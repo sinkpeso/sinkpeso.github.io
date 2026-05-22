@@ -425,8 +425,12 @@
         // ── WALLET HELPERS ─────────────────────────────────────────────────────
         const WALLET_COLORS = ["#00E676","#3B82F6","#A855F7","#F59E0B","#EF4444","#10B981","#EC4899","#64748B"];
         function applyWalletDelta(wallets, setWallets, walletId, deltaCents) {
-            if (!walletId) return;
-            setWallets(prev => prev.map(w => w.id === walletId ? { ...w, balanceCents: (w.balanceCents || 0) + deltaCents } : w));
+            if (!walletId || !deltaCents || isNaN(deltaCents)) return;
+            setWallets(prev => prev.map(w =>
+                w.id === walletId
+                    ? { ...w, balanceCents: Math.round((w.balanceCents || 0) + deltaCents) }
+                    : w
+            ));
         }
 
         // Optional wallet selector — renders nothing if no wallets exist
@@ -1200,12 +1204,29 @@ e('footer', {
             const [incName, setIncName] = useState(""); const [incAmt, setIncAmt] = useState(""); const [incWalletId, setIncWalletId] = useState("");
             const [billName, setBillName] = useState(""); const [billAmt, setBillAmt] = useState(""); const [billDate, setBillDate] = useState(""); const [billRecurring, setBillRecurring] = useState("none"); const [billCat, setBillCat] = useState("Bills");
 
-            const [openMenuInc, setOpenMenuInc] = useState(null); const [editIncome, setEditIncome] = useState(null); const [editIncForm, setEditIncForm] = useState({ name: "", amount: "" });
+            const [openMenuInc, setOpenMenuInc] = useState(null); const [editIncome, setEditIncome] = useState(null); const [editIncForm, setEditIncForm] = useState({ name: "", amount: "", walletId: "" });
             const [openMenuBill, setOpenMenuBill] = useState(null); const [editBill, setEditBill] = useState(null); const [editBillForm, setEditBillForm] = useState({ name: "", amount: "", dueDate: "", recurring: "none", category: "Bills" });
 
-            const openEditIncome = (item) => { setEditIncome(item); setEditIncForm({ name: item.name, amount: String((item.amountCents / 100).toFixed(2)) }); };
-            const saveEditIncome = () => { if (!editIncForm.name || !editIncForm.amount) return; setIncomes(incomes.map(i => i.id === editIncome.id ? { ...i, name: editIncForm.name.trim(), amountCents: tc(editIncForm.amount) } : i )); setEditIncome(null); };
-            const deleteIncome = (id) => { if (window.confirm("Delete this income entry?")) setIncomes(incomes.filter(i => i.id !== id)); };
+            const openEditIncome = (item) => { setEditIncome(item); setEditIncForm({ name: item.name, amount: String((item.amountCents / 100).toFixed(2)), walletId: item.walletId || "" }); };
+            const saveEditIncome = () => {
+                if (!editIncForm.name || !editIncForm.amount) return;
+                const old = incomes.find(i => i.id === editIncome.id);
+                const newAmt = tc(editIncForm.amount);
+                // reverse old wallet effect, apply new
+                if (old?.walletId) applyWalletDelta(wallets, setWallets, old.walletId, -old.amountCents);
+                if (editIncForm.walletId) applyWalletDelta(wallets, setWallets, editIncForm.walletId, newAmt);
+                setIncomes(incomes.map(i => i.id === editIncome.id
+                    ? { ...i, name: editIncForm.name.trim(), amountCents: newAmt, walletId: editIncForm.walletId || null }
+                    : i
+                ));
+                setEditIncome(null);
+            };
+            const deleteIncome = (id) => {
+                if (!window.confirm("Delete this income entry?")) return;
+                const old = incomes.find(i => i.id === id);
+                if (old?.walletId) applyWalletDelta(wallets, setWallets, old.walletId, -old.amountCents);
+                setIncomes(incomes.filter(i => i.id !== id));
+            };
 
             const openEditBill = (item) => { setEditBill(item); setEditBillForm({ name: item.name, amount: String((item.amountCents / 100).toFixed(2)), dueDate: item.dueDate, recurring: item.recurring || "none", category: item.category || "Bills" }); };
             const saveEditBill = () => { if (!editBillForm.name || !editBillForm.amount || !editBillForm.dueDate) return; setBills(bills.map(b => b.id === editBill.id ? { ...b, name: editBillForm.name.trim(), amountCents: tc(editBillForm.amount), dueDate: editBillForm.dueDate, recurring: editBillForm.recurring, category: editBillForm.category } : b )); setEditBill(null); };
@@ -1220,7 +1241,15 @@ e('footer', {
                         e('div', { style: { display: "flex", gap: 12, marginBottom: 24 } },
                             e('div', { style: { flex: 2 } }, e(Inp, { value: incName, placeholder: "Source name", onChange: ev => setIncName(ev.target.value) })),
                             e('div', { style: { flex: 1 } }, e(Inp, { type: "number", value: incAmt, placeholder: "Amount", onChange: ev => setIncAmt(ev.target.value) })),
-                            e(Btn, { v: "primary", onClick: () => { if(!incName || !incAmt) return; setIncomes([...incomes, { id: uid(), name: incName, amountCents: tc(incAmt), date: todayStr() }]); setIncName(""); setIncAmt(""); } }, "Add")
+                            e(WalletPicker, { wallets, value: incWalletId, onChange: setIncWalletId }),
+                            e(Btn, { v: "primary", onClick: () => {
+                                if(!incName || !incAmt) return;
+                                const amtCents = tc(incAmt);
+                                const rec = { id: uid(), name: incName, amountCents: amtCents, date: todayStr(), walletId: incWalletId || null };
+                                setIncomes([...incomes, rec]);
+                                if (incWalletId) applyWalletDelta(wallets, setWallets, incWalletId, amtCents);
+                                setIncName(""); setIncAmt(""); setIncWalletId("");
+                            } }, "Add")
                         ),
                         e(SLabel, { style: { marginBottom: 12 } }, "Income History List"),
                         incomes.length === 0 ? e('div', { style: { color: "var(--text-muted)", fontSize: 13, padding: "10px 0" } }, e("div", { className: "empty-state" }, e("div", { className: "empty-state-icon" }, e(Icon, { name: "inbox", size: 28, color: "var(--text-muted)" })), e("div", { className: "empty-state-title" }, "No income added"), e("div", { className: "empty-state-sub" }, "Add a salary, freelance, or any cash in."))) :
@@ -1271,19 +1300,37 @@ e('footer', {
                     )
                 ),
                 // Edit Modals
-                editIncome && e('div', { className: "modal-overlay" }, e('div', { className: "modal-container" }, e('h3', { style: { marginBottom: 20 } }, "Edit Income"), e(Field, { label: "Source" }, e(Inp, { value: editIncForm.name, onChange: ev => setEditIncForm({ ...editIncForm, name: ev.target.value }) })), e(Field, { label: "Amount" }, e(Inp, { type: "number", value: editIncForm.amount, onChange: ev => setEditIncForm({ ...editIncForm, amount: ev.target.value }) })), e('div', { style: { display: "flex", gap: 12 } }, e(Btn, { v: "ghost", style: { flex: 1 }, onClick: () => setEditIncome(null) }, "Cancel"), e(Btn, { v: "primary", style: { flex: 1 }, onClick: saveEditIncome }, "Save")))),
+                editIncome && e('div', { className: "modal-overlay" }, e('div', { className: "modal-container" }, e('h3', { style: { marginBottom: 20 } }, "Edit Income"), e(Field, { label: "Source" }, e(Inp, { value: editIncForm.name, onChange: ev => setEditIncForm({ ...editIncForm, name: ev.target.value }) })), e(Field, { label: "Amount" }, e(Inp, { type: "number", value: editIncForm.amount, onChange: ev => setEditIncForm({ ...editIncForm, amount: ev.target.value }) })), e(Field, { label: "Wallet (optional)" }, e(WalletPicker, { wallets, value: editIncForm.walletId, onChange: v => setEditIncForm({ ...editIncForm, walletId: v }) })), e('div', { style: { display: "flex", gap: 12, marginTop: 8 } }, e(Btn, { v: "ghost", style: { flex: 1 }, onClick: () => setEditIncome(null) }, "Cancel"), e(Btn, { v: "primary", style: { flex: 1 }, onClick: saveEditIncome }, "Save")))),
                 editBill && e('div', { className: "modal-overlay" }, e('div', { className: "modal-container" }, e('h3', { style: { marginBottom: 20 } }, "Edit Bill"), e(Field, { label: "Bill Label" }, e(Inp, { value: editBillForm.name, onChange: ev => setEditBillForm({ ...editBillForm, name: ev.target.value }) })), e(Field, { label: "Amount" }, e(Inp, { type: "number", value: editBillForm.amount, onChange: ev => setEditBillForm({ ...editBillForm, amount: ev.target.value }) })), e(Field, { label: "Due Date" }, e(Inp, { type: "date", value: editBillForm.dueDate, onChange: ev => setEditBillForm({ ...editBillForm, dueDate: ev.target.value }) })), e(Field, { label: "Category" }, e(Sel, { value: editBillForm.category, onChange: ev => setEditBillForm({ ...editBillForm, category: ev.target.value }) }, CATEGORIES.map(c => e('option', {key: c, value: c}, c)))), e(Field, { label: "Recurring" }, e(Sel, { value: editBillForm.recurring, onChange: ev => setEditBillForm({ ...editBillForm, recurring: ev.target.value }) }, e('option', { value: "none" }, "One-Time"), e('option', { value: "monthly" }, "Monthly"), e('option', { value: "weekly" }, "Weekly"))), e('div', { style: { display: "flex", gap: 12 } }, e(Btn, { v: "ghost", style: { flex: 1 }, onClick: () => setEditBill(null) }, "Cancel"), e(Btn, { v: "accent", style: { flex: 1 }, onClick: saveEditBill }, "Save"))))
             );
         }
 
         // ── MODULE: DAILY EXPENSES ──────────────────────────────────────────
-        function DailyExpensesView({ dailyExpenses, setDailyExpenses, fc }) {
-            const [name, setName] = useState(""); const [amount, setAmount] = useState(""); const [category, setCategory] = useState("Food");
+        function DailyExpensesView({ dailyExpenses, setDailyExpenses, wallets, setWallets, fc }) {
+            const [name, setName] = useState(""); const [amount, setAmount] = useState(""); const [category, setCategory] = useState("Food"); const [walletId, setWalletId] = useState("");
             const [openMenu, setOpenMenu] = useState(null); const [editExp, setEditExp] = useState(null); const [editForm, setEditForm] = useState({ name: "", amount: "", category: "Food" });
 
             const openEditExp = (exp) => { setEditExp(exp); setEditForm({ name: exp.name, amount: String((exp.amountCents / 100).toFixed(2)), category: exp.category }); };
-            const saveEditExp = () => { if (!editForm.name || !editForm.amount) return; setDailyExpenses(dailyExpenses.map(ex => ex.id === editExp.id ? { ...ex, name: editForm.name.trim(), amountCents: tc(editForm.amount), category: editForm.category } : ex )); setEditExp(null); };
-            const deleteExp = (id) => { if (window.confirm("Delete this expense entry?")) setDailyExpenses(dailyExpenses.filter(ex => ex.id !== id)); };
+            const saveEditExp = () => {
+                if (!editForm.name || !editForm.amount) return;
+                const old = dailyExpenses.find(ex => ex.id === editExp.id);
+                const newAmt = tc(editForm.amount);
+                // Reverse old wallet effect, then apply new amount to same wallet
+                if (old?.walletId) applyWalletDelta(wallets, setWallets, old.walletId, old.amountCents);
+                if (old?.walletId) applyWalletDelta(wallets, setWallets, old.walletId, -newAmt);
+                setDailyExpenses(dailyExpenses.map(ex => ex.id === editExp.id
+                    ? { ...ex, name: editForm.name.trim(), amountCents: newAmt, category: editForm.category }
+                    : ex
+                ));
+                setEditExp(null);
+            };
+            const deleteExp = (id) => {
+                if (!window.confirm("Delete this expense entry?")) return;
+                const old = dailyExpenses.find(ex => ex.id === id);
+                // Restore wallet balance before removing
+                if (old?.walletId) applyWalletDelta(wallets, setWallets, old.walletId, old.amountCents);
+                setDailyExpenses(dailyExpenses.filter(ex => ex.id !== id));
+            };
 
             return e('div', null,
                 e(PageTitle, null, 'Daily Outflow Tracking'),
@@ -1293,7 +1340,15 @@ e('footer', {
                         e('div', { style: { flex: 2 } }, e(Inp, { value: name, placeholder: "What did you pay for?", onChange: ev => setName(ev.target.value) })),
                         e('div', { style: { flex: 1 } }, e(Inp, { type: "number", value: amount, placeholder: "Amount", onChange: ev => setAmount(ev.target.value) })),
                         e('div', { style: { width: 180 } }, e(Sel, { value: category, onChange: ev => setCategory(ev.target.value) }, CATEGORIES.map(c => e('option', { key: c, value: c }, c)))),
-                        e(Btn, { v: "accent", onClick: () => { if(!name || !amount) return; setDailyExpenses([{ id: uid(), name: name.trim(), amountCents: tc(amount), category, date: todayStr() }, ...dailyExpenses]); setName(""); setAmount(""); } }, "Log Item")
+                        wallets && wallets.length > 0 && e('div', { style: { width: 160 } }, e(WalletPicker, { wallets, value: walletId, onChange: setWalletId })),
+                        e(Btn, { v: "accent", onClick: () => {
+                            if(!name || !amount) return;
+                            const amtCents = tc(amount);
+                            const rec = { id: uid(), name: name.trim(), amountCents: amtCents, category, date: todayStr(), walletId: walletId || null };
+                            setDailyExpenses([rec, ...dailyExpenses]);
+                            if (walletId) applyWalletDelta(wallets, setWallets, walletId, -amtCents);
+                            setName(""); setAmount(""); setWalletId("");
+                        } }, "Log Item")
                     )
                 ),
                 e('div', { className: "premium-panel" },
