@@ -1283,18 +1283,20 @@ e('footer', {
                     // INCOME
                     e('div', { className: "premium-panel" },
                         e(SLabel, { style: { marginBottom: 16 } }, "Add Money In (Income)"),
-                        e('div', { style: { display: "flex", gap: 12, marginBottom: 24 } },
-                            e('div', { style: { flex: 2 } }, e(Inp, { value: incName, placeholder: "Source name", onChange: ev => setIncName(ev.target.value) })),
-                            e('div', { style: { flex: 1 } }, e(Inp, { type: "number", value: incAmt, placeholder: "Amount", onChange: ev => setIncAmt(ev.target.value) })),
+                        e('div', { style: { display: "flex", flexDirection: "column", gap: 8, marginBottom: 24 } },
+                            e('div', { style: { display: "flex", gap: 8 } },
+                                e('div', { style: { flex: 3 } }, e(Inp, { value: incName, placeholder: "Source name", onChange: ev => setIncName(ev.target.value) })),
+                                e('div', { style: { flex: 2 } }, e(Inp, { type: "number", value: incAmt, placeholder: "₱ Amount", onChange: ev => setIncAmt(ev.target.value) }))
+                            ),
                             e(WalletPicker, { wallets, value: incWalletId, onChange: setIncWalletId }),
-                            e(Btn, { v: "primary", onClick: () => {
+                            e(Btn, { v: "primary", style: { width: "100%" }, onClick: () => {
                                 if(!incName || !incAmt) return;
                                 const amtCents = tc(incAmt);
                                 const rec = { id: uid(), name: incName, amountCents: amtCents, date: todayStr(), walletId: incWalletId || null };
                                 setIncomes([...incomes, rec]);
                                 if (incWalletId) applyWalletDelta(wallets, setWallets, incWalletId, amtCents);
                                 setIncName(""); setIncAmt(""); setIncWalletId("");
-                            } }, "Add")
+                            } }, "Add Income")
                         ),
                         e(SLabel, { style: { marginBottom: 12 } }, "Income History List"),
                         incomes.length === 0 ? e('div', { style: { color: "var(--text-muted)", fontSize: 13, padding: "10px 0" } }, e("div", { className: "empty-state" }, e("div", { className: "empty-state-icon" }, e(Icon, { name: "inbox", size: 28, color: "var(--text-muted)" })), e("div", { className: "empty-state-title" }, "No income added"), e("div", { className: "empty-state-sub" }, "Add a salary, freelance, or any cash in."))) :
