@@ -728,7 +728,8 @@
                         bills:   [...bills],
                         dailyExpenses: [...dailyExpenses],
                         funds: [...funds],
-                        txns:  [...txns]
+                        txns:  [...txns],
+                        wallets: [...wallets]
                     }
                 };
 
@@ -949,9 +950,19 @@ e('footer', {
             );
         }
 
-        // ── NEW MODULE: SETTINGS (Data Backup & Preferences) ─────────────────
+        // ── SETTINGS GROUP HELPER ─────────────────────────────────────────────
+        function SettingGroup({ title, icon, children }) {
+            return e('div', { className: "premium-panel", style: { marginBottom: 16 } },
+                e('div', { style: { display:"flex", alignItems:"center", gap:8, marginBottom:16, paddingBottom:12, borderBottom:"1px solid var(--border)" } },
+                    e(Icon, { name: icon, size: 14, color: "var(--text-muted)" }),
+                    e('div', { style: { fontSize:11, fontWeight:700, letterSpacing:"0.09em", textTransform:"uppercase", color:"var(--text-muted)" } }, title)
+                ),
+                children
+            );
+        }
+
+        // ── MODULE: SETTINGS ─────────────────────────────────────────────────
         function SettingsView({ settings, setSettings, setIncomes, setBills, setDailyExpenses, setFunds, setTxns, setArchives, setBudgets, showToast, totals, bills, budgets, fc }) {
-            console.log("settings render"); console.log("settings", settings); console.log("settings type", typeof settings);
             const safeSettings = settings || {};
             const [pinInput, setPinInput] = useState(safeSettings?.pin || '');
 
@@ -964,6 +975,7 @@ e('footer', {
                     sp_daily: localStorage.getItem('sp_daily'),
                     sp_archives: localStorage.getItem('sp_archives'),
                     sp_budgets: localStorage.getItem('sp_budgets'),
+                    sp_wallets: localStorage.getItem('sp_wallets'),
                     sp_settings: localStorage.getItem('sp_settings')
                 };
                 const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
@@ -987,32 +999,65 @@ e('footer', {
             };
 
             return e('div', null,
-                e(PageTitle, null, 'App Settings'),
-                
+                e(PageTitle, { sub: "Preferences, security, and data management." }, 'Settings'),
                 e(InsightStrip, { totals, bills, budgets, fc }),
 
                 e('div', { className: "dashboard-grid" },
-                    e('div', { className: "premium-panel" },
-                        e(SLabel, { style: { marginBottom: 16 } }, "Preferences"),
-                        e(Field, { label: "Theme Mode" }, e(Sel, { value: settings?.theme || 'dark', onChange: e => setSettings({...settings, theme: e.target.value}) },
-                            e('option', { value: "dark" }, "Dark Mode"), e('option', { value: "light" }, "Light Mode")
-                        )),
-                        e(Field, { label: "Display Currency" }, e(Sel, { value: settings?.currency || 'PHP', onChange: e => setSettings({...settings, currency: e.target.value}) },
-                            Object.keys(CURRENCIES).map(c => e('option', { key: c, value: c }, c))
-                        )),
-                        e('div', { style: { borderTop: "1px solid var(--border)", paddingTop: 16, marginTop: 16 } },
-                            e(Field, { label: "App PIN Lock (Numeric)" }, e(Inp, { type: "password", inputMode: "numeric", pattern: "[0-9]*", placeholder: "Leave blank to disable", value: pinInput, onChange: e => setPinInput(e.target.value.replace(/[^0-9]/g, '')) })),
-                            e(Btn, { v: "accent", onClick: () => { setSettings({...settings, pin: pinInput}); showToast("✓ PIN successfully set!"); } }, "Save PIN")
+                    // LEFT COLUMN
+                    e('div', null,
+                        e(SettingGroup, { title: "Appearance", icon: "grid" },
+                            e(Field, { label: "Theme" }, e(Sel, { value: settings?.theme || 'dark', onChange: ev => setSettings({...settings, theme: ev.target.value}) },
+                                e('option', { value: "dark" }, "🌙 Dark Mode"),
+                                e('option', { value: "light" }, "☀️ Light Mode")
+                            )),
+                            e(Field, { label: "Currency" }, e(Sel, { value: settings?.currency || 'PHP', onChange: ev => setSettings({...settings, currency: ev.target.value}) },
+                                Object.keys(CURRENCIES).map(c => e('option', { key: c, value: c }, c))
+                            ))
+                        ),
+
+                        e(SettingGroup, { title: "Security", icon: "lock" },
+                            e('p', { style: { fontSize:13, color:"var(--text-muted)", marginBottom:16, lineHeight:1.5 } },
+                                settings?.pin ? "PIN is active. Clear the field and save to disable." : "Add a numeric PIN to lock the app on open."
+                            ),
+                            e(Field, { label: "PIN (leave blank to disable)" },
+                                e(Inp, { type: "password", inputMode: "numeric", pattern: "[0-9]*", placeholder: "e.g. 1234", value: pinInput, onChange: ev => setPinInput(ev.target.value.replace(/[^0-9]/g, '')) })
+                            ),
+                            e(Btn, { v: "accent", onClick: () => { setSettings({...settings, pin: pinInput}); showToast(pinInput ? "✓ PIN saved." : "✓ PIN removed."); } }, pinInput ? "Save PIN" : "Remove PIN")
                         )
                     ),
-                    e('div', { className: "premium-panel" },
-                        e(SLabel, { style: { marginBottom: 16 } }, "Data Management"),
-                        e('p', { style: { fontSize: 13, color: "var(--text-light)", marginBottom: 16 } }, "Your data is stored safely in your browser. Export it regularly to prevent loss if you clear your browser history."),
-                        e(Btn, { v: "primary", style: { width: "100%", marginBottom: 16 }, onClick: handleExport }, "Export Data Backup (.json)"),
-                        
-                        e('div', { style: { borderTop: "1px solid var(--border)", paddingTop: 16 } },
-                            e(SLabel, { style: { marginBottom: 10 } }, "Restore Backup"),
-                            e('input', { type: "file", accept: ".json", onChange: handleImport, style: { background: "var(--bg-input)", color: "var(--text-main)", padding: 8, borderRadius: 8, width: "100%", border: "1px solid var(--border)" } })
+
+                    // RIGHT COLUMN
+                    e('div', null,
+                        e(SettingGroup, { title: "Data Backup", icon: "archive" },
+                            e('p', { style: { fontSize:13, color:"var(--text-muted)", marginBottom:16, lineHeight:1.5 } },
+                                "All data lives in your browser. Export regularly — clearing browser storage will erase everything."
+                            ),
+                            e(Btn, { v: "primary", style: { width:"100%", marginBottom:10 }, onClick: handleExport },
+                                "⬇ Export Backup (.json)"
+                            ),
+                            e('div', { style: { borderTop:"1px solid var(--border)", paddingTop:16, marginTop:6 } },
+                                e(SLabel, { style: { marginBottom:10 } }, "Restore from backup"),
+                                e('input', { type:"file", accept:".json", onChange: handleImport,
+                                    style: { background:"var(--bg-input)", color:"var(--text-main)", padding:"10px 12px", borderRadius:10, width:"100%", border:"1px solid var(--border-input)", fontSize:13 }
+                                })
+                            )
+                        ),
+
+                        e(SettingGroup, { title: "About", icon: "shield" },
+                            e('div', { style: { display:"flex", flexDirection:"column", gap:8 } },
+                                e('div', { style: { display:"flex", justifyContent:"space-between", fontSize:13 } },
+                                    e('span', { style: { color:"var(--text-muted)" } }, "App"), e('span', { style: { fontWeight:600 } }, "SINKPESO")
+                                ),
+                                e('div', { style: { display:"flex", justifyContent:"space-between", fontSize:13 } },
+                                    e('span', { style: { color:"var(--text-muted)" } }, "Storage"), e('span', { style: { fontWeight:600 } }, "Browser localStorage")
+                                ),
+                                e('div', { style: { display:"flex", justifyContent:"space-between", fontSize:13 } },
+                                    e('span', { style: { color:"var(--text-muted)" } }, "Sync"), e('span', { style: { fontWeight:600, color:"#00E676" } }, "Offline Only")
+                                ),
+                                e('div', { style: { display:"flex", justifyContent:"space-between", fontSize:13 } },
+                                    e('span', { style: { color:"var(--text-muted)" } }, "Account"), e('span', { style: { fontWeight:600, color:"#00E676" } }, "None required")
+                                )
+                            )
                         )
                     )
                 )
@@ -1308,18 +1353,20 @@ e('footer', {
         // ── MODULE: DAILY EXPENSES ──────────────────────────────────────────
         function DailyExpensesView({ dailyExpenses, setDailyExpenses, wallets, setWallets, fc }) {
             const [name, setName] = useState(""); const [amount, setAmount] = useState(""); const [category, setCategory] = useState("Food"); const [walletId, setWalletId] = useState("");
-            const [openMenu, setOpenMenu] = useState(null); const [editExp, setEditExp] = useState(null); const [editForm, setEditForm] = useState({ name: "", amount: "", category: "Food" });
+            const [openMenu, setOpenMenu] = useState(null); const [editExp, setEditExp] = useState(null); const [editForm, setEditForm] = useState({ name: "", amount: "", category: "Food", walletId: "" });
 
-            const openEditExp = (exp) => { setEditExp(exp); setEditForm({ name: exp.name, amount: String((exp.amountCents / 100).toFixed(2)), category: exp.category }); };
+            const openEditExp = (exp) => { setEditExp(exp); setEditForm({ name: exp.name, amount: String((exp.amountCents / 100).toFixed(2)), category: exp.category, walletId: exp.walletId || "" }); };
             const saveEditExp = () => {
                 if (!editForm.name || !editForm.amount) return;
                 const old = dailyExpenses.find(ex => ex.id === editExp.id);
                 const newAmt = tc(editForm.amount);
-                // Reverse old wallet effect, then apply new amount to same wallet
+                const newWalletId = editForm.walletId || null;
+                // Reverse old wallet effect
                 if (old?.walletId) applyWalletDelta(wallets, setWallets, old.walletId, old.amountCents);
-                if (old?.walletId) applyWalletDelta(wallets, setWallets, old.walletId, -newAmt);
+                // Apply new wallet effect (may be same or different wallet)
+                if (newWalletId) applyWalletDelta(wallets, setWallets, newWalletId, -newAmt);
                 setDailyExpenses(dailyExpenses.map(ex => ex.id === editExp.id
-                    ? { ...ex, name: editForm.name.trim(), amountCents: newAmt, category: editForm.category }
+                    ? { ...ex, name: editForm.name.trim(), amountCents: newAmt, category: editForm.category, walletId: newWalletId }
                     : ex
                 ));
                 setEditExp(null);
@@ -1359,7 +1406,7 @@ e('footer', {
                         e('div', { style: S.row10 }, e('div', { style: { fontWeight: 700, color: "#EF4444" } }, `-${fc(exp.amountCents)}`), e(DotMenu, { itemId: exp.id, openMenu, setOpenMenu, onEdit: () => openEditExp(exp), onDelete: () => deleteExp(exp.id) }))
                     ))
                 ),
-                editExp && e('div', { className: "modal-overlay" }, e('div', { className: "modal-container" }, e('h3', { style: { marginBottom: 20 } }, "Edit Expense"), e(Field, { label: "Description" }, e(Inp, { value: editForm.name, onChange: ev => setEditForm({ ...editForm, name: ev.target.value }) })), e(Field, { label: "Amount" }, e(Inp, { type: "number", value: editForm.amount, onChange: ev => setEditForm({ ...editForm, amount: ev.target.value }) })), e(Field, { label: "Category" }, e(Sel, { value: editForm.category, onChange: ev => setEditForm({ ...editForm, category: ev.target.value }) }, CATEGORIES.map(c => e('option', { key: c, value: c }, c)))), e('div', { style: S.formFooter }, e(Btn, { v: "ghost", style: { flex: 1 }, onClick: () => setEditExp(null) }, "Cancel"), e(Btn, { v: "accent", style: { flex: 1 }, onClick: saveEditExp }, "Save"))))
+                editExp && e('div', { className: "modal-overlay" }, e('div', { className: "modal-container" }, e('h3', { style: { marginBottom: 20 } }, "Edit Expense"), e(Field, { label: "Description" }, e(Inp, { value: editForm.name, onChange: ev => setEditForm({ ...editForm, name: ev.target.value }) })), e(Field, { label: "Amount" }, e(Inp, { type: "number", value: editForm.amount, onChange: ev => setEditForm({ ...editForm, amount: ev.target.value }) })), e(Field, { label: "Category" }, e(Sel, { value: editForm.category, onChange: ev => setEditForm({ ...editForm, category: ev.target.value }) }, CATEGORIES.map(c => e('option', { key: c, value: c }, c)))), wallets && wallets.length > 0 && e(Field, { label: "Wallet" }, e(WalletPicker, { wallets, value: editForm.walletId, onChange: v => setEditForm({ ...editForm, walletId: v }) })), e('div', { style: S.formFooter }, e(Btn, { v: "ghost", style: { flex: 1 }, onClick: () => setEditExp(null) }, "Cancel"), e(Btn, { v: "accent", style: { flex: 1 }, onClick: saveEditExp }, "Save"))))
             );
         }
 
@@ -1451,7 +1498,11 @@ e('footer', {
                     )
                 ),
 
-                archives.length === 0 ? e('div', { className: "premium-panel", style: { textAlign: "center", padding: "48px 0", color: "var(--text-muted)" } }, "No archived months yet.") :
+                archives.length === 0 ? e('div', { className: "premium-panel", style: { textAlign: "center", padding: "48px 24px", color: "var(--text-muted)" } },
+                    e('div', { style: { fontSize: 32, marginBottom: 12, opacity: 0.4 } }, "📅"),
+                    e('div', { style: { fontWeight: 700, fontSize: 15, marginBottom: 8, color: "var(--text-light)" } }, "No archived months yet"),
+                    e('div', { style: { fontSize: 13, lineHeight: 1.6, maxWidth: 280, margin: "0 auto" } }, 'Use "Archive & Start New Month" at the end of each month to save a snapshot and start fresh.')
+                ) :
                 e('div', { className: "premium-panel" },
                     e(SLabel, { style: { marginBottom: 12 } }, "Archive Ledgers"),
                     archives.map(arc => {
@@ -1464,10 +1515,35 @@ e('footer', {
                     e('div', { className: "modal-container", style: { maxWidth: 560, maxHeight: "85vh", overflowY: "auto" }, onClick: ev => ev.stopPropagation() },
                         e('div', { style: { display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 20 } }, e('div', null, e('h3', { style: { fontSize: 20, fontWeight: 800, color: "var(--text-main)" } }, selected.month), e('div', { style: { fontSize: 12, color: "var(--text-muted)", marginTop: 4 } }, `Closed ${fmt(selected.closedAt)}`)), e('button', { onClick: () => setSelected(null), style: S.closeBtn }, e(Icon, { name: "x", size: 16 }))),
                         e('div', { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 24 } }, statBox("Total Income", fc(selected.totalIncome), "var(--text-main)"), statBox("Total Spent", fc(selected.totalSpent), "#EF4444"), statBox("Bills Paid", fc(selected.totalBills), "#A855F7"), statBox("In Savings", fc(selected.totalSavings), "#10B981")),
-                        e('div', { style: { display: "flex", gap: 6, marginBottom: 18, background: "var(--hover-bg)", borderRadius: 12, padding: 4 } }, ["income", "bills", "expenses"].map(t => e('button', { key: t, onClick: () => setDetailTab(t), style: { flex: 1, background: detailTab === t ? "var(--border)" : "transparent", border: "none", color: detailTab === t ? "var(--text-main)" : "var(--text-muted)", padding: "7px 0", borderRadius: 8, cursor: "pointer", fontSize: 12, fontWeight: 700, textTransform: "capitalize" } }, t))),
-                        detailTab === "income" && e('div', null, selected.snapshot.incomes.map(i => e('div', { key: i.id, className: "stream-row" }, e('div', null, e('div', { style: { fontWeight: 600 } }, i.name)), e('div', { style: { color: "#00E676", fontWeight: 700 } }, `+${fc(i.amountCents)}`)))),
-                        detailTab === "bills" && e('div', null, selected.snapshot.bills.map(b => e('div', { key: b.id, className: "stream-row" }, e('div', null, e('div', { style: { fontWeight: 600, textDecoration: b.isPaid ? "line-through" : "none", opacity: b.isPaid ? 0.5 : 1 } }, b.name)), e('div', { style: { fontWeight: 700 } }, fc(b.amountCents))))),
-                        detailTab === "expenses" && e('div', null, selected.snapshot.dailyExpenses.map(ex => e('div', { key: ex.id, className: "stream-row" }, e('div', null, e('div', { style: { fontWeight: 600 } }, ex.name)), e('div', { style: { fontWeight: 700, color: "#EF4444" } }, `-${fc(ex.amountCents)}`))))
+                        e('div', { style: { display: "flex", gap: 6, marginBottom: 18, background: "var(--hover-bg)", borderRadius: 12, padding: 4 } },
+                            ["income", "bills", "expenses", "wallets"].map(t => e('button', { key: t, onClick: () => setDetailTab(t), style: { flex: 1, background: detailTab === t ? "var(--border)" : "transparent", border: "none", color: detailTab === t ? "var(--text-main)" : "var(--text-muted)", padding: "7px 0", borderRadius: 8, cursor: "pointer", fontSize: 11, fontWeight: 700, textTransform: "capitalize", fontFamily: "inherit" } }, t))
+                        ),
+                        detailTab === "income" && e('div', null,
+                            selected.snapshot.incomes.length === 0
+                                ? e('div', { style: { padding: "16px 0", textAlign: "center", fontSize: 13, color: "var(--text-muted)" } }, "No income recorded this month.")
+                                : selected.snapshot.incomes.map(i => e('div', { key: i.id, className: "stream-row" }, e('div', null, e('div', { style: { fontWeight: 600 } }, i.name)), e('div', { style: { color: "#00E676", fontWeight: 700 } }, `+${fc(i.amountCents)}`)))
+                        ),
+                        detailTab === "bills" && e('div', null,
+                            selected.snapshot.bills.length === 0
+                                ? e('div', { style: { padding: "16px 0", textAlign: "center", fontSize: 13, color: "var(--text-muted)" } }, "No bills recorded this month.")
+                                : selected.snapshot.bills.map(b => e('div', { key: b.id, className: "stream-row" }, e('div', null, e('div', { style: { fontWeight: 600, textDecoration: b.isPaid ? "line-through" : "none", opacity: b.isPaid ? 0.5 : 1 } }, b.name), e('div', { style: { fontSize: 11, color: "var(--text-muted)", marginTop: 2 } }, b.isPaid ? "Paid" : "Unpaid")), e('div', { style: { fontWeight: 700 } }, fc(b.amountCents))))
+                        ),
+                        detailTab === "expenses" && e('div', null,
+                            selected.snapshot.dailyExpenses.length === 0
+                                ? e('div', { style: { padding: "16px 0", textAlign: "center", fontSize: 13, color: "var(--text-muted)" } }, "No expenses recorded this month.")
+                                : selected.snapshot.dailyExpenses.map(ex => e('div', { key: ex.id, className: "stream-row" }, e('div', null, e('div', { style: { fontWeight: 600 } }, ex.name), e('div', { style: { fontSize: 11, color: "var(--text-muted)", marginTop: 2 } }, ex.category)), e('div', { style: { fontWeight: 700, color: "#EF4444" } }, `-${fc(ex.amountCents)}`)))
+                        ),
+                        detailTab === "wallets" && e('div', null,
+                            !selected.snapshot.wallets || selected.snapshot.wallets.length === 0
+                                ? e('div', { style: { padding: "16px 0", textAlign: "center", fontSize: 13, color: "var(--text-muted)" } }, "No wallet snapshot for this archive.")
+                                : selected.snapshot.wallets.map(w => e('div', { key: w.id, className: "stream-row" },
+                                    e('div', { style: { display:"flex", alignItems:"center", gap:10 } },
+                                        e('div', { style: { width:10, height:10, borderRadius:"50%", background: w.color || "#00E676", flexShrink:0 } }),
+                                        e('div', { style: { fontWeight: 600 } }, w.name)
+                                    ),
+                                    e('div', { style: { fontWeight: 700, color: (w.balanceCents||0) < 0 ? "#EF4444" : "var(--text-main)" } }, fc(w.balanceCents || 0))
+                                ))
+                        )
                     )
                 )
             );
