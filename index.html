@@ -7,7 +7,7 @@
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
     
     <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
@@ -15,44 +15,55 @@
     <style>
         /* THEME VARIABLES */
         :root {
-            --bg-body: #030712;
-            --bg-panel: #0B0F19;
-            --bg-input: #111827;
-            --text-main: #FFFFFF;
-            --text-muted: #64748B;
-            --text-light: #94A3B8;
-            --border: rgba(255,255,255,0.05);
-            --border-input: rgba(255,255,255,0.08);
-            --gradient-start: #0A1128;
-            --gradient-end: #030712;
-            --card-grad-start: #1E293B;
-            --card-grad-end: #0F172A;
-            --hover-bg: rgba(255,255,255,0.06);
-            --modal-bg: rgba(3, 7, 18, 0.85);
+            --bg-body: #020810;
+            --bg-panel: #0A0E1A;
+            --bg-input: #0F1526;
+            --text-main: #F1F5F9;
+            --text-muted: #475569;
+            --text-light: #7C8FA6;
+            --border: rgba(255,255,255,0.055);
+            --border-input: rgba(255,255,255,0.09);
+            --gradient-start: #091020;
+            --gradient-end: #020810;
+            --card-grad-start: #141E32;
+            --card-grad-end: #0A0E1A;
+            --hover-bg: rgba(255,255,255,0.05);
+            --modal-bg: rgba(2, 8, 16, 0.88);
+            --accent: #00E676;
+            --accent-dim: rgba(0,230,118,0.08);
+            --accent-border: rgba(0,230,118,0.2);
+            /* spacing scale (8px grid) */
+            --sp-1: 4px; --sp-2: 8px; --sp-3: 12px; --sp-4: 16px;
+            --sp-5: 20px; --sp-6: 24px; --sp-7: 28px; --sp-8: 32px;
+            /* type scale */
+            --t-xs: 11px; --t-sm: 12px; --t-base: 13px; --t-md: 15px; --t-lg: 17px;
+            --t-xl: 22px; --t-hero: 36px;
+            /* radius */
+            --r-sm: 10px; --r-md: 14px; --r-lg: 18px; --r-xl: 22px;
         }
 
         [data-theme="light"] {
-            --bg-body: #F8FAFC;
+            --bg-body: #F5F7FA;
             --bg-panel: #FFFFFF;
-            --bg-input: #F1F5F9;
+            --bg-input: #EEF2F7;
             --text-main: #0F172A;
             --text-muted: #64748B;
             --text-light: #475569;
-            --border: rgba(0,0,0,0.1);
-            --border-input: rgba(0,0,0,0.15);
-            --gradient-start: #E2E8F0;
-            --gradient-end: #F8FAFC;
-            --card-grad-start: #CBD5E1;
-            --card-grad-end: #E2E8F0;
-            --hover-bg: rgba(0,0,0,0.06);
-            --modal-bg: rgba(255, 255, 255, 0.85);
+            --border: rgba(0,0,0,0.08);
+            --border-input: rgba(0,0,0,0.12);
+            --gradient-start: #DDE4F0;
+            --gradient-end: #F5F7FA;
+            --card-grad-start: #C8D3E8;
+            --card-grad-end: #DDE4F0;
+            --hover-bg: rgba(0,0,0,0.05);
+            --modal-bg: rgba(245, 247, 250, 0.88);
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { 
-            font-family: 'Inter', -apple-system, sans-serif; 
+            font-family: 'DM Sans', -apple-system, sans-serif; 
             background-color: var(--bg-body); 
-            background: radial-gradient(circle at 50% 0%, var(--gradient-start) 0%, var(--gradient-end) 100%);
+            background: radial-gradient(ellipse at 50% -10%, var(--gradient-start) 0%, var(--gradient-end) 65%);
             color: var(--text-main); 
             min-height: 100vh; 
             overflow-x: hidden; 
@@ -91,35 +102,35 @@
         .premium-panel { 
             background: var(--bg-panel); 
             border: 1px solid var(--border); 
-            border-radius: 20px; 
-            box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
-            padding: 24px;
-            margin-bottom: 16px;
+            border-radius: var(--r-xl); 
+            box-shadow: 0 1px 12px rgba(0, 0, 0, 0.04);
+            padding: var(--sp-6);
+            margin-bottom: var(--sp-4);
         }
         @media (max-width: 600px) {
-            .premium-panel { padding: 18px 16px; border-radius: 16px; }
+            .premium-panel { padding: var(--sp-5) var(--sp-4); border-radius: var(--r-lg); }
         }
 
         /* ── BALANCE CARD ── */
         .balance-gradient-card {
-            background: linear-gradient(135deg, var(--card-grad-start) 0%, var(--card-grad-end) 100%);
+            background: linear-gradient(140deg, var(--card-grad-start) 0%, var(--card-grad-end) 100%);
             border: 1px solid var(--border-input);
-            border-radius: 24px;
-            padding: 28px;
+            border-radius: var(--r-xl);
+            padding: var(--sp-7);
             position: relative;
             overflow: hidden;
-            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.03);
         }
         @media (max-width: 600px) {
-            .balance-gradient-card { padding: 20px 18px; border-radius: 18px; }
+            .balance-gradient-card { padding: var(--sp-5) var(--sp-4); border-radius: var(--r-lg); }
         }
 
         .balance-gradient-card::before {
             content: '';
             position: absolute;
-            top: -50%; right: -20%;
-            width: 250px; height: 250px;
-            background: radial-gradient(circle, rgba(59, 130, 246, 0.15) 0%, transparent 70%);
+            top: -60%; right: -15%;
+            width: 220px; height: 220px;
+            background: radial-gradient(circle, rgba(0, 230, 118, 0.06) 0%, transparent 70%);
             pointer-events: none;
         }
 
@@ -127,111 +138,111 @@
         .category-mini-card {
             background: var(--bg-input);
             border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 18px;
-            transition: transform 0.2s;
+            border-radius: var(--r-md);
+            padding: var(--sp-4);
+            transition: transform 0.2s, border-color 0.2s;
         }
         @media (max-width: 600px) {
-            .category-mini-card { padding: 14px 12px; border-radius: 12px; }
+            .category-mini-card { padding: var(--sp-3) var(--sp-3); border-radius: var(--r-sm); }
         }
-        .category-mini-card:hover { transform: translateY(-2px); }
+        .category-mini-card:hover { transform: translateY(-1px); border-color: var(--border-input); }
 
         /* ── STREAM ROW ── */
         .stream-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 16px 0;
+            padding: var(--sp-4) 0;
             border-bottom: 1px solid var(--border);
-            gap: 12px;
+            gap: var(--sp-3);
         }
         .stream-row:last-child { border-bottom: none; }
         @media (max-width: 600px) {
-            .stream-row { padding: 14px 0; }
+            .stream-row { padding: var(--sp-3) 0; }
         }
 
         /* Chart Styles */
-        .chart-container { display: flex; align-items: flex-end; gap: 16px; height: 200px; padding: 20px 0; border-bottom: 1px solid var(--border); margin-bottom: 16px; overflow-x: auto; }
-        .chart-bar-group { display: flex; flex-direction: column; align-items: center; gap: 8px; flex: 1; min-width: 60px; }
-        .bars-wrapper { display: flex; gap: 4px; align-items: flex-end; height: 100%; width: 100%; justify-content: center; }
-        .chart-bar { width: 24px; border-radius: 4px 4px 0 0; transition: height 0.4s ease; }
-        .bar-income { background: #00E676; }
-        .bar-spent { background: #EF4444; }
+        .chart-container { display: flex; align-items: flex-end; gap: 12px; height: 180px; padding: 16px 0; border-bottom: 1px solid var(--border); margin-bottom: 14px; overflow-x: auto; }
+        .chart-bar-group { display: flex; flex-direction: column; align-items: center; gap: 6px; flex: 1; min-width: 56px; }
+        .bars-wrapper { display: flex; gap: 3px; align-items: flex-end; height: 100%; width: 100%; justify-content: center; }
+        .chart-bar { width: 20px; border-radius: 3px 3px 0 0; transition: height 0.4s ease; }
+        .bar-income { background: #00E676; opacity: 0.85; }
+        .bar-spent { background: #EF4444; opacity: 0.75; }
 
         /* Dot Menu */
-        .dot-menu-btn { background: transparent; border: none; color: var(--text-muted); cursor: pointer; padding: 4px 8px; border-radius: 8px; font-size: 20px; font-weight: 900; transition: all 0.15s; display: flex; align-items: center; justify-content: center; min-width: 36px; min-height: 36px; }
+        .dot-menu-btn { background: transparent; border: none; color: var(--text-muted); cursor: pointer; padding: 4px 8px; border-radius: var(--sp-2); font-size: 18px; font-weight: 900; transition: all 0.15s; display: flex; align-items: center; justify-content: center; min-width: 34px; min-height: 34px; }
         .dot-menu-btn:hover { color: var(--text-main); background: var(--hover-bg); }
-        .dot-menu-dropdown { position: absolute; right: 0; top: calc(100% + 4px); background: var(--bg-panel); border: 1px solid var(--border); border-radius: 12px; padding: 6px; z-index: 300; min-width: 130px; box-shadow: 0 12px 32px rgba(0,0,0,0.3); }
-        .dot-menu-item { display: block; width: 100%; text-align: left; background: transparent; border: none; padding: 11px 14px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 600; color: var(--text-main); transition: background 0.12s; }
+        .dot-menu-dropdown { position: absolute; right: 0; top: calc(100% + 4px); background: var(--bg-panel); border: 1px solid var(--border); border-radius: var(--r-md); padding: 4px; z-index: 300; min-width: 130px; box-shadow: 0 8px 28px rgba(0,0,0,0.28); }
+        .dot-menu-item { display: block; width: 100%; text-align: left; background: transparent; border: none; padding: 10px 12px; border-radius: var(--r-sm); cursor: pointer; font-size: var(--t-base); font-weight: 600; color: var(--text-main); transition: background 0.12s; }
         .dot-menu-item:hover { background: var(--hover-bg); }
 
         /* ── MODAL ── */
-        .modal-overlay { position: fixed; inset: 0; background: var(--modal-bg); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 16px; }
-        .modal-container { background: var(--bg-panel); border: 1px solid var(--border); border-radius: 24px; padding: 28px; width: 100%; max-width: 480px; box-shadow: 0 20px 50px rgba(0,0,0,0.4); }
+        .modal-overlay { position: fixed; inset: 0; background: var(--modal-bg); backdrop-filter: blur(10px); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: var(--sp-4); }
+        .modal-container { background: var(--bg-panel); border: 1px solid var(--border); border-radius: var(--r-xl); padding: var(--sp-7); width: 100%; max-width: 480px; box-shadow: 0 24px 64px rgba(0,0,0,0.5); }
         @media (max-width: 600px) {
-            .modal-container { padding: 20px 16px; border-radius: 18px; }
+            .modal-container { padding: var(--sp-5) var(--sp-4); border-radius: var(--r-lg); }
         }
         
-        .pin-screen { position: fixed; inset: 0; background: var(--bg-body); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px; }
-        .pin-input { font-size: 32px; letter-spacing: 16px; text-align: center; background: var(--bg-input); color: var(--text-main); border: 1px solid var(--border-input); padding: 16px; border-radius: 16px; outline: none; width: 240px; }
+        .pin-screen { position: fixed; inset: 0; background: var(--bg-body); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: var(--sp-6); }
+        .pin-input { font-family: 'DM Mono', monospace; font-size: 28px; letter-spacing: 14px; text-align: center; background: var(--bg-input); color: var(--text-main); border: 1px solid var(--border-input); padding: var(--sp-4); border-radius: var(--r-lg); outline: none; width: 240px; }
 
         /* ── SECTION SPACING ── */
-        .section-gap { margin-bottom: 24px; }
-        @media (max-width: 600px) { .section-gap { margin-bottom: 16px; } }
+        .section-gap { margin-bottom: 20px; }
+        @media (max-width: 600px) { .section-gap { margin-bottom: 14px; } }
     
         /* ── VAULTS GRID ── */
-        .vaults-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; margin-top: 20px; }
-        @media (max-width: 600px) { .vaults-grid { grid-template-columns: 1fr; gap: 16px; } }
+        .vaults-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(272px, 1fr)); gap: 16px; margin-top: 16px; }
+        @media (max-width: 600px) { .vaults-grid { grid-template-columns: 1fr; gap: 12px; } }
 
         /* ── BOTTOM NAV (mobile only) ── */
-        .bottom-nav { display: none; position: fixed; bottom: 0; left: 0; right: 0; background: var(--bg-panel); border-top: 1px solid var(--border); z-index: 200; padding: 6px 0 env(safe-area-inset-bottom, 6px); }
+        .bottom-nav { display: none; position: fixed; bottom: 0; left: 0; right: 0; background: var(--bg-panel); border-top: 1px solid var(--border); z-index: 200; padding: 6px 0 env(safe-area-inset-bottom, 6px); backdrop-filter: blur(12px); }
         @media (max-width: 768px) { .bottom-nav { display: flex; } }
         @media (max-width: 768px) { .desktop-tabs { display: none !important; } }
         @media (max-width: 768px) { .page-wrap { padding-bottom: 88px !important; } }
-        .bnav-btn { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; background: none; border: none; cursor: pointer; padding: 7px 2px 4px; color: var(--text-muted); font-size: 10px; font-weight: 700; letter-spacing: 0.02em; transition: color 0.15s; min-width: 0; }
+        .bnav-btn { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; background: none; border: none; cursor: pointer; padding: 7px 2px 4px; color: var(--text-muted); font-size: 10px; font-weight: 600; letter-spacing: 0.03em; transition: color 0.15s; min-width: 0; }
         .bnav-btn.active { color: #00E676; }
-        .bnav-btn svg { opacity: 0.7; transition: opacity 0.15s; }
+        .bnav-btn svg { opacity: 0.55; transition: opacity 0.15s; }
         .bnav-btn.active svg { opacity: 1; }
 
         /* ── FLOATING ACTION BUTTON ── */
-        .fab { position: fixed; right: 20px; width: 54px; height: 54px; border-radius: 50%; background: #00E676; color: #030712; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 16px rgba(0,230,118,0.3); z-index: 180; transition: transform 0.18s, box-shadow 0.18s; bottom: 88px; }
+        .fab { position: fixed; right: 20px; width: 52px; height: 52px; border-radius: 50%; background: var(--accent); color: #020810; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 16px rgba(0,230,118,0.22); z-index: 180; transition: transform 0.18s, box-shadow 0.18s; bottom: 88px; }
         @media (min-width: 769px) { .fab { bottom: 32px; } }
-        .fab:hover { transform: scale(1.06); box-shadow: 0 6px 22px rgba(0,230,118,0.4); }
+        .fab:hover { transform: scale(1.05); box-shadow: 0 6px 20px rgba(0,230,118,0.32); }
         .fab:active { transform: scale(0.96); }
 
         /* ── TOAST ── */
-        .toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); background: #1E293B; border: 1px solid rgba(0,230,118,0.3); color: #FFFFFF; padding: 11px 22px; border-radius: 14px; font-size: 13px; font-weight: 700; z-index: 9000; animation: slideUp 0.25s ease; white-space: nowrap; box-shadow: 0 8px 28px rgba(0,0,0,0.45); pointer-events: none; }
+        .toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); background: var(--bg-panel); border: 1px solid rgba(0,230,118,0.25); color: var(--text-main); padding: 10px 20px; border-radius: var(--r-md); font-size: var(--t-base); font-weight: 600; z-index: 9000; animation: slideUp 0.25s ease; white-space: nowrap; box-shadow: 0 8px 24px rgba(0,0,0,0.35); pointer-events: none; letter-spacing: 0.01em; }
         @media (min-width: 769px) { .toast { bottom: 36px; } }
-        @keyframes slideUp { from { opacity: 0; transform: translateX(-50%) translateY(12px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+        @keyframes slideUp { from { opacity: 0; transform: translateX(-50%) translateY(10px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
         @keyframes shake { 0%,100%{transform:translateX(0)} 20%,60%{transform:translateX(-8px)} 40%,80%{transform:translateX(8px)} }
 
         /* ── MORE BOTTOM SHEET ── */
-        .sheet-overlay { position: fixed; inset: 0; background: var(--modal-bg); backdrop-filter: blur(6px); z-index: 500; display: flex; align-items: flex-end; }
-        .sheet-panel { background: var(--bg-panel); border-radius: 22px 22px 0 0; border-top: 1px solid var(--border); width: 100%; padding: 0 0 env(safe-area-inset-bottom, 16px); animation: sheetUp 0.25s ease; }
+        .sheet-overlay { position: fixed; inset: 0; background: var(--modal-bg); backdrop-filter: blur(8px); z-index: 500; display: flex; align-items: flex-end; }
+        .sheet-panel { background: var(--bg-panel); border-radius: var(--r-xl) var(--r-xl) 0 0; border-top: 1px solid var(--border); width: 100%; padding: 0 0 env(safe-area-inset-bottom, 16px); animation: sheetUp 0.22s ease; }
         @keyframes sheetUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-        .sheet-handle { width: 36px; height: 4px; background: var(--border); border-radius: 2px; margin: 12px auto 16px; }
-        .sheet-row { display: flex; align-items: center; gap: 16px; padding: 16px 24px; cursor: pointer; border-bottom: 1px solid var(--border); transition: background 0.12s; }
+        .sheet-handle { width: 32px; height: 3px; background: var(--border-input); border-radius: 2px; margin: 14px auto 18px; }
+        .sheet-row { display: flex; align-items: center; gap: var(--sp-4); padding: var(--sp-4) var(--sp-6); cursor: pointer; border-bottom: 1px solid var(--border); transition: background 0.12s; }
         .sheet-row:last-child { border-bottom: none; }
         .sheet-row:hover { background: var(--hover-bg); }
-        .sheet-row-icon { font-size: 22px; width: 36px; text-align: center; }
-        .sheet-row-label { font-size: 15px; font-weight: 600; color: var(--text-main); }
-        .sheet-row-sub { font-size: 12px; color: var(--text-muted); margin-top: 1px; }
+        .sheet-row-icon { width: 32px; text-align: center; display: flex; align-items: center; justify-content: center; }
+        .sheet-row-label { font-size: var(--t-md); font-weight: 600; color: var(--text-main); }
+        .sheet-row-sub { font-size: var(--t-sm); color: var(--text-muted); margin-top: 2px; }
 
         /* ── QUICK ADD FORM ── */
-        .quick-add-amount { font-size: 36px; font-weight: 800; text-align: center; background: transparent; color: var(--text-main); border: none; border-bottom: 2px solid var(--border-input); padding: 8px 16px; width: 100%; outline: none; margin-bottom: 8px; }
-        .quick-add-amount:focus { border-bottom-color: #00E676; }
-        .cat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 16px 0; }
-        .cat-btn { padding: 10px 6px; border: 1px solid var(--border); border-radius: 12px; background: var(--bg-input); color: var(--text-light); font-size: 12px; font-weight: 700; cursor: pointer; transition: all 0.15s; text-align: center; }
-        .cat-btn.selected { border-color: #00E676; color: #00E676; background: rgba(0,230,118,0.08); }
+        .quick-add-amount { font-family: 'DM Mono', monospace; font-size: 34px; font-weight: 500; text-align: center; background: transparent; color: var(--text-main); border: none; border-bottom: 2px solid var(--border-input); padding: var(--sp-2) var(--sp-4); width: 100%; outline: none; margin-bottom: var(--sp-2); }
+        .quick-add-amount:focus { border-bottom-color: var(--accent); }
+        .cat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--sp-2); margin: var(--sp-4) 0; }
+        .cat-btn { padding: 10px 6px; border: 1px solid var(--border); border-radius: var(--r-sm); background: var(--bg-input); color: var(--text-light); font-size: var(--t-sm); font-weight: 600; cursor: pointer; transition: all 0.15s; text-align: center; }
+        .cat-btn.selected { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
 
         /* ── SAFE SPEND CHIP ── */
-        .safe-chip { display: inline-flex; align-items: center; gap: 6px; background: rgba(0,230,118,0.08); border: 1px solid rgba(0,230,118,0.2); color: #00E676; padding: 6px 14px; border-radius: 10px; font-size: 13px; font-weight: 700; margin-top: 14px; }
+        .safe-chip { display: inline-flex; align-items: center; gap: var(--sp-2); background: var(--accent-dim); border: 1px solid var(--accent-border); color: var(--accent); padding: 5px 12px; border-radius: var(--sp-2); font-size: var(--t-base); font-weight: 600; margin-top: var(--sp-4); }
 
         /* ── EMPTY STATE ── */
-        .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 32px 24px; text-align: center; color: var(--text-muted); gap: 8px; }
-        .empty-state-icon { opacity: 0.4; margin-bottom: 4px; }
-        .empty-state-title { font-size: 14px; font-weight: 700; color: var(--text-light); }
-        .empty-state-sub { font-size: 13px; max-width: 240px; line-height: 1.5; }
+        .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: var(--sp-8) var(--sp-6); text-align: center; color: var(--text-muted); gap: var(--sp-2); }
+        .empty-state-icon { opacity: 0.3; margin-bottom: var(--sp-1); }
+        .empty-state-title { font-size: var(--t-base); font-weight: 700; color: var(--text-light); }
+        .empty-state-sub { font-size: var(--t-sm); max-width: 220px; line-height: 1.6; }
 </style>
     <link rel="apple-touch-icon" href="logosinkpeso.png">
     <link rel="icon" href="logosinkpeso.png" type="image/png">
@@ -259,28 +270,28 @@
             colGap8:    { display:"flex", flexDirection:"column", gap:8 },
 
             // ── TYPOGRAPHY ────────────────────────────────────────
-            pageTitle:   { fontSize:22, fontWeight:800, color:"var(--text-main)", lineHeight:1.2 },
-            sectionTitle:{ fontSize:13, fontWeight:700, letterSpacing:"0.07em", textTransform:"uppercase", color:"var(--text-muted)", marginBottom:14 },
-            modalTitle:  { fontSize:18, fontWeight:800, color:"var(--text-main)" },
-            heroVal:     { fontSize:36, fontWeight:800, color:"#00E676", lineHeight:1 },
-            bodyMuted:   { fontSize:13, color:"var(--text-muted)", lineHeight:1.5 },
-            muted:       { fontSize:14, color:"var(--text-muted)" },
-            label:       { fontSize:11, fontWeight:700, letterSpacing:"0.08em", textTransform:"uppercase", color:"var(--text-muted)" },
+            pageTitle:   { fontSize:22, fontWeight:800, color:"var(--text-main)", lineHeight:1.15, letterSpacing:"-0.02em" },
+            sectionTitle:{ fontSize:11, fontWeight:700, letterSpacing:"0.09em", textTransform:"uppercase", color:"var(--text-muted)", marginBottom:14 },
+            modalTitle:  { fontSize:17, fontWeight:800, color:"var(--text-main)", letterSpacing:"-0.01em" },
+            heroVal:     { fontSize:36, fontWeight:800, color:"#00E676", lineHeight:1, fontVariantNumeric:"tabular-nums", letterSpacing:"-0.02em" },
+            bodyMuted:   { fontSize:13, color:"var(--text-muted)", lineHeight:1.55 },
+            muted:       { fontSize:13, color:"var(--text-muted)" },
+            label:       { fontSize:11, fontWeight:700, letterSpacing:"0.09em", textTransform:"uppercase", color:"var(--text-muted)" },
 
             // ── CARDS ─────────────────────────────────────────────
-            statCard:    { background:"var(--hover-bg)", border:"1px solid var(--border)", borderRadius:14, padding:"16px 18px" },
+            statCard:    { background:"var(--hover-bg)", border:"1px solid var(--border)", borderRadius:12, padding:"14px 16px" },
             card:        { background:"var(--bg-panel)", border:"1px solid var(--border)", borderRadius:20, padding:24 },
 
             // ── BUTTONS ───────────────────────────────────────────
-            chip: (bg, color, border) => ({ display:"inline-flex", alignItems:"center", gap:6, background:bg, color, border:`1px solid ${border}`, padding:"6px 12px", borderRadius:10, fontSize:12, fontWeight:700, cursor:"pointer", whiteSpace:"nowrap" }),
-            iconBtn:     { background:"transparent", border:"1px solid var(--border)", color:"var(--text-muted)", width:34, height:34, borderRadius:10, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", transition:"all 0.2s", flexShrink:0 },
-            closeBtn:    { background:"var(--hover-bg)", border:"none", color:"var(--text-light)", width:32, height:32, borderRadius:8, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 },
+            chip: (bg, color, border) => ({ display:"inline-flex", alignItems:"center", gap:6, background:bg, color, border:`1px solid ${border}`, padding:"5px 11px", borderRadius:8, fontSize:12, fontWeight:600, cursor:"pointer", whiteSpace:"nowrap" }),
+            iconBtn:     { background:"transparent", border:"1px solid var(--border)", color:"var(--text-muted)", width:32, height:32, borderRadius:8, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", transition:"all 0.2s", flexShrink:0 },
+            closeBtn:    { background:"var(--hover-bg)", border:"none", color:"var(--text-light)", width:30, height:30, borderRadius:8, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 },
 
             // ── PAGE STRUCTURE ────────────────────────────────────
             pageHeader:  { display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:24, flexWrap:"wrap", gap:12 },
             modalHeader: { display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:20 },
-            modalFooter: { display:"flex", gap:12, marginTop:24 },
-            formFooter:  { display:"flex", gap:12, marginTop:8 },
+            modalFooter: { display:"flex", gap:10, marginTop:24 },
+            formFooter:  { display:"flex", gap:10, marginTop:8 },
             section:     { marginBottom:24 },
         };
 
@@ -316,6 +327,8 @@
             car:         "M5 17H3a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v9a2 2 0 01-2 2h-3 M8.5 17a1.5 1.5 0 100 3 1.5 1.5 0 000-3z M18.5 17a1.5 1.5 0 100 3 1.5 1.5 0 000-3z",
             home2:       "M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z M9 22V12h6v10",
             gift:        "M20 12v10H4V12 M2 7h20v5H2z M12 22V7 M12 7H7.5a2.5 2.5 0 010-5C11 2 12 7 12 7z M12 7h4.5a2.5 2.5 0 000-5C13 2 12 7 12 7z",
+            creditcard:  "M1 4h22v16H1z M1 10h22",
+            banknote:    "M2 7h20v14H2z M16 14a2 2 0 000-4H8 M6 14h.01",
         };
         function Icon({ name, size = 18, color = "currentColor", style: st = {} }) {
             const path = ICONS[name] || ICONS.target;
@@ -369,7 +382,7 @@
             return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
         };
 
-        function SLabel({ children, style = {} }) { return e('div', { style: { fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--text-muted)", ...style } }, children); }
+        function SLabel({ children, style = {} }) { return e('div', { style: { fontSize: 11, fontWeight: 700, letterSpacing: "0.09em", textTransform: "uppercase", color: "var(--text-muted)", ...style } }, children); }
         function PageTitle({ children, sub }) {
             return e('div', { style: { marginBottom: 24 } },
                 e('h2', { style: S.pageTitle }, children),
@@ -383,16 +396,16 @@
             );
         }
         function Field({ label, children }) { return e('div', { style: { marginBottom: 20 } }, e('div', { style: { fontSize: 12, fontWeight: 600, color: "var(--text-light)", marginBottom: 8, letterSpacing: "0.03em" } }, label), children); }
-        function Inp(p) { const num = p.type === "number" ? { inputMode: "decimal", pattern: "[0-9]*" } : {}; return e('input', { ...num, ...p, style: { background: "var(--bg-input)", color: "var(--text-main)", border: "1px solid var(--border-input)", borderRadius: 12, padding: "14px 16px", fontSize: 15, width: "100%", boxSizing: "border-box", outline: "none", transition: "border 0.2s", minHeight: 48, ...(p.style || {}) } }); }
-        function Sel({ children, ...p }) { return e('select', { ...p, style: { background: "var(--bg-input)", color: "var(--text-main)", border: "1px solid var(--border-input)", borderRadius: 12, padding: "14px 16px", fontSize: 15, width: "100%", boxSizing: "border-box", outline: "none", minHeight: 48, ...(p.style || {}) } }, children); }
+        function Inp(p) { const num = p.type === "number" ? { inputMode: "decimal", pattern: "[0-9]*" } : {}; return e('input', { ...num, ...p, style: { background: "var(--bg-input)", color: "var(--text-main)", border: "1px solid var(--border-input)", borderRadius: 10, padding: "13px 15px", fontSize: 15, width: "100%", boxSizing: "border-box", outline: "none", transition: "border-color 0.2s", minHeight: 46, fontFamily: "inherit", ...(p.style || {}) } }); }
+        function Sel({ children, ...p }) { return e('select', { ...p, style: { background: "var(--bg-input)", color: "var(--text-main)", border: "1px solid var(--border-input)", borderRadius: 10, padding: "13px 15px", fontSize: 15, width: "100%", boxSizing: "border-box", outline: "none", minHeight: 46, fontFamily: "inherit", ...(p.style || {}) } }, children); }
         function Btn({ children, v = "primary", style = {}, ...p }) {
             const vs = {
-                primary: { background: "#2563EB", color: "#FFFFFF" },
-                accent: { background: "#00E676", color: "#030712" },
+                primary: { background: "#1D4ED8", color: "#FFFFFF" },
+                accent: { background: "#00E676", color: "#020810" },
                 ghost: { background: "transparent", color: "var(--text-main)", border: "1px solid var(--border-input)" },
-                danger: { background: "rgba(239, 68, 68, 0.1)", color: "#EF4444", border: "none" }
+                danger: { background: "rgba(239, 68, 68, 0.09)", color: "#EF4444", border: "1px solid rgba(239,68,68,0.18)" }
             };
-            return e('button', { ...p, style: { ...vs[v], borderRadius: 12, padding: "13px 22px", fontSize: 13, fontWeight: 600, cursor: "pointer", border: vs[v].border || "none", transition: "all 0.15s ease", minHeight: 44, lineHeight: 1.2, ...style } }, children);
+            return e('button', { ...p, style: { ...vs[v], borderRadius: 10, padding: "12px 20px", fontSize: 13, fontWeight: 600, cursor: "pointer", border: vs[v].border || "none", transition: "all 0.15s ease", minHeight: 44, lineHeight: 1.2, letterSpacing: "0.01em", ...style } }, children);
         }
 
         function DotMenu({ itemId, openMenu, setOpenMenu, onEdit, onDelete }) {
@@ -409,15 +422,122 @@
             );
         }
 
+        // ── WALLET HELPERS ─────────────────────────────────────────────────────
+        const WALLET_COLORS = ["#00E676","#3B82F6","#A855F7","#F59E0B","#EF4444","#10B981","#EC4899","#64748B"];
+        function applyWalletDelta(wallets, setWallets, walletId, deltaCents) {
+            if (!walletId) return;
+            setWallets(prev => prev.map(w => w.id === walletId ? { ...w, balanceCents: (w.balanceCents || 0) + deltaCents } : w));
+        }
+
+        // Optional wallet selector — renders nothing if no wallets exist
+        function WalletPicker({ wallets, value, onChange }) {
+            if (!wallets || wallets.length === 0) return null;
+            return e('div', null,
+                e(Sel, { value: value || "", onChange: ev => onChange(ev.target.value) },
+                    e('option', { value: "" }, "No wallet"),
+                    wallets.map(w => e('option', { key: w.id, value: w.id }, w.name))
+                )
+            );
+        }
+
+        // ── MODULE: WALLETS ────────────────────────────────────────────────────
+        function WalletsView({ wallets, setWallets, fc }) {
+            const [modal, setModal] = useState(false);
+            const [form, setForm] = useState({ name: "", balanceCents: "", color: WALLET_COLORS[0] });
+            const [editWallet, setEditWallet] = useState(null);
+            const [editForm, setEditForm] = useState({ name: "", balanceCents: "", color: WALLET_COLORS[0] });
+            const [openMenu, setOpenMenu] = useState(null);
+
+            const handleCreate = () => {
+                if (!form.name) return;
+                setWallets([...wallets, { id: uid(), name: form.name.trim(), balanceCents: tc(form.balanceCents || "0"), color: form.color }]);
+                setForm({ name: "", balanceCents: "", color: WALLET_COLORS[0] });
+                setModal(false);
+            };
+            const openEdit = (w) => { setEditWallet(w); setEditForm({ name: w.name, balanceCents: String(((w.balanceCents||0)/100).toFixed(2)), color: w.color || WALLET_COLORS[0] }); };
+            const saveEdit = () => {
+                if (!editForm.name) return;
+                setWallets(wallets.map(w => w.id === editWallet.id ? { ...w, name: editForm.name.trim(), balanceCents: tc(editForm.balanceCents||"0"), color: editForm.color } : w));
+                setEditWallet(null);
+            };
+            const deleteWallet = (id) => { if (window.confirm("Delete this wallet?")) setWallets(wallets.filter(w => w.id !== id)); };
+
+            const ColorPicker = ({ value, onChange }) => e('div', { style: { display:"flex", gap:8, flexWrap:"wrap", marginTop:4 } },
+                WALLET_COLORS.map(c => e('button', { key:c, onClick: () => onChange(c), style: { width:28, height:28, borderRadius:"50%", background:c, border: value===c ? "3px solid var(--text-main)" : "2px solid transparent", cursor:"pointer", padding:0, flexShrink:0 } }))
+            );
+
+            return e('div', null,
+                e('div', { style: S.pageHeader },
+                    e('div', null, e('h2', { style: S.pageTitle }, 'Wallets'), e('div', { style: { fontSize:13, color:"var(--text-muted)", marginTop:4 } }, 'Track where your money lives.')),
+                    e(Btn, { v:"accent", onClick: () => setModal(true) }, "+ Add Wallet")
+                ),
+
+                wallets.length === 0
+                    ? e('div', { className:"premium-panel" }, e('div', { className:"empty-state" },
+                        e('div', { className:"empty-state-icon" }, e(Icon, { name:"creditcard", size:32, color:"var(--text-muted)" })),
+                        e('div', { className:"empty-state-title" }, "No wallets yet"),
+                        e('div', { className:"empty-state-sub" }, "Add Cash, GCash, Maya or any bank account to track balances.")))
+                    : e('div', { className:"premium-panel" },
+                        wallets.map(w => e('div', { key:w.id, className:"stream-row" },
+                            e('div', { style:{ display:"flex", alignItems:"center", gap:12 } },
+                                e('div', { style:{ width:10, height:10, borderRadius:"50%", background: w.color||"#00E676", flexShrink:0 } }),
+                                e('div', { style:{ fontWeight:600 } }, w.name)
+                            ),
+                            e('div', { style:S.row10 },
+                                e('div', { style:{ fontWeight:700, fontVariantNumeric:"tabular-nums", color: (w.balanceCents||0) < 0 ? "#EF4444" : "var(--text-main)" } }, fc(w.balanceCents||0)),
+                                e(DotMenu, { itemId:w.id, openMenu, setOpenMenu, onEdit:() => openEdit(w), onDelete:() => deleteWallet(w.id) })
+                            )
+                        ))
+                    ),
+
+                // CREATE MODAL
+                modal && e('div', { className:"modal-overlay", onClick:() => setModal(false) },
+                    e('div', { className:"modal-container", style:{maxWidth:400}, onClick:ev=>ev.stopPropagation() },
+                        e('div', { style:S.modalHeader },
+                            e('div', { style:S.modalTitle }, "Add Wallet"),
+                            e('button', { onClick:()=>setModal(false), style:S.closeBtn }, e(Icon, {name:"x",size:16}))
+                        ),
+                        e(Field, { label:"Wallet Name" }, e(Inp, { autoFocus:true, placeholder:"e.g. GCash, BPI, Cash", value:form.name, onChange:ev=>setForm({...form,name:ev.target.value}) })),
+                        e(Field, { label:"Current Balance" }, e(Inp, { type:"number", placeholder:"0.00", value:form.balanceCents, onChange:ev=>setForm({...form,balanceCents:ev.target.value}) })),
+                        e(Field, { label:"Color" }, e(ColorPicker, { value:form.color, onChange:c=>setForm({...form,color:c}) })),
+                        e('div', { style:{...S.modalFooter, marginTop:20} },
+                            e(Btn, { v:"ghost", style:{flex:1}, onClick:()=>setModal(false) }, "Cancel"),
+                            e(Btn, { v:"accent", style:{flex:1}, onClick:handleCreate }, "Add Wallet")
+                        )
+                    )
+                ),
+
+                // EDIT MODAL
+                editWallet && e('div', { className:"modal-overlay", onClick:()=>setEditWallet(null) },
+                    e('div', { className:"modal-container", style:{maxWidth:400}, onClick:ev=>ev.stopPropagation() },
+                        e('div', { style:S.modalHeader },
+                            e('div', { style:S.modalTitle }, "Edit Wallet"),
+                            e('button', { onClick:()=>setEditWallet(null), style:S.closeBtn }, e(Icon, {name:"x",size:16}))
+                        ),
+                        e(Field, { label:"Wallet Name" }, e(Inp, { autoFocus:true, value:editForm.name, onChange:ev=>setEditForm({...editForm,name:ev.target.value}) })),
+                        e(Field, { label:"Balance" }, e(Inp, { type:"number", value:editForm.balanceCents, onChange:ev=>setEditForm({...editForm,balanceCents:ev.target.value}) })),
+                        e(Field, { label:"Color" }, e(ColorPicker, { value:editForm.color, onChange:c=>setEditForm({...editForm,color:c}) })),
+                        e('div', { style:{...S.modalFooter, marginTop:20} },
+                            e(Btn, { v:"ghost", style:{flex:1}, onClick:()=>setEditWallet(null) }, "Cancel"),
+                            e(Btn, { v:"primary", style:{flex:1}, onClick:saveEdit }, "Save")
+                        )
+                    )
+                )
+            );
+        }
+
         // ── QUICK ADD MODAL ────────────────────────────────────────────────
-        function QuickAddModal({ onSave, onClose }) {
+        function QuickAddModal({ onSave, onClose, wallets, setWallets }) {
             const [amount, setAmount] = useState("");
             const [category, setCategory] = useState("Food");
             const [note, setNote] = useState("");
+            const [walletId, setWalletId] = useState("");
             const catIcons = { Food: "utensils", Gas: "car", Bills: "receipt", Business: "briefcase", Personal: "shoppingbag", Savings: "landmark" };
             const handle = () => {
                 if (!amount || Number(amount) <= 0) return;
-                onSave({ id: uid(), name: note.trim() || category, amountCents: tc(amount), category, date: todayStr() });
+                const amtCents = tc(amount);
+                onSave({ id: uid(), name: note.trim() || category, amountCents: amtCents, category, date: todayStr(), walletId: walletId || null });
+                if (walletId) applyWalletDelta(wallets, setWallets, walletId, -amtCents);
             };
             return e('div', { className: "modal-overlay", onClick: onClose },
                 e('div', { className: "modal-container", style: { maxWidth: 400 }, onClick: ev => ev.stopPropagation() },
@@ -432,8 +552,9 @@
                             c
                         ))
                     ),
-                    e(Inp, { placeholder: "Note (optional)", value: note, onChange: ev => setNote(ev.target.value), style: { marginBottom: 20 } }),
-                    e(Btn, { v: "accent", style: { width: "100%", fontSize: 15 }, onClick: handle }, "Save Expense")
+                    e(Inp, { placeholder: "Note (optional)", value: note, onChange: ev => setNote(ev.target.value), style: { marginBottom: 12 } }),
+                    e(WalletPicker, { wallets, value: walletId, onChange: setWalletId }),
+                    e(Btn, { v: "accent", style: { width: "100%", fontSize: 15, marginTop: 16 }, onClick: handle }, "Save Expense")
                 )
             );
         }
@@ -480,7 +601,7 @@
             render() {
                 if (this.state.hasError) {
                     return e('div', { style: { display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "100vh", padding: 24, fontFamily: "Inter, sans-serif" } },
-                        e('div', { style: { fontSize: 48, marginBottom: 16 } }, "⚠️"),
+                        e('div', { style: { fontSize: 32, marginBottom: 16, opacity: 0.5 } }, e(Icon, { name: "target", size: 48, color: "#EF4444" })),
                         e('h2', { style: { color: "#EF4444", marginBottom: 8, fontWeight: 800 } }, "Something went wrong"),
                         e('p', { style: { color: "#64748B", marginBottom: 24, textAlign: "center", maxWidth: 360 } }, "Your data is safe in localStorage. Try reloading the page."),
                         e('button', { onClick: () => window.location.reload(), style: { background: "#2563EB", color: "#fff", border: "none", borderRadius: 12, padding: "12px 28px", fontSize: 14, fontWeight: 700, cursor: "pointer" } }, "Reload App")
@@ -513,6 +634,7 @@
             const [dailyExpenses, setDailyExpenses] = useState(() => safeGet("sp_daily"));
             const [archives, setArchives] = useState(() => safeGet("sp_archives"));
             const [budgets, setBudgets] = useState(() => safeGet("sp_budgets"));
+            const [wallets, setWallets] = useState(() => safeGet("sp_wallets"));
 
             // Sync states to LocalStorage & Apply Theme
             useEffect(() => {
@@ -526,6 +648,7 @@
             useEffect(() => { localStorage.setItem("sp_daily", JSON.stringify(dailyExpenses)); }, [dailyExpenses]);
             useEffect(() => { localStorage.setItem("sp_archives", JSON.stringify(archives)); }, [archives]);
             useEffect(() => { localStorage.setItem("sp_budgets", JSON.stringify(budgets)); }, [budgets]);
+            useEffect(() => { localStorage.setItem("sp_wallets", JSON.stringify(wallets)); }, [wallets]);
 
             // Currency Formatter bound to state
             const fc = useMemo(() => {
@@ -557,12 +680,12 @@
                     catSum["Bills"] = (catSum["Bills"] || 0) + b.amountCents; 
                 });
 
-                let healthStatus = { label: "🟢 Optimal", color: "#00E676", bg: "rgba(0, 230, 118, 0.1)" };
+                let healthStatus = { label: "Optimal", color: "#00E676", bg: "rgba(0, 230, 118, 0.08)" };
                 const closeBillExists = bills.some(b => !b.isPaid && getDaysRemaining(b.dueDate) <= 3);
                 const dailySpendingRatio = safeDiv(totalDailySpent, totalIncome);
 
-                if (closeBillExists || unpaidBills > 0) { healthStatus = { label: "🔴 Overhead Warning", color: "#FF1744", bg: "rgba(255, 23, 68, 0.1)" }; } 
-                else if (dailySpendingRatio > 0.40) { healthStatus = { label: "🟡 Caution", color: "#FFD600", bg: "rgba(255, 214, 0, 0.1)" }; }
+                if (closeBillExists || unpaidBills > 0) { healthStatus = { label: "Overhead Warning", color: "#FF1744", bg: "rgba(255, 23, 68, 0.09)" }; } 
+                else if (dailySpendingRatio > 0.40) { healthStatus = { label: "Caution", color: "#FFD600", bg: "rgba(255, 214, 0, 0.09)" }; }
 
                 return { totalIncome, paidBills, unpaidBills, totalDailySpent, totalInGoals, netAvailable, enrichedFunds, catSum, healthStatus };
             }, [incomes, bills, funds, txns, dailyExpenses]);
@@ -666,6 +789,7 @@
 
                         // Secondary tabs — smaller, clearly subordinate
                         [
+                            { id: "wallets",      label: "Wallets" },
                             { id: "limits",       label: "Limits" },
                             { id: "transactions", label: "Logs" },
                             { id: "history",      label: "History" },
@@ -677,11 +801,12 @@
                 ),
                 
                 e('div', { className: "page-wrap", style: { maxWidth: 1140, margin: "0 auto", padding: "clamp(16px, 4vw, 32px) clamp(12px, 4vw, 24px) 80px" } },
-                    tab === "dashboard" && e(DashboardOverview, { totals, bills, dailyExpenses, budgets, fc }),
+                    tab === "dashboard" && e(DashboardOverview, { totals, bills, dailyExpenses, budgets, wallets, fc }),
                     tab === "limits" && e(BudgetLimitsView, { budgets, setBudgets, fc }),
-                    tab === "budget" && e(BudgetBillsView, { incomes, setIncomes, bills, setBills, fc }),
-                    tab === "daily" && e(DailyExpensesView, { dailyExpenses, setDailyExpenses, fc }),
-                    tab === "goals" && e(SinkingFundsView, { funds, setFunds, enrichedFunds: totals.enrichedFunds, txns, setTxns, fc }),
+                    tab === "wallets" && e(WalletsView, { wallets, setWallets, fc }),
+                    tab === "budget" && e(BudgetBillsView, { incomes, setIncomes, bills, setBills, wallets, setWallets, fc }),
+                    tab === "daily" && e(DailyExpensesView, { dailyExpenses, setDailyExpenses, wallets, setWallets, fc }),
+                    tab === "goals" && e(SinkingFundsView, { funds, setFunds, enrichedFunds: totals.enrichedFunds, txns, setTxns, wallets, setWallets, fc }),
                     tab === "transactions" && e(TransactionsView, { txns, setTxns, funds, fc }),
                     tab === "history" && e(HistoryView, { archives, fc }),
                     tab === "settings" && e(SettingsView, { settings, setSettings, setIncomes, setBills, setDailyExpenses, setFunds, setTxns, setArchives, setBudgets, showToast, totals, bills, budgets, fc }),
@@ -716,7 +841,7 @@ e('footer', {
                         { id: "more",      icon: "more",    label: "More" }
                     ].map(t => e('button', {
                         key: t.id,
-                        className: "bnav-btn" + (tab === t.id || (t.id === "more" && ["limits","transactions","history","settings"].includes(tab)) ? " active" : ""),
+                        className: "bnav-btn" + (tab === t.id || (t.id === "more" && ["wallets","limits","transactions","history","settings"].includes(tab)) ? " active" : ""),
                         onClick: () => t.id === "more" ? setShowMoreSheet(true) : setTab(t.id)
                     },
                         e(Icon, { name: t.icon, size: 22 }),
@@ -729,6 +854,7 @@ e('footer', {
                     e('div', { className: "sheet-panel", onClick: ev => ev.stopPropagation() },
                         e('div', { className: "sheet-handle" }),
                         [
+                            { id: "wallets",      icon: "creditcard", label: "Wallets",        sub: "Cash, GCash, bank accounts" },
                             { id: "limits",       icon: "grid",    label: "Budget Limits",  sub: "Set spending caps per category" },
                             { id: "transactions", icon: "list",    label: "Vault Logs",      sub: "Deposit & withdrawal history" },
                             { id: "history",      icon: "history", label: "Month History",   sub: "Archived monthly snapshots" },
@@ -752,6 +878,7 @@ e('footer', {
 
                 // ── QUICK ADD EXPENSE MODAL ─────────────────────────────────
                 showQuickAdd && e(QuickAddModal, { 
+                    wallets, setWallets,
                     onSave: (item) => { 
                         setDailyExpenses(prev => [item, ...prev]); 
                         setShowQuickAdd(false); 
@@ -766,7 +893,6 @@ e('footer', {
                         // Header
                         e('div', { style: { display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 20 } },
                             e('div', null,
-                                e('div', { style: { fontSize: 24, marginBottom: 6 } }, "🗓"),
                                 e('h3', { style: { fontSize: 18, fontWeight: 800, color: "var(--text-main)" } }, "Close This Month"),
                                 e('div', { style: { fontSize: 13, color: "var(--text-muted)", marginTop: 4 } },
                                     new Date().toLocaleDateString("en-PH", { month: "long", year: "numeric" })
@@ -776,43 +902,43 @@ e('footer', {
                         ),
 
                         // What happens section
-                        e('div', { style: { background: "rgba(168,85,247,0.07)", border: "1px solid rgba(168,85,247,0.2)", borderRadius: 14, padding: "14px 16px", marginBottom: 16 } },
+                        e('div', { style: { background: "rgba(168,85,247,0.06)", border: "1px solid rgba(168,85,247,0.18)", borderRadius: 12, padding: "14px 16px", marginBottom: 14 } },
                             e('div', { style: { fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#A855F7", marginBottom: 10 } }, "What will be archived & reset"),
                             [
-                                ["📥", "Archived", "Income entries → saved to History"],
-                                ["🧾", "Archived", "Bills snapshot (paid/unpaid status)"],
-                                ["💸", "Archived", "All daily expenses"],
-                                ["🔄", "Reset",    "Bills marked back to unpaid"],
-                                ["🧹", "Cleared",  "Income & daily expense lists"],
+                                ["archive",    "Archived", "Income entries → saved to History"],
+                                ["receipt",    "Archived", "Bills snapshot (paid/unpaid status)"],
+                                ["wallet",     "Archived", "All daily expenses"],
+                                ["arrowupdown","Reset",    "Bills marked back to unpaid"],
+                                ["trash",      "Cleared",  "Income & daily expense lists"],
                             ].map(([icon, badge, text], i) =>
                                 e('div', { key: i, style: { display: "flex", alignItems: "center", gap: 10, marginBottom: 8 } },
-                                    e('span', { style: { fontSize: 16 } }, icon),
-                                    e('span', { style: { fontSize: 10, fontWeight: 800, background: "rgba(168,85,247,0.2)", color: "#A855F7", padding: "2px 7px", borderRadius: 6, flexShrink: 0 } }, badge),
+                                    e(Icon, { name: icon, size: 14, color: "#A855F7" }),
+                                    e('span', { style: { fontSize: 10, fontWeight: 700, background: "rgba(168,85,247,0.18)", color: "#A855F7", padding: "2px 7px", borderRadius: 5, flexShrink: 0 } }, badge),
                                     e('span', { style: { fontSize: 13, color: "var(--text-light)" } }, text)
                                 )
                             )
                         ),
 
                         // Safe zone section
-                        e('div', { style: { background: "rgba(0,230,118,0.06)", border: "1px solid rgba(0,230,118,0.15)", borderRadius: 14, padding: "14px 16px", marginBottom: 24 } },
+                        e('div', { style: { background: "rgba(0,230,118,0.05)", border: "1px solid rgba(0,230,118,0.12)", borderRadius: 12, padding: "14px 16px", marginBottom: 24 } },
                             e('div', { style: { fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#00E676", marginBottom: 10 } }, "Always preserved — never touched"),
                             [
-                                ["🏦", "Savings Vaults & vault balances"],
-                                ["⚙️", "Settings, PIN & preferences"],
-                                ["📊", "Budget limits"],
-                                ["🗂️", "All previous history archives"],
+                                ["landmark",  "Savings Vaults & vault balances"],
+                                ["settings",  "Settings, PIN & preferences"],
+                                ["grid",      "Budget limits"],
+                                ["history",   "All previous history archives"],
                             ].map(([icon, text], i) =>
                                 e('div', { key: i, style: { display: "flex", alignItems: "center", gap: 10, marginBottom: 6 } },
-                                    e('span', { style: { fontSize: 15 } }, icon),
+                                    e(Icon, { name: icon, size: 14, color: "#00E676" }),
                                     e('span', { style: { fontSize: 13, color: "var(--text-light)" } }, text)
                                 )
                             )
                         ),
 
                         // Action buttons
-                        e('div', { style: { display: "flex", gap: 12 } },
+                        e('div', { style: { display: "flex", gap: 10 } },
                             e(Btn, { v: "ghost", style: { flex: 1 }, onClick: () => setShowCloseModal(false) }, "Cancel"),
-                            e(Btn, { v: "primary", style: { flex: 1, background: "#A855F7" }, onClick: handleCloseMonth }, "✓ Archive & Start Fresh")
+                            e(Btn, { v: "primary", style: { flex: 1, background: "#A855F7" }, onClick: handleCloseMonth }, "Archive & Start Fresh")
                         )
                     )
                 )
@@ -865,7 +991,7 @@ e('footer', {
                     e('div', { className: "premium-panel" },
                         e(SLabel, { style: { marginBottom: 16 } }, "Preferences"),
                         e(Field, { label: "Theme Mode" }, e(Sel, { value: settings?.theme || 'dark', onChange: e => setSettings({...settings, theme: e.target.value}) },
-                            e('option', { value: "dark" }, "🌙 Dark Mode"), e('option', { value: "light" }, "☀️ Light Mode")
+                            e('option', { value: "dark" }, "Dark Mode"), e('option', { value: "light" }, "Light Mode")
                         )),
                         e(Field, { label: "Display Currency" }, e(Sel, { value: settings?.currency || 'PHP', onChange: e => setSettings({...settings, currency: e.target.value}) },
                             Object.keys(CURRENCIES).map(c => e('option', { key: c, value: c }, c))
@@ -878,7 +1004,7 @@ e('footer', {
                     e('div', { className: "premium-panel" },
                         e(SLabel, { style: { marginBottom: 16 } }, "Data Management"),
                         e('p', { style: { fontSize: 13, color: "var(--text-light)", marginBottom: 16 } }, "Your data is stored safely in your browser. Export it regularly to prevent loss if you clear your browser history."),
-                        e(Btn, { v: "primary", style: { width: "100%", marginBottom: 16 }, onClick: handleExport }, "⬇️ Export Data Backup (.json)"),
+                        e(Btn, { v: "primary", style: { width: "100%", marginBottom: 16 }, onClick: handleExport }, "Export Data Backup (.json)"),
                         
                         e('div', { style: { borderTop: "1px solid var(--border)", paddingTop: 16 } },
                             e(SLabel, { style: { marginBottom: 10 } }, "Restore Backup"),
@@ -931,7 +1057,7 @@ e('footer', {
                     e('div', { style: { display: "flex", flexDirection: "column", gap: 24 } },
                         e('div', { className: "balance-gradient-card" },
                             e(SLabel, { style: { color: "var(--text-light)", marginBottom: 6 } }, "Money left to spend"),
-                            e('div', { style: { fontSize: 38, fontWeight: 800, color: "#00E676" } }, fc(totals.netAvailable)),
+                            e('div', { style: { fontSize: 38, fontWeight: 800, color: "#00E676", letterSpacing: "-0.025em", fontVariantNumeric: "tabular-nums" } }, fc(totals.netAvailable)),
                             (() => {
                                 const daysInMonth = new Date(new Date().getFullYear(), new Date().getMonth()+1, 0).getDate();
                                 const dayOfMonth  = new Date().getDate();
@@ -995,7 +1121,7 @@ e('footer', {
 
                         e('div', { style: { borderTop: "1px solid var(--border)", paddingTop: 20 } },
                             e(SLabel, { style: { marginBottom: 12 } }, "Upcoming Unpaid Bills"),
-                            bills.filter(b => !b.isPaid).length === 0 ? e('div', { style: { color: "#00E676", fontSize: 13, fontWeight: 600 } }, "✓ Excellent! All bills paid.") :
+                            bills.filter(b => !b.isPaid).length === 0 ? e('div', { style: { color: "#00E676", fontSize: 13, fontWeight: 600, display:"flex", alignItems:"center", gap:6 } }, e(Icon, {name:"shield", size:14, color:"#00E676"}), "All bills paid") :
                             bills.filter(b => !b.isPaid).slice(0, 3).map(b => {
                                 const days = getDaysRemaining(b.dueDate);
                                 let urgencyColor = "var(--text-muted)"; let urgencyText = "";
@@ -1070,8 +1196,8 @@ e('footer', {
         }
 
         // ── MODULE: BILLS & INCOME ──────────────────────────────────────────
-        function BudgetBillsView({ incomes, setIncomes, bills, setBills, fc }) {
-            const [incName, setIncName] = useState(""); const [incAmt, setIncAmt] = useState("");
+        function BudgetBillsView({ incomes, setIncomes, bills, setBills, wallets, setWallets, fc }) {
+            const [incName, setIncName] = useState(""); const [incAmt, setIncAmt] = useState(""); const [incWalletId, setIncWalletId] = useState("");
             const [billName, setBillName] = useState(""); const [billAmt, setBillAmt] = useState(""); const [billDate, setBillDate] = useState(""); const [billRecurring, setBillRecurring] = useState("none"); const [billCat, setBillCat] = useState("Bills");
 
             const [openMenuInc, setOpenMenuInc] = useState(null); const [editIncome, setEditIncome] = useState(null); const [editIncForm, setEditIncForm] = useState({ name: "", amount: "" });
