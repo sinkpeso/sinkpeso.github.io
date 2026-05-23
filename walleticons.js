@@ -26,197 +26,333 @@
     // Keep SVGs simple — they render at 28–32px so fine detail is invisible.
     const WALLET_BRAND_ICONS = {
 
-        // ── GCash — blue G mark ────────────────────────────────────────────────
-        gcash: {
-            bg: "#0070E0",
-            svg: `<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <rect width="40" height="40" rx="10" fill="#0070E0"/>
-                <text x="20" y="27" text-anchor="middle" font-family="Arial Black,Arial,sans-serif"
-                    font-size="20" font-weight="900" fill="#ffffff">G</text>
-                <path d="M22 21h5v2.5a7 7 0 01-7 2.5 7 7 0 010-14 7 7 0 014.9 2" 
-                    stroke="#7DD4FC" stroke-width="1.5" stroke-linecap="round" fill="none"/>
-            </svg>`
-        },
+// ── GCash ───────────────────────────────────────────────────────────────
+gcash: {
+    bg: "#007DFE",
+    svg: `<svg viewBox="0 0 40 40" fill="none"
+        xmlns="http://www.w3.org/2000/svg">
+        <rect width="40" height="40" rx="10" fill="#007DFE"/>
+        <path d="M27 20a7 7 0 11-2-5"
+            stroke="#ffffff" stroke-width="3"
+            stroke-linecap="round"/>
+        <path d="M21 20h7"
+            stroke="#7DD3FC" stroke-width="3"
+            stroke-linecap="round"/>
+    </svg>`
+},
 
-        // ── Maya — teal/green wordmark M ──────────────────────────────────────
-        maya: {
-            bg: "#00A859",
-            svg: `<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <rect width="40" height="40" rx="10" fill="#00A859"/>
-                <path d="M9 28V14l7 9 7-9v14M27 14l4 7-4 7" 
-                    stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-            </svg>`
-        },
+// ── Maya ────────────────────────────────────────────────────────────────
+maya: {
+    bg: "#00C389",
+    svg: `<svg viewBox="0 0 40 40" fill="none"
+        xmlns="http://www.w3.org/2000/svg">
+        <rect width="40" height="40" rx="10" fill="#00C389"/>
+        <path d="M9 28V14l7 8 7-8v14"
+            stroke="#ffffff" stroke-width="3"
+            stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M27 14l4 7-4 7"
+            stroke="#D1FAE5" stroke-width="3"
+            stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>`
+},
 
-        // ── GoTyme — coral/orange G ───────────────────────────────────────────
-        gotyme: {
-            bg: "#FF5733",
-            svg: `<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <rect width="40" height="40" rx="10" fill="#FF5733"/>
-                <text x="20" y="28" text-anchor="middle" font-family="Arial Black,Arial,sans-serif"
-                    font-size="22" font-weight="900" fill="#ffffff">G</text>
-            </svg>`
-        },
+// ── PayMaya alias ───────────────────────────────────────────────────────
+paymaya: {
+    bg: "#00C389",
+    svg: `<svg viewBox="0 0 40 40" fill="none"
+        xmlns="http://www.w3.org/2000/svg">
+        <rect width="40" height="40" rx="10" fill="#00C389"/>
+        <path d="M9 28V14l7 8 7-8v14"
+            stroke="#ffffff" stroke-width="3"
+            stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M27 14l4 7-4 7"
+            stroke="#D1FAE5" stroke-width="3"
+            stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>`
+},
 
-        // ── Tyme / GoTyme alias ───────────────────────────────────────────────
-        tyme: {
-            bg: "#FF5733",
-            svg: `<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <rect width="40" height="40" rx="10" fill="#FF5733"/>
-                <text x="20" y="28" text-anchor="middle" font-family="Arial Black,Arial,sans-serif"
-                    font-size="22" font-weight="900" fill="#ffffff">G</text>
-            </svg>`
-        },
+// ── BDO Unibank ────────────────────────────────────────────────────────
+bdo: {
+    bg: "#0038A8",
+    svg: `<svg viewBox="0 0 40 40" fill="none"
+        xmlns="http://www.w3.org/2000/svg">
+        <rect width="40" height="40" rx="10" fill="#0038A8"/>
+        <circle cx="20" cy="20" r="8"
+            stroke="#ffffff" stroke-width="2.5"/>
+        <circle cx="20" cy="20" r="3"
+            fill="#EF4444"/>
+        <path d="M20 12v16M12 20h16"
+            stroke="#ffffff" stroke-width="1.8"/>
+    </svg>`
+},
 
-        // ── SeaBank — ocean blue wave ─────────────────────────────────────────
-        seabank: {
-            bg: "#1A56DB",
-            svg: `<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <rect width="40" height="40" rx="10" fill="#1A56DB"/>
-                <path d="M8 24c3-4 5-4 8 0s5 4 8 0 5-4 8 0" 
-                    stroke="#93C5FD" stroke-width="2.5" stroke-linecap="round" fill="none"/>
-                <path d="M8 18c3-3 5-3 8 0s5 3 8 0 5-3 8 0" 
-                    stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" fill="none"/>
-            </svg>`
-        },
+// ── BDO Unibank alias ──────────────────────────────────────────────────
+bdounibank: {
+    bg: "#0038A8",
+    svg: `<svg viewBox="0 0 40 40" fill="none"
+        xmlns="http://www.w3.org/2000/svg">
+        <rect width="40" height="40" rx="10" fill="#0038A8"/>
+        <circle cx="20" cy="20" r="8"
+            stroke="#ffffff" stroke-width="2.5"/>
+        <circle cx="20" cy="20" r="3"
+            fill="#EF4444"/>
+        <path d="M20 12v16M12 20h16"
+            stroke="#ffffff" stroke-width="1.8"/>
+    </svg>`
+},
 
-        // ── CIMB — red C ──────────────────────────────────────────────────────
-        cimb: {
-            bg: "#CC0001",
-            svg: `<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <rect width="40" height="40" rx="10" fill="#CC0001"/>
-                <path d="M27 14a10 10 0 100 12" 
-                    stroke="#ffffff" stroke-width="3" stroke-linecap="round" fill="none"/>
-                <path d="M27 17a6 6 0 100 6" 
-                    stroke="#FECACA" stroke-width="2" stroke-linecap="round" fill="none"/>
-            </svg>`
-        },
+// ── MariBank ───────────────────────────────────────────────────────────
+maribank: {
+    bg: "#6D28D9",
+    svg: `<svg viewBox="0 0 40 40" fill="none"
+        xmlns="http://www.w3.org/2000/svg">
+        <defs>
+            <linearGradient id="mariGrad" x1="0" y1="0" x2="40" y2="40">
+                <stop stop-color="#8B5CF6"/>
+                <stop offset="1" stop-color="#4C1D95"/>
+            </linearGradient>
+        </defs>
+        <rect width="40" height="40" rx="10" fill="url(#mariGrad)"/>
+        <text x="20" y="27"
+            text-anchor="middle"
+            font-family="Arial Black,Arial,sans-serif"
+            font-size="18"
+            font-weight="900"
+            fill="#ffffff">M</text>
+    </svg>`
+},
 
-        // ── BPI — red/maroon building columns ────────────────────────────────
-        bpi: {
-            bg: "#8B0000",
-            svg: `<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <rect width="40" height="40" rx="10" fill="#8B0000"/>
-                <rect x="8" y="28" width="24" height="3" rx="1" fill="#ffffff"/>
-                <rect x="8" y="10" width="24" height="3" rx="1" fill="#ffffff"/>
-                <rect x="11" y="13" width="3" height="15" rx="1" fill="#FECACA"/>
-                <rect x="18.5" y="13" width="3" height="15" rx="1" fill="#FECACA"/>
-                <rect x="26" y="13" width="3" height="15" rx="1" fill="#FECACA"/>
-            </svg>`
-        },
+// ── PayPal ─────────────────────────────────────────────────────────────
+paypal: {
+    bg: "#003087",
+    svg: `<svg viewBox="0 0 40 40" fill="none"
+        xmlns="http://www.w3.org/2000/svg">
+        <rect width="40" height="40" rx="10" fill="#003087"/>
+        <path d="M15 10h8a5 5 0 010 10h-5l-1 7"
+            stroke="#ffffff"
+            stroke-width="3"
+            stroke-linecap="round"
+            stroke-linejoin="round"/>
+        <path d="M18 13h7a4 4 0 010 8"
+            stroke="#7DD3FC"
+            stroke-width="2"
+            stroke-linecap="round"/>
+    </svg>`
+},
 
-        // ── UnionBank — purple U shield ───────────────────────────────────────
-        unionbank: {
-            bg: "#4B0082",
-            svg: `<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <rect width="40" height="40" rx="10" fill="#4B0082"/>
-                <path d="M20 9l-10 4v8c0 6 4.5 10.5 10 12 5.5-1.5 10-6 10-12v-8l-10-4z" 
-                    stroke="#C4B5FD" stroke-width="1.5" fill="rgba(196,181,253,0.15)"/>
-                <path d="M14 17v6a6 6 0 0012 0v-6" 
-                    stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" fill="none"/>
-            </svg>`
-        },
+// ── GrabPay ────────────────────────────────────────────────────────────
+grabpay: {
+    bg: "#00B14F",
+    svg: `<svg viewBox="0 0 40 40" fill="none"
+        xmlns="http://www.w3.org/2000/svg">
+        <rect width="40" height="40" rx="10" fill="#00B14F"/>
+        <path d="M12 23c2-4 4-6 8-6s6 2 8 6"
+            stroke="#ffffff"
+            stroke-width="2.8"
+            stroke-linecap="round"/>
+        <path d="M12 18c2-3 4-4 8-4s6 1 8 4"
+            stroke="#D1FAE5"
+            stroke-width="2.3"
+            stroke-linecap="round"/>
+    </svg>`
+},
 
-        // ── Union Bank alias ──────────────────────────────────────────────────
-        union: {
-            bg: "#4B0082",
-            svg: `<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <rect width="40" height="40" rx="10" fill="#4B0082"/>
-                <path d="M20 9l-10 4v8c0 6 4.5 10.5 10 12 5.5-1.5 10-6 10-12v-8l-10-4z" 
-                    stroke="#C4B5FD" stroke-width="1.5" fill="rgba(196,181,253,0.15)"/>
-                <path d="M14 17v6a6 6 0 0012 0v-6" 
-                    stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" fill="none"/>
-            </svg>`
-        },
+// ── ShopeePay ──────────────────────────────────────────────────────────
+shopeepay: {
+    bg: "#EE4D2D",
+    svg: `<svg viewBox="0 0 40 40" fill="none"
+        xmlns="http://www.w3.org/2000/svg">
+        <rect width="40" height="40" rx="10" fill="#EE4D2D"/>
+        <path d="M14 17h12v9a4 4 0 01-4 4h-4a4 4 0 01-4-4v-9z"
+            stroke="#ffffff"
+            stroke-width="2.2"
+            fill="rgba(255,255,255,0.08)"/>
+        <path d="M17 17a3 3 0 016 0"
+            stroke="#ffffff"
+            stroke-width="2"/>
+        <text x="20" y="25"
+            text-anchor="middle"
+            font-family="Arial Black,Arial,sans-serif"
+            font-size="10"
+            font-weight="900"
+            fill="#ffffff">S</text>
+    </svg>`
+},
 
-        // ── Cash — green banknote ─────────────────────────────────────────────
-        cash: {
-            bg: "#00E676",
-            svg: `<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <rect width="40" height="40" rx="10" fill="#00E676"/>
-                <rect x="7" y="14" width="26" height="16" rx="3" fill="rgba(0,0,0,0.18)"/>
-                <rect x="9" y="16" width="22" height="12" rx="2" stroke="#065f46" stroke-width="1" fill="rgba(6,95,70,0.25)"/>
-                <circle cx="20" cy="22" r="4" stroke="#065f46" stroke-width="1.5" fill="none"/>
-                <path d="M20 19v6M17 22h6" stroke="#065f46" stroke-width="1.2" stroke-linecap="round"/>
-            </svg>`
-        },
+// ── Wise ───────────────────────────────────────────────────────────────
+wise: {
+    bg: "#06B6D4",
+    svg: `<svg viewBox="0 0 40 40" fill="none"
+        xmlns="http://www.w3.org/2000/svg">
+        <rect width="40" height="40" rx="10" fill="#06B6D4"/>
+        <path d="M10 26l5-12 4 7 3-4 6 9"
+            stroke="#ffffff"
+            stroke-width="2.8"
+            stroke-linecap="round"
+            stroke-linejoin="round"/>
+    </svg>`
+},
 
-        // ── Landbank ─────────────────────────────────────────────────────────
-        landbank: {
-            bg: "#1B5E20",
-            svg: `<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <rect width="40" height="40" rx="10" fill="#1B5E20"/>
-                <path d="M20 10L8 17v2h24v-2L20 10z" fill="#A5D6A7"/>
-                <rect x="11" y="19" width="3" height="11" rx="1" fill="#A5D6A7"/>
-                <rect x="18.5" y="19" width="3" height="11" rx="1" fill="#A5D6A7"/>
-                <rect x="26" y="19" width="3" height="11" rx="1" fill="#A5D6A7"/>
-                <rect x="8" y="30" width="24" height="2.5" rx="1" fill="#A5D6A7"/>
-            </svg>`
-        },
+// ── RCBC ───────────────────────────────────────────────────────────────
+rcbc: {
+    bg: "#006747",
+    svg: `<svg viewBox="0 0 40 40" fill="none"
+        xmlns="http://www.w3.org/2000/svg">
+        <rect width="40" height="40" rx="10" fill="#006747"/>
+        <rect x="11" y="11" width="18" height="18"
+            rx="4"
+            stroke="#ffffff"
+            stroke-width="2.3"/>
+        <path d="M14 20h12"
+            stroke="#D1FAE5"
+            stroke-width="2.3"
+            stroke-linecap="round"/>
+    </svg>`
+},
 
-        // ── PNB (Philippine National Bank) ────────────────────────────────────
-        pnb: {
-            bg: "#003087",
-            svg: `<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <rect width="40" height="40" rx="10" fill="#003087"/>
-                <text x="20" y="27" text-anchor="middle" font-family="Arial Black,Arial,sans-serif"
-                    font-size="13" font-weight="900" fill="#ffffff" letter-spacing="-1">PNB</text>
-            </svg>`
-        },
+// ── EastWest Bank ──────────────────────────────────────────────────────
+eastwest: {
+    bg: "#B00020",
+    svg: `<svg viewBox="0 0 40 40" fill="none"
+        xmlns="http://www.w3.org/2000/svg">
+        <rect width="40" height="40" rx="10" fill="#B00020"/>
+        <text x="20" y="26"
+            text-anchor="middle"
+            font-family="Arial Black,Arial,sans-serif"
+            font-size="12"
+            font-weight="900"
+            fill="#ffffff">EW</text>
+    </svg>`
+},
 
-        // ── Metrobank ─────────────────────────────────────────────────────────
-        metrobank: {
-            bg: "#003087",
-            svg: `<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <rect width="40" height="40" rx="10" fill="#003087"/>
-                <text x="20" y="27" text-anchor="middle" font-family="Arial Black,Arial,sans-serif"
-                    font-size="9" font-weight="900" fill="#ffffff">METRO</text>
-            </svg>`
-        },
+// ── China Bank ─────────────────────────────────────────────────────────
+chinabank: {
+    bg: "#00796B",
+    svg: `<svg viewBox="0 0 40 40" fill="none"
+        xmlns="http://www.w3.org/2000/svg">
+        <rect width="40" height="40" rx="10" fill="#00796B"/>
+        <circle cx="20" cy="20" r="7"
+            stroke="#ffffff"
+            stroke-width="2"/>
+        <path d="M20 13v14M13 20h14"
+            stroke="#CCFBF1"
+            stroke-width="2"/>
+    </svg>`
+},
 
-        // ── Security Bank ─────────────────────────────────────────────────────
-        securitybank: {
-            bg: "#C41E3A",
-            svg: `<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <rect width="40" height="40" rx="10" fill="#C41E3A"/>
-                <path d="M20 10l-9 4v7c0 5 4 9 9 10 5-1 9-5 9-10v-7l-9-4z" 
-                    fill="rgba(255,255,255,0.12)" stroke="#FCA5A5" stroke-width="1.2"/>
-                <path d="M15 20h10M15 23h7" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
-            </svg>`
-        },
+// ── Tonik ──────────────────────────────────────────────────────────────
+tonik: {
+    bg: "#CC0F7A",
+    svg: `<svg viewBox="0 0 40 40" fill="none"
+        xmlns="http://www.w3.org/2000/svg">
+        <rect width="40" height="40" rx="10" fill="#CC0F7A"/>
+        <text x="20" y="27"
+            text-anchor="middle"
+            font-family="Arial Black,Arial,sans-serif"
+            font-size="18"
+            font-weight="900"
+            fill="#ffffff">T</text>
+    </svg>`
+},
 
-        // ── Palawan Pawnshop / PalawanPay ─────────────────────────────────────
-        palawan: {
-            bg: "#E65C00",
-            svg: `<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <rect width="40" height="40" rx="10" fill="#E65C00"/>
-                <text x="20" y="27" text-anchor="middle" font-family="Arial Black,Arial,sans-serif"
-                    font-size="18" font-weight="900" fill="#ffffff">P</text>
-            </svg>`
-        },
+// ── UNO Digital Bank ───────────────────────────────────────────────────
+uno: {
+    bg: "#111827",
+    svg: `<svg viewBox="0 0 40 40" fill="none"
+        xmlns="http://www.w3.org/2000/svg">
+        <rect width="40" height="40" rx="10" fill="#111827"/>
+        <text x="20" y="25"
+            text-anchor="middle"
+            font-family="Arial Black,Arial,sans-serif"
+            font-size="10"
+            font-weight="900"
+            fill="#ffffff">UNO</text>
+    </svg>`
+},
 
-        // ── Coins.ph ──────────────────────────────────────────────────────────
-        coins: {
-            bg: "#2563EB",
-            svg: `<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <rect width="40" height="40" rx="10" fill="#2563EB"/>
-                <circle cx="20" cy="20" r="9" stroke="#93C5FD" stroke-width="2" fill="rgba(147,197,253,0.1)"/>
-                <circle cx="20" cy="20" r="5" stroke="#ffffff" stroke-width="2" fill="none"/>
-                <circle cx="20" cy="20" r="2" fill="#ffffff"/>
-            </svg>`
-        },
+// ── UnionDigital Bank ──────────────────────────────────────────────────
+uniondigital: {
+    bg: "#5227CC",
+    svg: `<svg viewBox="0 0 40 40" fill="none"
+        xmlns="http://www.w3.org/2000/svg">
+        <rect width="40" height="40" rx="10" fill="#5227CC"/>
+        <path d="M12 15v8a8 8 0 0016 0v-8"
+            stroke="#ffffff"
+            stroke-width="3"
+            stroke-linecap="round"/>
+        <circle cx="20" cy="23" r="2" fill="#C4B5FD"/>
+    </svg>`
+},
 
-        // ── PayMaya alias ─────────────────────────────────────────────────────
-        paymaya: {
-            bg: "#00A859",
-            svg: `<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <rect width="40" height="40" rx="10" fill="#00A859"/>
-                <path d="M9 28V14l7 9 7-9v14M27 14l4 7-4 7" 
-                    stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-            </svg>`
-        },
+// ── AUB ────────────────────────────────────────────────────────────────
+aub: {
+    bg: "#1D4ED8",
+    svg: `<svg viewBox="0 0 40 40" fill="none"
+        xmlns="http://www.w3.org/2000/svg">
+        <rect width="40" height="40" rx="10" fill="#1D4ED8"/>
+        <text x="20" y="25"
+            text-anchor="middle"
+            font-family="Arial Black,Arial,sans-serif"
+            font-size="11"
+            font-weight="900"
+            fill="#ffffff">AUB</text>
+    </svg>`
+},
+
+// ── PNB ────────────────────────────────────────────────────────────────
+pnb: {
+    bg: "#0038A8",
+    svg: `<svg viewBox="0 0 40 40" fill="none"
+        xmlns="http://www.w3.org/2000/svg">
+        <rect width="40" height="40" rx="10" fill="#0038A8"/>
+        <text x="20" y="26"
+            text-anchor="middle"
+            font-family="Arial Black,Arial,sans-serif"
+            font-size="11"
+            font-weight="900"
+            fill="#ffffff">PNB</text>
+    </svg>`
+},
+
+// ── DBP ────────────────────────────────────────────────────────────────
+dbp: {
+    bg: "#0057B8",
+    svg: `<svg viewBox="0 0 40 40" fill="none"
+        xmlns="http://www.w3.org/2000/svg">
+        <rect width="40" height="40" rx="10" fill="#0057B8"/>
+        <circle cx="20" cy="20" r="8"
+            stroke="#ffffff"
+            stroke-width="2.2"/>
+        <path d="M20 15v10M15 20h10"
+            stroke="#BFDBFE"
+            stroke-width="2"
+            stroke-linecap="round"/>
+    </svg>`
+},
+
+// ── LandBank ───────────────────────────────────────────────────────────
+landbank: {
+    bg: "#1B5E20",
+    svg: `<svg viewBox="0 0 40 40" fill="none"
+        xmlns="http://www.w3.org/2000/svg">
+        <rect width="40" height="40" rx="10" fill="#1B5E20"/>
+        <path d="M20 11L10 17v2h20v-2L20 11z"
+            fill="#A7F3D0"/>
+        <rect x="12" y="19" width="3" height="10"
+            rx="1" fill="#A7F3D0"/>
+        <rect x="18.5" y="19" width="3" height="10"
+            rx="1" fill="#A7F3D0"/>
+        <rect x="25" y="19" width="3" height="10"
+            rx="1" fill="#A7F3D0"/>
+        <rect x="10" y="29" width="20" height="2"
+            rx="1" fill="#A7F3D0"/>
+    </svg>`
+},	
+	
 
     };
+
+	
 
     // ── BRAND LOOKUP ─────────────────────────────────────────────────────────
     // Match wallet name to a brand entry.
