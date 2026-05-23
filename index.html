@@ -23,6 +23,7 @@ const EmptyState = window.EmptyState;
 <script src="DashboardOverview.js"></script>
 <script src="EmptyState.js"></script>
 <script src="SettingGroup.js"></script>
+<script src="finance.js"></script>
 
         <link rel="apple-touch-icon" href="logosinkpeso.png">
     <link rel="icon" href="logosinkpeso.png" type="image/png">
@@ -383,7 +384,7 @@ e(EmptyState, { icon:"creditcard", title:"No wallets yet", sub:"Add Cash, GCash,
                 if (!amount || Number(amount) <= 0) return;
                 const amtCents = tc(amount);
                 onSave({ id: uid(), name: note.trim() || category, amountCents: amtCents, category, date: todayStr(), walletId: walletId || null });
-                if (walletId) applyWalletDelta(wallets, setWallets, walletId, -amtCents);
+                window.finance.processFinancialTransaction({ type: "expense", walletId, amountCents: amtCents, wallets, setWallets });
             };
             return e('div', { className: "modal-overlay", onClick: onClose },
                 e('div', { className: "modal-container", style: { maxWidth: 400 }, onClick: ev => ev.stopPropagation() },
@@ -1155,8 +1156,7 @@ e('footer', {
                 const old = incomes.find(i => i.id === editIncome.id);
                 const newAmt = tc(editIncForm.amount);
                 // reverse old wallet effect, apply new
-                if (old?.walletId) applyWalletDelta(wallets, setWallets, old.walletId, -old.amountCents);
-                if (editIncForm.walletId) applyWalletDelta(wallets, setWallets, editIncForm.walletId, newAmt);
+                window.finance.processFinancialTransaction({ type: "income_edit", oldWalletId: old?.walletId, oldAmountCents: old?.amountCents, newWalletId: editIncForm.walletId, newAmountCents: newAmt, wallets, setWallets });
                 setIncomes(incomes.map(i => i.id === editIncome.id
                     ? { ...i, name: editIncForm.name.trim(), amountCents: newAmt, walletId: editIncForm.walletId || null }
                     : i
@@ -1166,7 +1166,7 @@ e('footer', {
             const deleteIncome = (id) => {
                 if (!window.confirm("Delete this income entry?")) return;
                 const old = incomes.find(i => i.id === id);
-                if (old?.walletId) applyWalletDelta(wallets, setWallets, old.walletId, -old.amountCents);
+                window.finance.processFinancialTransaction({ type: "income_delete", walletId: old?.walletId, amountCents: old?.amountCents, wallets, setWallets });
                 setIncomes(incomes.filter(i => i.id !== id));
             };
 
@@ -1191,7 +1191,7 @@ e('footer', {
                                 const amtCents = tc(incAmt);
                                 const rec = { id: uid(), name: incName, amountCents: amtCents, date: todayStr(), walletId: incWalletId || null };
                                 setIncomes([...incomes, rec]);
-                                if (incWalletId) applyWalletDelta(wallets, setWallets, incWalletId, amtCents);
+                                window.finance.processFinancialTransaction({ type: "income", walletId: incWalletId, amountCents: amtCents, wallets, setWallets });
                                 setIncName(""); setIncAmt(""); setIncWalletId(CASH_WALLET_ID);
                             } }, "Add Income")
                         ),
@@ -1262,8 +1262,9 @@ e('footer', {
                     fc,
                     onCancel: () => setPayBillModal(null),
                     onConfirm: (walletId) => {
-                        // Decrease wallet balance
-                        applyWalletDelta(wallets, setWallets, walletId, -payBillModal.amountCents);
+                        // Decrease wallet balance via central finance engine
+                        const billResult = window.finance.processFinancialTransaction({ type: "bill_payment", walletId, amountCents: payBillModal.amountCents, wallets, setWallets });
+                        if (!billResult.ok) { alert(billResult.error); return; }
                         // Mark bill as paid
                         setBills(bills.map(b => b.id === payBillModal.id ? { ...b, isPaid: true } : b));
                         // Create transaction record
@@ -1290,10 +1291,8 @@ e('footer', {
                 const old = dailyExpenses.find(ex => ex.id === editExp.id);
                 const newAmt = tc(editForm.amount);
                 const newWalletId = editForm.walletId || null;
-                // Reverse old wallet effect
-                if (old?.walletId) applyWalletDelta(wallets, setWallets, old.walletId, old.amountCents);
-                // Apply new wallet effect (may be same or different wallet)
-                if (newWalletId) applyWalletDelta(wallets, setWallets, newWalletId, -newAmt);
+                // Reverse old + apply new via central finance engine
+                window.finance.processFinancialTransaction({ type: "expense_edit", oldWalletId: old?.walletId, oldAmountCents: old?.amountCents, newWalletId, newAmountCents: newAmt, wallets, setWallets });
                 setDailyExpenses(dailyExpenses.map(ex => ex.id === editExp.id
                     ? { ...ex, name: editForm.name.trim(), amountCents: newAmt, category: editForm.category, walletId: newWalletId }
                     : ex
@@ -1303,8 +1302,8 @@ e('footer', {
             const deleteExp = (id) => {
                 if (!window.confirm("Delete this expense entry?")) return;
                 const old = dailyExpenses.find(ex => ex.id === id);
-                // Restore wallet balance before removing
-                if (old?.walletId) applyWalletDelta(wallets, setWallets, old.walletId, old.amountCents);
+                // Restore wallet balance via central finance engine
+                window.finance.processFinancialTransaction({ type: "expense_delete", walletId: old?.walletId, amountCents: old?.amountCents, wallets, setWallets });
                 setDailyExpenses(dailyExpenses.filter(ex => ex.id !== id));
             };
 
@@ -1322,7 +1321,7 @@ e('footer', {
                             const amtCents = tc(amount);
                             const rec = { id: uid(), name: name.trim(), amountCents: amtCents, category, date: todayStr(), walletId: walletId || null };
                             setDailyExpenses([rec, ...dailyExpenses]);
-                            if (walletId) applyWalletDelta(wallets, setWallets, walletId, -amtCents);
+                            window.finance.processFinancialTransaction({ type: "expense", walletId, amountCents: amtCents, wallets, setWallets });
                             setName(""); setAmount(""); setWalletId("");
                         } }, "Log Item")
                     )
@@ -1360,10 +1359,10 @@ e('footer', {
                 // Record the vault transaction
                 setTxns([{ id: uid(), fundId: actionModal.fund.id, type: actionModal.type, amountCents: amtCents, date: todayStr() }, ...txns]);
                 
-                // Deduct or add to the selected wallet
+                // Move money to/from wallet via central finance engine
                 if (actionWalletId) {
-                    const delta = actionModal.type === 'deposit' ? -amtCents : amtCents;
-                    applyWalletDelta(wallets, setWallets, actionWalletId, delta);
+                    const txType = actionModal.type === "deposit" ? "vault_deposit" : "vault_withdrawal";
+                    window.finance.processFinancialTransaction({ type: txType, walletId: actionWalletId, amountCents: amtCents, wallets, setWallets });
                 }
 
                 setActionAmt("");
