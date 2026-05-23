@@ -24,6 +24,7 @@ const EmptyState = window.EmptyState;
 <script src="EmptyState.js"></script>
 <script src="SettingGroup.js"></script>
 <script src="finance.js"></script>
+<script src="walleticons.js"></script>
 
         <link rel="apple-touch-icon" href="logosinkpeso.png">
     <link rel="icon" href="logosinkpeso.png" type="image/png">
@@ -219,10 +220,23 @@ const EmptyState = window.EmptyState;
         // Optional wallet selector for expenses (kept for backwards compat)
         function WalletPicker({ wallets, value, onChange }) {
             if (!wallets || wallets.length === 0) return null;
-            return e('div', null,
-                e(Sel, { value: value || "", onChange: ev => onChange(ev.target.value) },
-                    wallets.map(w => e('option', { key: w.id, value: w.id }, w.name))
-                )
+            const { WalletIcon } = window.walleticons;
+            return e('div', { style: { display: "flex", flexWrap: "wrap", gap: 8 } },
+                wallets.map(w => {
+                    const selected = value === w.id;
+                    return e('button', { key: w.id, onClick: () => onChange(w.id), style: {
+                        display: "flex", alignItems: "center", gap: 8,
+                        padding: "8px 12px 8px 8px", borderRadius: 10,
+                        background: selected ? "rgba(0,230,118,0.10)" : "var(--bg-input)",
+                        border: `1px solid ${selected ? "#00E676" : "var(--border-input)"}`,
+                        cursor: "pointer", transition: "all 0.15s", flexShrink: 0,
+                    } },
+                        e(WalletIcon, { name: w.name, color: w.color || "#00E676", size: 26, radius: 7 }),
+                        e('div', { style: { textAlign: "left" } },
+                            e('div', { style: { fontSize: 13, fontWeight: 700, color: selected ? "#00E676" : "var(--text-main)", lineHeight: 1.2 } }, w.name)
+                        )
+                    );
+                })
             );
         }
 
@@ -242,19 +256,20 @@ const EmptyState = window.EmptyState;
             };
 
             const safeWallets = (wallets || []);
+            const { WalletIcon } = window.walleticons;
 
             return e('div', { style: { marginBottom: 8 } },
                 e('div', { style: { fontSize: 12, fontWeight: 600, color: "var(--text-light)", marginBottom: 8, letterSpacing: "0.03em" } }, "Receiving Source"),
                 e('div', { style: { display: "flex", flexWrap: "wrap", gap: 8 } },
                     safeWallets.map(w => e('button', { key: w.id, onClick: () => onChange(w.id), style: {
-                        display: "flex", alignItems: "center", gap: 6,
-                        padding: "8px 14px", borderRadius: 10,
+                        display: "flex", alignItems: "center", gap: 8,
+                        padding: "8px 12px 8px 8px", borderRadius: 10,
                         background: value === w.id ? "rgba(0,230,118,0.12)" : "var(--bg-input)",
                         border: `1px solid ${value === w.id ? "#00E676" : "var(--border-input)"}`,
                         color: value === w.id ? "#00E676" : "var(--text-main)",
                         fontSize: 13, fontWeight: 600, cursor: "pointer", transition: "all 0.15s"
                     } },
-                        e('div', { style: { width: 8, height: 8, borderRadius: "50%", background: w.color || "#00E676", flexShrink: 0 } }),
+                        e(WalletIcon, { name: w.name, color: w.color || "#00E676", size: 24, radius: 7 }),
                         w.name
                     )),
                     e('button', { onClick: () => setShowCreate(!showCreate), style: {
@@ -327,7 +342,7 @@ e(EmptyState, { icon:"creditcard", title:"No wallets yet", sub:"Add Cash, GCash,
                     : e('div', { className:"premium-panel" },
                         wallets.map(w => e('div', { key:w.id, className:"stream-row" },
                             e('div', { style:{ display:"flex", alignItems:"center", gap:12 } },
-                                e('div', { style:{ width:10, height:10, borderRadius:"50%", background: w.color||"#00E676", flexShrink:0 } }),
+                                e(window.walleticons.WalletIcon, { name: w.name, color: w.color||"#00E676", size: 32, radius: 9 }),
                                 e('div', { style:{ fontWeight:600 } }, w.name)
                             ),
                             e('div', { style:S.row10 },
@@ -1116,14 +1131,14 @@ e('footer', {
                                     onClick: () => setSelectedWalletId(w.id),
                                     style: {
                                         display: "flex", justifyContent: "space-between", alignItems: "center",
-                                        padding: "12px 14px", borderRadius: 10,
+                                        padding: "10px 14px", borderRadius: 10,
                                         background: selectedWalletId === w.id ? "rgba(0,230,118,0.12)" : "var(--bg-input)",
                                         border: `1px solid ${selectedWalletId === w.id ? "#00E676" : "var(--border-input)"}`,
                                         color: "var(--text-main)", fontSize: 13, fontWeight: 600, cursor: "pointer", transition: "all 0.15s"
                                     }
                                 },
-                                    e('div', { style: { display: "flex", alignItems: "center", gap: 8 } },
-                                        e('div', { style: { width: 8, height: 8, borderRadius: "50%", background: w.color || "#00E676", flexShrink: 0 } }),
+                                    e('div', { style: { display: "flex", alignItems: "center", gap: 10 } },
+                                        e(window.walleticons.WalletIcon, { name: w.name, color: w.color || "#00E676", size: 28, radius: 8 }),
                                         e('div', null, w.name)
                                     ),
                                     e('div', { style: { fontWeight: 700, color: (w.balanceCents || 0) < 0 ? "#EF4444" : "#00E676" } }, fc(w.balanceCents || 0))
