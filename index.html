@@ -1353,7 +1353,7 @@ e('footer', {
                         e('div', { style: { flex: 2 } }, e(Inp, { value: name, placeholder: "What did you pay for?", onChange: ev => setName(ev.target.value) })),
                         e('div', { style: { flex: 1 } }, e(Inp, { type: "number", value: amount, placeholder: "Amount", onChange: ev => setAmount(ev.target.value) })),
                         e('div', { style: { width: 180 } }, e(Sel, { value: category, onChange: ev => setCategory(ev.target.value) }, CATEGORIES.map(c => e('option', { key: c, value: c }, c)))),
-                        wallets && wallets.length > 0 && e('div', { style: { width: 160 } }, e(WalletPicker, { wallets, value: walletId, onChange: setWalletId })),
+                        wallets && wallets.length > 0 && e('div', { style: { flex: "1.2 1 360px", minWidth: 280 } }, e(WalletPicker, { wallets, value: walletId, onChange: setWalletId })),
                         e(Btn, { v: "accent", onClick: () => {
                             if(!name || !amount) return;
                             const amtCents = tc(amount);
