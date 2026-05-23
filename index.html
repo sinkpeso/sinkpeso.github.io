@@ -220,7 +220,6 @@ const EmptyState = window.EmptyState;
             if (!wallets || wallets.length === 0) return null;
             return e('div', null,
                 e(Sel, { value: value || "", onChange: ev => onChange(ev.target.value) },
-                    e('option', { value: "" }, "No wallet"),
                     wallets.map(w => e('option', { key: w.id, value: w.id }, w.name))
                 )
             );
@@ -378,7 +377,7 @@ e(EmptyState, { icon:"creditcard", title:"No wallets yet", sub:"Add Cash, GCash,
             const [amount, setAmount] = useState("");
             const [category, setCategory] = useState("Food");
             const [note, setNote] = useState("");
-            const [walletId, setWalletId] = useState("");
+            const [walletId, setWalletId] = useState(wallets.length > 0 ? (wallets.find(w => w.id === CASH_WALLET_ID) ? CASH_WALLET_ID : wallets[0].id) : "");
             const catIcons = { Food: "utensils", Gas: "car", Bills: "receipt", Business: "briefcase", Personal: "shoppingbag", Savings: "landmark" };
             const handle = () => {
                 if (!amount || Number(amount) <= 0) return;
@@ -401,7 +400,7 @@ e(EmptyState, { icon:"creditcard", title:"No wallets yet", sub:"Add Cash, GCash,
                     ),
                     e(Inp, { placeholder: "Note (optional)", value: note, onChange: ev => setNote(ev.target.value), style: { marginBottom: 12 } }),
                     e(WalletPicker, { wallets, value: walletId, onChange: setWalletId }),
-                    e(Btn, { v: "accent", style: { width: "100%", fontSize: 15, marginTop: 16 }, onClick: handle }, "Save Expense")
+                    e(Btn, { v: "accent", style: { width: "100%", fontSize: 15, marginTop: 16 }, onClick: handle, disabled: wallets.length === 0 }, wallets.length === 0 ? "Add a Wallet First" : "Save Expense")
                 )
             );
         }
@@ -1281,7 +1280,8 @@ e('footer', {
 
         // ── MODULE: DAILY EXPENSES ──────────────────────────────────────────
         function DailyExpensesView({ dailyExpenses, setDailyExpenses, wallets, setWallets, fc }) {
-            const [name, setName] = useState(""); const [amount, setAmount] = useState(""); const [category, setCategory] = useState("Food"); const [walletId, setWalletId] = useState("");
+            const [name, setName] = useState(""); const [amount, setAmount] = useState(""); const [category, setCategory] = useState("Food"); 
+            const [walletId, setWalletId] = useState(wallets.length > 0 ? (wallets.find(w => w.id === CASH_WALLET_ID) ? CASH_WALLET_ID : wallets[0].id) : "");
             const [openMenu, setOpenMenu] = useState(null); const [editExp, setEditExp] = useState(null); const [editForm, setEditForm] = useState({ name: "", amount: "", category: "Food", walletId: "" });
 
             const openEditExp = (exp) => { setEditExp(exp); setEditForm({ name: exp.name, amount: String((exp.amountCents / 100).toFixed(2)), category: exp.category, walletId: exp.walletId || "" }); };
