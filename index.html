@@ -655,7 +655,7 @@ e(EmptyState, { icon:"creditcard", title:"No wallets yet", sub:"Add Cash, GCash,
                     tab === "dashboard" && e(DashboardOverview, { totals, bills, dailyExpenses, budgets, wallets, fc }),
                     tab === "limits" && e(BudgetLimitsView, { budgets, setBudgets, fc }),
                     tab === "wallets" && e(WalletsView, { wallets, setWallets, fc }),
-                    tab === "budget" && e(BudgetBillsView, { incomes, setIncomes, bills, setBills, wallets, setWallets, fc }),
+                    tab === "budget" && e(BudgetBillsView, { incomes, setIncomes, bills, setBills, wallets, setWallets, txns, setTxns, fc }),
                     tab === "daily" && e(DailyExpensesView, { dailyExpenses, setDailyExpenses, wallets, setWallets, fc }),
                     tab === "goals" && e(SinkingFundsView, { funds, setFunds, enrichedFunds: totals.enrichedFunds, txns, setTxns, wallets, setWallets, fc }),
                     tab === "transactions" && e(TransactionsView, { txns, setTxns, funds, fc }),
@@ -1090,13 +1090,65 @@ e('footer', {
             );
         }
 
+        // ── PAY BILL MODAL ────────────────────────────────────────────────────────────
+        // Modal to select wallet and confirm bill payment
+        function PayBillModal({ bill, wallets, onConfirm, onCancel, fc }) {
+            const [selectedWalletId, setSelectedWalletId] = useState(wallets.length > 0 ? wallets[0].id : "");
+            const selectedWallet = wallets.find(w => w.id === selectedWalletId);
+            const hasInsufficientBalance = selectedWallet && (selectedWallet.balanceCents || 0) < bill.amountCents;
+            
+            return e('div', { className: "modal-overlay", onClick: onCancel },
+                e('div', { className: "modal-container", style: { maxWidth: 400 }, onClick: ev => ev.stopPropagation() },
+                    e('div', { style: S.modalHeader },
+                        e('div', { style: S.modalTitle }, `Pay ${bill.name}`),
+                        e('button', { onClick: onCancel, style: S.closeBtn }, e(Icon, { name: "x", size: 16 }))
+                    ),
+                    e('div', { style: { marginBottom: 20 } },
+                        e('div', { style: { fontSize: 14, fontWeight: 600, color: "var(--text-light)", marginBottom: 8 } }, "Amount Due"),
+                        e('div', { style: { fontSize: 28, fontWeight: 800, color: "#00E676", letterSpacing: "-0.02em" } }, fc(bill.amountCents))
+                    ),
+                    e(Field, { label: "Pay From" },
+                        wallets.length === 0 
+                            ? e('div', { style: { color: "#EF4444", fontSize: 13, padding: "12px", background: "rgba(239,68,68,0.09)", borderRadius: 8 } }, "No wallets available. Create a wallet first.")
+                            : e('div', { style: { display: "flex", flexDirection: "column", gap: 8 } },
+                                wallets.map(w => e('button', {
+                                    key: w.id,
+                                    onClick: () => setSelectedWalletId(w.id),
+                                    style: {
+                                        display: "flex", justifyContent: "space-between", alignItems: "center",
+                                        padding: "12px 14px", borderRadius: 10,
+                                        background: selectedWalletId === w.id ? "rgba(0,230,118,0.12)" : "var(--bg-input)",
+                                        border: `1px solid ${selectedWalletId === w.id ? "#00E676" : "var(--border-input)"}`,
+                                        color: "var(--text-main)", fontSize: 13, fontWeight: 600, cursor: "pointer", transition: "all 0.15s"
+                                    }
+                                },
+                                    e('div', { style: { display: "flex", alignItems: "center", gap: 8 } },
+                                        e('div', { style: { width: 8, height: 8, borderRadius: "50%", background: w.color || "#00E676", flexShrink: 0 } }),
+                                        e('div', null, w.name)
+                                    ),
+                                    e('div', { style: { fontWeight: 700, color: (w.balanceCents || 0) < 0 ? "#EF4444" : "#00E676" } }, fc(w.balanceCents || 0))
+                                ))
+                            )
+                    ),
+                    selectedWallet && hasInsufficientBalance && e('div', { style: { background: "rgba(239,68,68,0.09)", border: "1px solid rgba(239,68,68,0.3)", color: "#EF4444", padding: "12px 14px", borderRadius: 8, fontSize: 12, fontWeight: 600, marginBottom: 16 } },
+                        `Insufficient balance. Available: ${fc(selectedWallet.balanceCents || 0)}`
+                    ),
+                    e('div', { style: S.modalFooter },
+                        e(Btn, { v: "ghost", style: { flex: 1 }, onClick: onCancel }, "Cancel"),
+                        e(Btn, { v: "accent", style: { flex: 1 }, onClick: () => onConfirm(selectedWalletId), disabled: !selectedWallet || hasInsufficientBalance }, "Confirm Payment")
+                    )
+                )
+            );
+        }
+
         // ── MODULE: BILLS & INCOME ──────────────────────────────────────────
-        function BudgetBillsView({ incomes, setIncomes, bills, setBills, wallets, setWallets, fc }) {
+        function BudgetBillsView({ incomes, setIncomes, bills, setBills, wallets, setWallets, txns, setTxns, fc }) {
             const [incName, setIncName] = useState(""); const [incAmt, setIncAmt] = useState(""); const [incWalletId, setIncWalletId] = useState(CASH_WALLET_ID);
             const [billName, setBillName] = useState(""); const [billAmt, setBillAmt] = useState(""); const [billDate, setBillDate] = useState(""); const [billRecurring, setBillRecurring] = useState("none"); const [billCat, setBillCat] = useState("Bills");
 
             const [openMenuInc, setOpenMenuInc] = useState(null); const [editIncome, setEditIncome] = useState(null); const [editIncForm, setEditIncForm] = useState({ name: "", amount: "", walletId: CASH_WALLET_ID });
             const [openMenuBill, setOpenMenuBill] = useState(null); const [editBill, setEditBill] = useState(null); const [editBillForm, setEditBillForm] = useState({ name: "", amount: "", dueDate: "", recurring: "none", category: "Bills" });
+            const [payBillModal, setPayBillModal] = useState(null);
 
             const openEditIncome = (item) => { setEditIncome(item); setEditIncForm({ name: item.name, amount: String((item.amountCents / 100).toFixed(2)), walletId: item.walletId || CASH_WALLET_ID }); };
             const saveEditIncome = () => {
@@ -1197,13 +1249,30 @@ e('footer', {
                                 ),
                                 e('div', { style: S.row10 },
                                     e('span', { style: { fontWeight: 700, color: b.isPaid ? "var(--text-muted)" : "var(--text-main)" } }, fc(b.amountCents)),
-                                    e('button', { onClick: () => setBills(bills.map(x => x.id === b.id ? { ...x, isPaid: !x.isPaid } : x)), style: { background: b.isPaid ? "rgba(0, 230, 118, 0.15)" : "var(--hover-bg)", color: b.isPaid ? "#00E676" : "var(--text-main)", border: "none", padding: "6px 14px", borderRadius: 8, fontSize: 11, fontWeight: 700, cursor: "pointer" } }, b.isPaid ? "Paid" : "Pay"),
+                                    e('button', { onClick: () => b.isPaid ? setBills(bills.map(x => x.id === b.id ? { ...x, isPaid: false } : x)) : setPayBillModal(b), style: { background: b.isPaid ? "rgba(0, 230, 118, 0.15)" : "var(--hover-bg)", color: b.isPaid ? "#00E676" : "var(--text-main)", border: "none", padding: "6px 14px", borderRadius: 8, fontSize: 11, fontWeight: 700, cursor: "pointer" } }, b.isPaid ? "Paid" : "Pay"),
                                     e(DotMenu, { itemId: b.id, openMenu: openMenuBill, setOpenMenu: setOpenMenuBill, onEdit: () => openEditBill(b), onDelete: () => deleteBill(b.id) })
                                 )
                             );
                         })
                     )
                 ),
+                // Pay Bill Modal
+                payBillModal && e(PayBillModal, { 
+                    bill: payBillModal, 
+                    wallets, 
+                    fc,
+                    onCancel: () => setPayBillModal(null),
+                    onConfirm: (walletId) => {
+                        // Decrease wallet balance
+                        applyWalletDelta(wallets, setWallets, walletId, -payBillModal.amountCents);
+                        // Mark bill as paid
+                        setBills(bills.map(b => b.id === payBillModal.id ? { ...b, isPaid: true } : b));
+                        // Create transaction record
+                        const txn = { id: uid(), type: "bill_payment", billId: payBillModal.id, walletId, amountCents: payBillModal.amountCents, date: todayStr() };
+                        setTxns([...txns, txn]);
+                        setPayBillModal(null);
+                    }
+                }),
                 // Edit Modals
                 editIncome && e('div', { className: "modal-overlay" }, e('div', { className: "modal-container" }, e('h3', { style: { marginBottom: 20 } }, "Edit Income"), e(Field, { label: "Source" }, e(Inp, { value: editIncForm.name, onChange: ev => setEditIncForm({ ...editIncForm, name: ev.target.value }) })), e(Field, { label: "Amount" }, e(Inp, { type: "number", value: editIncForm.amount, onChange: ev => setEditIncForm({ ...editIncForm, amount: ev.target.value }) })), e(Field, { label: "Receiving Source" }, e(IncomeSourcePicker, { wallets, setWallets, value: editIncForm.walletId, onChange: v => setEditIncForm({ ...editIncForm, walletId: v }) })), e('div', { style: { display: "flex", gap: 12, marginTop: 8 } }, e(Btn, { v: "ghost", style: { flex: 1 }, onClick: () => setEditIncome(null) }, "Cancel"), e(Btn, { v: "primary", style: { flex: 1 }, onClick: saveEditIncome }, "Save")))),
                 editBill && e('div', { className: "modal-overlay" }, e('div', { className: "modal-container" }, e('h3', { style: { marginBottom: 20 } }, "Edit Bill"), e(Field, { label: "Bill Label" }, e(Inp, { value: editBillForm.name, onChange: ev => setEditBillForm({ ...editBillForm, name: ev.target.value }) })), e(Field, { label: "Amount" }, e(Inp, { type: "number", value: editBillForm.amount, onChange: ev => setEditBillForm({ ...editBillForm, amount: ev.target.value }) })), e(Field, { label: "Due Date" }, e(Inp, { type: "date", value: editBillForm.dueDate, onChange: ev => setEditBillForm({ ...editBillForm, dueDate: ev.target.value }) })), e(Field, { label: "Category" }, e(Sel, { value: editBillForm.category, onChange: ev => setEditBillForm({ ...editBillForm, category: ev.target.value }) }, CATEGORIES.map(c => e('option', {key: c, value: c}, c)))), e(Field, { label: "Recurring" }, e(Sel, { value: editBillForm.recurring, onChange: ev => setEditBillForm({ ...editBillForm, recurring: ev.target.value }) }, e('option', { value: "none" }, "One-Time"), e('option', { value: "monthly" }, "Monthly"), e('option', { value: "weekly" }, "Weekly"))), e('div', { style: { display: "flex", gap: 12 } }, e(Btn, { v: "ghost", style: { flex: 1 }, onClick: () => setEditBill(null) }, "Cancel"), e(Btn, { v: "accent", style: { flex: 1 }, onClick: saveEditBill }, "Save"))))
