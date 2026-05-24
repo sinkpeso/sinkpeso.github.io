@@ -420,7 +420,8 @@ e(EmptyState, { icon:"creditcard", title:"No wallets yet", sub:"Add Cash, GCash,
             const handle = () => {
                 if (!amount || Number(amount) <= 0) return;
                 const amtCents = tc(amount);
-                onSave({ id: uid(), name: note.trim() || category, amountCents: amtCents, category, date: todayStr(), walletId: walletId || null });
+                const selWallet = wallets.find(w => w.id === walletId);
+                onSave({ id: uid(), name: note.trim() || category, amountCents: amtCents, category, date: todayStr(), walletId: walletId || null, walletNameSnapshot: selWallet ? selWallet.name : null });
                 window.finance.processFinancialTransaction({ type: "expense", walletId, amountCents: amtCents, wallets, setWallets });
             };
             return e('div', { className: "modal-overlay", onClick: onClose },
@@ -700,13 +701,13 @@ e(EmptyState, { icon:"creditcard", title:"No wallets yet", sub:"Add Cash, GCash,
                 ),
                 
                 e('div', { className: "page-wrap", style: { maxWidth: 1140, margin: "0 auto", padding: "clamp(16px, 4vw, 32px) clamp(12px, 4vw, 24px) 80px" } },
-                    tab === "dashboard" && e(DashboardOverview, { totals, bills, dailyExpenses, budgets, wallets: displayWallets, fc }),
+                    tab === "dashboard" && e(DashboardOverview, { totals, bills, dailyExpenses, budgets, wallets: displayWallets, fc, incomes, txns, funds, archives, onNavigate: setTab }),
                     tab === "limits" && e(BudgetLimitsView, { budgets, setBudgets, fc }),
                     tab === "wallets" && e(WalletsView, { wallets: displayWallets, setWallets, incomes, dailyExpenses, txns, fc }),
                     tab === "budget" && e(BudgetBillsView, { incomes, setIncomes, bills, setBills, wallets: displayWallets, setWallets, txns, setTxns, fc }),
                     tab === "daily" && e(DailyExpensesView, { dailyExpenses, setDailyExpenses, wallets: displayWallets, setWallets, fc }),
                     tab === "goals" && e(SinkingFundsView, { funds, setFunds, enrichedFunds: totals.enrichedFunds, txns, setTxns, wallets: displayWallets, setWallets, fc }),
-                    tab === "transactions" && e(TransactionsView, { txns, setTxns, funds, fc }),
+                    tab === "transactions" && e(AllTransactionsView, { txns, setTxns, funds, incomes, dailyExpenses, bills, wallets: displayWallets, fc }),
                     tab === "history" && e(HistoryView, { archives, fc }),
                     tab === "settings" && e(SettingsView, { settings, setSettings, setIncomes, setBills, setDailyExpenses, setFunds, setTxns, setArchives, setBudgets, showToast, totals, bills, budgets, fc }),
 
@@ -755,7 +756,7 @@ e('footer', {
                         [
                             { id: "wallets",      icon: "creditcard", label: "Wallets",        sub: "Cash, GCash, bank accounts" },
                             { id: "limits",       icon: "grid",    label: "Budget Limits",  sub: "Set spending caps per category" },
-                            { id: "transactions", icon: "list",    label: "Vault Logs",      sub: "Deposit & withdrawal history" },
+                            { id: "transactions", icon: "list",    label: "Transaction Log",  sub: "All expenses, income, bills & vaults" },
                             { id: "history",      icon: "history", label: "Month History",   sub: "Archived monthly snapshots" },
                             { id: "settings",     icon: "settings",label: "Settings",        sub: "Preferences, PIN, backup" },
                         ].map(t => e('div', { key: t.id, className: "sheet-row", onClick: () => { setTab(t.id); setShowMoreSheet(false); } },
@@ -982,7 +983,7 @@ e('footer', {
         }
 
         // ── MODULE: DASHBOARD OVERVIEW ──────────────────────────────────────
-        function DashboardOverview({ totals, bills, dailyExpenses, budgets, wallets, fc }) {
+        function DashboardOverview({ totals, bills, dailyExpenses, budgets, wallets, fc, incomes, txns, funds, archives, onNavigate }) {
             const spendPercentage = totals.totalIncome > 0 ? (totals.totalDailySpent + totals.paidBills) / totals.totalIncome : 0;
             // Wallet total = sum of all real wallet balances (persists across months)
             const walletTotal = (wallets || []).reduce((s, w) => s + (w.balanceCents || 0), 0);
@@ -1095,7 +1096,10 @@ e('footer', {
                             })
                         )
                     )
-                )
+                ),
+
+                // ── Recent Activity ─────────────────────────────────────────────
+                onNavigate && e(RecentActivitySection, { incomes, dailyExpenses, bills, txns, funds, wallets, archives, fc, onNavigate })
             );
         }
 
@@ -1264,7 +1268,8 @@ e('footer', {
                             e(Btn, { v: "primary", style: { width: "100%" }, onClick: () => {
                                 if(!incName || !incAmt) return;
                                 const amtCents = tc(incAmt);
-                                const rec = { id: uid(), name: incName, amountCents: amtCents, date: todayStr(), walletId: incWalletId || null };
+                                const incW = wallets.find(w => w.id === incWalletId);
+                                const rec = { id: uid(), name: incName, amountCents: amtCents, date: todayStr(), walletId: incWalletId || null, walletNameSnapshot: incW ? incW.name : null };
                                 setIncomes([...incomes, rec]);
                                 window.finance.processFinancialTransaction({ type: "income", walletId: incWalletId, amountCents: amtCents, wallets, setWallets });
                                 setIncName(""); setIncAmt(""); setIncWalletId(CASH_WALLET_ID);
@@ -1341,7 +1346,8 @@ e('footer', {
                         const billResult = window.finance.processFinancialTransaction({ type: "bill_payment", walletId, amountCents: payBillModal.amountCents, wallets, setWallets });
                         if (!billResult.ok) { alert(billResult.error); return; }
                         // Create transaction record
-                        const txn = { id: uid(), type: "bill_payment", billId: payBillModal.id, walletId, amountCents: payBillModal.amountCents, date: todayStr() };
+                        const billW = wallets.find(w => w.id === walletId);
+                        const txn = { id: uid(), type: "bill_payment", billId: payBillModal.id, walletId, amountCents: payBillModal.amountCents, date: todayStr(), walletNameSnapshot: billW ? billW.name : null };
                         // Mark bill as paid and link it to the payment transaction
                         setBills(bills.map(b => b.id === payBillModal.id ? { ...b, isPaid: true, paidTxnId: txn.id, paidWalletId: walletId } : b));
                         setTxns([...txns.filter(t => !(t.type === "bill_payment" && t.billId === payBillModal.id)), txn]);
@@ -1394,7 +1400,8 @@ e('footer', {
                         e(Btn, { v: "accent", onClick: () => {
                             if(!name || !amount) return;
                             const amtCents = tc(amount);
-                            const rec = { id: uid(), name: name.trim(), amountCents: amtCents, category, date: todayStr(), walletId: walletId || null };
+                            const selW = wallets.find(w => w.id === walletId);
+                            const rec = { id: uid(), name: name.trim(), amountCents: amtCents, category, date: todayStr(), walletId: walletId || null, walletNameSnapshot: selW ? selW.name : null };
                             setDailyExpenses([rec, ...dailyExpenses]);
                             window.finance.processFinancialTransaction({ type: "expense", walletId, amountCents: amtCents, wallets, setWallets });
                             setName(""); setAmount(""); setWalletId("");
@@ -1404,10 +1411,23 @@ e('footer', {
                 e('div', { className: "premium-panel" },
                     e(SLabel, { style: { marginBottom: 12 } }, "Spending Log Timeline"),
                     dailyExpenses.length === 0 ? e('div', { style: { color: "var(--text-muted)", fontSize: 13, padding: "14px 0" } }, e("div", { className: "empty-state" }, e("div", { className: "empty-state-icon" }, e(Icon, { name: "wallet", size: 28, color: "var(--text-muted)" })), e("div", { className: "empty-state-title" }, "No expenses yet"), e("div", { className: "empty-state-sub" }, "Tap + to log your first expense."))) :
-                    dailyExpenses.map(exp => e('div', { key: exp.id, className: "stream-row" },
-                        e('div', null, e('div', { style: { fontWeight: 600, color: "var(--text-main)" } }, exp.name), e('div', { style: { fontSize: 11, color: "var(--text-muted)", marginTop: 2 } }, `${exp.date} • ${exp.category}`)),
-                        e('div', { style: S.row10 }, e('div', { style: { fontWeight: 700, color: "#EF4444" } }, `-${fc(exp.amountCents)}`), e(DotMenu, { itemId: exp.id, openMenu, setOpenMenu, onEdit: () => openEditExp(exp), onDelete: () => deleteExp(exp.id) }))
-                    ))
+                    dailyExpenses.map(exp => {
+                        const expWallet = exp.walletNameSnapshot || ((wallets||[]).find(w => w.id === exp.walletId) || {}).name;
+                        return e('div', { key: exp.id, className: "stream-row" },
+                            e('div', null,
+                                e('div', { style: { fontWeight: 600, color: "var(--text-main)" } }, exp.name),
+                                e('div', { style: { fontSize: 11, color: "var(--text-muted)", marginTop: 2 } }, `${exp.date} • ${exp.category}`),
+                                expWallet && e('div', { style: { fontSize: 11, color: "var(--text-light)", marginTop: 3, display: "flex", alignItems: "center", gap: 4 } },
+                                    e('span', { style: { color: "var(--text-muted)", fontWeight: 500 } }, "Wallet: "),
+                                    e('span', { style: { fontWeight: 700 } }, expWallet)
+                                )
+                            ),
+                            e('div', { style: S.row10 },
+                                e('div', { style: { fontWeight: 700, color: "#EF4444" } }, `-${fc(exp.amountCents)}`),
+                                e(DotMenu, { itemId: exp.id, openMenu, setOpenMenu, onEdit: () => openEditExp(exp), onDelete: () => deleteExp(exp.id) })
+                            )
+                        );
+                    })
                 ),
                 editExp && e('div', { className: "modal-overlay" }, e('div', { className: "modal-container" }, e('h3', { style: { marginBottom: 20 } }, "Edit Expense"), e(Field, { label: "Description" }, e(Inp, { value: editForm.name, onChange: ev => setEditForm({ ...editForm, name: ev.target.value }) })), e(Field, { label: "Amount" }, e(Inp, { type: "number", value: editForm.amount, onChange: ev => setEditForm({ ...editForm, amount: ev.target.value }) })), e(Field, { label: "Category" }, e(Sel, { value: editForm.category, onChange: ev => setEditForm({ ...editForm, category: ev.target.value }) }, CATEGORIES.map(c => e('option', { key: c, value: c }, c)))), wallets && wallets.length > 0 && e(Field, { label: "Wallet" }, e(WalletPicker, { wallets, value: editForm.walletId, onChange: v => setEditForm({ ...editForm, walletId: v }) })), e('div', { style: S.formFooter }, e(Btn, { v: "ghost", style: { flex: 1 }, onClick: () => setEditExp(null) }, "Cancel"), e(Btn, { v: "accent", style: { flex: 1 }, onClick: saveEditExp }, "Save"))))
             );
@@ -1436,7 +1456,8 @@ e('footer', {
                     if (!result.ok) { alert(result.error); return; }
                 }
 
-                setTxns([{ id: uid(), fundId: actionModal.fund.id, walletId: actionWalletId || null, type: actionModal.type, amountCents: amtCents, date: todayStr() }, ...txns]);
+                const vaultW = wallets.find(w => w.id === actionWalletId);
+                setTxns([{ id: uid(), fundId: actionModal.fund.id, walletId: actionWalletId || null, walletNameSnapshot: vaultW ? vaultW.name : null, type: actionModal.type, amountCents: amtCents, date: todayStr() }, ...txns]);
 
                 setActionAmt("");
                 setActionModal(null);
@@ -1472,6 +1493,152 @@ e('footer', {
             );
         }
 
+        // ── MODULE: ALL TRANSACTIONS LOG ─────────────────────────────────────────
+        function AllTransactionsView({ txns, setTxns, funds, incomes, dailyExpenses, bills, wallets, fc }) {
+            const [search, setSearch] = useState("");
+            const [walletFilter, setWalletFilter] = useState("all");
+            const [openMenu, setOpenMenu] = useState(null);
+            const [editTxn, setEditTxn] = useState(null);
+            const [editTxnForm, setEditTxnForm] = useState({ type: "deposit", amount: "", date: "" });
+
+            const resolveWallet = (walletId, snapshot) => {
+                if (snapshot) return snapshot;
+                const w = (wallets || []).find(x => x.id === walletId);
+                return w ? w.name : null;
+            };
+
+            const allItems = useMemo(() => {
+                const items = [];
+                (dailyExpenses || []).forEach(ex => {
+                    items.push({ id: `exp-${ex.id}`, rawId: ex.id, source: "expense", icon: "wallet",
+                        title: ex.name, subtitle: ex.category, amountCents: ex.amountCents,
+                        date: ex.date, walletId: ex.walletId,
+                        walletName: resolveWallet(ex.walletId, ex.walletNameSnapshot),
+                        amountColor: "#EF4444", amountPrefix: "−" });
+                });
+                (incomes || []).forEach(inc => {
+                    items.push({ id: `inc-${inc.id}`, rawId: inc.id, source: "income", icon: "trendingup",
+                        title: inc.name, subtitle: "Income", amountCents: inc.amountCents,
+                        date: inc.date, walletId: inc.walletId,
+                        walletName: resolveWallet(inc.walletId, inc.walletNameSnapshot),
+                        amountColor: "#00E676", amountPrefix: "+" });
+                });
+                (txns || []).filter(t => t.type === "bill_payment").forEach(t => {
+                    const bill = (bills || []).find(b => b.id === t.billId);
+                    items.push({ id: `bill-${t.id}`, rawId: t.id, source: "bill", icon: "receipt",
+                        title: bill ? bill.name : "Bill Payment", subtitle: "Bill",
+                        amountCents: t.amountCents, date: t.date, walletId: t.walletId,
+                        walletName: resolveWallet(t.walletId, t.walletNameSnapshot),
+                        amountColor: "#A855F7", amountPrefix: "−" });
+                });
+                (txns || []).filter(t => t.fundId).forEach(t => {
+                    const fund = (funds || []).find(f => f.id === t.fundId);
+                    items.push({ id: `vault-${t.id}`, rawId: t.id, source: "vault", icon: "landmark",
+                        title: fund ? fund.name : "Vault", subtitle: t.type === "deposit" ? "Vault Deposit" : "Vault Withdrawal",
+                        amountCents: t.amountCents, date: t.date, walletId: t.walletId,
+                        walletName: resolveWallet(t.walletId, t.walletNameSnapshot),
+                        amountColor: t.type === "deposit" ? "#2563EB" : "#F59E0B",
+                        amountPrefix: t.type === "deposit" ? "→" : "←" });
+                });
+                return items.sort((a, b) => b.date !== a.date ? b.date.localeCompare(a.date) : b.id.localeCompare(a.id));
+            }, [dailyExpenses, incomes, txns, bills, funds, wallets]);
+
+            const filtered = useMemo(() => {
+                let list = allItems;
+                if (walletFilter !== "all") list = list.filter(item => item.walletId === walletFilter);
+                if (search.trim()) {
+                    const q = search.toLowerCase();
+                    list = list.filter(item =>
+                        item.title.toLowerCase().includes(q) ||
+                        item.subtitle.toLowerCase().includes(q) ||
+                        (item.walletName && item.walletName.toLowerCase().includes(q))
+                    );
+                }
+                return list;
+            }, [allItems, walletFilter, search]);
+
+            const getVaultName = (fundId) => { const f = (funds||[]).find(x => x.id === fundId); return f ? f.name : "Unknown Vault"; };
+            const openEditTxn = (t) => { setEditTxn(t); setEditTxnForm({ type: t.type, amount: String((t.amountCents / 100).toFixed(2)), date: t.date }); };
+            const saveEditTxn = () => { if (!editTxnForm.amount || !editTxnForm.date) return; setTxns(txns.map(t => t.id === editTxn.id ? { ...t, type: editTxnForm.type, amountCents: tc(editTxnForm.amount), date: editTxnForm.date } : t)); setEditTxn(null); };
+            const deleteTxn = (id) => { if (window.confirm("Delete this transaction?")) setTxns(txns.filter(t => t.id !== id)); };
+
+            return e('div', null,
+                e('h2', { style: { fontSize: 22, fontWeight: 800, marginBottom: 4 } }, 'Transaction Log'),
+                e('div', { style: { fontSize: 14, color: "var(--text-muted)", marginBottom: 20 } }, 'Full history — expenses, income, bills, and vault actions.'),
+
+                // ── Search + Wallet Filter ──────────────────────────────────────
+                e('div', { className: "premium-panel", style: { marginBottom: 14 } },
+                    e('div', { style: { display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" } },
+                        e('div', { style: { flex: "1 1 200px" } },
+                            e(Inp, { placeholder: "Search title, category, wallet…", value: search, onChange: ev => setSearch(ev.target.value), style: { marginBottom: 0 } })
+                        ),
+                        e('div', { style: { flex: "0 0 170px" } },
+                            e(Sel, { value: walletFilter, onChange: ev => setWalletFilter(ev.target.value), style: { marginBottom: 0 } },
+                                e('option', { value: "all" }, "All Wallets"),
+                                (wallets || []).map(w => e('option', { key: w.id, value: w.id }, w.name))
+                            )
+                        )
+                    )
+                ),
+
+                // ── Unified Transaction List ────────────────────────────────────
+                e('div', { className: "premium-panel" },
+                    filtered.length === 0 ? e('div', { style: { padding: "36px 0", textAlign: "center" } },
+                        e('div', { style: { fontSize: 30, marginBottom: 12, opacity: 0.35 } }, "📋"),
+                        e('div', { style: { fontWeight: 700, fontSize: 15, color: "var(--text-light)", marginBottom: 6 } },
+                            allItems.length === 0 ? "No transactions yet" : "No matching transactions"),
+                        e('div', { style: { fontSize: 13, color: "var(--text-muted)" } },
+                            allItems.length === 0 ? "Add an expense, income, or pay a bill to start tracking." : "Try a different search or wallet filter.")
+                    ) :
+                    filtered.map(item => {
+                        const canEdit = item.source === "vault";
+                        return e('div', { key: item.id, className: "stream-row" },
+                            e('div', { style: { display: "flex", alignItems: "flex-start", gap: 12 } },
+                                e('div', { style: {
+                                    width: 36, height: 36, borderRadius: 10, flexShrink: 0,
+                                    background: item.amountColor + "15",
+                                    border: "1px solid " + item.amountColor + "35",
+                                    display: "flex", alignItems: "center", justifyContent: "center"
+                                } }, e(Icon, { name: item.icon, size: 16, color: item.amountColor })),
+                                e('div', null,
+                                    e('div', { style: { fontWeight: 600, color: "var(--text-main)" } }, item.title),
+                                    e('div', { style: { fontSize: 11, color: "var(--text-muted)", marginTop: 2 } }, item.subtitle),
+                                    item.walletName && e('div', { style: { fontSize: 11, color: "var(--text-light)", marginTop: 3, display: "flex", alignItems: "center", gap: 4 } },
+                                        e('span', { style: { color: "var(--text-muted)", fontWeight: 500 } }, "Wallet: "),
+                                        e('span', { style: { fontWeight: 700 } }, item.walletName)
+                                    )
+                                )
+                            ),
+                            e('div', { style: { display: "flex", alignItems: "center", gap: 10, flexShrink: 0 } },
+                                e('div', { style: { textAlign: "right" } },
+                                    e('div', { style: { fontWeight: 700, color: item.amountColor, fontVariantNumeric: "tabular-nums" } }, `${item.amountPrefix}${fc(item.amountCents)}`),
+                                    e('div', { style: { fontSize: 10, color: "var(--text-muted)", marginTop: 2 } }, item.date)
+                                ),
+                                canEdit && e(DotMenu, {
+                                    itemId: item.rawId, openMenu, setOpenMenu,
+                                    onEdit: () => { const t = (txns||[]).find(x => x.id === item.rawId); if (t) openEditTxn(t); },
+                                    onDelete: () => deleteTxn(item.rawId)
+                                })
+                            )
+                        );
+                    })
+                ),
+
+                // ── Edit vault txn modal (preserved from original) ────────────
+                editTxn && e('div', { className: "modal-overlay" }, e('div', { className: "modal-container" },
+                    e('h3', { style: { marginBottom: 8 } }, "Edit Vault Transaction"),
+                    e('p', { style: { fontSize: 13, color: "var(--text-muted)", marginBottom: 20 } }, `Vault: ${getVaultName(editTxn.fundId)}`),
+                    e(Field, { label: "Transaction Type" }, e(Sel, { value: editTxnForm.type, onChange: ev => setEditTxnForm({ ...editTxnForm, type: ev.target.value }) },
+                        e('option', { value: "deposit" }, "Deposit"), e('option', { value: "withdrawal" }, "Withdrawal"))),
+                    e(Field, { label: "Amount" }, e(Inp, { type: "number", value: editTxnForm.amount, onChange: ev => setEditTxnForm({ ...editTxnForm, amount: ev.target.value }) })),
+                    e(Field, { label: "Date" }, e(Inp, { type: "date", value: editTxnForm.date, onChange: ev => setEditTxnForm({ ...editTxnForm, date: ev.target.value }) })),
+                    e('div', { style: S.formFooter },
+                        e(Btn, { v: "ghost", style: { flex: 1 }, onClick: () => setEditTxn(null) }, "Cancel"),
+                        e(Btn, { v: "primary", style: { flex: 1 }, onClick: saveEditTxn }, "Save Changes"))
+                ))
+            );
+        }
+
         // ── MODULE: TRANSACTIONS VAULT LOGS ─────────────────────────────────
         function TransactionsView({ txns, setTxns, funds, fc }) {
             const [openMenu, setOpenMenu] = useState(null); const [editTxn, setEditTxn] = useState(null); const [editTxnForm, setEditTxnForm] = useState({ type: "deposit", amount: "", date: "" });
@@ -1491,6 +1658,121 @@ e('footer', {
                     vaultTxns.map(t => e('div', { key: t.id, className: "stream-row" }, e('div', null, e('div', { style: { fontWeight: 600, color: "var(--text-main)" } }, getVaultName(t.fundId)), e('div', { style: { fontSize: 11, color: "var(--text-muted)", marginTop: 2, textTransform: "capitalize" } }, `${t.date} • ${t.type}`)), e('div', { style: S.row12 }, e('span', { style: { fontWeight: 700, color: t.type === 'deposit' ? "#00E676" : "#EF4444" } }, t.type === 'deposit' ? `+${fc(t.amountCents)}` : `-${fc(t.amountCents)}`), e(DotMenu, { itemId: t.id, openMenu, setOpenMenu, onEdit: () => openEditTxn(t), onDelete: () => deleteTxn(t.id) }))))
                 ),
                 editTxn && e('div', { className: "modal-overlay" }, e('div', { className: "modal-container" }, e('h3', { style: { marginBottom: 8 } }, "Edit Vault Transaction"), e('p', { style: { fontSize: 13, color: "var(--text-muted)", marginBottom: 20 } }, `Vault: ${getVaultName(editTxn.fundId)}`), e(Field, { label: "Transaction Type" }, e(Sel, { value: editTxnForm.type, onChange: ev => setEditTxnForm({ ...editTxnForm, type: ev.target.value }) }, e('option', { value: "deposit" }, "Deposit"), e('option', { value: "withdrawal" }, "Withdrawal"))), e(Field, { label: "Amount" }, e(Inp, { type: "number", value: editTxnForm.amount, onChange: ev => setEditTxnForm({ ...editTxnForm, amount: ev.target.value }) })), e(Field, { label: "Date" }, e(Inp, { type: "date", value: editTxnForm.date, onChange: ev => setEditTxnForm({ ...editTxnForm, date: ev.target.value }) })), e('div', { style: S.formFooter }, e(Btn, { v: "ghost", style: { flex: 1 }, onClick: () => setEditTxn(null) }, "Cancel"), e(Btn, { v: "primary", style: { flex: 1 }, onClick: saveEditTxn }, "Save Changes"))))
+            );
+        }
+
+        // ── COMPONENT: RECENT ACTIVITY SECTION (Dashboard) ──────────────────────
+        function RecentActivitySection({ incomes, dailyExpenses, bills, txns, funds, wallets, archives, fc, onNavigate }) {
+            const relTime = (dateStr) => {
+                if (!dateStr) return "";
+                const today = new Date().toISOString().slice(0, 10);
+                if (dateStr === today) return "Today";
+                const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+                if (dateStr === yesterday) return "Yesterday";
+                const diffDays = Math.floor((new Date(today) - new Date(dateStr)) / 86400000);
+                if (diffDays < 7) return `${diffDays}d ago`;
+                if (diffDays < 30) return `${Math.floor(diffDays / 7)}w ago`;
+                return `${Math.floor(diffDays / 30)}mo ago`;
+            };
+
+            const resolveWallet = (walletId, snapshot) => {
+                if (snapshot) return snapshot;
+                const w = (wallets || []).find(x => x.id === walletId);
+                return w ? w.name : null;
+            };
+
+            const activities = useMemo(() => {
+                const items = [];
+                (dailyExpenses || []).forEach(ex => {
+                    items.push({ id: `exp-${ex.id}`, icon: "wallet", iconColor: "#EF4444",
+                        title: ex.name, subtitle: ex.category, amountCents: ex.amountCents,
+                        amountColor: "#EF4444", amountPrefix: "−", date: ex.date,
+                        walletName: resolveWallet(ex.walletId, ex.walletNameSnapshot), navTarget: "daily" });
+                });
+                (incomes || []).forEach(inc => {
+                    items.push({ id: `inc-${inc.id}`, icon: "trendingup", iconColor: "#00E676",
+                        title: inc.name, subtitle: "Income", amountCents: inc.amountCents,
+                        amountColor: "#00E676", amountPrefix: "+", date: inc.date,
+                        walletName: resolveWallet(inc.walletId, inc.walletNameSnapshot), navTarget: "budget" });
+                });
+                (txns || []).filter(t => t.type === "bill_payment").forEach(t => {
+                    const bill = (bills || []).find(b => b.id === t.billId);
+                    items.push({ id: `bill-${t.id}`, icon: "receipt", iconColor: "#A855F7",
+                        title: bill ? bill.name + " Paid" : "Bill Paid", subtitle: "Bill",
+                        amountCents: t.amountCents, amountColor: "#A855F7", amountPrefix: "✓",
+                        date: t.date, walletName: resolveWallet(t.walletId, t.walletNameSnapshot), navTarget: "budget" });
+                });
+                (txns || []).filter(t => t.fundId).forEach(t => {
+                    const fund = (funds || []).find(f => f.id === t.fundId);
+                    const isDeposit = t.type === "deposit";
+                    items.push({ id: `vault-${t.id}`, icon: "landmark",
+                        iconColor: isDeposit ? "#2563EB" : "#F59E0B",
+                        title: (isDeposit ? "Deposit → " : "Withdraw ← ") + (fund ? fund.name : "Vault"),
+                        subtitle: isDeposit ? "Vault Deposit" : "Vault Withdrawal",
+                        amountCents: t.amountCents,
+                        amountColor: isDeposit ? "#2563EB" : "#F59E0B",
+                        amountPrefix: isDeposit ? "+" : "−",
+                        date: t.date, walletName: resolveWallet(t.walletId, t.walletNameSnapshot), navTarget: "goals" });
+                });
+                (archives || []).slice(0, 3).forEach(arc => {
+                    items.push({ id: `arc-${arc.id}`, icon: "archive", iconColor: "#A855F7",
+                        title: arc.month + " Archived", subtitle: "Monthly Snapshot",
+                        amountCents: null, amountColor: null, amountPrefix: null,
+                        date: arc.closedAt ? arc.closedAt.slice(0, 10) : "",
+                        walletName: null, navTarget: "history" });
+                });
+                return items
+                    .filter(i => i.date)
+                    .sort((a, b) => b.date.localeCompare(a.date))
+                    .slice(0, 10);
+            }, [incomes, dailyExpenses, bills, txns, funds, wallets, archives]);
+
+            return e('div', { className: "premium-panel", style: { marginTop: 20 } },
+                e('div', { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 } },
+                    e(SLabel, null, "Recent Activity"),
+                    activities.length > 0 && e('button', {
+                        onClick: () => onNavigate("transactions"),
+                        style: { background: "transparent", border: "none", color: "var(--text-muted)", fontSize: 11, fontWeight: 700, cursor: "pointer", letterSpacing: "0.04em", padding: 0 }
+                    }, "View All →")
+                ),
+
+                activities.length === 0
+                    ? e('div', { style: { padding: "28px 0", textAlign: "center" } },
+                        e('div', { style: { fontSize: 26, marginBottom: 10, opacity: 0.35 } }, "🎯"),
+                        e('div', { style: { fontWeight: 700, fontSize: 14, color: "var(--text-light)", marginBottom: 6 } }, "No recent activity yet"),
+                        e('div', { style: { fontSize: 12, color: "var(--text-muted)", marginBottom: 14 } }, "Your transactions will appear here"),
+                        e(Btn, { v: "accent", style: { fontSize: 12, padding: "9px 20px" }, onClick: () => onNavigate("daily") }, "Log First Expense")
+                    )
+                    : activities.map(item => e('div', {
+                        key: item.id,
+                        className: "stream-row",
+                        style: { cursor: "pointer" },
+                        onClick: () => onNavigate(item.navTarget)
+                    },
+                        e('div', { style: { display: "flex", alignItems: "center", gap: 11 } },
+                            e('div', { style: {
+                                width: 34, height: 34, borderRadius: 9, flexShrink: 0,
+                                background: item.iconColor + "18",
+                                border: "1px solid " + item.iconColor + "35",
+                                display: "flex", alignItems: "center", justifyContent: "center"
+                            } }, e(Icon, { name: item.icon, size: 15, color: item.iconColor })),
+                            e('div', null,
+                                e('div', { style: { fontWeight: 600, color: "var(--text-main)", fontSize: 13 } }, item.title),
+                                e('div', { style: { display: "flex", gap: 7, alignItems: "center", marginTop: 2, flexWrap: "wrap" } },
+                                    e('span', { style: { fontSize: 11, color: "var(--text-muted)" } }, item.subtitle),
+                                    item.walletName && e('span', { style: {
+                                        fontSize: 10, fontWeight: 700, color: "var(--text-light)",
+                                        background: "var(--hover-bg)", padding: "1px 6px", borderRadius: 4
+                                    } }, item.walletName)
+                                )
+                            )
+                        ),
+                        e('div', { style: { textAlign: "right", flexShrink: 0 } },
+                            item.amountCents != null && e('div', { style: { fontWeight: 700, color: item.amountColor, fontSize: 13, fontVariantNumeric: "tabular-nums" } },
+                                `${item.amountPrefix}${fc(item.amountCents)}`),
+                            e('div', { style: { fontSize: 10, color: "var(--text-muted)", marginTop: 2 } }, relTime(item.date))
+                        )
+                    ))
             );
         }
 
