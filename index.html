@@ -553,6 +553,8 @@ e(EmptyState, { icon:"creditcard", title:"No wallets yet", sub:"Add Cash, GCash,
 
                 if (closeBillExists || unpaidBills > 0) { healthStatus = { label: "Overhead Warning", color: "#FF1744", bg: "rgba(255, 23, 68, 0.09)" }; } 
                 else if (dailySpendingRatio > 0.40) { healthStatus = { label: "Caution", color: "#FFD600", bg: "rgba(255, 214, 0, 0.09)" }; }
+                // Deficit overrides everything — net spendable cash is negative
+                if (netAvailable < 0) { healthStatus = { label: "Deficit", color: "#FF1744", bg: "rgba(255, 23, 68, 0.09)" }; }
 
                 return { totalIncome, paidBills, unpaidBills, totalDailySpent, totalInGoals, netAvailable, enrichedFunds, catSum, healthStatus };
             }, [incomes, bills, funds, txns, dailyExpenses]);
@@ -586,6 +588,7 @@ e(EmptyState, { icon:"creditcard", title:"No wallets yet", sub:"Add Cash, GCash,
                     month: monthLabel,
                     closedAt: now.toISOString(),
                     totalIncome, totalSpent, totalBills, totalSavings, remaining,
+                    status: remaining < 0 ? "Deficit" : "Settled",
                     snapshot: {
                         incomes: [...incomes],
                         bills:   [...bills],
@@ -1172,6 +1175,7 @@ e('footer', {
             const [openMenuInc, setOpenMenuInc] = useState(null); const [editIncome, setEditIncome] = useState(null); const [editIncForm, setEditIncForm] = useState({ name: "", amount: "", walletId: CASH_WALLET_ID });
             const [openMenuBill, setOpenMenuBill] = useState(null); const [editBill, setEditBill] = useState(null); const [editBillForm, setEditBillForm] = useState({ name: "", amount: "", dueDate: "", recurring: "none", category: "Bills" });
             const [payBillModal, setPayBillModal] = useState(null);
+            const [forceDeleteModal, setForceDeleteModal] = useState(null);
 
             const openEditIncome = (item) => { setEditIncome(item); setEditIncForm({ name: item.name, amount: String((item.amountCents / 100).toFixed(2)), walletId: item.walletId || CASH_WALLET_ID }); };
             const saveEditIncome = () => {
@@ -1187,10 +1191,26 @@ e('footer', {
                 setEditIncome(null);
             };
             const deleteIncome = (id) => {
-                if (!window.confirm("Delete this income entry?")) return;
                 const old = incomes.find(i => i.id === id);
+                if (!old) return;
+                // Simulate wallet impact before allowing delete
+                if (old.walletId) {
+                    const check = window.finance.checkIncomeDeleteSafe(old.walletId, old.amountCents, wallets);
+                    if (!check.safe) {
+                        setForceDeleteModal({ income: old, check });
+                        return;
+                    }
+                }
+                if (!window.confirm("Delete this income entry?")) return;
                 window.finance.processFinancialTransaction({ type: "income_delete", walletId: old?.walletId, amountCents: old?.amountCents, wallets, setWallets });
                 setIncomes(incomes.filter(i => i.id !== id));
+            };
+            const execForceDelete = () => {
+                const old = forceDeleteModal?.income;
+                if (!old) return;
+                window.finance.processFinancialTransaction({ type: "income_delete", walletId: old.walletId, amountCents: old.amountCents, wallets, setWallets });
+                setIncomes(incomes.filter(i => i.id !== old.id));
+                setForceDeleteModal(null);
             };
 
             const openEditBill = (item) => { setEditBill(item); setEditBillForm({ name: item.name, amount: String((item.amountCents / 100).toFixed(2)), dueDate: item.dueDate, recurring: item.recurring || "none", category: item.category || "Bills" }); };
@@ -1313,7 +1333,36 @@ e('footer', {
                 }),
                 // Edit Modals
                 editIncome && e('div', { className: "modal-overlay" }, e('div', { className: "modal-container" }, e('h3', { style: { marginBottom: 20 } }, "Edit Income"), e(Field, { label: "Source" }, e(Inp, { value: editIncForm.name, onChange: ev => setEditIncForm({ ...editIncForm, name: ev.target.value }) })), e(Field, { label: "Amount" }, e(Inp, { type: "number", value: editIncForm.amount, onChange: ev => setEditIncForm({ ...editIncForm, amount: ev.target.value }) })), e(Field, { label: "Receiving Source" }, e(IncomeSourcePicker, { wallets, setWallets, value: editIncForm.walletId, onChange: v => setEditIncForm({ ...editIncForm, walletId: v }) })), e('div', { style: { display: "flex", gap: 12, marginTop: 8 } }, e(Btn, { v: "ghost", style: { flex: 1 }, onClick: () => setEditIncome(null) }, "Cancel"), e(Btn, { v: "primary", style: { flex: 1 }, onClick: saveEditIncome }, "Save")))),
-                editBill && e('div', { className: "modal-overlay" }, e('div', { className: "modal-container" }, e('h3', { style: { marginBottom: 20 } }, "Edit Bill"), e(Field, { label: "Bill Label" }, e(Inp, { value: editBillForm.name, onChange: ev => setEditBillForm({ ...editBillForm, name: ev.target.value }) })), e(Field, { label: "Amount" }, e(Inp, { type: "number", value: editBillForm.amount, onChange: ev => setEditBillForm({ ...editBillForm, amount: ev.target.value }) })), e(Field, { label: "Due Date" }, e(Inp, { type: "date", value: editBillForm.dueDate, onChange: ev => setEditBillForm({ ...editBillForm, dueDate: ev.target.value }) })), e(Field, { label: "Category" }, e(Sel, { value: editBillForm.category, onChange: ev => setEditBillForm({ ...editBillForm, category: ev.target.value }) }, CATEGORIES.map(c => e('option', {key: c, value: c}, c)))), e(Field, { label: "Recurring" }, e(Sel, { value: editBillForm.recurring, onChange: ev => setEditBillForm({ ...editBillForm, recurring: ev.target.value }) }, e('option', { value: "none" }, "One-Time"), e('option', { value: "monthly" }, "Monthly"), e('option', { value: "weekly" }, "Weekly"))), e('div', { style: { display: "flex", gap: 12 } }, e(Btn, { v: "ghost", style: { flex: 1 }, onClick: () => setEditBill(null) }, "Cancel"), e(Btn, { v: "accent", style: { flex: 1 }, onClick: saveEditBill }, "Save"))))
+                editBill && e('div', { className: "modal-overlay" }, e('div', { className: "modal-container" }, e('h3', { style: { marginBottom: 20 } }, "Edit Bill"), e(Field, { label: "Bill Label" }, e(Inp, { value: editBillForm.name, onChange: ev => setEditBillForm({ ...editBillForm, name: ev.target.value }) })), e(Field, { label: "Amount" }, e(Inp, { type: "number", value: editBillForm.amount, onChange: ev => setEditBillForm({ ...editBillForm, amount: ev.target.value }) })), e(Field, { label: "Due Date" }, e(Inp, { type: "date", value: editBillForm.dueDate, onChange: ev => setEditBillForm({ ...editBillForm, dueDate: ev.target.value }) })), e(Field, { label: "Category" }, e(Sel, { value: editBillForm.category, onChange: ev => setEditBillForm({ ...editBillForm, category: ev.target.value }) }, CATEGORIES.map(c => e('option', {key: c, value: c}, c)))), e(Field, { label: "Recurring" }, e(Sel, { value: editBillForm.recurring, onChange: ev => setEditBillForm({ ...editBillForm, recurring: ev.target.value }) }, e('option', { value: "none" }, "One-Time"), e('option', { value: "monthly" }, "Monthly"), e('option', { value: "weekly" }, "Weekly"))), e('div', { style: { display: "flex", gap: 12 } }, e(Btn, { v: "ghost", style: { flex: 1 }, onClick: () => setEditBill(null) }, "Cancel"), e(Btn, { v: "accent", style: { flex: 1 }, onClick: saveEditBill }, "Save")))),
+
+                // ── FORCE DELETE INCOME MODAL ─────────────────────────────────
+                forceDeleteModal && e('div', { className: "modal-overlay", onClick: () => setForceDeleteModal(null) },
+                    e('div', { className: "modal-container", style: { maxWidth: 420 }, onClick: ev => ev.stopPropagation() },
+                        e('div', { style: S.modalHeader },
+                            e('div', null,
+                                e('div', { style: { ...S.modalTitle, color: "#EF4444" } }, "Cannot Delete Income"),
+                                e('div', { style: { fontSize: 13, color: "var(--text-muted)", marginTop: 4 } }, forceDeleteModal.income.name)
+                            ),
+                            e('button', { onClick: () => setForceDeleteModal(null), style: S.closeBtn }, e(Icon, { name: "x", size: 16 }))
+                        ),
+                        e('div', { style: { background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 12, padding: "14px 16px", marginBottom: 20 } },
+                            e('div', { style: { fontSize: 13, color: "var(--text-light)", lineHeight: 1.6 } },
+                                "This income is funding existing expenses or wallet balances. Deleting it will push ",
+                                e('strong', { style: { color: "#EF4444" } }, forceDeleteModal.check.walletName),
+                                " to a negative balance (",
+                                e('strong', { style: { color: "#EF4444" } }, fc(forceDeleteModal.check.projectedBalance)),
+                                ")."
+                            )
+                        ),
+                        e('div', { style: { fontSize: 12, color: "var(--text-muted)", marginBottom: 20, lineHeight: 1.6 } },
+                            "Force deleting will allow a negative wallet balance. The dashboard will show a Deficit status."
+                        ),
+                        e('div', { style: S.modalFooter },
+                            e(Btn, { v: "ghost", style: { flex: 1 }, onClick: () => setForceDeleteModal(null) }, "Cancel"),
+                            e(Btn, { v: "danger", style: { flex: 1 }, onClick: execForceDelete }, "Force Delete")
+                        )
+                    )
+                )
             );
         }
 
@@ -1499,7 +1548,7 @@ e('footer', {
                     e(SLabel, { style: { marginBottom: 12 } }, "Archive Ledgers"),
                     archives.map(arc => {
                         const isGreen = arc.remaining >= 0;
-                        return e('div', { key: arc.id, className: "stream-row", style: { cursor: "pointer" }, onClick: () => { setSelected(arc); setDetailTab("income"); } }, e('div', { style: { display: "flex", flexDirection: "column", gap: 3 } }, e('div', { style: { fontWeight: 700, color: "var(--text-main)", fontSize: 15 } }, arc.month), e('div', { style: { fontSize: 11, color: "var(--text-muted)" } }, `Closed ${fmt(arc.closedAt)}`)), e('div', { style: { display: "flex", gap: 32, alignItems: "center" } }, e('div', { style: { textAlign: "right" } }, e('div', { style: { fontSize: 11, color: "var(--text-muted)", fontWeight: 600, marginBottom: 2 } }, "Remaining"), e('div', { style: { fontSize: 14, fontWeight: 800, color: isGreen ? "#00E676" : "#FF1744" } }, fc(arc.remaining))), e('div', { style: { color: "var(--text-light)", fontSize: 18 } }, "›")));
+                        return e('div', { key: arc.id, className: "stream-row", style: { cursor: "pointer" }, onClick: () => { setSelected(arc); setDetailTab("income"); } }, e('div', { style: { display: "flex", flexDirection: "column", gap: 3 } }, e('div', { style: { display:"flex", alignItems:"center", gap:8 } }, e('div', { style: { fontWeight: 700, color: "var(--text-main)", fontSize: 15 } }, arc.month), arc.status === "Deficit" && e('span', { style: { fontSize:10, fontWeight:700, padding:"2px 7px", borderRadius:5, background:"rgba(239,68,68,0.12)", color:"#EF4444" } }, "Deficit")), e('div', { style: { fontSize: 11, color: "var(--text-muted)" } }, `Closed ${fmt(arc.closedAt)}`)), e('div', { style: { display: "flex", gap: 32, alignItems: "center" } }, e('div', { style: { textAlign: "right" } }, e('div', { style: { fontSize: 11, color: "var(--text-muted)", fontWeight: 600, marginBottom: 2 } }, "Remaining"), e('div', { style: { fontSize: 14, fontWeight: 800, color: isGreen ? "#00E676" : "#FF1744" } }, fc(arc.remaining))), e('div', { style: { color: "var(--text-light)", fontSize: 18 } }, "›")));
                     })
                 ),
 
