@@ -348,7 +348,35 @@ landbank: {
             rx="1" fill="#A7F3D0"/>
     </svg>`
 },	
-	
+	// ── Cash ─────────────────────────────────────────────────────────────
+cash: {
+    bg: "#00E676",
+    svg: `<svg viewBox="0 0 40 40" fill="none"
+        xmlns="http://www.w3.org/2000/svg">
+
+        <!-- Background -->
+        <rect width="40" height="40" rx="10" fill="#00E676"/>
+
+        <!-- Bill -->
+        <rect x="7" y="12" width="26" height="16" rx="4"
+            fill="#065F46"/>
+
+        <!-- Inner border -->
+        <rect x="10" y="15" width="20" height="10" rx="2"
+            stroke="#A7F3D0"
+            stroke-width="1.5"
+            fill="none"/>
+
+        <!-- Peso symbol -->
+        <text x="20" y="23"
+            text-anchor="middle"
+            font-family="Arial Black,Arial,sans-serif"
+            font-size="10"
+            font-weight="900"
+            fill="#A7F3D0">₱</text>
+
+    </svg>`
+},
 
     };
 
