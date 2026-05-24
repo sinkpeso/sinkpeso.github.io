@@ -124,11 +124,32 @@
         }
     }
 
+    // ── INCOME DELETE SAFETY CHECK ────────────────────────────────────────────
+    // Simulates removing an income entry and reports whether any wallet
+    // would go negative.
+    //
+    // derivedWallets: array already populated with current .balanceCents
+    //                 (e.g. the displayWallets from App's useMemo)
+    //
+    // Returns: { safe: bool, walletName: string|null, projectedBalance: number }
+    function checkIncomeDeleteSafe(walletId, amountCents, derivedWallets) {
+        if (!walletId) return { safe: true, walletName: null, projectedBalance: 0 };
+        const wallet = (derivedWallets || []).find(w => w.id === walletId);
+        if (!wallet) return { safe: true, walletName: null, projectedBalance: 0 };
+        const projected = cents(wallet.balanceCents) - cents(amountCents);
+        return {
+            safe: projected >= 0,
+            walletName: wallet.name,
+            projectedBalance: projected
+        };
+    }
+
     window.finance = {
         deriveWallets,
         deriveWalletBalance,
         getWalletDelta,
         migrateWallets,
-        processFinancialTransaction
+        processFinancialTransaction,
+        checkIncomeDeleteSafe
     };
 })();
