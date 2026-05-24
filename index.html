@@ -411,19 +411,66 @@ e(EmptyState, { icon:"creditcard", title:"No wallets yet", sub:"Add Cash, GCash,
         }
 
         // ── QUICK ADD MODAL ────────────────────────────────────────────────
-        function QuickAddModal({ onSave, onClose, wallets, setWallets }) {
+        // ── INSUFFICIENT BALANCE MODAL ─────────────────────────────────────────
+        function InsufficientBalanceModal({ wallet, expenseAmount, fc, onCancel, onForce }) {
+            return e('div', { className: "modal-overlay", onClick: onCancel, style: { zIndex: 1100 } },
+                e('div', { className: "modal-container", style: { maxWidth: 360 }, onClick: ev => ev.stopPropagation() },
+                    e('div', { style: { ...S.modalHeader, marginBottom: 16 } },
+                        e('div', { style: { fontSize: 17, fontWeight: 800, color: "#EF4444" } }, "Insufficient Balance"),
+                        e('button', { onClick: onCancel, style: S.closeBtn }, e(Icon, { name: "x", size: 16 }))
+                    ),
+                    e('div', { style: { background: "rgba(239,68,68,0.07)", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 12, padding: "16px", marginBottom: 20 } },
+                        e('div', { style: { display: "flex", justifyContent: "space-between", marginBottom: 10 } },
+                            e('span', { style: { fontSize: 13, color: "var(--text-muted)" } }, "Wallet"),
+                            e('span', { style: { fontSize: 13, fontWeight: 700, color: "var(--text-main)" } }, wallet.name)
+                        ),
+                        e('div', { style: { display: "flex", justifyContent: "space-between", marginBottom: 10 } },
+                            e('span', { style: { fontSize: 13, color: "var(--text-muted)" } }, "Available"),
+                            e('span', { style: { fontSize: 13, fontWeight: 700, color: "#00E676" } }, fc(wallet.balanceCents || 0))
+                        ),
+                        e('div', { style: { display: "flex", justifyContent: "space-between", paddingTop: 10, borderTop: "1px solid rgba(239,68,68,0.2)" } },
+                            e('span', { style: { fontSize: 13, color: "var(--text-muted)" } }, "Expense"),
+                            e('span', { style: { fontSize: 13, fontWeight: 700, color: "#EF4444" } }, fc(expenseAmount))
+                        )
+                    ),
+                    e('div', { style: { fontSize: 12, color: "var(--text-muted)", marginBottom: 20, lineHeight: 1.6 } },
+                        "Force Spend will allow this expense and push your wallet into deficit."
+                    ),
+                    e('div', { style: { display: "flex", gap: 10 } },
+                        e(Btn, { v: "ghost", style: { flex: 1 }, onClick: onCancel }, "Cancel"),
+                        e(Btn, { v: "danger", style: { flex: 1 }, onClick: onForce }, "Force Spend")
+                    )
+                )
+            );
+        }
+
+        function QuickAddModal({ onSave, onClose, wallets, setWallets, fc }) {
             const [amount, setAmount] = useState("");
             const [category, setCategory] = useState("Food");
             const [note, setNote] = useState("");
             const [walletId, setWalletId] = useState(wallets.length > 0 ? (wallets.find(w => w.id === CASH_WALLET_ID) ? CASH_WALLET_ID : wallets[0].id) : "");
+            const [pendingExpense, setPendingExpense] = useState(null);
             const catIcons = { Food: "utensils", Gas: "car", Bills: "receipt", Business: "briefcase", Personal: "shoppingbag", Savings: "landmark" };
-            const handle = () => {
-                if (!amount || Number(amount) <= 0) return;
-                const amtCents = tc(amount);
+
+            const selectedWallet = wallets.find(w => w.id === walletId);
+            const isWalletEmpty = selectedWallet && (selectedWallet.balanceCents || 0) === 0;
+
+            const commitSave = (amtCents, override) => {
                 const selWallet = wallets.find(w => w.id === walletId);
                 onSave({ id: uid(), name: note.trim() || category, amountCents: amtCents, category, date: todayStr(), walletId: walletId || null, walletNameSnapshot: selWallet ? selWallet.name : null });
                 window.finance.processFinancialTransaction({ type: "expense", walletId, amountCents: amtCents, wallets, setWallets });
             };
+            const handle = () => {
+                if (!amount || Number(amount) <= 0) return;
+                const amtCents = tc(amount);
+                const selWallet = wallets.find(w => w.id === walletId);
+                if (selWallet && (selWallet.balanceCents || 0) < amtCents) {
+                    setPendingExpense({ amtCents, selWallet });
+                    return;
+                }
+                commitSave(amtCents, false);
+            };
+
             return e('div', { className: "modal-overlay", onClick: onClose },
                 e('div', { className: "modal-container", style: { maxWidth: 400 }, onClick: ev => ev.stopPropagation() },
                     e('div', { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 } },
@@ -439,7 +486,12 @@ e(EmptyState, { icon:"creditcard", title:"No wallets yet", sub:"Add Cash, GCash,
                     ),
                     e(Inp, { placeholder: "Note (optional)", value: note, onChange: ev => setNote(ev.target.value), style: { marginBottom: 12 } }),
                     e(WalletPicker, { wallets, value: walletId, onChange: setWalletId }),
-                    e(Btn, { v: "accent", style: { width: "100%", fontSize: 15, marginTop: 16 }, onClick: handle, disabled: wallets.length === 0 }, wallets.length === 0 ? "Add a Wallet First" : "Save Expense")
+                    isWalletEmpty && e('div', { style: { fontSize: 12, color: "#F59E0B", background: "rgba(245,158,11,0.08)", border: "1px solid rgba(245,158,11,0.2)", borderRadius: 8, padding: "8px 12px", marginTop: 10, display: "flex", alignItems: "center", gap: 6 } },
+                        e(Icon, { name: "arrowupdown", size: 12, color: "#F59E0B" }),
+                        "Wallet is empty — add income or fund this wallet first."
+                    ),
+                    e(Btn, { v: "accent", style: { width: "100%", fontSize: 15, marginTop: 16 }, onClick: handle, disabled: wallets.length === 0 }, wallets.length === 0 ? "Add a Wallet First" : "Save Expense"),
+                    pendingExpense && e(InsufficientBalanceModal, { wallet: pendingExpense.selWallet, expenseAmount: pendingExpense.amtCents, fc, onCancel: () => setPendingExpense(null), onForce: () => { setPendingExpense(null); commitSave(pendingExpense.amtCents, true); } })
                 )
             );
         }
@@ -577,7 +629,8 @@ e(EmptyState, { icon:"creditcard", title:"No wallets yet", sub:"Add Cash, GCash,
                 const closeBillExists = bills.some(b => !b.isPaid && getDaysRemaining(b.dueDate) <= 3);
                 const dailySpendingRatio = safeDiv(totalDailySpent, totalIncome);
 
-                if (closeBillExists || unpaidBills > 0) { healthStatus = { label: "Overhead Warning", color: "#FF1744", bg: "rgba(255, 23, 68, 0.09)" }; } 
+                if (netAvailable < 0) { healthStatus = { label: "⚠️ Deficit", color: "#FF1744", bg: "rgba(255, 23, 68, 0.09)" }; }
+                else if (closeBillExists || unpaidBills > 0) { healthStatus = { label: "Overhead Warning", color: "#FF1744", bg: "rgba(255, 23, 68, 0.09)" }; } 
                 else if (dailySpendingRatio > 0.40) { healthStatus = { label: "Caution", color: "#FFD600", bg: "rgba(255, 214, 0, 0.09)" }; }
 
                 return { totalIncome, paidBills, unpaidBills, totalDailySpent, totalInGoals, netAvailable, enrichedFunds, catSum, healthStatus };
@@ -778,7 +831,7 @@ e('footer', {
 
                 // ── QUICK ADD EXPENSE MODAL ─────────────────────────────────
                 showQuickAdd && e(QuickAddModal, { 
-                    wallets: displayWallets, setWallets,
+                    wallets: displayWallets, setWallets, fc,
                     onSave: (item) => { 
                         setDailyExpenses(prev => [item, ...prev]); 
                         setShowQuickAdd(false); 
@@ -1365,13 +1418,38 @@ e('footer', {
             const [name, setName] = useState(""); const [amount, setAmount] = useState(""); const [category, setCategory] = useState("Food"); 
             const [walletId, setWalletId] = useState(wallets.length > 0 ? (wallets.find(w => w.id === CASH_WALLET_ID) ? CASH_WALLET_ID : wallets[0].id) : "");
             const [openMenu, setOpenMenu] = useState(null); const [editExp, setEditExp] = useState(null); const [editForm, setEditForm] = useState({ name: "", amount: "", category: "Food", walletId: "" });
+            const [pendingExpense, setPendingExpense] = useState(null);      // { rec, type: "add"|"edit" }
+            const [pendingEditData, setPendingEditData] = useState(null);    // holds the edit payload for force-save
+
+            const selectedWallet = wallets.find(w => w.id === walletId);
+            const isWalletEmpty = selectedWallet && (selectedWallet.balanceCents || 0) === 0;
+
+            const commitAddExpense = (rec) => {
+                setDailyExpenses(prev => [rec, ...prev]);
+                window.finance.processFinancialTransaction({ type: "expense", walletId: rec.walletId, amountCents: rec.amountCents, wallets, setWallets });
+                setName(""); setAmount(""); setWalletId("");
+                setPendingExpense(null);
+            };
 
             const openEditExp = (exp) => { setEditExp(exp); setEditForm({ name: exp.name, amount: String((exp.amountCents / 100).toFixed(2)), category: exp.category, walletId: exp.walletId || "" }); };
-            const saveEditExp = () => {
+            const saveEditExp = (force = false) => {
                 if (!editForm.name || !editForm.amount) return;
                 const old = dailyExpenses.find(ex => ex.id === editExp.id);
                 const newAmt = tc(editForm.amount);
                 const newWalletId = editForm.walletId || null;
+
+                // After reversing the old expense, compute net available on target wallet
+                const targetWallet = wallets.find(w => w.id === newWalletId);
+                const isSameWallet = old?.walletId === newWalletId;
+                const restoredBalance = targetWallet
+                    ? (targetWallet.balanceCents || 0) + (isSameWallet ? (old?.amountCents || 0) : 0)
+                    : 0;
+
+                if (!force && targetWallet && restoredBalance < newAmt) {
+                    setPendingEditData({ old, newAmt, newWalletId, editId: editExp.id });
+                    setPendingExpense({ selWallet: { ...targetWallet, balanceCents: restoredBalance }, amtCents: newAmt, type: "edit" });
+                    return;
+                }
                 // Reverse old + apply new via central finance engine
                 window.finance.processFinancialTransaction({ type: "expense_edit", oldWalletId: old?.walletId, oldAmountCents: old?.amountCents, newWalletId, newAmountCents: newAmt, wallets, setWallets });
                 setDailyExpenses(dailyExpenses.map(ex => ex.id === editExp.id
@@ -1379,7 +1457,19 @@ e('footer', {
                     : ex
                 ));
                 setEditExp(null);
+                setPendingExpense(null);
+                setPendingEditData(null);
             };
+            const commitForceEdit = () => {
+                const { old, newAmt, newWalletId, editId } = pendingEditData;
+                window.finance.processFinancialTransaction({ type: "expense_edit", oldWalletId: old?.walletId, oldAmountCents: old?.amountCents, newWalletId, newAmountCents: newAmt, wallets, setWallets });
+                setDailyExpenses(dailyExpenses.map(ex => ex.id === editId
+                    ? { ...ex, name: editForm.name.trim(), amountCents: newAmt, category: editForm.category, walletId: newWalletId }
+                    : ex
+                ));
+                setEditExp(null); setPendingExpense(null); setPendingEditData(null);
+            };
+
             const deleteExp = (id) => {
                 if (!window.confirm("Delete this expense entry?")) return;
                 const old = dailyExpenses.find(ex => ex.id === id);
@@ -1388,24 +1478,40 @@ e('footer', {
                 setDailyExpenses(dailyExpenses.filter(ex => ex.id !== id));
             };
 
+            const handleLogItem = () => {
+                if (!name || !amount) return;
+                const amtCents = tc(amount);
+                const selW = wallets.find(w => w.id === walletId);
+                if (selW && (selW.balanceCents || 0) < amtCents) {
+                    setPendingExpense({ selWallet: selW, amtCents, type: "add", rec: { id: uid(), name: name.trim(), amountCents: amtCents, category, date: todayStr(), walletId: walletId || null, walletNameSnapshot: selW.name } });
+                    return;
+                }
+                commitAddExpense({ id: uid(), name: name.trim(), amountCents: amtCents, category, date: todayStr(), walletId: walletId || null, walletNameSnapshot: selW ? selW.name : null });
+            };
+
             return e('div', null,
                 e(PageTitle, null, 'Daily Outflow Tracking'),
+                pendingExpense && e(InsufficientBalanceModal, {
+                    wallet: pendingExpense.selWallet,
+                    expenseAmount: pendingExpense.amtCents,
+                    fc,
+                    onCancel: () => { setPendingExpense(null); setPendingEditData(null); },
+                    onForce: () => pendingExpense.type === "edit" ? commitForceEdit() : commitAddExpense(pendingExpense.rec)
+                }),
                 e('div', { className: "premium-panel", style: { marginBottom: 24 } },
                     e(SLabel, { style: { marginBottom: 16 } }, "Log New Daily Spend Item"),
                     e('div', { className: "tf" },
                         e('div', { style: { flex: 2 } }, e(Inp, { value: name, placeholder: "What did you pay for?", onChange: ev => setName(ev.target.value) })),
                         e('div', { style: { flex: 1 } }, e(Inp, { type: "number", value: amount, placeholder: "Amount", onChange: ev => setAmount(ev.target.value) })),
                         e('div', { style: { width: 180 } }, e(Sel, { value: category, onChange: ev => setCategory(ev.target.value) }, CATEGORIES.map(c => e('option', { key: c, value: c }, c)))),
-                        wallets && wallets.length > 0 && e('div', { style: { flex: "1.2 1 360px", minWidth: 280 } }, e(WalletPicker, { wallets, value: walletId, onChange: setWalletId })),
-                        e(Btn, { v: "accent", onClick: () => {
-                            if(!name || !amount) return;
-                            const amtCents = tc(amount);
-                            const selW = wallets.find(w => w.id === walletId);
-                            const rec = { id: uid(), name: name.trim(), amountCents: amtCents, category, date: todayStr(), walletId: walletId || null, walletNameSnapshot: selW ? selW.name : null };
-                            setDailyExpenses([rec, ...dailyExpenses]);
-                            window.finance.processFinancialTransaction({ type: "expense", walletId, amountCents: amtCents, wallets, setWallets });
-                            setName(""); setAmount(""); setWalletId("");
-                        } }, "Log Item")
+                        wallets && wallets.length > 0 && e('div', { style: { flex: "1.2 1 360px", minWidth: 280 } },
+                            e(WalletPicker, { wallets, value: walletId, onChange: setWalletId }),
+                            isWalletEmpty && e('div', { style: { fontSize: 11, color: "#F59E0B", marginTop: 6, display: "flex", alignItems: "center", gap: 4 } },
+                                e(Icon, { name: "arrowupdown", size: 11, color: "#F59E0B" }),
+                                "Wallet is empty — add income or fund first."
+                            )
+                        ),
+                        e(Btn, { v: "accent", onClick: handleLogItem }, "Log Item")
                     )
                 ),
                 e('div', { className: "premium-panel" },
