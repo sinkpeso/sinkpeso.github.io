@@ -24,7 +24,7 @@
     // Usage: e(PageTitle, { sub: "Track your money" }, "Dashboard")
     function PageTitle({ children, sub }) {
         return e('div', { style: { marginBottom: 24 } },
-            e('h2', { style: S.pageTitle }, children),
+            e('h2', { style: { fontSize: 22, fontWeight: 800, color: "var(--text-main)", lineHeight: 1.15, letterSpacing: "-0.02em" } }, children),
             sub && e('div', { style: { fontSize: 13, color: "var(--text-muted)", marginTop: 4 } }, sub)
         );
     }
