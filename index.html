@@ -112,8 +112,6 @@
             creditcard:  "M1 4h22v16H1z M1 10h22",
             banknote:    "M2 7h20v14H2z M16 14a2 2 0 000-4H8 M6 14h.01",
             calendar:    "M3 4h18a2 2 0 012 2v14a2 2 0 01-2 2H3a2 2 0 01-2-2V6a2 2 0 012-2z M16 2v4 M8 2v4 M1 10h22",
-            moon:        "M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z",
-            sun:         "M12 1v2 M12 21v2 M4.22 4.22l1.42 1.42 M18.36 18.36l1.42 1.42 M1 12h2 M21 12h2 M4.22 19.78l1.42-1.42 M18.36 5.64l1.42-1.42 M12 7a5 5 0 100 10A5 5 0 0012 7z",
         };
         function Icon({ name, size = 18, color = "currentColor", style: st = {} }) {
             const path = ICONS[name] || ICONS.target;
@@ -485,7 +483,6 @@ e(EmptyState, { icon:"creditcard", title:"No wallets yet", sub:"Add Cash, GCash,
                 e('p', { style: { color: "var(--text-muted)", marginBottom: 32, fontSize: 13, letterSpacing: "0.01em" } }, "Private. Offline. Yours."),
                 e('input', { 
                     type: "password", inputMode: "numeric", pattern: "[0-9]*", className: "pin-input", value: input, autoFocus: true,
-                    placeholder: "Enter PIN",
                     onChange: e => setInput(e.target.value.replace(/[^0-9]/g, '')),
                     onKeyDown: e => e.key === 'Enter' && handleAttempt(),
                     style: { borderColor: error ? "#EF4444" : "var(--border-input)", animation: error ? "shake 0.4s" : "none" }
@@ -946,40 +943,10 @@ e('footer', {
                     // LEFT COLUMN
                     e('div', null,
                         e(SettingGroup, { title: "Appearance", icon: "grid" },
-                            e(Field, { label: "Theme" },
-                                e('div', { style: { display: "flex", gap: 8 } },
-                                    // Dark Mode button
-                                    e('button', {
-                                        onClick: () => setSettings({...settings, theme: "dark"}),
-                                        style: {
-                                            flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-                                            padding: "11px 14px", borderRadius: 10, cursor: "pointer",
-                                            background: (settings?.theme || "dark") === "dark" ? "rgba(0,230,118,0.10)" : "var(--bg-input)",
-                                            border: `1px solid ${(settings?.theme || "dark") === "dark" ? "#00E676" : "var(--border-input)"}`,
-                                            color: (settings?.theme || "dark") === "dark" ? "#00E676" : "var(--text-muted)",
-                                            fontSize: 13, fontWeight: 600, transition: "all 0.15s", fontFamily: "inherit",
-                                        }
-                                    },
-                                        e(Icon, { name: "moon", size: 15, color: (settings?.theme || "dark") === "dark" ? "#00E676" : "var(--text-muted)" }),
-                                        "Dark"
-                                    ),
-                                    // Light Mode button
-                                    e('button', {
-                                        onClick: () => setSettings({...settings, theme: "light"}),
-                                        style: {
-                                            flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-                                            padding: "11px 14px", borderRadius: 10, cursor: "pointer",
-                                            background: settings?.theme === "light" ? "rgba(0,230,118,0.10)" : "var(--bg-input)",
-                                            border: `1px solid ${settings?.theme === "light" ? "#00E676" : "var(--border-input)"}`,
-                                            color: settings?.theme === "light" ? "#00E676" : "var(--text-muted)",
-                                            fontSize: 13, fontWeight: 600, transition: "all 0.15s", fontFamily: "inherit",
-                                        }
-                                    },
-                                        e(Icon, { name: "sun", size: 15, color: settings?.theme === "light" ? "#00E676" : "var(--text-muted)" }),
-                                        "Light"
-                                    )
-                                )
-                            ),
+                            e(Field, { label: "Theme" }, e(Sel, { value: settings?.theme || 'dark', onChange: ev => setSettings({...settings, theme: ev.target.value}) },
+                                e('option', { value: "dark" }, "🌙 Dark Mode"),
+                                e('option', { value: "light" }, "☀️ Light Mode")
+                            )),
                             e(Field, { label: "Currency" }, e(Sel, { value: settings?.currency || 'PHP', onChange: ev => setSettings({...settings, currency: ev.target.value}) },
                                 Object.keys(CURRENCIES).map(c => e('option', { key: c, value: c }, c))
                             ))
@@ -1425,6 +1392,7 @@ e('footer', {
             const openEditExp = (exp) => { setEditExp(exp); setEditForm({ name: exp.name, amount: String((exp.amountCents / 100).toFixed(2)), category: exp.category, walletId: exp.walletId || "" }); };
             const saveEditExp = (force = false) => {
                 if (!editForm.name || !editForm.amount) return;
+                const isForced = force === true; // guard: reject MouseEvent or other truthy non-booleans
                 const old = dailyExpenses.find(ex => ex.id === editExp.id);
                 const newAmt = tc(editForm.amount);
                 const newWalletId = editForm.walletId || null;
@@ -1436,15 +1404,16 @@ e('footer', {
                     ? (targetWallet.balanceCents || 0) + (isSameWallet ? (old?.amountCents || 0) : 0)
                     : 0;
 
-                if (!force && targetWallet && restoredBalance < newAmt) {
+                if (!isForced && targetWallet && restoredBalance < newAmt) {
                     setPendingEditData({ old, newAmt, newWalletId, editId: editExp.id });
                     setPendingExpense({ selWallet: { ...targetWallet, balanceCents: restoredBalance }, amtCents: newAmt, type: "edit" });
                     return;
                 }
                 // Reverse old + apply new via central finance engine
                 window.finance.processFinancialTransaction({ type: "expense_edit", oldWalletId: old?.walletId, oldAmountCents: old?.amountCents, newWalletId, newAmountCents: newAmt, wallets, setWallets });
+                const newWalletName = (wallets || []).find(w => w.id === newWalletId)?.name || null;
                 setDailyExpenses(dailyExpenses.map(ex => ex.id === editExp.id
-                    ? { ...ex, name: editForm.name.trim(), amountCents: newAmt, category: editForm.category, walletId: newWalletId }
+                    ? { ...ex, name: editForm.name.trim(), amountCents: newAmt, category: editForm.category, walletId: newWalletId, walletNameSnapshot: newWalletName }
                     : ex
                 ));
                 setEditExp(null);
@@ -1502,7 +1471,10 @@ e('footer', {
                     e(SLabel, { style: { marginBottom: 12 } }, "Spending Log Timeline"),
                     dailyExpenses.length === 0 ? e('div', { style: { color: "var(--text-muted)", fontSize: 13, padding: "14px 0" } }, e("div", { className: "empty-state" }, e("div", { className: "empty-state-icon" }, e(Icon, { name: "wallet", size: 28, color: "var(--text-muted)" })), e("div", { className: "empty-state-title" }, "No expenses yet"), e("div", { className: "empty-state-sub" }, "Tap + to log your first expense."))) :
                     dailyExpenses.map(exp => {
-                        const expWallet = exp.walletNameSnapshot || ((wallets||[]).find(w => w.id === exp.walletId) || {}).name;
+                        // Derive wallet name dynamically — walletId is source of truth.
+                        // Only fall back to snapshot for deleted wallets.
+                        const liveWallet = (wallets || []).find(w => w.id === exp.walletId);
+                        const expWallet = liveWallet ? liveWallet.name : (exp.walletNameSnapshot || null);
                         return e('div', { key: exp.id, className: "stream-row" },
                             e('div', null,
                                 e('div', { style: { fontWeight: 600, color: "var(--text-main)" } }, exp.name),
@@ -1519,7 +1491,7 @@ e('footer', {
                         );
                     })
                 ),
-                editExp && e('div', { className: "modal-overlay" }, e('div', { className: "modal-container" }, e('h3', { style: { marginBottom: 20 } }, "Edit Expense"), e(Field, { label: "Description" }, e(Inp, { value: editForm.name, onChange: ev => setEditForm({ ...editForm, name: ev.target.value }) })), e(Field, { label: "Amount" }, e(Inp, { type: "number", value: editForm.amount, onChange: ev => setEditForm({ ...editForm, amount: ev.target.value }) })), e(Field, { label: "Category" }, e(Sel, { value: editForm.category, onChange: ev => setEditForm({ ...editForm, category: ev.target.value }) }, CATEGORIES.map(c => e('option', { key: c, value: c }, c)))), wallets && wallets.length > 0 && e(Field, { label: "Wallet" }, e(WalletPicker, { wallets, value: editForm.walletId, onChange: v => setEditForm({ ...editForm, walletId: v }) })), e('div', { style: S.formFooter }, e(Btn, { v: "ghost", style: { flex: 1 }, onClick: () => setEditExp(null) }, "Cancel"), e(Btn, { v: "accent", style: { flex: 1 }, onClick: saveEditExp }, "Save"))))
+                editExp && e('div', { className: "modal-overlay" }, e('div', { className: "modal-container" }, e('h3', { style: { marginBottom: 20 } }, "Edit Expense"), e(Field, { label: "Description" }, e(Inp, { value: editForm.name, onChange: ev => setEditForm({ ...editForm, name: ev.target.value }) })), e(Field, { label: "Amount" }, e(Inp, { type: "number", value: editForm.amount, onChange: ev => setEditForm({ ...editForm, amount: ev.target.value }) })), e(Field, { label: "Category" }, e(Sel, { value: editForm.category, onChange: ev => setEditForm({ ...editForm, category: ev.target.value }) }, CATEGORIES.map(c => e('option', { key: c, value: c }, c)))), wallets && wallets.length > 0 && e(Field, { label: "Wallet" }, e(WalletPicker, { wallets, value: editForm.walletId, onChange: v => setEditForm({ ...editForm, walletId: v }) })), e('div', { style: S.formFooter }, e(Btn, { v: "ghost", style: { flex: 1 }, onClick: () => setEditExp(null) }, "Cancel"), e(Btn, { v: "accent", style: { flex: 1 }, onClick: () => saveEditExp(false) }, "Save"))))
             );
         }
 
@@ -1591,10 +1563,12 @@ e('footer', {
             const [editTxn, setEditTxn] = useState(null);
             const [editTxnForm, setEditTxnForm] = useState({ type: "deposit", amount: "", date: "" });
 
+            // Always derive from walletId first (source of truth).
+            // Snapshot is only a fallback for wallets that have since been deleted.
             const resolveWallet = (walletId, snapshot) => {
-                if (snapshot) return snapshot;
                 const w = (wallets || []).find(x => x.id === walletId);
-                return w ? w.name : null;
+                if (w) return w.name;
+                return snapshot || null;
             };
 
             const allItems = useMemo(() => {
@@ -1674,7 +1648,9 @@ e('footer', {
                 // ── Unified Transaction List ────────────────────────────────────
                 e('div', { className: "premium-panel" },
                     filtered.length === 0 ? e('div', { style: { padding: "36px 0", textAlign: "center" } },
-                        e('div', { style: { fontSize: 30, marginBottom: 12, opacity: 0.35 } }, "📋"),
+                        e('div', { style: { marginBottom: 14, opacity: 0.35, display: "flex", justifyContent: "center" } },
+                            e(Icon, { name: "clipboardlist", size: 38, color: "var(--text-muted)" })
+                        ),
                         e('div', { style: { fontWeight: 700, fontSize: 15, color: "var(--text-light)", marginBottom: 6 } },
                             allItems.length === 0 ? "No transactions yet" : "No matching transactions"),
                         e('div', { style: { fontSize: 13, color: "var(--text-muted)" } },
@@ -1765,10 +1741,12 @@ e('footer', {
                 return `${Math.floor(diffDays / 30)}mo ago`;
             };
 
+            // Always derive from walletId first (source of truth).
+            // Snapshot is only a fallback for wallets that have since been deleted.
             const resolveWallet = (walletId, snapshot) => {
-                if (snapshot) return snapshot;
                 const w = (wallets || []).find(x => x.id === walletId);
-                return w ? w.name : null;
+                if (w) return w.name;
+                return snapshot || null;
             };
 
             const activities = useMemo(() => {
@@ -1828,7 +1806,9 @@ e('footer', {
 
                 activities.length === 0
                     ? e('div', { style: { padding: "28px 0", textAlign: "center" } },
-                        e('div', { style: { fontSize: 26, marginBottom: 10, opacity: 0.35 } }, "🎯"),
+                        e('div', { style: { marginBottom: 12, opacity: 0.35, display: "flex", justifyContent: "center" } },
+                            e(Icon, { name: "trendingup", size: 36, color: "var(--text-muted)" })
+                        ),
                         e('div', { style: { fontWeight: 700, fontSize: 14, color: "var(--text-light)", marginBottom: 6 } }, "No recent activity yet"),
                         e('div', { style: { fontSize: 12, color: "var(--text-muted)", marginBottom: 14 } }, "Your transactions will appear here"),
                         e(Btn, { v: "accent", style: { fontSize: 12, padding: "9px 20px" }, onClick: () => onNavigate("daily") }, "Log First Expense")
