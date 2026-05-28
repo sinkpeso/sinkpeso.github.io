@@ -39,4 +39,12 @@
     // Expose globally
     window.EmptyState = EmptyState;
 
+    if (window.PropTypes) {
+        EmptyState.propTypes = {
+            icon: PropTypes.string.isRequired,
+            title: PropTypes.string.isRequired,
+            sub: PropTypes.string,
+        };
+    }
+
 })();

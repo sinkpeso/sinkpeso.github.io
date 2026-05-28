@@ -161,6 +161,12 @@ input, select, textarea { font-size: 16px !important; }
 .dot-menu-item { display: block; width: 100%; text-align: left; background: transparent; border: none; padding: 10px 12px; border-radius: var(--r-sm); cursor: pointer; font-size: var(--t-base); font-weight: 600; color: var(--text-main); transition: background 0.12s; }
 .dot-menu-item:hover { background: var(--hover-bg); }
 
+/* ── Z-INDEX LAYER SYSTEM (mirror of Z constant in index.html) ──
+    STICKY_HEADER: 100  |  FAB: 180  |  BOTTOM_NAV: 200
+    MENU_BACKDROP: 299  |  MENU_DROPDOWN: 300  |  SHEET: 500
+    MODAL: 1000  |  MODAL_INLINE: 1100  |  TOAST: 9000  |  PIN_SCREEN: 9999
+   ──────────────────────────────────────────────────────────────── */
+
 /* ── MODAL ── */
 .modal-overlay { position: fixed; inset: 0; background: var(--modal-bg); backdrop-filter: blur(10px); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: var(--sp-4); }
 .modal-container { background: var(--bg-panel); border: 1px solid var(--border); border-radius: var(--r-xl); padding: var(--sp-7); width: 100%; max-width: 480px; box-shadow: 0 24px 64px rgba(0,0,0,0.5); }
@@ -170,6 +176,10 @@ input, select, textarea { font-size: 16px !important; }
 
 .pin-screen { position: fixed; inset: 0; background: var(--bg-body); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: var(--sp-6); }
 .pin-input { font-family: 'DM Mono', monospace; font-size: 28px; letter-spacing: 14px; text-align: center; background: var(--bg-input); color: var(--text-main); border: 1px solid var(--border-input); padding: var(--sp-4); border-radius: var(--r-lg); outline: none; width: 240px; }
+
+/* ── INTERACTIVE HOVER STATES ── */
+.pin-unlock-btn:hover { background: rgba(0,230,118,0.08) !important; border-color: #00E676 !important; }
+.util-menu-btn:hover { background: var(--hover-bg) !important; color: var(--text-main) !important; }
 
 /* ── SECTION SPACING ── */
 .section-gap { margin-bottom: 20px; }

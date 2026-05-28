@@ -3,7 +3,8 @@
 // Rules:
 //   - Each action is a single named function with a flat options object.
 //   - All money is integer cents.
-//   - Wallet side-effects are delegated to window.finance.processFinancialTransaction.
+//   - Wallet balances are derived (see deriveWallets in finance.js), not mutated directly.
+//   - processFinancialTransaction validates amounts/balances only; state setters handle persistence.
 //   - No React imports; state setters are passed in as options.
 //
 // Depends on: utils.js, finance.js

@@ -85,7 +85,6 @@
         // Wise
         "wise":                             "wise",
         "wisetransfer":                     "wise",   // raw
-        "wise":                             "wise",   // stripped ("transfer" removed)
 
         // GoTyme
         "gotyme":                           "gotyme",

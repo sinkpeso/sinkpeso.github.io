@@ -5,13 +5,13 @@
 // down as separate saved values. This keeps balances, edits, and deletes aligned.
 
 (function () {
-    function cents(value) {
+    function ensureIntCents(value) {
         const n = Math.round(Number(value) || 0);
         return Number.isFinite(n) ? n : 0;
     }
 
     function validatePositiveCents(amountCents, label = "amount") {
-        const n = cents(amountCents);
+        const n = ensureIntCents(amountCents);
         if (n <= 0) {
             throw new Error(`Invalid ${label}.`);
         }
@@ -28,19 +28,19 @@
         let total = 0;
 
         incomes.forEach(item => {
-            if (item.walletId === walletId) total += cents(item.amountCents);
+            if (item.walletId === walletId) total += ensureIntCents(item.amountCents);
         });
 
         dailyExpenses.forEach(item => {
-            if (item.walletId === walletId) total -= cents(item.amountCents);
+            if (item.walletId === walletId) total -= ensureIntCents(item.amountCents);
         });
 
         txns.forEach(item => {
             if (item.walletId !== walletId) return;
 
-            if (item.type === "bill_payment") total -= cents(item.amountCents);
-            if (item.type === "deposit") total -= cents(item.amountCents);
-            if (item.type === "withdrawal") total += cents(item.amountCents);
+            if (item.type === "bill_payment") total -= ensureIntCents(item.amountCents);
+            if (item.type === "deposit") total -= ensureIntCents(item.amountCents);
+            if (item.type === "withdrawal") total += ensureIntCents(item.amountCents);
         });
 
         return total;
@@ -48,7 +48,7 @@
 
     function deriveWalletBalance(wallet, sources = {}) {
         if (!wallet) return 0;
-        return cents(wallet.openingBalanceCents) + getWalletDelta(wallet.id, sources);
+        return ensureIntCents(wallet.openingBalanceCents) + getWalletDelta(wallet.id, sources);
     }
 
     function deriveWallets(wallets, sources = {}) {
@@ -62,7 +62,7 @@
         return (Array.isArray(wallets) ? wallets : []).map(wallet => {
             if (wallet.openingBalanceCents !== undefined) return wallet;
 
-            const savedBalance = cents(wallet.balanceCents);
+            const savedBalance = ensureIntCents(wallet.balanceCents);
             const existingRecordDelta = getWalletDelta(wallet.id, sources);
 
             return {
@@ -72,6 +72,8 @@
         });
     }
 
+    // Validates transaction amounts and wallet balance sufficiency.
+    // Does NOT mutate state — wallet balances are derived via deriveWallets().
     function processFinancialTransaction(opts = {}) {
         try {
             const type = opts.type;
@@ -98,7 +100,7 @@
 
                 const wallet = (opts.wallets || []).find(w => w.id === opts.walletId);
                 if (!wallet) return { ok: false, error: "Wallet not found." };
-                if (cents(wallet.balanceCents) < amt) {
+                if (ensureIntCents(wallet.balanceCents) < amt) {
                     return { ok: false, error: "Insufficient funds for this vault deposit." };
                 }
 
@@ -111,7 +113,7 @@
 
                 const wallet = (opts.wallets || []).find(w => w.id === opts.walletId);
                 if (!wallet) return { ok: false, error: "Wallet not found." };
-                if (cents(wallet.balanceCents) < amt) {
+                if (ensureIntCents(wallet.balanceCents) < amt) {
                     return { ok: false, error: "Insufficient funds for this bill payment." };
                 }
 
@@ -136,7 +138,7 @@
         if (!walletId) return { safe: true, walletName: null, projectedBalance: 0 };
         const wallet = (derivedWallets || []).find(w => w.id === walletId);
         if (!wallet) return { safe: true, walletName: null, projectedBalance: 0 };
-        const projected = cents(wallet.balanceCents) - cents(amountCents);
+        const projected = ensureIntCents(wallet.balanceCents) - ensureIntCents(amountCents);
         return {
             safe: projected >= 0,
             walletName: wallet.name,

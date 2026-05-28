@@ -20,6 +20,8 @@
     // Pull helpers from window.utils (extracted in a previous step)
     const getDaysRemaining = window.utils.getDaysRemaining;
     const safeDiv          = window.utils.safeDiv;
+    // CATEGORIES is defined in index.html's main <script> — resolve at render time, not load time
+    const getCats = () => window.CATEGORIES || [];
 
     function InsightStrip({ totals, bills, budgets, fc }) {
         // Safety guard — render nothing if any required prop is missing
@@ -65,7 +67,7 @@
             });
 
         // ── Chip 4: Category budget almost full (80–99%) ─────────────────────
-        const warnCat = CATEGORIES.find(k => {
+        const warnCat = getCats().find(k => {
             const b = budgets.find(x => x.category === k);
             const ratio = b ? safeDiv(totals.catSum[k] || 0, b.limitCents) : 0;
             return b && ratio >= 0.8 && ratio < 1;
@@ -78,7 +80,7 @@
             });
 
         // ── Chip 5: Category budget exceeded (≥100%) ─────────────────────────
-        const overCat = CATEGORIES.find(k => {
+        const overCat = getCats().find(k => {
             const b = budgets.find(x => x.category === k);
             return b && safeDiv(totals.catSum[k] || 0, b.limitCents) >= 1;
         });
@@ -128,5 +130,14 @@
 
     // Expose to window so index.html can use it as a global
     window.InsightStrip = InsightStrip;
+
+    if (window.PropTypes) {
+        InsightStrip.propTypes = {
+            totals: PropTypes.object.isRequired,
+            bills: PropTypes.array.isRequired,
+            budgets: PropTypes.array.isRequired,
+            fc: PropTypes.func.isRequired,
+        };
+    }
 
 })();

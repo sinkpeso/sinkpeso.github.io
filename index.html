@@ -9,8 +9,9 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
     
-    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+    <script src="https://unpkg.com/prop-types@15/prop-types.min.js" crossorigin></script>
     
 	
 	
@@ -25,6 +26,7 @@
 <script src="selectors.js"></script>
 <script src="actions.js"></script>
 <script src="walleticons.js"></script>
+<script src="persistence.js"></script>
 
         <link rel="apple-touch-icon" href="logosinkpeso.png">
     <link rel="icon" href="logosinkpeso.png" type="image/png">
@@ -37,7 +39,7 @@
     <div id="root"></div>
 
     <script>
-        const { useState, useMemo, useEffect, useRef } = React;
+        const { useState, useMemo, useEffect, useRef, useCallback } = React;
         const e = React.createElement;
 
         // ── SHARED STYLE TOKENS ───────────────────────────────────────────────
@@ -75,6 +77,20 @@
             modalFooter: { display:"flex", gap:10, marginTop:24 },
             formFooter:  { display:"flex", gap:10, marginTop:8 },
             section:     { marginBottom:24 },
+        };
+
+        // ── Z-INDEX LAYER SYSTEM ─────────────────────────────────────────────
+        const Z = {
+            STICKY_HEADER: 100,
+            FAB:           180,
+            BOTTOM_NAV:    200,
+            MENU_BACKDROP: 299,
+            MENU_DROPDOWN: 300,
+            SHEET:         500,
+            MODAL:         1000,
+            MODAL_INLINE:  1100,
+            TOAST:         9000,
+            PIN_SCREEN:    9999,
         };
 
         // ── LUCIDE SVG ICON PRIMITIVE ─────────────────────────────────────────
@@ -158,7 +174,7 @@
         function DotMenu({ itemId, openMenu, setOpenMenu, onEdit, onDelete }) {
             const isOpen = openMenu === itemId;
             return e('div', { style: { position: "relative", flexShrink: 0 } },
-                isOpen && e('div', { style: { position: "fixed", inset: 0, zIndex: 299 }, onClick: (ev) => { ev.stopPropagation(); setOpenMenu(null); } }),
+                isOpen && e('div', { style: { position: "fixed", inset: 0, zIndex: Z.MENU_BACKDROP }, onClick: (ev) => { ev.stopPropagation(); setOpenMenu(null); } }),
                 e('button', { className: "dot-menu-btn", onClick: (ev) => { ev.stopPropagation(); setOpenMenu(isOpen ? null : itemId); } }, '⋮'),
                 isOpen && e('div', { className: "dot-menu-dropdown" },
                     e('button', { className: "dot-menu-item", onClick: (ev) => { ev.stopPropagation(); setOpenMenu(null); onEdit(); } },
@@ -258,7 +274,7 @@
         }
 
         // ── MODULE: WALLETS ────────────────────────────────────────────────────
-        function WalletsView({ wallets, setWallets, incomes, dailyExpenses, txns, fc }) {
+        function WalletsView({ wallets, setWallets, incomes, dailyExpenses, txns, fc, requestConfirm, showToast }) {
             const [modal, setModal] = useState(false);
             const [form, setForm] = useState({ name: "", balanceCents: "", color: WALLET_COLORS[0] });
             const [editWallet, setEditWallet] = useState(null);
@@ -288,10 +304,10 @@
             const deleteWallet = (id) => {
                 const wallet = wallets.find(w => w.id === id);
                 if (wallet && (wallet.balanceCents || 0) !== 0) {
-                    alert("This wallet still has a balance. Move or spend the balance before deleting it.");
+                    showToast("This wallet still has a balance. Move or spend it first.");
                     return;
                 }
-                if (window.confirm("Delete this wallet?")) setWallets(wallets.filter(w => w.id !== id));
+                requestConfirm("Delete this wallet?", () => setWallets(wallets.filter(w => w.id !== id)));
             };
 
             const ColorPicker = ({ value, onChange }) => e('div', { style: { display:"flex", gap:8, flexWrap:"wrap", marginTop:4 } },
@@ -378,7 +394,7 @@ e(EmptyState, { icon:"creditcard", title:"No wallets yet", sub:"Add Cash, GCash,
         // ── QUICK ADD MODAL ────────────────────────────────────────────────
         // ── INSUFFICIENT BALANCE MODAL ─────────────────────────────────────────
         function InsufficientBalanceModal({ wallet, expenseAmount, fc, onCancel, onForce }) {
-            return e('div', { className: "modal-overlay", onClick: onCancel, style: { zIndex: 1100 } },
+            return e('div', { className: "modal-overlay", onClick: onCancel, style: { zIndex: Z.MODAL_INLINE } },
                 e('div', { className: "modal-container", style: { maxWidth: 360 }, onClick: ev => ev.stopPropagation() },
                     e('div', { style: { ...S.modalHeader, marginBottom: 16 } },
                         e('div', { style: { fontSize: 17, fontWeight: 800, color: "#EF4444" } }, "Insufficient Balance"),
@@ -500,8 +516,7 @@ e(EmptyState, { icon:"creditcard", title:"No wallets yet", sub:"Add Cash, GCash,
                         fontFamily: "inherit", display: "inline-flex",
                         alignItems: "center", justifyContent: "center",
                     },
-                    onMouseOver: ev => { ev.currentTarget.style.background = "rgba(0,230,118,0.08)"; ev.currentTarget.style.borderColor = "#00E676"; },
-                    onMouseOut:  ev => { ev.currentTarget.style.background = "transparent"; ev.currentTarget.style.borderColor = "rgba(0,230,118,0.4)"; },
+                    className: "pin-unlock-btn",
                 }, "Unlock App"),
                 // Footer
                 e('div', { style: { position: "absolute", bottom: 32, left: 0, right: 0, textAlign: "center" } },
@@ -528,48 +543,41 @@ e(EmptyState, { icon:"creditcard", title:"No wallets yet", sub:"Add Cash, GCash,
             }
         }
 
-        const safeGet = (key, fallback = []) => { try { return JSON.parse(localStorage.getItem(key)) || fallback; } catch { return fallback; } };
-
         // ── CORE APPLICATION ──────────────────────────────────────────────────
         function App() {
             const [tab, setTab] = useState("dashboard");
 
+            const saved = window.persistence.loadState();
             const defaultSettings = { currency: 'PHP', theme: 'dark', pin: '' };
-            const [settings, setSettings] = useState(() => {
-                try { 
-                    const saved = JSON.parse(localStorage.getItem("sp_settings"));
-                    return saved && typeof saved === 'object' ? { ...defaultSettings, ...saved } : defaultSettings;
-                }
-                catch { return defaultSettings; }
-            });
+            const [settings, setSettings] = useState(() => ({ ...defaultSettings, ...saved.settings }));
             const [isUnlocked, setIsUnlocked] = useState(!settings.pin);
 
-            const [funds, setFunds] = useState(() => safeGet("sp_funds"));
-            const [txns, setTxns] = useState(() => safeGet("sp_txns"));
-            const [incomes, setIncomes] = useState(() => safeGet("sp_incomes"));
-            const [bills, setBills] = useState(() => safeGet("sp_bills"));
-            const [dailyExpenses, setDailyExpenses] = useState(() => safeGet("sp_daily"));
-            const [archives, setArchives] = useState(() => safeGet("sp_archives"));
-            const [budgets, setBudgets] = useState(() => safeGet("sp_budgets"));
+            const [funds, setFunds] = useState(saved.funds);
+            const [txns, setTxns] = useState(saved.txns);
+            const [incomes, setIncomes] = useState(saved.incomes);
+            const [bills, setBills] = useState(saved.bills);
+            const [dailyExpenses, setDailyExpenses] = useState(saved.daily);
+            const [archives, setArchives] = useState(saved.archives);
+            const [budgets, setBudgets] = useState(saved.budgets);
             const [wallets, setWallets] = useState(() => {
-                const saved = safeGet("sp_wallets");
-                const withCash = saved.find(w => w.id === CASH_WALLET_ID) ? saved : [CASH_WALLET, ...saved];
+                const w = saved.wallets;
+                const withCash = w.find(x => x.id === CASH_WALLET_ID) ? w : [CASH_WALLET, ...w];
                 return window.finance.migrateWallets(withCash, { incomes, bills, dailyExpenses, txns });
             });
 
             // Sync states to LocalStorage & Apply Theme
             useEffect(() => {
-                localStorage.setItem("sp_settings", JSON.stringify(settings));
+                window.persistence.saveKey("settings", settings);
                 document.documentElement.setAttribute('data-theme', settings.theme);
             }, [settings]);
-            useEffect(() => { localStorage.setItem("sp_funds", JSON.stringify(funds)); }, [funds]);
-            useEffect(() => { localStorage.setItem("sp_txns", JSON.stringify(txns)); }, [txns]);
-            useEffect(() => { localStorage.setItem("sp_incomes", JSON.stringify(incomes)); }, [incomes]);
-            useEffect(() => { localStorage.setItem("sp_bills", JSON.stringify(bills)); }, [bills]);
-            useEffect(() => { localStorage.setItem("sp_daily", JSON.stringify(dailyExpenses)); }, [dailyExpenses]);
-            useEffect(() => { localStorage.setItem("sp_archives", JSON.stringify(archives)); }, [archives]);
-            useEffect(() => { localStorage.setItem("sp_budgets", JSON.stringify(budgets)); }, [budgets]);
-            useEffect(() => { localStorage.setItem("sp_wallets", JSON.stringify(wallets)); }, [wallets]);
+            useEffect(() => { window.persistence.saveKey("funds", funds); }, [funds]);
+            useEffect(() => { window.persistence.saveKey("txns", txns); }, [txns]);
+            useEffect(() => { window.persistence.saveKey("incomes", incomes); }, [incomes]);
+            useEffect(() => { window.persistence.saveKey("bills", bills); }, [bills]);
+            useEffect(() => { window.persistence.saveKey("daily", dailyExpenses); }, [dailyExpenses]);
+            useEffect(() => { window.persistence.saveKey("archives", archives); }, [archives]);
+            useEffect(() => { window.persistence.saveKey("budgets", budgets); }, [budgets]);
+            useEffect(() => { window.persistence.saveKey("wallets", wallets); }, [wallets]);
 
             // Currency Formatter bound to state
             const fc = useMemo(() => {
@@ -592,11 +600,17 @@ e(EmptyState, { icon:"creditcard", title:"No wallets yet", sub:"Add Cash, GCash,
             const [showUtilMenu, setShowUtilMenu]   = useState(false);
             const [toast, setToast] = useState(null);
             const toastTimer = useRef(null);
-            const showToast = (msg) => {
+            const showToast = useCallback((msg) => {
                 if (toastTimer.current) clearTimeout(toastTimer.current);
                 setToast(msg);
                 toastTimer.current = setTimeout(() => setToast(null), 2600);
-            };
+            }, []);
+
+            // ── CONFIRM DIALOG ───────────────────────────────────────────────────
+            const [confirmState, setConfirmState] = useState(null);
+            const requestConfirm = useCallback((message, onConfirm) => {
+                setConfirmState({ message, onConfirm });
+            }, []);
 
             if (!isUnlocked) return e(PinScreen, { targetPin: settings.pin, onUnlock: () => setIsUnlocked(true) });
 
@@ -651,7 +665,7 @@ e(EmptyState, { icon:"creditcard", title:"No wallets yet", sub:"Add Cash, GCash,
             };
 
             return e('div', null,
-                e('div', { style: { background: "var(--bg-panel)", borderBottom: "1px solid var(--border)", position: "sticky", top: 0, zIndex: 100 } },
+                e('div', { style: { background: "var(--bg-panel)", borderBottom: "1px solid var(--border)", position: "sticky", top: 0, zIndex: Z.STICKY_HEADER } },
 
                     // ── ROW 1: Logo + Action Buttons ──────────────────────────
                     e('div', { style: { display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 16px", gap: 8 } },
@@ -665,24 +679,23 @@ e(EmptyState, { icon:"creditcard", title:"No wallets yet", sub:"Add Cash, GCash,
                             e('div', { style: { position: "relative" } },
                                 // Backdrop to close on outside click
                                 showUtilMenu && e('div', {
-                                    style: { position: "fixed", inset: 0, zIndex: 299 },
+                                    style: { position: "fixed", inset: 0, zIndex: Z.MENU_BACKDROP },
                                     onClick: () => setShowUtilMenu(false)
                                 }),
                                 // Three-dot trigger
                                 e('button', {
                                     onClick: () => setShowUtilMenu(!showUtilMenu),
                                     title: "More actions",
+                                    className: "util-menu-btn",
                                     style: {
                                         background: showUtilMenu ? "var(--hover-bg)" : "transparent",
                                         border: "1px solid rgba(255,255,255,0.09)",
-                                        color: "var(--text-muted)",
+                                        color: showUtilMenu ? "var(--text-main)" : "var(--text-muted)",
                                         width: 34, height: 34, borderRadius: 8,
                                         cursor: "pointer", display: "flex",
                                         alignItems: "center", justifyContent: "center",
                                         transition: "all 0.15s", flexShrink: 0,
                                     },
-                                    onMouseOver: ev => { ev.currentTarget.style.background = "var(--hover-bg)"; ev.currentTarget.style.color = "var(--text-main)"; },
-                                    onMouseOut:  ev => { if (!showUtilMenu) { ev.currentTarget.style.background = "transparent"; ev.currentTarget.style.color = "var(--text-muted)"; } },
                                 },
                                     e(Icon, { name: "more", size: 16 })
                                 ),
@@ -693,7 +706,7 @@ e(EmptyState, { icon:"creditcard", title:"No wallets yet", sub:"Add Cash, GCash,
                                         background: "var(--bg-panel)",
                                         border: "1px solid var(--border)",
                                         borderRadius: 12, padding: 4,
-                                        zIndex: 300, minWidth: 178,
+                                        zIndex: Z.MENU_DROPDOWN, minWidth: 178,
                                         boxShadow: "0 8px 28px rgba(0,0,0,0.45)",
                                     }
                                 },
@@ -755,12 +768,12 @@ e(EmptyState, { icon:"creditcard", title:"No wallets yet", sub:"Add Cash, GCash,
                 
                 e('div', { className: "page-wrap", style: { maxWidth: 1140, margin: "0 auto", padding: "clamp(16px, 4vw, 32px) clamp(12px, 4vw, 24px) 80px" } },
                     tab === "dashboard" && e(DashboardOverview, { totals, bills, dailyExpenses, budgets, wallets: displayWallets, fc, incomes, txns, funds, archives, onNavigate: setTab }),
-                    tab === "limits" && e(BudgetLimitsView, { budgets, setBudgets, fc }),
-                    tab === "wallets" && e(WalletsView, { wallets: displayWallets, setWallets, incomes, dailyExpenses, txns, fc }),
-                    tab === "budget" && e(BudgetBillsView, { incomes, setIncomes, bills, setBills, wallets: displayWallets, setWallets, txns, setTxns, fc }),
-                    tab === "daily" && e(DailyExpensesView, { dailyExpenses, setDailyExpenses, wallets: displayWallets, setWallets, fc }),
-                    tab === "goals" && e(SinkingFundsView, { funds, setFunds, enrichedFunds: totals.enrichedFunds, txns, setTxns, wallets: displayWallets, setWallets, fc }),
-                    tab === "transactions" && e(AllTransactionsView, { txns, setTxns, funds, incomes, dailyExpenses, bills, wallets: displayWallets, fc }),
+                    tab === "limits" && e(BudgetLimitsView, { budgets, setBudgets, fc, requestConfirm }),
+                    tab === "wallets" && e(WalletsView, { wallets: displayWallets, setWallets, incomes, dailyExpenses, txns, fc, requestConfirm, showToast }),
+                    tab === "budget" && e(BudgetBillsView, { incomes, setIncomes, bills, setBills, wallets: displayWallets, setWallets, txns, setTxns, fc, requestConfirm, showToast }),
+                    tab === "daily" && e(DailyExpensesView, { dailyExpenses, setDailyExpenses, wallets: displayWallets, setWallets, fc, requestConfirm }),
+                    tab === "goals" && e(SinkingFundsView, { funds, setFunds, enrichedFunds: totals.enrichedFunds, txns, setTxns, wallets: displayWallets, setWallets, fc, requestConfirm, showToast }),
+                    tab === "transactions" && e(AllTransactionsView, { txns, setTxns, funds, incomes, dailyExpenses, bills, wallets: displayWallets, fc, requestConfirm }),
                     tab === "history" && e(HistoryView, { archives, fc }),
                     tab === "settings" && e(SettingsView, { settings, setSettings, setIncomes, setBills, setDailyExpenses, setFunds, setTxns, setArchives, setBudgets, showToast, totals, bills, budgets, fc }),
 
@@ -780,6 +793,17 @@ e('footer', {
 
                 // ── TOAST NOTIFICATION ──────────────────────────────────────
                 toast && e('div', { className: "toast" }, toast),
+
+                // ── Confirm Dialog ────────────────────────────────────────────
+                confirmState && e('div', { className: "modal-overlay", onClick: () => setConfirmState(null), style: { zIndex: Z.MODAL } },
+                    e('div', { onClick: ev => ev.stopPropagation(), style: { background: "var(--bg-panel)", borderRadius: 18, padding: "24px 20px", maxWidth: 340, width: "100%", border: "1px solid var(--border)", boxShadow: "0 20px 60px rgba(0,0,0,0.5)" } },
+                        e('div', { style: { fontSize: 15, fontWeight: 600, color: "var(--text-main)", lineHeight: 1.5, textAlign: "center", marginBottom: 20 } }, confirmState.message),
+                        e('div', { style: { display: "flex", gap: 10 } },
+                            e(Btn, { v: "ghost", style: { flex: 1 }, onClick: () => setConfirmState(null) }, "Cancel"),
+                            e(Btn, { v: "danger", style: { flex: 1 }, onClick: () => { const cb = confirmState.onConfirm; setConfirmState(null); cb(); } }, "Confirm")
+                        )
+                    )
+                ),
 
                 // ── FLOATING QUICK ADD BUTTON ───────────────────────────────
                 e('button', { className: "fab", title: "Quick Add Expense", onClick: () => setShowQuickAdd(true) }, e(Icon, { name: "plus", size: 26, color: "#030712" })),
@@ -904,17 +928,12 @@ e('footer', {
             const [pinInput, setPinInput] = useState(safeSettings?.pin || '');
 
             const handleExport = () => {
-                const data = {
-                    sp_funds: localStorage.getItem('sp_funds'),
-                    sp_txns: localStorage.getItem('sp_txns'),
-                    sp_incomes: localStorage.getItem('sp_incomes'),
-                    sp_bills: localStorage.getItem('sp_bills'),
-                    sp_daily: localStorage.getItem('sp_daily'),
-                    sp_archives: localStorage.getItem('sp_archives'),
-                    sp_budgets: localStorage.getItem('sp_budgets'),
-                    sp_wallets: localStorage.getItem('sp_wallets'),
-                    sp_settings: localStorage.getItem('sp_settings')
-                };
+                const state = window.persistence.loadState();
+                const keys = window.persistence.getAllRawKeys();
+                const data = {};
+                Object.entries(keys).forEach(([name, lsKey]) => {
+                    data[lsKey] = JSON.stringify(state[name]);
+                });
                 const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a'); a.href = url; a.download = `sinkpeso_backup_${todayStr()}.json`; a.click();
@@ -927,10 +946,11 @@ e('footer', {
                 reader.onload = (e) => {
                     try {
                         const data = JSON.parse(e.target.result);
+                        window.persistence.clearState();
                         Object.keys(data).forEach(k => { if (k.startsWith('sp_')) localStorage.setItem(k, data[k] || "[]"); });
-                        alert("Backup restored! The app will now reload.");
-                        window.location.reload();
-                    } catch (err) { alert("Invalid backup file format."); }
+                        showToast("Backup restored! Reloading...");
+                        setTimeout(() => window.location.reload(), 800);
+                    } catch (err) { showToast("Invalid backup file format."); }
                 };
                 reader.readAsText(file);
             };
@@ -1038,131 +1058,9 @@ e('footer', {
         }
 
         // InsightStrip is defined in InsightStrip.js (window.InsightStrip)
-        // The inline version below is authoritative — richer than the external file.
-
-                // ── MODULE: DASHBOARD OVERVIEW ──────────────────────────────────────
-        function DashboardOverview({ totals, bills, dailyExpenses, budgets, wallets, fc, incomes, txns, funds, archives, onNavigate }) {
-            const spendPercentage = totals.totalIncome > 0 ? (totals.totalDailySpent + totals.paidBills) / totals.totalIncome : 0;
-            // Wallet total = sum of all real wallet balances (persists across months)
-            const walletTotal = (wallets || []).reduce((s, w) => s + (w.balanceCents || 0), 0);
-
-            return e('div', null,
-                e('div', { style: { marginBottom: 20 } },
-                    e('div', { style: { display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap", marginBottom: 5 } },
-                        e('h1', { style: { fontSize: "clamp(18px, 5vw, 24px)", fontWeight: 800, color: "var(--text-main)", lineHeight: 1.1 } }, "Financial Position"),
-                        e('div', { style: { background: totals.healthStatus.bg, color: totals.healthStatus.color, border: `1px solid ${totals.healthStatus.color}30`, padding: "4px 12px", borderRadius: 20, fontSize: 11, fontWeight: 700, whiteSpace: "nowrap" } }, totals.healthStatus.label)
-                    ),
-                    e('div', { style: { fontSize: 13, color: "var(--text-muted)" } }, "Simple visual breakdown of your cash health")
-                ),
-
-                e('div', { className: "dashboard-grid" },
-                    e('div', { style: { display: "flex", flexDirection: "column", gap: 24 } },
-                        e('div', { className: "balance-gradient-card" },
-                            // ── Available This Month ───────────────────────────────────
-                            e(SLabel, { style: { color: "var(--text-light)", marginBottom: 6 } }, "Available This Month"),
-                            e('div', { style: { fontSize: 38, fontWeight: 800, color: "#00E676", letterSpacing: "-0.025em", fontVariantNumeric: "tabular-nums" } }, fc(totals.netAvailable)),
-                            e('div', { style: { fontSize: 11, color: "var(--text-muted)", marginTop: 2, marginBottom: 16 } }, "Income minus expenses, bills paid & savings this month"),
-
-                            // ── Wallet Total (separate — persists across months) ────────
-                            e('div', { style: { display: "flex", alignItems: "center", justifyContent: "space-between", background: "rgba(255,255,255,0.04)", border: "1px solid var(--border)", borderRadius: 10, padding: "10px 14px" } },
-                                e('div', null,
-                                    e(SLabel, { style: { marginBottom: 3 } }, "Wallet Total"),
-                                    e('div', { style: { fontSize: 11, color: "var(--text-muted)" } }, "Persists across months")
-                                ),
-                                e('div', { style: { fontSize: 18, fontWeight: 800, color: walletTotal < 0 ? "#EF4444" : "var(--text-main)", fontVariantNumeric: "tabular-nums" } }, fc(walletTotal))
-                            ),
-
-                            (() => {
-                                const daysInMonth = new Date(new Date().getFullYear(), new Date().getMonth()+1, 0).getDate();
-                                const dayOfMonth  = new Date().getDate();
-                                const daysLeft    = Math.max(1, daysInMonth - dayOfMonth);
-                                const safeDailySpend = totals.netAvailable > 0 ? Math.floor(totals.netAvailable / daysLeft) : 0;
-                                return e('div', null,
-                                    e('div', { style: { display: "flex", gap: 40, marginTop: 20, borderTop: "1px solid var(--border)", paddingTop: 20 } },
-                                        e('div', null, e(SLabel, { style: { marginBottom: 4 } }, "Total Income"), e('div', { style: { fontSize: 16, fontWeight: 700, color: "var(--text-main)" } }, fc(totals.totalIncome))),
-                                        e('div', null, e(SLabel, { style: { marginBottom: 4 } }, "Total Spent"), e('div', { style: { fontSize: 16, fontWeight: 700, color: "var(--text-muted)" } }, fc(totals.totalDailySpent + totals.paidBills)))
-                                    ),
-                                    safeDailySpend > 0 && e('div', { className: "safe-chip" },
-                                        e(Icon, { name: "trendingup", size: 13, color: "#00E676" }),
-                                        e('span', null, `Safe daily spend: ${fc(safeDailySpend)} / day (${daysLeft}d left)`)
-                                    )
-                                );
-                            })()
-                        ),
-
-                        e('div', { className: "premium-panel" },
-                            e(SLabel, { style: { marginBottom: 16 } }, "Where Your Money Goes"),
-                            e('div', { className: "category-box-grid" },
-                                CATEGORIES.map(cKey => {
-                                    const currentVal = totals.catSum[cKey] || 0;
-                                    const budgetObj = budgets.find(b => b.category === cKey);
-                                    const limit = budgetObj ? budgetObj.limitCents : null;
-                                    const percent = limit ? safeDiv(currentVal, limit) : 0;
-                                    
-                                    let pColor = "#00E676"; 
-                                    if (limit) {
-                                        if (percent >= 1.0) pColor = "#FF1744"; else if (percent >= 0.8) pColor = "#FFD600";
-                                    } else { pColor = "var(--border)"; }
-
-                                    return e('div', { key: cKey, className: "category-mini-card" },
-                                        e('div', { style: { display: "flex", justifyContent: "space-between", fontSize: 12, fontWeight: 600, color: "var(--text-light)", marginBottom: 4 } },
-                                            e('span', null, cKey), e('span', { style: { color: "var(--text-main)" } }, limit ? `${Math.round(percent * 100)}%` : "-")
-                                        ),
-                                        e('div', { style: { fontSize: 16, fontWeight: 700, color: "var(--text-main)", marginTop: 2 } }, 
-                                            limit ? `${fc(currentVal)} / ${fc(limit)}` : e('span', {style: {fontSize: 13, color: "var(--text-muted)", fontWeight: 600}}, "No limit set")
-                                        ),
-                                        e(PBar, { pct: limit ? percent : 0, color: pColor })
-                                    );
-                                })
-                            )
-                        )
-                    ),
-
-                    e('div', { className: "premium-panel", style: { display: "flex", flexDirection: "column", gap: 24, justifyContent: "space-between" } },
-                        e('div', null,
-                            e(SLabel, { style: { marginBottom: 12, textAlign: "center" } }, "Monthly Budget Used"),
-                            e('div', { style: { display: 'flex', justifyContent: 'center', position: 'relative' } },
-                                e('svg', { height: 140, width: 140, style: { transform: 'rotate(-90deg)' } },
-                                    e('circle', { fill: 'none', stroke: 'var(--border-input)', strokeWidth: 14, r: 56, cx: 70, cy: 70 }),
-                                    e('circle', { fill: 'none', stroke: spendPercentage > 0.8 ? '#FF1744' : '#00E676', strokeWidth: 14, strokeLinecap: 'round', strokeDasharray: 56 * 2 * Math.PI, strokeDashoffset: (56 * 2 * Math.PI) * (1 - Math.min(spendPercentage, 1)), r: 56, cx: 70, cy: 70, style: { transition: 'stroke-dashoffset 0.5s ease' } })
-                                ),
-                                e('div', { style: { position: 'absolute', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', width: 140, height: 140 } },
-                                    e('span', { style: { fontSize: 20, fontWeight: 800, color: 'var(--text-main)' } }, `${Math.round(spendPercentage * 100)}%`),
-                                    e('span', { style: { fontSize: 11, color: 'var(--text-muted)', fontWeight: 600, marginTop: 2 } }, "used")
-                                )
-                            )
-                        ),
-
-                        e('div', { style: { borderTop: "1px solid var(--border)", paddingTop: 20 } },
-                            e(SLabel, { style: { marginBottom: 12 } }, "Upcoming Unpaid Bills"),
-                            bills.filter(b => !b.isPaid).length === 0 ? e('div', { style: { color: "#00E676", fontSize: 13, fontWeight: 600, display:"flex", alignItems:"center", gap:6 } }, e(Icon, {name:"shield", size:14, color:"#00E676"}), "All bills paid") :
-                            bills.filter(b => !b.isPaid).slice(0, 3).map(b => {
-                                const days = getDaysRemaining(b.dueDate);
-                                let urgencyColor = "var(--text-muted)"; let urgencyText = "";
-                                if (days < 0) { urgencyColor = "#EF4444"; urgencyText = `Overdue (${Math.abs(days)}d)`; }
-                                else if (days <= 1) { urgencyColor = "#EF4444"; urgencyText = "Due Tomorrow!"; }
-                                else if (days <= 3) { urgencyColor = "#F59E0B"; urgencyText = `Due in ${days} days`; }
-                                else { urgencyText = `Due in ${days} days`; }
-
-                                return e('div', { key: b.id, style: { display: "flex", justifyContent: "space-between", alignItems: "center", background: "var(--hover-bg)", padding: "12px 16px", borderRadius: 12, marginBottom: 8 } },
-                                    e('div', null,
-                                        e('div', { style: { fontSize: 13, fontWeight: 600, color: 'var(--text-main)' } }, b.name),
-                                        e('div', { style: { fontSize: 11, color: urgencyColor, marginTop: 2, fontWeight: days <= 3 ? 700 : 500 } }, urgencyText)
-                                    ),
-                                    e('div', { style: { fontSize: 13, fontWeight: 700, color: 'var(--text-main)' } }, fc(b.amountCents))
-                                )
-                            })
-                        )
-                    )
-                ),
-
-                // ── Recent Activity ─────────────────────────────────────────────
-                onNavigate && e(RecentActivitySection, { incomes, dailyExpenses, bills, txns, funds, wallets, archives, fc, onNavigate })
-            );
-        }
 
         // ── MODULE: BUDGET LIMITS ───────────────────────────────────────────
-        function BudgetLimitsView({ budgets, setBudgets, fc }) {
+        function BudgetLimitsView({ budgets, setBudgets, fc, requestConfirm }) {
             const [category, setCategory] = useState("Food");
             const [limitAmt, setLimitAmt] = useState("");
             const [openMenu, setOpenMenu] = useState(null);
@@ -1175,7 +1073,7 @@ e('footer', {
                 setBudgets(budgets.map(b => b.id === editBudget.id ? { ...b, category: editForm.category, limitCents: tc(editForm.limit) } : b ));
                 setEditBudget(null);
             };
-            const deleteBudget = (id) => { if (window.confirm("Delete this budget limit?")) setBudgets(budgets.filter(b => b.id !== id)); };
+            const deleteBudget = (id) => { requestConfirm("Delete this budget limit?", () => setBudgets(budgets.filter(b => b.id !== id))); };
 
             return e('div', null,
                 e(PageTitle, null, 'Budget Category Limits'),
@@ -1264,7 +1162,7 @@ e('footer', {
         }
 
         // ── MODULE: BILLS & INCOME ──────────────────────────────────────────
-        function BudgetBillsView({ incomes, setIncomes, bills, setBills, wallets, setWallets, txns, setTxns, fc }) {
+        function BudgetBillsView({ incomes, setIncomes, bills, setBills, wallets, setWallets, txns, setTxns, fc, requestConfirm, showToast }) {
             const [incName, setIncName] = useState(""); const [incAmt, setIncAmt] = useState(""); const [incWalletId, setIncWalletId] = useState(CASH_WALLET_ID);
             const [billName, setBillName] = useState(""); const [billAmt, setBillAmt] = useState(""); const [billDate, setBillDate] = useState(""); const [billRecurring, setBillRecurring] = useState("none"); const [billCat, setBillCat] = useState("Bills");
 
@@ -1280,8 +1178,7 @@ e('footer', {
                 setEditIncome(null);
             };
             const deleteIncome = (id) => {
-                if (!window.confirm("Delete this income entry?")) return;
-                window.actions.deleteIncome({ id, incomes, setIncomes, wallets, setWallets });
+                requestConfirm("Delete this income entry?", () => window.actions.deleteIncome({ id, incomes, setIncomes, wallets, setWallets }));
             };
 
             const openEditBill = (item) => { setEditBill(item); setEditBillForm({ name: item.name, amount: String((item.amountCents / 100).toFixed(2)), dueDate: item.dueDate, recurring: item.recurring || "none", category: item.category || "Bills" }); };
@@ -1293,14 +1190,16 @@ e('footer', {
                 setEditBill(null);
             };
             const markBillUnpaid = (bill) => {
-                if (!window.confirm("Mark this bill as unpaid? The payment transaction will be removed.")) return;
-                setBills(bills.map(x => x.id === bill.id ? { ...x, isPaid: false, paidTxnId: null, paidWalletId: null } : x));
-                setTxns(txns.filter(t => !(t.type === "bill_payment" && t.billId === bill.id)));
+                requestConfirm("Mark this bill as unpaid? The payment transaction will be removed.", () => {
+                    setBills(bills.map(x => x.id === bill.id ? { ...x, isPaid: false, paidTxnId: null, paidWalletId: null } : x));
+                    setTxns(txns.filter(t => !(t.type === "bill_payment" && t.billId === bill.id)));
+                });
             };
             const deleteBill = (id) => {
-                if (!window.confirm("Delete this bill? Related payment records will also be removed.")) return;
-                setBills(bills.filter(b => b.id !== id));
-                setTxns(txns.filter(t => !(t.type === "bill_payment" && t.billId === id)));
+                requestConfirm("Delete this bill? Related payment records will also be removed.", () => {
+                    setBills(bills.filter(b => b.id !== id));
+                    setTxns(txns.filter(t => !(t.type === "bill_payment" && t.billId === id)));
+                });
             };
 
             return e('div', null,
@@ -1392,7 +1291,7 @@ e('footer', {
                     onConfirm: (walletId) => {
                         // Decrease wallet balance via central finance engine
                         const billResult = window.finance.processFinancialTransaction({ type: "bill_payment", walletId, amountCents: payBillModal.amountCents, wallets, setWallets });
-                        if (!billResult.ok) { alert(billResult.error); return; }
+                        if (!billResult.ok) { showToast(billResult.error); return; }
                         // Create transaction record
                         const billW = wallets.find(w => w.id === walletId);
                         const txn = { id: uid(), type: "bill_payment", billId: payBillModal.id, walletId, amountCents: payBillModal.amountCents, date: todayStr(), walletNameSnapshot: billW ? billW.name : null };
@@ -1409,7 +1308,7 @@ e('footer', {
         }
 
         // ── MODULE: DAILY EXPENSES ──────────────────────────────────────────
-        function DailyExpensesView({ dailyExpenses, setDailyExpenses, wallets, setWallets, fc }) {
+        function DailyExpensesView({ dailyExpenses, setDailyExpenses, wallets, setWallets, fc, requestConfirm }) {
             const [name, setName] = useState(""); const [amount, setAmount] = useState(""); const [category, setCategory] = useState("Food"); 
             const [walletId, setWalletId] = useState(wallets.length > 0 ? (wallets.find(w => w.id === CASH_WALLET_ID) ? CASH_WALLET_ID : wallets[0].id) : "");
             const [openMenu, setOpenMenu] = useState(null); const [editExp, setEditExp] = useState(null); const [editForm, setEditForm] = useState({ name: "", amount: "", category: "Food", walletId: "" });
@@ -1463,8 +1362,7 @@ e('footer', {
             };
 
             const deleteExp = (id) => {
-                if (!window.confirm("Delete this expense entry?")) return;
-                window.actions.deleteExpense({ id, dailyExpenses, setDailyExpenses, wallets, setWallets });
+                requestConfirm("Delete this expense entry?", () => window.actions.deleteExpense({ id, dailyExpenses, setDailyExpenses, wallets, setWallets }));
             };
 
             const handleLogItem = () => {
@@ -1532,7 +1430,7 @@ e('footer', {
         }
 
         // ── MODULE: SAVINGS VAULTS ──────────────────────────────────────────
-        function SinkingFundsView({ funds, setFunds, enrichedFunds, txns, setTxns, wallets, setWallets, fc }) {
+        function SinkingFundsView({ funds, setFunds, enrichedFunds, txns, setTxns, wallets, setWallets, fc, requestConfirm, showToast }) {
             const [modal, setModal] = useState(false); const [form, setForm] = useState({ iconId: "landmark", name: "", goal: "", start: "0" });
             const [actionModal, setActionModal] = useState(null); const [actionAmt, setActionAmt] = useState("");
             const [actionWalletId, setActionWalletId] = useState(CASH_WALLET_ID);
@@ -1545,13 +1443,13 @@ e('footer', {
                 const amtCents = tc(actionAmt);
                 if (amtCents <= 0) return;
                 if (actionModal.type === "withdrawal" && amtCents > actionModal.fund.bal) {
-                    alert(`Insufficient balance. Available: ${fc(actionModal.fund.bal)}`);
+                    showToast(`Insufficient balance. Available: ${fc(actionModal.fund.bal)}`);
                     return;
                 }
                 if (actionWalletId) {
                     const txType = actionModal.type === "deposit" ? "vault_deposit" : "vault_withdrawal";
                     const result = window.finance.processFinancialTransaction({ type: txType, walletId: actionWalletId, amountCents: amtCents, wallets, setWallets });
-                    if (!result.ok) { alert(result.error); return; }
+                    if (!result.ok) { showToast(result.error); return; }
                 }
 
                 const vaultW = wallets.find(w => w.id === actionWalletId);
@@ -1564,7 +1462,7 @@ e('footer', {
 
             const openEditVault = (fund) => { setEditVault(fund); setEditVaultForm({ iconId: resolveVaultIcon(fund.iconId || fund.emoji), name: fund.name, goal: String((fund.goalCents / 100).toFixed(2)), start: String(((fund.startCents || 0) / 100).toFixed(2)) }); };
             const saveEditVault = () => { if (!editVaultForm.name || !editVaultForm.goal) return; setFunds(funds.map(f => f.id === editVault.id ? { ...f, iconId: editVaultForm.iconId, name: editVaultForm.name.trim(), goalCents: tc(editVaultForm.goal), startCents: tc(editVaultForm.start || "0") } : f )); setEditVault(null); };
-            const deleteVault = (id) => { if (window.confirm("Delete this vault? All linked transactions will also be removed.")) { setFunds(funds.filter(f => f.id !== id)); setTxns(txns.filter(t => t.fundId !== id)); } };
+            const deleteVault = (id) => { requestConfirm("Delete this vault? All linked transactions will also be removed.", () => { setFunds(funds.filter(f => f.id !== id)); setTxns(txns.filter(t => t.fundId !== id)); }); };
 
             return e('div', null,
                 e('div', { style: S.pageHeader }, e('div', null, e('h2', { style: { fontSize: 22, fontWeight: 800 } }, 'Savings Vaults'), e('div', { style: { fontSize: 14, color: "var(--text-muted)", marginTop: 4 } }, 'Isolate cash balances cleanly.')), e(Btn, { v: "accent", onClick: () => setModal(true) }, "+ Create New Vault")),
@@ -1592,56 +1490,16 @@ e('footer', {
         }
 
         // ── MODULE: ALL TRANSACTIONS LOG ─────────────────────────────────────────
-        function AllTransactionsView({ txns, setTxns, funds, incomes, dailyExpenses, bills, wallets, fc }) {
+        function AllTransactionsView({ txns, setTxns, funds, incomes, dailyExpenses, bills, wallets, fc, requestConfirm }) {
             const [search, setSearch] = useState("");
             const [walletFilter, setWalletFilter] = useState("all");
             const [openMenu, setOpenMenu] = useState(null);
             const [editTxn, setEditTxn] = useState(null);
             const [editTxnForm, setEditTxnForm] = useState({ type: "deposit", amount: "", date: "" });
 
-            // Always derive from walletId first (source of truth).
-            // Snapshot is only a fallback for wallets that have since been deleted.
-            const resolveWallet = (walletId, snapshot) => {
-                const w = (wallets || []).find(x => x.id === walletId);
-                if (w) return w.name;
-                return snapshot || null;
-            };
-
-            const allItems = useMemo(() => {
-                const items = [];
-                (dailyExpenses || []).forEach(ex => {
-                    items.push({ id: `exp-${ex.id}`, rawId: ex.id, source: "expense", icon: "wallet",
-                        title: ex.name, subtitle: ex.category, amountCents: ex.amountCents,
-                        date: ex.date, walletId: ex.walletId,
-                        walletName: resolveWallet(ex.walletId, ex.walletNameSnapshot),
-                        amountColor: "#EF4444", amountPrefix: "−" });
-                });
-                (incomes || []).forEach(inc => {
-                    items.push({ id: `inc-${inc.id}`, rawId: inc.id, source: "income", icon: "trendingup",
-                        title: inc.name, subtitle: "Income", amountCents: inc.amountCents,
-                        date: inc.date, walletId: inc.walletId,
-                        walletName: resolveWallet(inc.walletId, inc.walletNameSnapshot),
-                        amountColor: "#00E676", amountPrefix: "+" });
-                });
-                (txns || []).filter(t => t.type === "bill_payment").forEach(t => {
-                    const bill = (bills || []).find(b => b.id === t.billId);
-                    items.push({ id: `bill-${t.id}`, rawId: t.id, source: "bill", icon: "receipt",
-                        title: bill ? bill.name : "Bill Payment", subtitle: "Bill",
-                        amountCents: t.amountCents, date: t.date, walletId: t.walletId,
-                        walletName: resolveWallet(t.walletId, t.walletNameSnapshot),
-                        amountColor: "#A855F7", amountPrefix: "−" });
-                });
-                (txns || []).filter(t => t.fundId).forEach(t => {
-                    const fund = (funds || []).find(f => f.id === t.fundId);
-                    items.push({ id: `vault-${t.id}`, rawId: t.id, source: "vault", icon: "landmark",
-                        title: fund ? fund.name : "Vault", subtitle: t.type === "deposit" ? "Vault Deposit" : "Vault Withdrawal",
-                        amountCents: t.amountCents, date: t.date, walletId: t.walletId,
-                        walletName: resolveWallet(t.walletId, t.walletNameSnapshot),
-                        amountColor: t.type === "deposit" ? "#2563EB" : "#F59E0B",
-                        amountPrefix: t.type === "deposit" ? "→" : "←" });
-                });
-                return items.sort((a, b) => b.date !== a.date ? b.date.localeCompare(a.date) : b.id.localeCompare(a.id));
-            }, [dailyExpenses, incomes, txns, bills, funds, wallets]);
+            const allItems = useMemo(() =>
+                window.selectors.getAllTransactionItems({ dailyExpenses, incomes, txns, bills, funds, wallets }),
+            [dailyExpenses, incomes, txns, bills, funds, wallets]);
 
             const filtered = useMemo(() => {
                 let list = allItems;
@@ -1660,7 +1518,7 @@ e('footer', {
             const getVaultName = (fundId) => { const f = (funds||[]).find(x => x.id === fundId); return f ? f.name : "Unknown Vault"; };
             const openEditTxn = (t) => { setEditTxn(t); setEditTxnForm({ type: t.type, amount: String((t.amountCents / 100).toFixed(2)), date: t.date }); };
             const saveEditTxn = () => { if (!editTxnForm.amount || !editTxnForm.date) return; setTxns(txns.map(t => t.id === editTxn.id ? { ...t, type: editTxnForm.type, amountCents: tc(editTxnForm.amount), date: editTxnForm.date } : t)); setEditTxn(null); };
-            const deleteTxn = (id) => { if (window.confirm("Delete this transaction?")) setTxns(txns.filter(t => t.id !== id)); };
+            const deleteTxn = (id) => { requestConfirm("Delete this transaction?", () => setTxns(txns.filter(t => t.id !== id))); };
 
             return e('div', null,
                 e('h2', { style: { fontSize: 22, fontWeight: 800, marginBottom: 4 } }, 'Transaction Log'),
@@ -1742,14 +1600,14 @@ e('footer', {
         }
 
         // ── MODULE: TRANSACTIONS VAULT LOGS ─────────────────────────────────
-        function TransactionsView({ txns, setTxns, funds, fc }) {
+        function TransactionsView({ txns, setTxns, funds, fc, requestConfirm }) {
             const [openMenu, setOpenMenu] = useState(null); const [editTxn, setEditTxn] = useState(null); const [editTxnForm, setEditTxnForm] = useState({ type: "deposit", amount: "", date: "" });
             const getVaultName = (fundId) => { const f = funds.find(x => x.id === fundId); return f ? f.name : "Unknown Vault"; };
             const vaultTxns = txns.filter(t => t.fundId);
 
             const openEditTxn = (t) => { setEditTxn(t); setEditTxnForm({ type: t.type, amount: String((t.amountCents / 100).toFixed(2)), date: t.date }); };
             const saveEditTxn = () => { if (!editTxnForm.amount || !editTxnForm.date) return; setTxns(txns.map(t => t.id === editTxn.id ? { ...t, type: editTxnForm.type, amountCents: tc(editTxnForm.amount), date: editTxnForm.date } : t )); setEditTxn(null); };
-            const deleteTxn = (id) => { if (window.confirm("Delete this vault transaction?")) setTxns(txns.filter(t => t.id !== id)); };
+            const deleteTxn = (id) => { requestConfirm("Delete this vault transaction?", () => setTxns(txns.filter(t => t.id !== id))); };
 
             return e('div', null,
                 e('h2', { style: { fontSize: 22, fontWeight: 800, marginBottom: 4 } }, 'Savings Vault Logs'),
@@ -1777,59 +1635,9 @@ e('footer', {
                 return `${Math.floor(diffDays / 30)}mo ago`;
             };
 
-            // Always derive from walletId first (source of truth).
-            // Snapshot is only a fallback for wallets that have since been deleted.
-            const resolveWallet = (walletId, snapshot) => {
-                const w = (wallets || []).find(x => x.id === walletId);
-                if (w) return w.name;
-                return snapshot || null;
-            };
-
-            const activities = useMemo(() => {
-                const items = [];
-                (dailyExpenses || []).forEach(ex => {
-                    items.push({ id: `exp-${ex.id}`, icon: "wallet", iconColor: "#EF4444",
-                        title: ex.name, subtitle: ex.category, amountCents: ex.amountCents,
-                        amountColor: "#EF4444", amountPrefix: "−", date: ex.date,
-                        walletName: resolveWallet(ex.walletId, ex.walletNameSnapshot), navTarget: "daily" });
-                });
-                (incomes || []).forEach(inc => {
-                    items.push({ id: `inc-${inc.id}`, icon: "trendingup", iconColor: "#00E676",
-                        title: inc.name, subtitle: "Income", amountCents: inc.amountCents,
-                        amountColor: "#00E676", amountPrefix: "+", date: inc.date,
-                        walletName: resolveWallet(inc.walletId, inc.walletNameSnapshot), navTarget: "budget" });
-                });
-                (txns || []).filter(t => t.type === "bill_payment").forEach(t => {
-                    const bill = (bills || []).find(b => b.id === t.billId);
-                    items.push({ id: `bill-${t.id}`, icon: "receipt", iconColor: "#A855F7",
-                        title: bill ? bill.name + " Paid" : "Bill Paid", subtitle: "Bill",
-                        amountCents: t.amountCents, amountColor: "#A855F7", amountPrefix: "✓",
-                        date: t.date, walletName: resolveWallet(t.walletId, t.walletNameSnapshot), navTarget: "budget" });
-                });
-                (txns || []).filter(t => t.fundId).forEach(t => {
-                    const fund = (funds || []).find(f => f.id === t.fundId);
-                    const isDeposit = t.type === "deposit";
-                    items.push({ id: `vault-${t.id}`, icon: "landmark",
-                        iconColor: isDeposit ? "#2563EB" : "#F59E0B",
-                        title: (isDeposit ? "Deposit → " : "Withdraw ← ") + (fund ? fund.name : "Vault"),
-                        subtitle: isDeposit ? "Vault Deposit" : "Vault Withdrawal",
-                        amountCents: t.amountCents,
-                        amountColor: isDeposit ? "#2563EB" : "#F59E0B",
-                        amountPrefix: isDeposit ? "+" : "−",
-                        date: t.date, walletName: resolveWallet(t.walletId, t.walletNameSnapshot), navTarget: "goals" });
-                });
-                (archives || []).slice(0, 3).forEach(arc => {
-                    items.push({ id: `arc-${arc.id}`, icon: "archive", iconColor: "#A855F7",
-                        title: arc.month + " Archived", subtitle: "Monthly Snapshot",
-                        amountCents: null, amountColor: null, amountPrefix: null,
-                        date: arc.closedAt ? arc.closedAt.slice(0, 10) : "",
-                        walletName: null, navTarget: "history" });
-                });
-                return items
-                    .filter(i => i.date)
-                    .sort((a, b) => b.date.localeCompare(a.date))
-                    .slice(0, 10);
-            }, [incomes, dailyExpenses, bills, txns, funds, wallets, archives]);
+            const activities = useMemo(() =>
+                window.selectors.getRecentActivities({ dailyExpenses, incomes, txns, bills, funds, wallets, archives }),
+            [incomes, dailyExpenses, bills, txns, funds, wallets, archives]);
 
             return e('div', { className: "premium-panel", style: { marginTop: 20 } },
                 e('div', { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 } },

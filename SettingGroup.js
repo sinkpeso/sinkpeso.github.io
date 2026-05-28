@@ -56,4 +56,12 @@
     // Expose globally
     window.SettingGroup = SettingGroup;
 
+    if (window.PropTypes) {
+        SettingGroup.propTypes = {
+            title: PropTypes.string.isRequired,
+            icon: PropTypes.string.isRequired,
+            children: PropTypes.node,
+        };
+    }
+
 })();
