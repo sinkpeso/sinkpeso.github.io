@@ -9,24 +9,22 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
     
-    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
-    <script src="https://unpkg.com/prop-types@15/prop-types.min.js" crossorigin></script>
-    
-	
-	
-<link rel="stylesheet" href="styles.css">
-<script src="utils.js"></script>
-<script src="components.js"></script>
-<script src="InsightStrip.js"></script>
-<script src="DashboardOverview.js"></script>
-<script src="EmptyState.js"></script>
-<script src="SettingGroup.js"></script>
-<script src="finance.js"></script>
-<script src="selectors.js"></script>
-<script src="actions.js"></script>
-<script src="walleticons.js"></script>
-<script src="persistence.js"></script>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin integrity="sha384-DGyLxAyjq0f9SPpVevD6IgztCFlnMF6oW/XQGmfe+IsZ8TqEiDrcHkMLKI6fiB/Z"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin integrity="sha384-gTGxhz21lVGYNMcdJOyq01Edg0jhn/c22nsx0kyqP0TxaV5WVdsSH1fSDUf5YJj1"></script>
+    <script src="https://unpkg.com/prop-types@15/prop-types.min.js" crossorigin integrity="sha384-/AfDwVDXNopzPvhxMPQ11y1OCpR6mVkWx47qzSwIiquvxkcMkZddEzDNtIOtfCpk"></script>
+
+    <link rel="stylesheet" href="styles.css">
+    <script src="utils.js"></script>
+    <script src="components.js"></script>
+    <script src="InsightStrip.js"></script>
+    <script src="DashboardOverview.js"></script>
+    <script src="EmptyState.js"></script>
+    <script src="SettingGroup.js"></script>
+    <script src="finance.js"></script>
+    <script src="selectors.js"></script>
+    <script src="actions.js"></script>
+    <script src="walleticons.js"></script>
+    <script src="persistence.js"></script>
 
         <link rel="apple-touch-icon" href="logosinkpeso.png">
     <link rel="icon" href="logosinkpeso.png" type="image/png">
@@ -483,6 +481,7 @@ e(EmptyState, { icon:"creditcard", title:"No wallets yet", sub:"Add Cash, GCash,
             const [error, setError] = useState(false);
 
             const handleAttempt = () => {
+                if (input.length < 4) { setError(true); setTimeout(() => setError(false), 1000); return; }
                 if (input === targetPin) onUnlock();
                 else { setError(true); setInput(""); setTimeout(() => setError(false), 1000); }
             };
@@ -1015,7 +1014,11 @@ e('footer', {
                             e(Field, { label: "PIN (leave blank to disable)" },
                                 e(Inp, { type: "password", inputMode: "numeric", pattern: "[0-9]*", placeholder: "e.g. 1234", value: pinInput, onChange: ev => setPinInput(ev.target.value.replace(/[^0-9]/g, '')) })
                             ),
-                            e(Btn, { v: "accent", onClick: () => { setSettings({...settings, pin: pinInput}); showToast(pinInput ? "✓ PIN saved." : "✓ PIN removed."); } }, pinInput ? "Save PIN" : "Remove PIN")
+                            e(Btn, { v: "accent", onClick: () => {
+                                if (pinInput && pinInput.length < 4) { showToast("PIN must be at least 4 digits."); return; }
+                                setSettings({...settings, pin: pinInput});
+                                showToast(pinInput ? "✓ PIN saved." : "✓ PIN removed.");
+                            } }, pinInput ? "Save PIN" : "Remove PIN")
                         )
                     ),
 

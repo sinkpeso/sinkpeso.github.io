@@ -1,0 +1,22 @@
+{
+  "name": "SINKPESO",
+  "short_name": "SINKPESO",
+  "description": "Premium offline budget tracker",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0F1117",
+  "theme_color": "#00E676",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "logosinkpeso.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "logosinkpeso.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
