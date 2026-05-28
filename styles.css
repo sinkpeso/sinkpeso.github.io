@@ -42,6 +42,9 @@
     --card-grad-end: #DDE4F0;
     --hover-bg: rgba(0,0,0,0.05);
     --modal-bg: rgba(245, 247, 250, 0.88);
+    --accent: #00C853;
+    --accent-dim: rgba(0,200,83,0.1);
+    --accent-border: rgba(0,200,83,0.25);
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }

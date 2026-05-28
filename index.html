@@ -770,7 +770,7 @@ e(EmptyState, { icon:"creditcard", title:"No wallets yet", sub:"Add Cash, GCash,
                     tab === "limits" && e(BudgetLimitsView, { budgets, setBudgets, fc, requestConfirm }),
                     tab === "wallets" && e(WalletsView, { wallets: displayWallets, setWallets, incomes, dailyExpenses, txns, fc, requestConfirm, showToast }),
                     tab === "budget" && e(BudgetBillsView, { incomes, setIncomes, bills, setBills, wallets: displayWallets, setWallets, txns, setTxns, fc, requestConfirm, showToast }),
-                    tab === "daily" && e(DailyExpensesView, { dailyExpenses, setDailyExpenses, wallets: displayWallets, setWallets, fc, requestConfirm }),
+                    tab === "daily" && e(DailyExpensesView, { dailyExpenses, setDailyExpenses, wallets: displayWallets, setWallets, fc, requestConfirm, showToast }),
                     tab === "goals" && e(SinkingFundsView, { funds, setFunds, enrichedFunds: totals.enrichedFunds, txns, setTxns, wallets: displayWallets, setWallets, fc, requestConfirm, showToast }),
                     tab === "transactions" && e(AllTransactionsView, { txns, setTxns, funds, incomes, dailyExpenses, bills, wallets: displayWallets, fc, requestConfirm }),
                     tab === "history" && e(HistoryView, { archives, fc }),
@@ -927,11 +927,10 @@ e('footer', {
             const [pinInput, setPinInput] = useState(safeSettings?.pin || '');
 
             const handleExport = () => {
-                const state = window.persistence.loadState();
                 const keys = window.persistence.getAllRawKeys();
                 const data = {};
-                Object.entries(keys).forEach(([name, lsKey]) => {
-                    data[lsKey] = JSON.stringify(state[name]);
+                Object.values(keys).forEach(lsKey => {
+                    data[lsKey] = localStorage.getItem(lsKey);
                 });
                 const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
                 const url = URL.createObjectURL(blob);
@@ -945,8 +944,11 @@ e('footer', {
                 reader.onload = (e) => {
                     try {
                         const data = JSON.parse(e.target.result);
+                        const validKeys = Object.values(window.persistence.getAllRawKeys());
                         window.persistence.clearState();
-                        Object.keys(data).forEach(k => { if (k.startsWith('sp_')) localStorage.setItem(k, data[k] || "[]"); });
+                        Object.keys(data).forEach(k => {
+                            if (validKeys.includes(k) && data[k]) localStorage.setItem(k, data[k]);
+                        });
                         showToast("Backup restored! Reloading...");
                         setTimeout(() => window.location.reload(), 800);
                     } catch (err) { showToast("Invalid backup file format."); }
@@ -1087,10 +1089,12 @@ e('footer', {
                         e('div', { style: { flex: 1 } }, e(Inp, { type: "number", value: limitAmt, placeholder: "Limit Amount", onChange: ev => setLimitAmt(ev.target.value) })),
                         e(Btn, { v: "accent", onClick: () => {
                             if(!limitAmt) return;
+                            if(tc(limitAmt) <= 0) { showToast("Amount must be greater than zero."); return; }
                             const existing = budgets.find(b => b.category === category);
                             if (existing) setBudgets(budgets.map(b => b.id === existing.id ? { ...b, limitCents: tc(limitAmt) } : b));
                             else setBudgets([...budgets, { id: uid(), category, limitCents: tc(limitAmt) }]);
                             setLimitAmt("");
+                            showToast("✓ Budget limit saved!");
                         } }, "Save Limit")
                     )
                 ),
@@ -1179,6 +1183,7 @@ e('footer', {
                 const oldRecord = incomes.find(i => i.id === editIncome.id);
                 window.actions.editIncome({ incId: editIncome.id, editForm: editIncForm, oldRecord, wallets, incomes, setIncomes, setWallets });
                 setEditIncome(null);
+                showToast("✓ Income updated!");
             };
             const deleteIncome = (id) => {
                 requestConfirm("Delete this income entry?", () => window.actions.deleteIncome({ id, incomes, setIncomes, wallets, setWallets }));
@@ -1191,6 +1196,7 @@ e('footer', {
                 setBills(bills.map(b => b.id === editBill.id ? { ...b, name: editBillForm.name.trim(), amountCents: newAmt, dueDate: editBillForm.dueDate, recurring: editBillForm.recurring, category: editBillForm.category } : b ));
                 setTxns(txns.map(t => t.type === "bill_payment" && t.billId === editBill.id ? { ...t, amountCents: newAmt } : t));
                 setEditBill(null);
+                showToast("✓ Bill updated!");
             };
             const markBillUnpaid = (bill) => {
                 requestConfirm("Mark this bill as unpaid? The payment transaction will be removed.", () => {
@@ -1219,10 +1225,12 @@ e('footer', {
                             e(IncomeSourcePicker, { wallets, setWallets, value: incWalletId, onChange: setIncWalletId }),
                             e(Btn, { v: "accent", style: { width: "100%" }, onClick: () => {
                                 if(!incName || !incAmt) return;
+                                if(tc(incAmt) <= 0) { showToast("Amount must be greater than zero."); return; }
                                 const incW = wallets.find(w => w.id === incWalletId);
                                 const rec = { id: uid(), name: incName.trim(), amountCents: tc(incAmt), date: todayStr(), walletId: incWalletId || null, walletNameSnapshot: incW ? incW.name : null };
                                 window.actions.addIncome({ rec, wallets, setIncomes, setWallets });
                                 setIncName(""); setIncAmt(""); setIncWalletId(CASH_WALLET_ID);
+                                showToast("✓ Income added!");
                             } }, "Add Income")
                         ),
                         e(SLabel, { style: { marginBottom: 12 } }, "Income History List"),
@@ -1257,7 +1265,7 @@ e('footer', {
                                 e(Sel, { value: billRecurring, style: {flex: 1}, onChange: ev => setBillRecurring(ev.target.value) }, e('option', { value: "none" }, "One-Time"), e('option', { value: "monthly" }, "Monthly"), e('option', { value: "weekly" }, "Weekly")),
                                 e(Sel, { value: billCat, style: {flex: 1}, onChange: ev => setBillCat(ev.target.value) }, CATEGORIES.map(c => e('option', {key: c, value: c}, c)))
                             ),
-                            e(Btn, { v: "accent", onClick: () => { if(!billName || !billAmt || !billDate) return; setBills([...bills, { id: uid(), name: billName, amountCents: tc(billAmt), dueDate: billDate, isPaid: false, recurring: billRecurring, category: billCat }]); setBillName(""); setBillAmt(""); setBillDate(""); setBillRecurring("none"); } }, "Save Bill Item")
+                            e(Btn, { v: "accent", onClick: () => { if(!billName || !billAmt || !billDate) return; if(tc(billAmt) <= 0) { showToast("Amount must be greater than zero."); return; } setBills([...bills, { id: uid(), name: billName, amountCents: tc(billAmt), dueDate: billDate, isPaid: false, recurring: billRecurring, category: billCat }]); setBillName(""); setBillAmt(""); setBillDate(""); setBillRecurring("none"); showToast("✓ Bill saved!"); } }, "Save Bill Item")
                         ),
                         e(SLabel, { style: { marginBottom: 12 } }, "Bill List Check"),
                         bills.length === 0 ? e('div', { style: { color: "var(--text-muted)", fontSize: 13, padding: "10px 0" } }, e("div", { className: "empty-state" }, e("div", { className: "empty-state-icon" }, e(Icon, { name: "receipt", size: 28, color: "var(--text-muted)" })), e("div", { className: "empty-state-title" }, "No bills yet"), e("div", { className: "empty-state-sub" }, "Track rent, utilities, subscriptions."))) :
@@ -1311,7 +1319,7 @@ e('footer', {
         }
 
         // ── MODULE: DAILY EXPENSES ──────────────────────────────────────────
-        function DailyExpensesView({ dailyExpenses, setDailyExpenses, wallets, setWallets, fc, requestConfirm }) {
+        function DailyExpensesView({ dailyExpenses, setDailyExpenses, wallets, setWallets, fc, requestConfirm, showToast }) {
             const [name, setName] = useState(""); const [amount, setAmount] = useState(""); const [category, setCategory] = useState("Food"); 
             const [walletId, setWalletId] = useState(wallets.length > 0 ? (wallets.find(w => w.id === CASH_WALLET_ID) ? CASH_WALLET_ID : wallets[0].id) : "");
             const [openMenu, setOpenMenu] = useState(null); const [editExp, setEditExp] = useState(null); const [editForm, setEditForm] = useState({ name: "", amount: "", category: "Food", walletId: "" });
@@ -1357,6 +1365,7 @@ e('footer', {
                 setEditExp(null);
                 setPendingExpense(null);
                 setPendingEditData(null);
+                showToast("✓ Expense updated!");
             };
             const commitForceEdit = () => {
                 const { old, newAmt, newWalletId, editId } = pendingEditData;
@@ -1371,12 +1380,14 @@ e('footer', {
             const handleLogItem = () => {
                 if (!name || !amount) return;
                 const amtCents = tc(amount);
+                if (amtCents <= 0) { showToast("Amount must be greater than zero."); return; }
                 const selW = wallets.find(w => w.id === walletId);
                 if (selW && (selW.balanceCents || 0) < amtCents) {
                     setPendingExpense({ selWallet: selW, amtCents, type: "add", rec: { id: uid(), name: name.trim(), amountCents: amtCents, category, date: todayStr(), walletId: walletId || null, walletNameSnapshot: selW.name } });
                     return;
                 }
                 commitAddExpense({ id: uid(), name: name.trim(), amountCents: amtCents, category, date: todayStr(), walletId: walletId || null, walletNameSnapshot: selW ? selW.name : null });
+                showToast("✓ Expense logged!");
             };
 
             return e('div', null,
@@ -1599,28 +1610,6 @@ e('footer', {
                         e(Btn, { v: "ghost", style: { flex: 1 }, onClick: () => setEditTxn(null) }, "Cancel"),
                         e(Btn, { v: "primary", style: { flex: 1 }, onClick: saveEditTxn }, "Save Changes"))
                 ))
-            );
-        }
-
-        // ── MODULE: TRANSACTIONS VAULT LOGS ─────────────────────────────────
-        function TransactionsView({ txns, setTxns, funds, fc, requestConfirm }) {
-            const [openMenu, setOpenMenu] = useState(null); const [editTxn, setEditTxn] = useState(null); const [editTxnForm, setEditTxnForm] = useState({ type: "deposit", amount: "", date: "" });
-            const getVaultName = (fundId) => { const f = funds.find(x => x.id === fundId); return f ? f.name : "Unknown Vault"; };
-            const vaultTxns = txns.filter(t => t.fundId);
-
-            const openEditTxn = (t) => { setEditTxn(t); setEditTxnForm({ type: t.type, amount: String((t.amountCents / 100).toFixed(2)), date: t.date }); };
-            const saveEditTxn = () => { if (!editTxnForm.amount || !editTxnForm.date) return; setTxns(txns.map(t => t.id === editTxn.id ? { ...t, type: editTxnForm.type, amountCents: tc(editTxnForm.amount), date: editTxnForm.date } : t )); setEditTxn(null); };
-            const deleteTxn = (id) => { requestConfirm("Delete this vault transaction?", () => setTxns(txns.filter(t => t.id !== id))); };
-
-            return e('div', null,
-                e('h2', { style: { fontSize: 22, fontWeight: 800, marginBottom: 4 } }, 'Savings Vault Logs'),
-                e('div', { style: { fontSize: 14, color: "var(--text-muted)", marginBottom: 24 } }, 'Audit historical ledger activities strictly related to isolated goals pools.'),
-                
-                e('div', { className: "premium-panel" },
-                    vaultTxns.length === 0 ? e('div', { style: { padding: "20px 0", textAlign: "center", color: "var(--text-muted)" } }, e("div", { className: "empty-state" }, e("div", { className: "empty-state-icon" }, e(Icon, { name: "clipboardlist", size: 28, color: "var(--text-muted)" })), e("div", { className: "empty-state-title" }, "No vault activity yet"), e("div", { className: "empty-state-sub" }, "Deposits and withdrawals will appear here."))) :
-                    vaultTxns.map(t => e('div', { key: t.id, className: "stream-row" }, e('div', null, e('div', { style: { fontWeight: 600, color: "var(--text-main)" } }, getVaultName(t.fundId)), e('div', { style: { fontSize: 11, color: "var(--text-muted)", marginTop: 2, textTransform: "capitalize" } }, `${t.date} • ${t.type}`)), e('div', { style: S.row12 }, e('span', { style: { fontWeight: 700, color: t.type === 'deposit' ? "#00E676" : "#EF4444" } }, t.type === 'deposit' ? `+${fc(t.amountCents)}` : `-${fc(t.amountCents)}`), e(DotMenu, { itemId: t.id, openMenu, setOpenMenu, onEdit: () => openEditTxn(t), onDelete: () => deleteTxn(t.id) }))))
-                ),
-                editTxn && e('div', { className: "modal-overlay" }, e('div', { className: "modal-container" }, e('h3', { style: { marginBottom: 8 } }, "Edit Vault Transaction"), e('p', { style: { fontSize: 13, color: "var(--text-muted)", marginBottom: 20 } }, `Vault: ${getVaultName(editTxn.fundId)}`), e(Field, { label: "Transaction Type" }, e(Sel, { value: editTxnForm.type, onChange: ev => setEditTxnForm({ ...editTxnForm, type: ev.target.value }) }, e('option', { value: "deposit" }, "Deposit"), e('option', { value: "withdrawal" }, "Withdrawal"))), e(Field, { label: "Amount" }, e(Inp, { type: "number", value: editTxnForm.amount, onChange: ev => setEditTxnForm({ ...editTxnForm, amount: ev.target.value }) })), e(Field, { label: "Date" }, e(Inp, { type: "date", value: editTxnForm.date, onChange: ev => setEditTxnForm({ ...editTxnForm, date: ev.target.value }) })), e('div', { style: S.formFooter }, e(Btn, { v: "ghost", style: { flex: 1 }, onClick: () => setEditTxn(null) }, "Cancel"), e(Btn, { v: "primary", style: { flex: 1 }, onClick: saveEditTxn }, "Save Changes"))))
             );
         }
 
