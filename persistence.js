@@ -41,7 +41,24 @@
 
     // ── SCHEMA VERSION ────────────────────────────────────────────────────────
     // Bump this when the shape of stored data changes and migration is needed.
-    var SCHEMA_VERSION = 1;
+    var SCHEMA_VERSION = 2;
+
+    // ── PIN HASHING ──────────────────────────────────────────────────────────
+    // Uses SHA-256 via SubtleCrypto to hash PINs before storage.
+    function hashPin(pin) {
+        if (!pin || typeof pin !== "string") return "";
+        var encoder = new TextEncoder();
+        var data = encoder.encode("sinkpeso:" + pin);
+        return crypto.subtle.digest("SHA-256", data).then(function (hash) {
+            var arr = new Uint8Array(hash);
+            var hex = "";
+            for (var i = 0; i < arr.length; i++) {
+                hex += arr[i].toString(16).padStart(2, "0");
+            }
+            return hex;
+        });
+    }
+    window.hashPin = hashPin;
 
     // ── STORAGE KEY MAP ───────────────────────────────────────────────────────
     // Single source of truth for every localStorage key used by SINKPESO.

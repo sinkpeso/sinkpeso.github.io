@@ -272,7 +272,7 @@
         }
 
         // ── MODULE: WALLETS ────────────────────────────────────────────────────
-        function WalletsView({ wallets, setWallets, incomes, dailyExpenses, txns, fc, requestConfirm, showToast }) {
+        function WalletsView({ wallets, rawWallets, setWallets, incomes, dailyExpenses, txns, fc, requestConfirm, showToast }) {
             const [modal, setModal] = useState(false);
             const [form, setForm] = useState({ name: "", balanceCents: "", color: WALLET_COLORS[0] });
             const [editWallet, setEditWallet] = useState(null);
@@ -305,7 +305,7 @@
                     showToast("This wallet still has a balance. Move or spend it first.");
                     return;
                 }
-                requestConfirm("Delete this wallet?", () => setWallets(wallets.filter(w => w.id !== id)));
+                requestConfirm("Delete this wallet?", () => setWallets(rawWallets.filter(w => w.id !== id)));
             };
 
             const ColorPicker = ({ value, onChange }) => e('div', { style: { display:"flex", gap:8, flexWrap:"wrap", marginTop:4 } },
@@ -482,8 +482,18 @@ e(EmptyState, { icon:"creditcard", title:"No wallets yet", sub:"Add Cash, GCash,
 
             const handleAttempt = () => {
                 if (input.length < 4) { setError(true); setTimeout(() => setError(false), 1000); return; }
-                if (input === targetPin) onUnlock();
-                else { setError(true); setInput(""); setTimeout(() => setError(false), 1000); }
+                // Support both hashed (64 hex chars) and legacy plaintext PINs
+                var isHashed = /^[0-9a-f]{64}$/.test(targetPin);
+                if (isHashed) {
+                    window.hashPin(input).then(function (hashed) {
+                        if (hashed === targetPin) onUnlock();
+                        else { setError(true); setInput(""); setTimeout(() => setError(false), 1000); }
+                    });
+                } else {
+                    // Legacy plaintext comparison
+                    if (input === targetPin) onUnlock();
+                    else { setError(true); setInput(""); setTimeout(() => setError(false), 1000); }
+                }
             };
 
             return e('div', { className: "pin-screen" },
@@ -545,6 +555,8 @@ e(EmptyState, { icon:"creditcard", title:"No wallets yet", sub:"Add Cash, GCash,
         // ── CORE APPLICATION ──────────────────────────────────────────────────
         function App() {
             const [tab, setTab] = useState("dashboard");
+
+            useEffect(() => { window.scrollTo(0, 0); }, [tab]);
 
             const saved = window.persistence.loadState();
             const defaultSettings = { currency: 'PHP', theme: 'dark', pin: '' };
@@ -768,7 +780,7 @@ e(EmptyState, { icon:"creditcard", title:"No wallets yet", sub:"Add Cash, GCash,
                 e('div', { className: "page-wrap", style: { maxWidth: 1140, margin: "0 auto", padding: "clamp(16px, 4vw, 32px) clamp(12px, 4vw, 24px) 80px" } },
                     tab === "dashboard" && e(DashboardOverview, { totals, bills, dailyExpenses, budgets, wallets: displayWallets, fc, incomes, txns, funds, archives, onNavigate: setTab }),
                     tab === "limits" && e(BudgetLimitsView, { budgets, setBudgets, fc, requestConfirm }),
-                    tab === "wallets" && e(WalletsView, { wallets: displayWallets, setWallets, incomes, dailyExpenses, txns, fc, requestConfirm, showToast }),
+                    tab === "wallets" && e(WalletsView, { wallets: displayWallets, rawWallets: wallets, setWallets, incomes, dailyExpenses, txns, fc, requestConfirm, showToast }),
                     tab === "budget" && e(BudgetBillsView, { incomes, setIncomes, bills, setBills, wallets: displayWallets, setWallets, txns, setTxns, fc, requestConfirm, showToast }),
                     tab === "daily" && e(DailyExpensesView, { dailyExpenses, setDailyExpenses, wallets: displayWallets, setWallets, fc, requestConfirm, showToast }),
                     tab === "goals" && e(SinkingFundsView, { funds, setFunds, enrichedFunds: totals.enrichedFunds, txns, setTxns, wallets: displayWallets, setWallets, fc, requestConfirm, showToast }),
@@ -835,13 +847,16 @@ e('footer', {
                             { id: "transactions", icon: "list",    label: "Transaction Log",  sub: "All expenses, income, bills & vaults" },
                             { id: "history",      icon: "history", label: "Month History",   sub: "Archived monthly snapshots" },
                             { id: "settings",     icon: "settings",label: "Settings",        sub: "Preferences, PIN, backup" },
-                        ].map(t => e('div', { key: t.id, className: "sheet-row", onClick: () => { setTab(t.id); setShowMoreSheet(false); } },
-                            e('span', { className: "sheet-row-icon" }, e(Icon, { name: t.icon, size: 22, color: "var(--text-light)" })),
-                            e('div', null,
-                                e('div', { className: "sheet-row-label" }, t.label),
-                                e('div', { className: "sheet-row-sub" }, t.sub)
-                            )
-                        )),
+                        ].map(t => {
+                            const isActive = tab === t.id;
+                            return e('div', { key: t.id, className: "sheet-row", style: isActive ? { background: "var(--hover-bg)" } : undefined, onClick: () => { setTab(t.id); setShowMoreSheet(false); } },
+                                e('span', { className: "sheet-row-icon" }, e(Icon, { name: t.icon, size: 22, color: isActive ? "#00E676" : "var(--text-light)" })),
+                                e('div', null,
+                                    e('div', { className: "sheet-row-label", style: isActive ? { color: "#00E676", fontWeight: 700 } : undefined }, t.label),
+                                    e('div', { className: "sheet-row-sub" }, t.sub)
+                                )
+                            );
+                        }),
                         e('div', { className: "sheet-row", style: { color: "#A855F7" }, onClick: () => { setShowMoreSheet(false); setShowCloseModal(true); } },
                             e('span', { className: "sheet-row-icon" }, e(Icon, { name: "archive", size: 22, color: "#A855F7" })),
                             e('div', null,
@@ -1018,8 +1033,15 @@ e('footer', {
                             ),
                             e(Btn, { v: "accent", onClick: () => {
                                 if (pinInput && pinInput.length < 4) { showToast("PIN must be at least 4 digits."); return; }
-                                setSettings({...settings, pin: pinInput});
-                                showToast(pinInput ? "✓ PIN saved." : "✓ PIN removed.");
+                                if (pinInput) {
+                                    window.hashPin(pinInput).then(function (hashed) {
+                                        setSettings({...settings, pin: hashed});
+                                        showToast("✓ PIN saved.");
+                                    });
+                                } else {
+                                    setSettings({...settings, pin: ""});
+                                    showToast("✓ PIN removed.");
+                                }
                             } }, pinInput ? "Save PIN" : "Remove PIN")
                         )
                     ),
@@ -1193,6 +1215,7 @@ e('footer', {
             const saveEditBill = () => {
                 if (!editBillForm.name || !editBillForm.amount || !editBillForm.dueDate) return;
                 const newAmt = tc(editBillForm.amount);
+                if (newAmt <= 0) { showToast("Amount must be greater than zero."); return; }
                 setBills(bills.map(b => b.id === editBill.id ? { ...b, name: editBillForm.name.trim(), amountCents: newAmt, dueDate: editBillForm.dueDate, recurring: editBillForm.recurring, category: editBillForm.category } : b ));
                 setTxns(txns.map(t => t.type === "bill_payment" && t.billId === editBill.id ? { ...t, amountCents: newAmt } : t));
                 setEditBill(null);
@@ -1507,6 +1530,8 @@ e('footer', {
         function AllTransactionsView({ txns, setTxns, funds, incomes, dailyExpenses, bills, wallets, fc, requestConfirm }) {
             const [search, setSearch] = useState("");
             const [walletFilter, setWalletFilter] = useState("all");
+            const [dateFrom, setDateFrom] = useState("");
+            const [dateTo, setDateTo] = useState("");
             const [openMenu, setOpenMenu] = useState(null);
             const [editTxn, setEditTxn] = useState(null);
             const [editTxnForm, setEditTxnForm] = useState({ type: "deposit", amount: "", date: "" });
@@ -1518,6 +1543,8 @@ e('footer', {
             const filtered = useMemo(() => {
                 let list = allItems;
                 if (walletFilter !== "all") list = list.filter(item => item.walletId === walletFilter);
+                if (dateFrom) list = list.filter(item => item.date >= dateFrom);
+                if (dateTo) list = list.filter(item => item.date <= dateTo);
                 if (search.trim()) {
                     const q = search.toLowerCase();
                     list = list.filter(item =>
@@ -1527,7 +1554,7 @@ e('footer', {
                     );
                 }
                 return list;
-            }, [allItems, walletFilter, search]);
+            }, [allItems, walletFilter, search, dateFrom, dateTo]);
 
             const getVaultName = (fundId) => { const f = (funds||[]).find(x => x.id === fundId); return f ? f.name : "Unknown Vault"; };
             const openEditTxn = (t) => { setEditTxn(t); setEditTxnForm({ type: t.type, amount: String((t.amountCents / 100).toFixed(2)), date: t.date }); };
@@ -1538,7 +1565,7 @@ e('footer', {
                 e('h2', { style: { fontSize: 22, fontWeight: 800, marginBottom: 4 } }, 'Transaction Log'),
                 e('div', { style: { fontSize: 14, color: "var(--text-muted)", marginBottom: 20 } }, 'Full history — expenses, income, bills, and vault actions.'),
 
-                // ── Search + Wallet Filter ──────────────────────────────────────
+                // ── Search + Filters ──────────────────────────────────────────────
                 e('div', { className: "premium-panel", style: { marginBottom: 14 } },
                     e('div', { style: { display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" } },
                         e('div', { style: { flex: "1 1 200px" } },
@@ -1550,6 +1577,17 @@ e('footer', {
                                 (wallets || []).map(w => e('option', { key: w.id, value: w.id }, w.name))
                             )
                         )
+                    ),
+                    e('div', { style: { display: "flex", gap: 10, marginTop: 10, flexWrap: "wrap", alignItems: "center" } },
+                        e('div', { style: { fontSize: 12, color: "var(--text-muted)", fontWeight: 600, flexShrink: 0 } }, "From:"),
+                        e('div', { style: { flex: "1 1 140px" } },
+                            e(Inp, { type: "date", value: dateFrom, onChange: ev => setDateFrom(ev.target.value), style: { marginBottom: 0 } })
+                        ),
+                        e('div', { style: { fontSize: 12, color: "var(--text-muted)", fontWeight: 600, flexShrink: 0 } }, "To:"),
+                        e('div', { style: { flex: "1 1 140px" } },
+                            e(Inp, { type: "date", value: dateTo, onChange: ev => setDateTo(ev.target.value), style: { marginBottom: 0 } })
+                        ),
+                        (dateFrom || dateTo) && e('button', { onClick: () => { setDateFrom(""); setDateTo(""); }, style: { background: "transparent", border: "none", color: "var(--text-muted)", fontSize: 12, fontWeight: 600, cursor: "pointer", padding: "8px 4px", flexShrink: 0 } }, "Clear")
                     )
                 ),
 
@@ -1771,6 +1809,11 @@ e('footer', {
         const container = document.getElementById('root');
         const root = ReactDOM.createRoot(container);
         root.render(e(ErrorBoundary, null, e(App)));
+    </script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./service-worker.js');
+        }
     </script>
 </body>
 </html>
