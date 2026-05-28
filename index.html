@@ -15,6 +15,7 @@
 	
 	
 <link rel="stylesheet" href="styles.css">
+<script src="persistence.js"></script>
 <script src="utils.js"></script>
 <script src="components.js"></script>
 <script src="InsightStrip.js"></script>
@@ -528,48 +529,58 @@ e(EmptyState, { icon:"creditcard", title:"No wallets yet", sub:"Add Cash, GCash,
             }
         }
 
-        const safeGet = (key, fallback = []) => { try { return JSON.parse(localStorage.getItem(key)) || fallback; } catch { return fallback; } };
+        // safeGet removed — reads now go through window.persistence.loadState()
 
         // ── CORE APPLICATION ──────────────────────────────────────────────────
         function App() {
             const [tab, setTab] = useState("dashboard");
 
+            // ── BOOT: load all persisted state in one guarded call ────────────
+            // window.persistence.loadState() reads every sp_* key, applies safe
+            // fallbacks for missing/corrupt values, and handles legacy (pre-envelope)
+            // data transparently. Replaces: inline safeGet helper + 9 individual
+            // useState(() => safeGet("sp_*")) calls that were here before.
+            const _boot = window.persistence.loadState();
+
             const defaultSettings = { currency: 'PHP', theme: 'dark', pin: '' };
             const [settings, setSettings] = useState(() => {
-                try { 
-                    const saved = JSON.parse(localStorage.getItem("sp_settings"));
-                    return saved && typeof saved === 'object' ? { ...defaultSettings, ...saved } : defaultSettings;
-                }
-                catch { return defaultSettings; }
+                const saved = _boot.settings;
+                return (saved && typeof saved === 'object') ? { ...defaultSettings, ...saved } : defaultSettings;
             });
             const [isUnlocked, setIsUnlocked] = useState(!settings.pin);
 
-            const [funds, setFunds] = useState(() => safeGet("sp_funds"));
-            const [txns, setTxns] = useState(() => safeGet("sp_txns"));
-            const [incomes, setIncomes] = useState(() => safeGet("sp_incomes"));
-            const [bills, setBills] = useState(() => safeGet("sp_bills"));
-            const [dailyExpenses, setDailyExpenses] = useState(() => safeGet("sp_daily"));
-            const [archives, setArchives] = useState(() => safeGet("sp_archives"));
-            const [budgets, setBudgets] = useState(() => safeGet("sp_budgets"));
-            const [wallets, setWallets] = useState(() => {
-                const saved = safeGet("sp_wallets");
+            const [funds,         setFunds]         = useState(_boot.funds);
+            const [txns,          setTxns]          = useState(_boot.txns);
+            const [incomes,       setIncomes]       = useState(_boot.incomes);
+            const [bills,         setBills]         = useState(_boot.bills);
+            const [dailyExpenses, setDailyExpenses] = useState(_boot.daily);
+            const [archives,      setArchives]      = useState(_boot.archives);
+            const [budgets,       setBudgets]       = useState(_boot.budgets);
+            const [wallets,       setWallets]       = useState(() => {
+                const saved    = _boot.wallets;
                 const withCash = saved.find(w => w.id === CASH_WALLET_ID) ? saved : [CASH_WALLET, ...saved];
-                return window.finance.migrateWallets(withCash, { incomes, bills, dailyExpenses, txns });
+                return window.finance.migrateWallets(withCash, {
+                    incomes: _boot.incomes, bills: _boot.bills,
+                    dailyExpenses: _boot.daily, txns: _boot.txns
+                });
             });
 
-            // Sync states to LocalStorage & Apply Theme
+            // ── PERSIST: save each slice through the persistence layer ────────
+            // window.persistence.saveKey(logicalName, value) wraps each value in
+            // a versioned envelope { _v: 1, data: ... } before writing to storage.
+            // Replaces: 9 individual useEffect → localStorage.setItem calls.
             useEffect(() => {
-                localStorage.setItem("sp_settings", JSON.stringify(settings));
+                window.persistence.saveKey("settings", settings);
                 document.documentElement.setAttribute('data-theme', settings.theme);
             }, [settings]);
-            useEffect(() => { localStorage.setItem("sp_funds", JSON.stringify(funds)); }, [funds]);
-            useEffect(() => { localStorage.setItem("sp_txns", JSON.stringify(txns)); }, [txns]);
-            useEffect(() => { localStorage.setItem("sp_incomes", JSON.stringify(incomes)); }, [incomes]);
-            useEffect(() => { localStorage.setItem("sp_bills", JSON.stringify(bills)); }, [bills]);
-            useEffect(() => { localStorage.setItem("sp_daily", JSON.stringify(dailyExpenses)); }, [dailyExpenses]);
-            useEffect(() => { localStorage.setItem("sp_archives", JSON.stringify(archives)); }, [archives]);
-            useEffect(() => { localStorage.setItem("sp_budgets", JSON.stringify(budgets)); }, [budgets]);
-            useEffect(() => { localStorage.setItem("sp_wallets", JSON.stringify(wallets)); }, [wallets]);
+            useEffect(() => { window.persistence.saveKey("funds",    funds);         }, [funds]);
+            useEffect(() => { window.persistence.saveKey("txns",     txns);          }, [txns]);
+            useEffect(() => { window.persistence.saveKey("incomes",  incomes);       }, [incomes]);
+            useEffect(() => { window.persistence.saveKey("bills",    bills);         }, [bills]);
+            useEffect(() => { window.persistence.saveKey("daily",    dailyExpenses); }, [dailyExpenses]);
+            useEffect(() => { window.persistence.saveKey("archives", archives);      }, [archives]);
+            useEffect(() => { window.persistence.saveKey("budgets",  budgets);       }, [budgets]);
+            useEffect(() => { window.persistence.saveKey("wallets",  wallets);       }, [wallets]);
 
             // Currency Formatter bound to state
             const fc = useMemo(() => {
@@ -904,17 +915,14 @@ e('footer', {
             const [pinInput, setPinInput] = useState(safeSettings?.pin || '');
 
             const handleExport = () => {
-                const data = {
-                    sp_funds: localStorage.getItem('sp_funds'),
-                    sp_txns: localStorage.getItem('sp_txns'),
-                    sp_incomes: localStorage.getItem('sp_incomes'),
-                    sp_bills: localStorage.getItem('sp_bills'),
-                    sp_daily: localStorage.getItem('sp_daily'),
-                    sp_archives: localStorage.getItem('sp_archives'),
-                    sp_budgets: localStorage.getItem('sp_budgets'),
-                    sp_wallets: localStorage.getItem('sp_wallets'),
-                    sp_settings: localStorage.getItem('sp_settings')
-                };
+                // getAllRawKeys() returns the canonical { logicalName: "sp_key" } map
+                // from persistence.js — adding a new storage key only requires
+                // updating KEYS in persistence.js, not this function.
+                const rawKeys = window.persistence.getAllRawKeys();
+                const data = {};
+                Object.values(rawKeys).forEach(lsKey => {
+                    data[lsKey] = localStorage.getItem(lsKey);
+                });
                 const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a'); a.href = url; a.download = `sinkpeso_backup_${todayStr()}.json`; a.click();
