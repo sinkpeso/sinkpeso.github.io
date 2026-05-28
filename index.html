@@ -15,7 +15,6 @@
 	
 	
 <link rel="stylesheet" href="styles.css">
-<script src="persistence.js"></script>
 <script src="utils.js"></script>
 <script src="components.js"></script>
 <script src="InsightStrip.js"></script>
@@ -113,6 +112,10 @@
             creditcard:  "M1 4h22v16H1z M1 10h22",
             banknote:    "M2 7h20v14H2z M16 14a2 2 0 000-4H8 M6 14h.01",
             calendar:    "M3 4h18a2 2 0 012 2v14a2 2 0 01-2 2H3a2 2 0 01-2-2V6a2 2 0 012-2z M16 2v4 M8 2v4 M1 10h22",
+            moon:        "M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z",
+            sun:         "M12 8a4 4 0 1 1 0 8 4 4 0 0 1 0-8 M12 2v2 M12 20v2 M4.22 4.22l1.42 1.42 M18.36 18.36l1.42 1.42 M2 12h2 M20 12h2 M6.34 17.66l-1.42 1.42 M19.07 4.93l-1.42 1.42",
+		
+
         };
         function Icon({ name, size = 18, color = "currentColor", style: st = {} }) {
             const path = ICONS[name] || ICONS.target;
@@ -529,58 +532,48 @@ e(EmptyState, { icon:"creditcard", title:"No wallets yet", sub:"Add Cash, GCash,
             }
         }
 
-        // safeGet removed — reads now go through window.persistence.loadState()
+        const safeGet = (key, fallback = []) => { try { return JSON.parse(localStorage.getItem(key)) || fallback; } catch { return fallback; } };
 
         // ── CORE APPLICATION ──────────────────────────────────────────────────
         function App() {
             const [tab, setTab] = useState("dashboard");
 
-            // ── BOOT: load all persisted state in one guarded call ────────────
-            // window.persistence.loadState() reads every sp_* key, applies safe
-            // fallbacks for missing/corrupt values, and handles legacy (pre-envelope)
-            // data transparently. Replaces: inline safeGet helper + 9 individual
-            // useState(() => safeGet("sp_*")) calls that were here before.
-            const _boot = window.persistence.loadState();
-
             const defaultSettings = { currency: 'PHP', theme: 'dark', pin: '' };
             const [settings, setSettings] = useState(() => {
-                const saved = _boot.settings;
-                return (saved && typeof saved === 'object') ? { ...defaultSettings, ...saved } : defaultSettings;
+                try { 
+                    const saved = JSON.parse(localStorage.getItem("sp_settings"));
+                    return saved && typeof saved === 'object' ? { ...defaultSettings, ...saved } : defaultSettings;
+                }
+                catch { return defaultSettings; }
             });
             const [isUnlocked, setIsUnlocked] = useState(!settings.pin);
 
-            const [funds,         setFunds]         = useState(_boot.funds);
-            const [txns,          setTxns]          = useState(_boot.txns);
-            const [incomes,       setIncomes]       = useState(_boot.incomes);
-            const [bills,         setBills]         = useState(_boot.bills);
-            const [dailyExpenses, setDailyExpenses] = useState(_boot.daily);
-            const [archives,      setArchives]      = useState(_boot.archives);
-            const [budgets,       setBudgets]       = useState(_boot.budgets);
-            const [wallets,       setWallets]       = useState(() => {
-                const saved    = _boot.wallets;
+            const [funds, setFunds] = useState(() => safeGet("sp_funds"));
+            const [txns, setTxns] = useState(() => safeGet("sp_txns"));
+            const [incomes, setIncomes] = useState(() => safeGet("sp_incomes"));
+            const [bills, setBills] = useState(() => safeGet("sp_bills"));
+            const [dailyExpenses, setDailyExpenses] = useState(() => safeGet("sp_daily"));
+            const [archives, setArchives] = useState(() => safeGet("sp_archives"));
+            const [budgets, setBudgets] = useState(() => safeGet("sp_budgets"));
+            const [wallets, setWallets] = useState(() => {
+                const saved = safeGet("sp_wallets");
                 const withCash = saved.find(w => w.id === CASH_WALLET_ID) ? saved : [CASH_WALLET, ...saved];
-                return window.finance.migrateWallets(withCash, {
-                    incomes: _boot.incomes, bills: _boot.bills,
-                    dailyExpenses: _boot.daily, txns: _boot.txns
-                });
+                return window.finance.migrateWallets(withCash, { incomes, bills, dailyExpenses, txns });
             });
 
-            // ── PERSIST: save each slice through the persistence layer ────────
-            // window.persistence.saveKey(logicalName, value) wraps each value in
-            // a versioned envelope { _v: 1, data: ... } before writing to storage.
-            // Replaces: 9 individual useEffect → localStorage.setItem calls.
+            // Sync states to LocalStorage & Apply Theme
             useEffect(() => {
-                window.persistence.saveKey("settings", settings);
+                localStorage.setItem("sp_settings", JSON.stringify(settings));
                 document.documentElement.setAttribute('data-theme', settings.theme);
             }, [settings]);
-            useEffect(() => { window.persistence.saveKey("funds",    funds);         }, [funds]);
-            useEffect(() => { window.persistence.saveKey("txns",     txns);          }, [txns]);
-            useEffect(() => { window.persistence.saveKey("incomes",  incomes);       }, [incomes]);
-            useEffect(() => { window.persistence.saveKey("bills",    bills);         }, [bills]);
-            useEffect(() => { window.persistence.saveKey("daily",    dailyExpenses); }, [dailyExpenses]);
-            useEffect(() => { window.persistence.saveKey("archives", archives);      }, [archives]);
-            useEffect(() => { window.persistence.saveKey("budgets",  budgets);       }, [budgets]);
-            useEffect(() => { window.persistence.saveKey("wallets",  wallets);       }, [wallets]);
+            useEffect(() => { localStorage.setItem("sp_funds", JSON.stringify(funds)); }, [funds]);
+            useEffect(() => { localStorage.setItem("sp_txns", JSON.stringify(txns)); }, [txns]);
+            useEffect(() => { localStorage.setItem("sp_incomes", JSON.stringify(incomes)); }, [incomes]);
+            useEffect(() => { localStorage.setItem("sp_bills", JSON.stringify(bills)); }, [bills]);
+            useEffect(() => { localStorage.setItem("sp_daily", JSON.stringify(dailyExpenses)); }, [dailyExpenses]);
+            useEffect(() => { localStorage.setItem("sp_archives", JSON.stringify(archives)); }, [archives]);
+            useEffect(() => { localStorage.setItem("sp_budgets", JSON.stringify(budgets)); }, [budgets]);
+            useEffect(() => { localStorage.setItem("sp_wallets", JSON.stringify(wallets)); }, [wallets]);
 
             // Currency Formatter bound to state
             const fc = useMemo(() => {
@@ -638,7 +631,7 @@ e(EmptyState, { icon:"creditcard", title:"No wallets yet", sub:"Add Cash, GCash,
 
                 setArchives(prev => [archive, ...prev]);
                 setWallets(displayWallets.map(w => {
-                    const activeVaultTxns = txns.filter(t => t.fundId);
+                    const activeVaultTxns = window.selectors.getVaultTransactions(txns);
                     const vaultDelta = window.finance.getWalletDelta(w.id, { txns: activeVaultTxns });
                     return { ...w, openingBalanceCents: (w.balanceCents || 0) - vaultDelta };
                 }));
@@ -915,14 +908,17 @@ e('footer', {
             const [pinInput, setPinInput] = useState(safeSettings?.pin || '');
 
             const handleExport = () => {
-                // getAllRawKeys() returns the canonical { logicalName: "sp_key" } map
-                // from persistence.js — adding a new storage key only requires
-                // updating KEYS in persistence.js, not this function.
-                const rawKeys = window.persistence.getAllRawKeys();
-                const data = {};
-                Object.values(rawKeys).forEach(lsKey => {
-                    data[lsKey] = localStorage.getItem(lsKey);
-                });
+                const data = {
+                    sp_funds: localStorage.getItem('sp_funds'),
+                    sp_txns: localStorage.getItem('sp_txns'),
+                    sp_incomes: localStorage.getItem('sp_incomes'),
+                    sp_bills: localStorage.getItem('sp_bills'),
+                    sp_daily: localStorage.getItem('sp_daily'),
+                    sp_archives: localStorage.getItem('sp_archives'),
+                    sp_budgets: localStorage.getItem('sp_budgets'),
+                    sp_wallets: localStorage.getItem('sp_wallets'),
+                    sp_settings: localStorage.getItem('sp_settings')
+                };
                 const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a'); a.href = url; a.download = `sinkpeso_backup_${todayStr()}.json`; a.click();
@@ -951,10 +947,52 @@ e('footer', {
                     // LEFT COLUMN
                     e('div', null,
                         e(SettingGroup, { title: "Appearance", icon: "grid" },
-                            e(Field, { label: "Theme" }, e(Sel, { value: settings?.theme || 'dark', onChange: ev => setSettings({...settings, theme: ev.target.value}) },
-                                e('option', { value: "dark" }, "🌙 Dark Mode"),
-                                e('option', { value: "light" }, "☀️ Light Mode")
-                            )),
+     			e(Field, { 
+    label: e('div', { style: { display: "flex", alignItems: "center", gap: 6 } },
+        e(Icon, { name: (settings?.theme || 'dark') === 'dark' ? 'moon' : 'sun', size: 12, color: "var(--text-light)" }),
+        "Theme"
+    )
+}, 
+    // SLEEK TOGGLE SWITCH TRACK
+    e('div', {
+        onClick: () => setSettings({ ...settings, theme: (settings?.theme || 'dark') === 'dark' ? 'light' : 'dark' }),
+        style: {
+            width: 54,
+            height: 28,
+            borderRadius: 999,
+            backgroundColor: (settings?.theme || 'dark') === 'dark' ? '#1E293B' : '#E2E8F0',
+            border: `1px solid ${(settings?.theme || 'dark') === 'dark' ? '#334155' : '#CBD5E1'}`,
+            position: 'relative',
+            cursor: 'pointer',
+            transition: 'all 0.2s ease',
+            marginTop: 6
+        }
+    },
+        // MOVING KNOB WITH EMBEDDED LUCIDE ICON
+        e('div', {
+            style: {
+                width: 20,
+                height: 20,
+                borderRadius: '50%',
+                backgroundColor: (settings?.theme || 'dark') === 'dark' ? '#38BDF8' : '#F59E0B',
+                position: 'absolute',
+                top: 3,
+                left: (settings?.theme || 'dark') === 'dark' ? 29 : 3,
+                transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 1px 3px rgba(0,0,0,0.15)'
+            }
+        },
+            e(Icon, { 
+                name: (settings?.theme || 'dark') === 'dark' ? 'moon' : 'sun', 
+                size: 11, 
+                color: '#FFFFFF' 
+            })
+        )
+    )
+),
                             e(Field, { label: "Currency" }, e(Sel, { value: settings?.currency || 'PHP', onChange: ev => setSettings({...settings, currency: ev.target.value}) },
                                 Object.keys(CURRENCIES).map(c => e('option', { key: c, value: c }, c))
                             ))
@@ -1014,9 +1052,14 @@ e('footer', {
 
                 // ── MODULE: DASHBOARD OVERVIEW ──────────────────────────────────────
         function DashboardOverview({ totals, bills, dailyExpenses, budgets, wallets, fc, incomes, txns, funds, archives, onNavigate }) {
-            const spendPercentage = totals.totalIncome > 0 ? (totals.totalDailySpent + totals.paidBills) / totals.totalIncome : 0;
+            // ── Derived dashboard state — all aggregation lives in selectors ──
+            const spendPercentage = useMemo(() => window.selectors.getSpendPercentage(totals),
+                [totals.totalDailySpent, totals.paidBills, totals.totalIncome]);
             // Wallet total = sum of all real wallet balances (persists across months)
-            const walletTotal = (wallets || []).reduce((s, w) => s + (w.balanceCents || 0), 0);
+            const walletTotal     = useMemo(() => window.selectors.getWalletTotal(wallets), [wallets]);
+            const dailySafe       = useMemo(() => window.selectors.getDailySafeSpend(totals.netAvailable), [totals.netAvailable]);
+            const upcomingBills   = useMemo(() => window.selectors.getUpcomingBills(bills), [bills]);
+            const categoryStats   = useMemo(() => window.selectors.getCategoryBudgetStatus(totals.catSum, budgets, CATEGORIES), [totals.catSum, budgets]);
 
             return e('div', null,
                 e('div', { style: { marginBottom: 20 } },
@@ -1044,48 +1087,32 @@ e('footer', {
                                 e('div', { style: { fontSize: 18, fontWeight: 800, color: walletTotal < 0 ? "#EF4444" : "var(--text-main)", fontVariantNumeric: "tabular-nums" } }, fc(walletTotal))
                             ),
 
-                            (() => {
-                                const daysInMonth = new Date(new Date().getFullYear(), new Date().getMonth()+1, 0).getDate();
-                                const dayOfMonth  = new Date().getDate();
-                                const daysLeft    = Math.max(1, daysInMonth - dayOfMonth);
-                                const safeDailySpend = totals.netAvailable > 0 ? Math.floor(totals.netAvailable / daysLeft) : 0;
-                                return e('div', null,
+                            e('div', null,
                                     e('div', { style: { display: "flex", gap: 40, marginTop: 20, borderTop: "1px solid var(--border)", paddingTop: 20 } },
                                         e('div', null, e(SLabel, { style: { marginBottom: 4 } }, "Total Income"), e('div', { style: { fontSize: 16, fontWeight: 700, color: "var(--text-main)" } }, fc(totals.totalIncome))),
                                         e('div', null, e(SLabel, { style: { marginBottom: 4 } }, "Total Spent"), e('div', { style: { fontSize: 16, fontWeight: 700, color: "var(--text-muted)" } }, fc(totals.totalDailySpent + totals.paidBills)))
                                     ),
-                                    safeDailySpend > 0 && e('div', { className: "safe-chip" },
+                                    dailySafe.safeDailySpend > 0 && e('div', { className: "safe-chip" },
                                         e(Icon, { name: "trendingup", size: 13, color: "#00E676" }),
-                                        e('span', null, `Safe daily spend: ${fc(safeDailySpend)} / day (${daysLeft}d left)`)
+                                        e('span', null, `Safe daily spend: ${fc(dailySafe.safeDailySpend)} / day (${dailySafe.daysLeft}d left)`)
                                     )
-                                );
-                            })()
+                                )
                         ),
 
                         e('div', { className: "premium-panel" },
                             e(SLabel, { style: { marginBottom: 16 } }, "Where Your Money Goes"),
                             e('div', { className: "category-box-grid" },
-                                CATEGORIES.map(cKey => {
-                                    const currentVal = totals.catSum[cKey] || 0;
-                                    const budgetObj = budgets.find(b => b.category === cKey);
-                                    const limit = budgetObj ? budgetObj.limitCents : null;
-                                    const percent = limit ? safeDiv(currentVal, limit) : 0;
-                                    
-                                    let pColor = "#00E676"; 
-                                    if (limit) {
-                                        if (percent >= 1.0) pColor = "#FF1744"; else if (percent >= 0.8) pColor = "#FFD600";
-                                    } else { pColor = "var(--border)"; }
-
-                                    return e('div', { key: cKey, className: "category-mini-card" },
+                                categoryStats.map(({ cKey, currentVal, limit, pct, pColor }) =>
+                                    e('div', { key: cKey, className: "category-mini-card" },
                                         e('div', { style: { display: "flex", justifyContent: "space-between", fontSize: 12, fontWeight: 600, color: "var(--text-light)", marginBottom: 4 } },
-                                            e('span', null, cKey), e('span', { style: { color: "var(--text-main)" } }, limit ? `${Math.round(percent * 100)}%` : "-")
+                                            e('span', null, cKey), e('span', { style: { color: "var(--text-main)" } }, limit ? `${Math.round(pct * 100)}%` : "-")
                                         ),
                                         e('div', { style: { fontSize: 16, fontWeight: 700, color: "var(--text-main)", marginTop: 2 } }, 
                                             limit ? `${fc(currentVal)} / ${fc(limit)}` : e('span', {style: {fontSize: 13, color: "var(--text-muted)", fontWeight: 600}}, "No limit set")
                                         ),
-                                        e(PBar, { pct: limit ? percent : 0, color: pColor })
-                                    );
-                                })
+                                        e(PBar, { pct: limit ? pct : 0, color: pColor })
+                                    )
+                                )
                             )
                         )
                     ),
@@ -1108,7 +1135,7 @@ e('footer', {
                         e('div', { style: { borderTop: "1px solid var(--border)", paddingTop: 20 } },
                             e(SLabel, { style: { marginBottom: 12 } }, "Upcoming Unpaid Bills"),
                             bills.filter(b => !b.isPaid).length === 0 ? e('div', { style: { color: "#00E676", fontSize: 13, fontWeight: 600, display:"flex", alignItems:"center", gap:6 } }, e(Icon, {name:"shield", size:14, color:"#00E676"}), "All bills paid") :
-                            bills.filter(b => !b.isPaid).slice(0, 3).map(b => {
+                            upcomingBills.slice(0, 3).map(b => {
                                 const days = getDaysRemaining(b.dueDate);
                                 let urgencyColor = "var(--text-muted)"; let urgencyText = "";
                                 if (days < 0) { urgencyColor = "#EF4444"; urgencyText = `Overdue (${Math.abs(days)}d)`; }
@@ -1573,47 +1600,12 @@ e('footer', {
 
             // Always derive from walletId first (source of truth).
             // Snapshot is only a fallback for wallets that have since been deleted.
-            const resolveWallet = (walletId, snapshot) => {
-                const w = (wallets || []).find(x => x.id === walletId);
-                if (w) return w.name;
-                return snapshot || null;
-            };
+            // wallet resolution is centralised in window.selectors.resolveWalletName.
 
-            const allItems = useMemo(() => {
-                const items = [];
-                (dailyExpenses || []).forEach(ex => {
-                    items.push({ id: `exp-${ex.id}`, rawId: ex.id, source: "expense", icon: "wallet",
-                        title: ex.name, subtitle: ex.category, amountCents: ex.amountCents,
-                        date: ex.date, walletId: ex.walletId,
-                        walletName: resolveWallet(ex.walletId, ex.walletNameSnapshot),
-                        amountColor: "#EF4444", amountPrefix: "−" });
-                });
-                (incomes || []).forEach(inc => {
-                    items.push({ id: `inc-${inc.id}`, rawId: inc.id, source: "income", icon: "trendingup",
-                        title: inc.name, subtitle: "Income", amountCents: inc.amountCents,
-                        date: inc.date, walletId: inc.walletId,
-                        walletName: resolveWallet(inc.walletId, inc.walletNameSnapshot),
-                        amountColor: "#00E676", amountPrefix: "+" });
-                });
-                (txns || []).filter(t => t.type === "bill_payment").forEach(t => {
-                    const bill = (bills || []).find(b => b.id === t.billId);
-                    items.push({ id: `bill-${t.id}`, rawId: t.id, source: "bill", icon: "receipt",
-                        title: bill ? bill.name : "Bill Payment", subtitle: "Bill",
-                        amountCents: t.amountCents, date: t.date, walletId: t.walletId,
-                        walletName: resolveWallet(t.walletId, t.walletNameSnapshot),
-                        amountColor: "#A855F7", amountPrefix: "−" });
-                });
-                (txns || []).filter(t => t.fundId).forEach(t => {
-                    const fund = (funds || []).find(f => f.id === t.fundId);
-                    items.push({ id: `vault-${t.id}`, rawId: t.id, source: "vault", icon: "landmark",
-                        title: fund ? fund.name : "Vault", subtitle: t.type === "deposit" ? "Vault Deposit" : "Vault Withdrawal",
-                        amountCents: t.amountCents, date: t.date, walletId: t.walletId,
-                        walletName: resolveWallet(t.walletId, t.walletNameSnapshot),
-                        amountColor: t.type === "deposit" ? "#2563EB" : "#F59E0B",
-                        amountPrefix: t.type === "deposit" ? "→" : "←" });
-                });
-                return items.sort((a, b) => b.date !== a.date ? b.date.localeCompare(a.date) : b.id.localeCompare(a.id));
-            }, [dailyExpenses, incomes, txns, bills, funds, wallets]);
+            const allItems = useMemo(() =>
+                window.selectors.getAllTransactionItems({ dailyExpenses, incomes, txns, bills, funds, wallets }),
+                [dailyExpenses, incomes, txns, bills, funds, wallets]
+            );
 
             const filtered = useMemo(() => {
                 let list = allItems;
@@ -1717,7 +1709,7 @@ e('footer', {
         function TransactionsView({ txns, setTxns, funds, fc }) {
             const [openMenu, setOpenMenu] = useState(null); const [editTxn, setEditTxn] = useState(null); const [editTxnForm, setEditTxnForm] = useState({ type: "deposit", amount: "", date: "" });
             const getVaultName = (fundId) => { const f = funds.find(x => x.id === fundId); return f ? f.name : "Unknown Vault"; };
-            const vaultTxns = txns.filter(t => t.fundId);
+            const vaultTxns = useMemo(() => window.selectors.getVaultTransactions(txns), [txns]);
 
             const openEditTxn = (t) => { setEditTxn(t); setEditTxnForm({ type: t.type, amount: String((t.amountCents / 100).toFixed(2)), date: t.date }); };
             const saveEditTxn = () => { if (!editTxnForm.amount || !editTxnForm.date) return; setTxns(txns.map(t => t.id === editTxn.id ? { ...t, type: editTxnForm.type, amountCents: tc(editTxnForm.amount), date: editTxnForm.date } : t )); setEditTxn(null); };
@@ -1751,57 +1743,12 @@ e('footer', {
 
             // Always derive from walletId first (source of truth).
             // Snapshot is only a fallback for wallets that have since been deleted.
-            const resolveWallet = (walletId, snapshot) => {
-                const w = (wallets || []).find(x => x.id === walletId);
-                if (w) return w.name;
-                return snapshot || null;
-            };
+            // wallet resolution is centralised in window.selectors.resolveWalletName.
 
-            const activities = useMemo(() => {
-                const items = [];
-                (dailyExpenses || []).forEach(ex => {
-                    items.push({ id: `exp-${ex.id}`, icon: "wallet", iconColor: "#EF4444",
-                        title: ex.name, subtitle: ex.category, amountCents: ex.amountCents,
-                        amountColor: "#EF4444", amountPrefix: "−", date: ex.date,
-                        walletName: resolveWallet(ex.walletId, ex.walletNameSnapshot), navTarget: "daily" });
-                });
-                (incomes || []).forEach(inc => {
-                    items.push({ id: `inc-${inc.id}`, icon: "trendingup", iconColor: "#00E676",
-                        title: inc.name, subtitle: "Income", amountCents: inc.amountCents,
-                        amountColor: "#00E676", amountPrefix: "+", date: inc.date,
-                        walletName: resolveWallet(inc.walletId, inc.walletNameSnapshot), navTarget: "budget" });
-                });
-                (txns || []).filter(t => t.type === "bill_payment").forEach(t => {
-                    const bill = (bills || []).find(b => b.id === t.billId);
-                    items.push({ id: `bill-${t.id}`, icon: "receipt", iconColor: "#A855F7",
-                        title: bill ? bill.name + " Paid" : "Bill Paid", subtitle: "Bill",
-                        amountCents: t.amountCents, amountColor: "#A855F7", amountPrefix: "✓",
-                        date: t.date, walletName: resolveWallet(t.walletId, t.walletNameSnapshot), navTarget: "budget" });
-                });
-                (txns || []).filter(t => t.fundId).forEach(t => {
-                    const fund = (funds || []).find(f => f.id === t.fundId);
-                    const isDeposit = t.type === "deposit";
-                    items.push({ id: `vault-${t.id}`, icon: "landmark",
-                        iconColor: isDeposit ? "#2563EB" : "#F59E0B",
-                        title: (isDeposit ? "Deposit → " : "Withdraw ← ") + (fund ? fund.name : "Vault"),
-                        subtitle: isDeposit ? "Vault Deposit" : "Vault Withdrawal",
-                        amountCents: t.amountCents,
-                        amountColor: isDeposit ? "#2563EB" : "#F59E0B",
-                        amountPrefix: isDeposit ? "+" : "−",
-                        date: t.date, walletName: resolveWallet(t.walletId, t.walletNameSnapshot), navTarget: "goals" });
-                });
-                (archives || []).slice(0, 3).forEach(arc => {
-                    items.push({ id: `arc-${arc.id}`, icon: "archive", iconColor: "#A855F7",
-                        title: arc.month + " Archived", subtitle: "Monthly Snapshot",
-                        amountCents: null, amountColor: null, amountPrefix: null,
-                        date: arc.closedAt ? arc.closedAt.slice(0, 10) : "",
-                        walletName: null, navTarget: "history" });
-                });
-                return items
-                    .filter(i => i.date)
-                    .sort((a, b) => b.date.localeCompare(a.date))
-                    .slice(0, 10);
-            }, [incomes, dailyExpenses, bills, txns, funds, wallets, archives]);
+            const activities = useMemo(() =>
+                window.selectors.getRecentActivities({ dailyExpenses, incomes, txns, bills, funds, wallets, archives }),
+                [incomes, dailyExpenses, bills, txns, funds, wallets, archives]
+            );
 
             return e('div', { className: "premium-panel", style: { marginTop: 20 } },
                 e('div', { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 } },
@@ -1864,7 +1811,7 @@ e('footer', {
                 e('div', { style: { fontSize: 20, fontWeight: 800, color, marginTop:6 } }, value));
 
             // Chart Data Prep
-            const chartData = useMemo(() => [...archives].reverse().slice(-6), [archives]);
+            const chartData = useMemo(() => window.selectors.getArchiveChartData(archives), [archives]);
             const maxVal = Math.max(1, ...chartData.flatMap(a => [a.totalIncome, a.totalSpent]));
 
             return e('div', null,
