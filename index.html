@@ -15,7 +15,6 @@
 	
 	
 <link rel="stylesheet" href="styles.css">
-<script src="persistence.js"></script>
 <script src="utils.js"></script>
 <script src="components.js"></script>
 <script src="InsightStrip.js"></script>
@@ -529,58 +528,48 @@ e(EmptyState, { icon:"creditcard", title:"No wallets yet", sub:"Add Cash, GCash,
             }
         }
 
-        // safeGet removed — reads now go through window.persistence.loadState()
+        const safeGet = (key, fallback = []) => { try { return JSON.parse(localStorage.getItem(key)) || fallback; } catch { return fallback; } };
 
         // ── CORE APPLICATION ──────────────────────────────────────────────────
         function App() {
             const [tab, setTab] = useState("dashboard");
 
-            // ── BOOT: load all persisted state in one guarded call ────────────
-            // window.persistence.loadState() reads every sp_* key, applies safe
-            // fallbacks for missing/corrupt values, and handles legacy (pre-envelope)
-            // data transparently. Replaces: inline safeGet helper + 9 individual
-            // useState(() => safeGet("sp_*")) calls that were here before.
-            const _boot = window.persistence.loadState();
-
             const defaultSettings = { currency: 'PHP', theme: 'dark', pin: '' };
             const [settings, setSettings] = useState(() => {
-                const saved = _boot.settings;
-                return (saved && typeof saved === 'object') ? { ...defaultSettings, ...saved } : defaultSettings;
+                try { 
+                    const saved = JSON.parse(localStorage.getItem("sp_settings"));
+                    return saved && typeof saved === 'object' ? { ...defaultSettings, ...saved } : defaultSettings;
+                }
+                catch { return defaultSettings; }
             });
             const [isUnlocked, setIsUnlocked] = useState(!settings.pin);
 
-            const [funds,         setFunds]         = useState(_boot.funds);
-            const [txns,          setTxns]          = useState(_boot.txns);
-            const [incomes,       setIncomes]       = useState(_boot.incomes);
-            const [bills,         setBills]         = useState(_boot.bills);
-            const [dailyExpenses, setDailyExpenses] = useState(_boot.daily);
-            const [archives,      setArchives]      = useState(_boot.archives);
-            const [budgets,       setBudgets]       = useState(_boot.budgets);
-            const [wallets,       setWallets]       = useState(() => {
-                const saved    = _boot.wallets;
+            const [funds, setFunds] = useState(() => safeGet("sp_funds"));
+            const [txns, setTxns] = useState(() => safeGet("sp_txns"));
+            const [incomes, setIncomes] = useState(() => safeGet("sp_incomes"));
+            const [bills, setBills] = useState(() => safeGet("sp_bills"));
+            const [dailyExpenses, setDailyExpenses] = useState(() => safeGet("sp_daily"));
+            const [archives, setArchives] = useState(() => safeGet("sp_archives"));
+            const [budgets, setBudgets] = useState(() => safeGet("sp_budgets"));
+            const [wallets, setWallets] = useState(() => {
+                const saved = safeGet("sp_wallets");
                 const withCash = saved.find(w => w.id === CASH_WALLET_ID) ? saved : [CASH_WALLET, ...saved];
-                return window.finance.migrateWallets(withCash, {
-                    incomes: _boot.incomes, bills: _boot.bills,
-                    dailyExpenses: _boot.daily, txns: _boot.txns
-                });
+                return window.finance.migrateWallets(withCash, { incomes, bills, dailyExpenses, txns });
             });
 
-            // ── PERSIST: save each slice through the persistence layer ────────
-            // window.persistence.saveKey(logicalName, value) wraps each value in
-            // a versioned envelope { _v: 1, data: ... } before writing to storage.
-            // Replaces: 9 individual useEffect → localStorage.setItem calls.
+            // Sync states to LocalStorage & Apply Theme
             useEffect(() => {
-                window.persistence.saveKey("settings", settings);
+                localStorage.setItem("sp_settings", JSON.stringify(settings));
                 document.documentElement.setAttribute('data-theme', settings.theme);
             }, [settings]);
-            useEffect(() => { window.persistence.saveKey("funds",    funds);         }, [funds]);
-            useEffect(() => { window.persistence.saveKey("txns",     txns);          }, [txns]);
-            useEffect(() => { window.persistence.saveKey("incomes",  incomes);       }, [incomes]);
-            useEffect(() => { window.persistence.saveKey("bills",    bills);         }, [bills]);
-            useEffect(() => { window.persistence.saveKey("daily",    dailyExpenses); }, [dailyExpenses]);
-            useEffect(() => { window.persistence.saveKey("archives", archives);      }, [archives]);
-            useEffect(() => { window.persistence.saveKey("budgets",  budgets);       }, [budgets]);
-            useEffect(() => { window.persistence.saveKey("wallets",  wallets);       }, [wallets]);
+            useEffect(() => { localStorage.setItem("sp_funds", JSON.stringify(funds)); }, [funds]);
+            useEffect(() => { localStorage.setItem("sp_txns", JSON.stringify(txns)); }, [txns]);
+            useEffect(() => { localStorage.setItem("sp_incomes", JSON.stringify(incomes)); }, [incomes]);
+            useEffect(() => { localStorage.setItem("sp_bills", JSON.stringify(bills)); }, [bills]);
+            useEffect(() => { localStorage.setItem("sp_daily", JSON.stringify(dailyExpenses)); }, [dailyExpenses]);
+            useEffect(() => { localStorage.setItem("sp_archives", JSON.stringify(archives)); }, [archives]);
+            useEffect(() => { localStorage.setItem("sp_budgets", JSON.stringify(budgets)); }, [budgets]);
+            useEffect(() => { localStorage.setItem("sp_wallets", JSON.stringify(wallets)); }, [wallets]);
 
             // Currency Formatter bound to state
             const fc = useMemo(() => {
@@ -915,14 +904,17 @@ e('footer', {
             const [pinInput, setPinInput] = useState(safeSettings?.pin || '');
 
             const handleExport = () => {
-                // getAllRawKeys() returns the canonical { logicalName: "sp_key" } map
-                // from persistence.js — adding a new storage key only requires
-                // updating KEYS in persistence.js, not this function.
-                const rawKeys = window.persistence.getAllRawKeys();
-                const data = {};
-                Object.values(rawKeys).forEach(lsKey => {
-                    data[lsKey] = localStorage.getItem(lsKey);
-                });
+                const data = {
+                    sp_funds: localStorage.getItem('sp_funds'),
+                    sp_txns: localStorage.getItem('sp_txns'),
+                    sp_incomes: localStorage.getItem('sp_incomes'),
+                    sp_bills: localStorage.getItem('sp_bills'),
+                    sp_daily: localStorage.getItem('sp_daily'),
+                    sp_archives: localStorage.getItem('sp_archives'),
+                    sp_budgets: localStorage.getItem('sp_budgets'),
+                    sp_wallets: localStorage.getItem('sp_wallets'),
+                    sp_settings: localStorage.getItem('sp_settings')
+                };
                 const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a'); a.href = url; a.download = `sinkpeso_backup_${todayStr()}.json`; a.click();
@@ -951,10 +943,46 @@ e('footer', {
                     // LEFT COLUMN
                     e('div', null,
                         e(SettingGroup, { title: "Appearance", icon: "grid" },
-                            e(Field, { label: "Theme" }, e(Sel, { value: settings?.theme || 'dark', onChange: ev => setSettings({...settings, theme: ev.target.value}) },
-                                e('option', { value: "dark" }, "🌙 Dark Mode"),
-                                e('option', { value: "light" }, "☀️ Light Mode")
-                            )),
+                            e(Field, { label: "Theme" },
+                                e('div', { style: { display: "inline-flex", background: "var(--bg-input)", border: "1px solid var(--border-input)", borderRadius: 10, padding: 3, gap: 2 } },
+                                    [
+                                        { val: 'dark', icon: "M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z", label: "Dark" },
+                                        { val: 'light', icon: null, label: "Light" }
+                                    ].map(opt => {
+                                        const active = (settings?.theme || 'dark') === opt.val;
+                                        return e('button', {
+                                            key: opt.val,
+                                            onClick: () => setSettings({...settings, theme: opt.val}),
+                                            style: {
+                                                display: "flex", alignItems: "center", gap: 6,
+                                                padding: "6px 12px", borderRadius: 7,
+                                                background: active ? "var(--bg-panel)" : "transparent",
+                                                border: active ? "1px solid var(--border)" : "1px solid transparent",
+                                                boxShadow: active ? "0 1px 4px rgba(0,0,0,0.18)" : "none",
+                                                cursor: "pointer", transition: "all 0.18s",
+                                                color: active ? "var(--text-main)" : "var(--text-muted)",
+                                                fontSize: 12, fontWeight: active ? 600 : 400,
+                                                fontFamily: "inherit",
+                                            }
+                                        },
+                                            opt.val === 'dark'
+                                                ? e('svg', { width: 13, height: 13, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 2.2, strokeLinecap: "round", strokeLinejoin: "round" }, e('path', { d: "M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" }))
+                                                : e('svg', { width: 13, height: 13, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 2.2, strokeLinecap: "round", strokeLinejoin: "round" },
+                                                    e('circle', { cx: 12, cy: 12, r: 5 }),
+                                                    e('line', { x1: 12, y1: 1, x2: 12, y2: 3 }),
+                                                    e('line', { x1: 12, y1: 21, x2: 12, y2: 23 }),
+                                                    e('line', { x1: 4.22, y1: 4.22, x2: 5.64, y2: 5.64 }),
+                                                    e('line', { x1: 18.36, y1: 18.36, x2: 19.78, y2: 19.78 }),
+                                                    e('line', { x1: 1, y1: 12, x2: 3, y2: 12 }),
+                                                    e('line', { x1: 21, y1: 12, x2: 23, y2: 12 }),
+                                                    e('line', { x1: 4.22, y1: 19.78, x2: 5.64, y2: 18.36 }),
+                                                    e('line', { x1: 18.36, y1: 5.64, x2: 19.78, y2: 4.22 })
+                                                ),
+                                            opt.label
+                                        );
+                                    })
+                                )
+                            ),
                             e(Field, { label: "Currency" }, e(Sel, { value: settings?.currency || 'PHP', onChange: ev => setSettings({...settings, currency: ev.target.value}) },
                                 Object.keys(CURRENCIES).map(c => e('option', { key: c, value: c }, c))
                             ))
