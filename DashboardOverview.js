@@ -44,6 +44,23 @@
         // Wallet total = sum of all real wallet balances (persists across months)
         const walletTotal = (wallets || []).reduce((s, w) => s + (w.balanceCents || 0), 0);
 
+        // Spending trends data from archives (last 6 months)
+        const trendData = useMemo(() => {
+            if (!archives || archives.length === 0) return [];
+            return [...archives].reverse().slice(-6).map(a => ({
+                month: a.month.split(' ')[0].substring(0, 3),
+                spent: a.totalSpent + a.totalBills,
+                income: a.totalIncome
+            }));
+        }, [archives]);
+
+        // Bill reminders (upcoming within 7 days or overdue)
+        const billReminders = useMemo(() => {
+            if (!bills) return [];
+            return bills.filter(b => !b.isPaid && getDaysRemaining(b.dueDate) <= 7)
+                .sort((a, b) => getDaysRemaining(a.dueDate) - getDaysRemaining(b.dueDate));
+        }, [bills]);
+
         return e('div', null,
             e('div', { style: { marginBottom: 20 } },
                 e('div', { style: { display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap", marginBottom: 5 } },
@@ -153,6 +170,70 @@
                         })
                     )
                 )
+            ),
+
+            // ── Spending Trends Chart ───────────────────────────────────────
+            trendData.length > 1 && e('div', { className: "premium-panel", style: { marginTop: 20 } },
+                e(SLabel, { style: { marginBottom: 16 } }, "Spending Trends (Last 6 Months)"),
+                e('div', { style: { display: "flex", alignItems: "flex-end", gap: 8, height: 120, padding: "0 4px" } },
+                    trendData.map((d, i) => {
+                        const maxVal = Math.max(...trendData.map(x => x.spent), 1);
+                        const height = (d.spent / maxVal) * 100;
+                        return e('div', { key: i, style: { flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 6 } },
+                            e('div', { style: { width: "100%", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "flex-end", height: 80 } },
+                                e('div', { style: {
+                                    width: "100%", maxWidth: 32, height: `${height}%`,
+                                    background: "linear-gradient(to top, #00E676, #00C853)",
+                                    borderRadius: "4px 4px 0 0",
+                                    transition: "height 0.5s ease"
+                                } })
+                            ),
+                            e('span', { style: { fontSize: 10, color: "var(--text-muted)", fontWeight: 600 } }, d.month)
+                        );
+                    })
+                ),
+                e('div', { style: { display: "flex", justifyContent: "space-between", marginTop: 12, paddingTop: 12, borderTop: "1px solid var(--border)" } },
+                    e('div', { style: { display: "flex", alignItems: "center", gap: 6 } },
+                        e('div', { style: { width: 8, height: 8, borderRadius: 2, background: "#00E676" } }),
+                        e('span', { style: { fontSize: 11, color: "var(--text-muted)" } }, "Spent")
+                    ),
+                    e('div', { style: { fontSize: 11, color: "var(--text-muted)" } },
+                        `Avg: ${fc(trendData.reduce((s, d) => s + d.spent, 0) / trendData.length)}`
+                    )
+                )
+            ),
+
+            // ── Bill Reminders ──────────────────────────────────────────────
+            billReminders.length > 0 && e('div', { className: "premium-panel", style: { marginTop: 20, borderLeft: "3px solid #F59E0B" } },
+                e('div', { style: { display: "flex", alignItems: "center", gap: 8, marginBottom: 14 } },
+                    e(Icon, { name: "calendar", size: 16, color: "#F59E0B" }),
+                    e(SLabel, { style: { marginBottom: 0, color: "#F59E0B" } }, "Bill Reminders")
+                ),
+                billReminders.map(b => {
+                    const days = getDaysRemaining(b.dueDate);
+                    let bgColor, textColor, badgeText;
+                    if (days < 0) { bgColor = "rgba(239,68,68,0.08)"; textColor = "#EF4444"; badgeText = `${Math.abs(days)}d overdue`; }
+                    else if (days === 0) { bgColor = "rgba(239,68,68,0.08)"; textColor = "#EF4444"; badgeText = "Due today"; }
+                    else if (days === 1) { bgColor = "rgba(245,158,11,0.08)"; textColor = "#F59E0B"; badgeText = "Due tomorrow"; }
+                    else { bgColor = "rgba(245,158,11,0.05)"; textColor = "#F59E0B"; badgeText = `Due in ${days}d`; }
+
+                    return e('div', { key: b.id, style: { display: "flex", justifyContent: "space-between", alignItems: "center", background: bgColor, padding: "12px 14px", borderRadius: 10, marginBottom: 8 } },
+                        e('div', { style: { display: "flex", alignItems: "center", gap: 10 } },
+                            e('div', { style: { width: 36, height: 36, borderRadius: 10, background: textColor + "15", display: "flex", alignItems: "center", justifyContent: "center" } },
+                                e(Icon, { name: "receipt", size: 16, color: textColor })
+                            ),
+                            e('div', null,
+                                e('div', { style: { fontSize: 13, fontWeight: 600, color: "var(--text-main)" } }, b.name),
+                                e('div', { style: { fontSize: 11, color: textColor, fontWeight: 600, marginTop: 2 } }, badgeText)
+                            )
+                        ),
+                        e('div', { style: { fontSize: 14, fontWeight: 700, color: "var(--text-main)" } }, fc(b.amountCents))
+                    );
+                }),
+                billReminders.length > 3 && e('button', {
+                    onClick: () => onNavigate("budget"),
+                    style: { background: "transparent", border: "none", color: "var(--text-muted)", fontSize: 12, fontWeight: 600, cursor: "pointer", padding: "8px 0", width: "100%", textAlign: "center" }
+                }, `View all ${billReminders.length} bills →`)
             ),
 
             // ── Recent Activity ─────────────────────────────────────────────
