@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SINKPESO — License Key Generator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: #020810;
+            color: #F1F5F9;
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .header h1 {
+            font-size: 28px;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+        .header p {
+            color: #64748B;
+            font-size: 14px;
+        }
+        .card {
+            background: #0A0E1A;
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 16px;
+            padding: 28px;
+            margin-bottom: 24px;
+        }
+        .card h2 {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .card h2 svg { color: #00E676; }
+        label {
+            display: block;
+            font-size: 12px;
+            font-weight: 700;
+            color: #64748B;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+        input, select {
+            width: 100%;
+            padding: 14px 16px;
+            background: #0F1526;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 10px;
+            color: #F1F5F9;
+            font-size: 16px;
+            font-family: inherit;
+            outline: none;
+            margin-bottom: 16px;
+            transition: border-color 0.2s;
+        }
+        input:focus, select:focus {
+            border-color: #00E676;
+        }
+        input::placeholder { color: #475569; }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            padding: 16px;
+            background: #00E676;
+            color: #020810;
+            font-weight: 700;
+            font-size: 15px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0,230,118,0.3);
+        }
+        .btn:active { transform: scale(0.98); }
+        .btn-secondary {
+            background: transparent;
+            color: #F1F5F9;
+            border: 1px solid rgba(255,255,255,0.15);
+        }
+        .btn-secondary:hover {
+            border-color: rgba(255,255,255,0.3);
+            background: rgba(255,255,255,0.05);
+            box-shadow: none;
+        }
+        .result {
+            margin-top: 24px;
+            padding: 20px;
+            background: rgba(0,230,118,0.06);
+            border: 1px solid rgba(0,230,118,0.15);
+            border-radius: 12px;
+            display: none;
+        }
+        .result.show { display: block; }
+        .result-label {
+            font-size: 11px;
+            font-weight: 700;
+            color: #00E676;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+        }
+        .key-display {
+            font-family: 'DM Mono', monospace;
+            font-size: 20px;
+            font-weight: 500;
+            color: #F1F5F9;
+            letter-spacing: 0.05em;
+            word-break: break-all;
+            margin-bottom: 16px;
+            padding: 16px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.06);
+        }
+        .copy-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: #F1F5F9;
+            font-size: 13px;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .copy-btn:hover { background: rgba(255,255,255,0.1); }
+        .history {
+            margin-top: 24px;
+        }
+        .history-title {
+            font-size: 12px;
+            font-weight: 700;
+            color: #64748B;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+        }
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.04);
+            border-radius: 10px;
+            font-family: 'DM Mono', monospace;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.12s;
+        }
+        .history-item:hover {
+            background: rgba(255,255,255,0.04);
+        }
+        .history-item .date {
+            font-family: 'DM Sans', sans-serif;
+            font-size: 11px;
+            color: #475569;
+        }
+        .warning {
+            padding: 16px;
+            background: rgba(245,158,11,0.06);
+            border: 1px solid rgba(245,158,11,0.15);
+            border-radius: 10px;
+            font-size: 13px;
+            color: #F59E0B;
+            line-height: 1.5;
+            margin-bottom: 24px;
+        }
+        .warning strong { color: #FBBF24; }
+        .stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+        .stat-card {
+            padding: 16px;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.04);
+            border-radius: 12px;
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 28px;
+            font-weight: 800;
+            color: #00E676;
+            margin-bottom: 4px;
+        }
+        .stat-label {
+            font-size: 12px;
+            color: #64748B;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>SINKPESO License Manager</h1>
+            <p>Generate and manage premium license keys</p>
+        </div>
+
+        <div class="warning">
+            <strong>⚠️ Keep this page private.</strong> Anyone with access can generate valid license keys. Bookmark this page and don't share the URL.
+        </div>
+
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-value" id="totalKeys">0</div>
+                <div class="stat-label">Keys Generated</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="todayKeys">0</div>
+                <div class="stat-label">Generated Today</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                Generate License Key
+            </h2>
+
+            <label for="customerName">Customer Name (optional)</label>
+            <input type="text" id="customerName" placeholder="e.g. Juan dela Cruz">
+
+            <label for="customerEmail">Customer Email (optional)</label>
+            <input type="email" id="customerEmail" placeholder="e.g. juan@email.com">
+
+            <label for="licenseType">License Type</label>
+            <select id="licenseType">
+                <option value="lifetime">Lifetime Access (₱299)</option>
+                <option value="annual">Annual (₱149/year)</option>
+                <option value="monthly">Monthly (₱49/month)</option>
+            </select>
+
+            <button class="btn" onclick="generateKey()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+                Generate Key
+            </button>
+
+            <div class="result" id="result">
+                <div class="result-label">License Key</div>
+                <div class="key-display" id="keyDisplay"></div>
+                <button class="copy-btn" onclick="copyKey()">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+                    Copy Key
+                </button>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22a10 10 0 100-20 10 10 0 000 20z"/><path d="M12 8v4l3 3"/></svg>
+                Generated Keys
+            </h2>
+
+            <div class="history">
+                <div class="history-title">Recent Keys</div>
+                <div class="history-list" id="historyList">
+                    <div style="text-align: center; padding: 20px; color: #475569; font-size: 13px;">No keys generated yet</div>
+                </div>
+            </div>
+
+            <div style="margin-top: 16px; display: flex; gap: 8px;">
+                <button class="btn btn-secondary" style="flex: 1;" onclick="exportKeys()">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+                    Export CSV
+                </button>
+                <button class="btn btn-secondary" style="flex: 1;" onclick="clearHistory()">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4h8v2M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6"/></svg>
+                    Clear History
+                </button>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                How It Works
+            </h2>
+            <div style="font-size: 14px; color: #94A3B8; line-height: 1.8;">
+                <p><strong style="color: #F1F5F9;">1.</strong> Generate a license key for each customer</p>
+                <p><strong style="color: #F1F5F9;">2.</strong> Send the key to the customer via email</p>
+                <p><strong style="color: #F1F5F9;">3.</strong> Customer enters key in SINKPESO Settings → Premium License</p>
+                <p><strong style="color: #F1F5F9;">4.</strong> Key unlocks all premium features instantly</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const STORAGE_KEY = 'sp_license_history';
+
+        function getHistory() {
+            try {
+                return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+            } catch {
+                return [];
+            }
+        }
+
+        function saveHistory(history) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
+        }
+
+        function generateKey() {
+            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+            let code = '';
+
+            // Generate 12 valid characters
+            do {
+                code = '';
+                for (let i = 0; i < 12; i++) {
+                    code += chars[Math.floor(Math.random() * chars.length)];
+                }
+            } while (!isValidChecksum(code));
+
+            const key = `SINKPESO-${code.slice(0, 4)}-${code.slice(4, 8)}-${code.slice(8, 12)}`;
+
+            // Save to history
+            const history = getHistory();
+            history.unshift({
+                key: key,
+                customer: document.getElementById('customerName').value || 'N/A',
+                email: document.getElementById('customerEmail').value || 'N/A',
+                type: document.getElementById('licenseType').value,
+                date: new Date().toISOString(),
+                used: false
+            });
+            saveHistory(history);
+
+            // Show result
+            document.getElementById('keyDisplay').textContent = key;
+            document.getElementById('result').classList.add('show');
+
+            // Update stats
+            updateStats();
+            renderHistory();
+
+            // Clear inputs
+            document.getElementById('customerName').value = '';
+            document.getElementById('customerEmail').value = '';
+        }
+
+        function isValidChecksum(code) {
+            let sum = 0;
+            for (let i = 0; i < code.length; i++) {
+                sum += code.charCodeAt(i);
+            }
+            return sum % 7 === 0;
+        }
+
+        function copyKey() {
+            const key = document.getElementById('keyDisplay').textContent;
+            navigator.clipboard.writeText(key).then(() => {
+                const btn = document.querySelector('.copy-btn');
+                btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg> Copied!';
+                setTimeout(() => {
+                    btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> Copy Key';
+                }, 2000);
+            });
+        }
+
+        function updateStats() {
+            const history = getHistory();
+            document.getElementById('totalKeys').textContent = history.length;
+
+            const today = new Date().toDateString();
+            const todayCount = history.filter(h => new Date(h.date).toDateString() === today).length;
+            document.getElementById('todayKeys').textContent = todayCount;
+        }
+
+        function renderHistory() {
+            const history = getHistory();
+            const list = document.getElementById('historyList');
+
+            if (history.length === 0) {
+                list.innerHTML = '<div style="text-align: center; padding: 20px; color: #475569; font-size: 13px;">No keys generated yet</div>';
+                return;
+            }
+
+            list.innerHTML = history.slice(0, 20).map(h => {
+                const date = new Date(h.date);
+                const dateStr = date.toLocaleDateString('en-PH', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+                return `
+                    <div class="history-item" onclick="navigator.clipboard.writeText('${h.key}')">
+                        <div>
+                            <div style="font-size: 13px;">${h.key}</div>
+                            <div style="font-size: 11px; color: #475569; margin-top: 4px; font-family: 'DM Sans', sans-serif;">${h.customer} • ${h.type}</div>
+                        </div>
+                        <div class="date">${dateStr}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function exportKeys() {
+            const history = getHistory();
+            if (history.length === 0) {
+                alert('No keys to export');
+                return;
+            }
+
+            const headers = ['Key', 'Customer', 'Email', 'Type', 'Date', 'Used'];
+            const rows = history.map(h => [
+                h.key,
+                h.customer,
+                h.email,
+                h.type,
+                new Date(h.date).toLocaleString(),
+                h.used ? 'Yes' : 'No'
+            ]);
+
+            const csv = [headers, ...rows].map(r => r.map(c => `"${c}"`).join(',')).join('\n');
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `sinkpeso-license-keys-${new Date().toISOString().slice(0, 10)}.csv`;
+            a.click();
+        }
+
+        function clearHistory() {
+            if (confirm('Clear all generated keys from history? This cannot be undone.')) {
+                localStorage.removeItem(STORAGE_KEY);
+                updateStats();
+                renderHistory();
+            }
+        }
+
+        // Initialize
+        updateStats();
+        renderHistory();
+    </script>
+</body>
+</html>
