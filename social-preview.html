@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SINKPESO Social Media Screenshots</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'DM Sans', sans-serif; background: #1a1a2e; padding: 40px 20px; }
+
+        .instructions {
+            max-width: 800px;
+            margin: 0 auto 40px;
+            color: #fff;
+            text-align: center;
+        }
+        .instructions h1 { font-size: 24px; margin-bottom: 12px; }
+        .instructions p { color: #94A3B8; font-size: 14px; }
+
+        .preview-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 60px;
+        }
+
+        .preview-label {
+            color: #94A3B8;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+            text-align: center;
+        }
+
+        /* Twitter/LinkedIn - 1200x628 */
+        .preview-twitter {
+            width: 1200px;
+            height: 628px;
+            background: linear-gradient(135deg, #020810 0%, #0A0E1A 100%);
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            padding: 60px;
+        }
+        .preview-twitter .left {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .preview-twitter .right {
+            width: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .preview-twitter h2 {
+            font-size: 48px;
+            font-weight: 800;
+            color: #F1F5F9;
+            line-height: 1.1;
+            margin-bottom: 20px;
+        }
+        .preview-twitter h2 span { color: #00E676; }
+        .preview-twitter p {
+            font-size: 20px;
+            color: #94A3B8;
+            line-height: 1.5;
+            margin-bottom: 32px;
+        }
+        .preview-twitter .features {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .preview-twitter .feature {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 16px;
+            color: #F1F5F9;
+        }
+        .preview-twitter .feature-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
+            background: rgba(0,230,118,0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .preview-twitter .mock-app {
+            width: 320px;
+            background: #0A0E1A;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+        }
+        .preview-twitter .mock-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .preview-twitter .mock-logo {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+        }
+        .preview-twitter .mock-title {
+            font-size: 16px;
+            font-weight: 800;
+            color: #fff;
+        }
+        .preview-twitter .mock-balance {
+            font-size: 32px;
+            font-weight: 800;
+            color: #00E676;
+            margin-bottom: 8px;
+        }
+        .preview-twitter .mock-label {
+            font-size: 12px;
+            color: #64748B;
+            margin-bottom: 20px;
+        }
+        .preview-twitter .mock-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-top: 1px solid rgba(255,255,255,0.06);
+        }
+        .preview-twitter .mock-row-name {
+            font-size: 14px;
+            color: #F1F5F9;
+        }
+        .preview-twitter .mock-row-amount {
+            font-size: 14px;
+            font-weight: 700;
+        }
+        .preview-twitter .mock-row-amount.negative { color: #EF4444; }
+        .preview-twitter .mock-row-amount.positive { color: #00E676; }
+
+        /* Instagram - 1080x1080 */
+        .preview-instagram {
+            width: 1080px;
+            height: 1080px;
+            background: linear-gradient(135deg, #020810 0%, #0A0E1A 100%);
+            border-radius: 12px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 80px;
+            text-align: center;
+        }
+        .preview-instagram .logo {
+            width: 100px;
+            height: 100px;
+            border-radius: 24px;
+            margin-bottom: 32px;
+            box-shadow: 0 12px 40px rgba(0,230,118,0.2);
+        }
+        .preview-instagram h2 {
+            font-size: 56px;
+            font-weight: 800;
+            color: #F1F5F9;
+            margin-bottom: 16px;
+        }
+        .preview-instagram h2 span { color: #00E676; }
+        .preview-instagram p {
+            font-size: 24px;
+            color: #94A3B8;
+            line-height: 1.5;
+            margin-bottom: 48px;
+            max-width: 600px;
+        }
+        .preview-instagram .tags {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .preview-instagram .tag {
+            padding: 10px 20px;
+            border-radius: 8px;
+            background: rgba(0,230,118,0.1);
+            border: 1px solid rgba(0,230,118,0.2);
+            color: #00E676;
+            font-size: 16px;
+            font-weight: 600;
+        }
+        .preview-instagram .url {
+            margin-top: 48px;
+            font-size: 20px;
+            color: #64748B;
+            font-family: 'DM Mono', monospace;
+        }
+
+        /* Facebook - 1200x630 */
+        .preview-facebook {
+            width: 1200px;
+            height: 630px;
+            background: #020810;
+            border-radius: 12px;
+            overflow: hidden;
+            display: flex;
+        }
+        .preview-facebook .left {
+            flex: 1;
+            padding: 60px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .preview-facebook .right {
+            width: 500px;
+            background: #0A0E1A;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+        }
+        .preview-facebook h2 {
+            font-size: 44px;
+            font-weight: 800;
+            color: #F1F5F9;
+            line-height: 1.15;
+            margin-bottom: 16px;
+        }
+        .preview-facebook h2 span { color: #00E676; }
+        .preview-facebook p {
+            font-size: 18px;
+            color: #94A3B8;
+            line-height: 1.6;
+            margin-bottom: 32px;
+        }
+        .preview-facebook .btn {
+            display: inline-flex;
+            padding: 16px 32px;
+            background: #00E676;
+            color: #020810;
+            font-weight: 700;
+            font-size: 16px;
+            border-radius: 10px;
+        }
+        .preview-facebook .chart-mock {
+            width: 100%;
+        }
+        .preview-facebook .chart-bar {
+            display: flex;
+            align-items: flex-end;
+            gap: 8px;
+            height: 200px;
+            padding: 0 20px;
+        }
+        .preview-facebook .bar {
+            flex: 1;
+            border-radius: 4px 4px 0 0;
+            transition: height 0.3s;
+        }
+        .preview-facebook .bar-labels {
+            display: flex;
+            gap: 8px;
+            padding: 0 20px;
+            margin-top: 8px;
+        }
+        .preview-facebook .bar-label {
+            flex: 1;
+            text-align: center;
+            font-size: 11px;
+            color: #64748B;
+        }
+
+        /* Mobile App Store - 1242x2688 (scaled down) */
+        .preview-mobile {
+            width: 390px;
+            height: 844px;
+            background: #020810;
+            border-radius: 40px;
+            overflow: hidden;
+            border: 4px solid #1a1a2e;
+            padding: 20px 16px;
+        }
+        .preview-mobile .status-bar {
+            display: flex;
+            justify-content: space-between;
+            padding: 0 8px;
+            margin-bottom: 20px;
+        }
+        .preview-mobile .status-time {
+            font-size: 14px;
+            font-weight: 600;
+            color: #fff;
+        }
+        .preview-mobile .status-icons {
+            display: flex;
+            gap: 4px;
+        }
+        .preview-mobile .app-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 24px;
+        }
+        .preview-mobile .app-logo {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+        }
+        .preview-mobile .app-name {
+            font-size: 18px;
+            font-weight: 800;
+            color: #fff;
+        }
+        .preview-mobile .balance-section {
+            background: linear-gradient(135deg, #141E32, #0A0E1A);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-left: 3px solid #00E676;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 20px;
+        }
+        .preview-mobile .balance-label {
+            font-size: 12px;
+            color: #94A3B8;
+            margin-bottom: 8px;
+        }
+        .preview-mobile .balance-amount {
+            font-size: 36px;
+            font-weight: 800;
+            color: #00E676;
+            margin-bottom: 4px;
+        }
+        .preview-mobile .balance-sub {
+            font-size: 12px;
+            color: #64748B;
+        }
+        .preview-mobile .quick-stats {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .preview-mobile .stat-card {
+            flex: 1;
+            background: #0A0E1A;
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 12px;
+            padding: 14px;
+        }
+        .preview-mobile .stat-label {
+            font-size: 11px;
+            color: #64748B;
+            margin-bottom: 6px;
+        }
+        .preview-mobile .stat-value {
+            font-size: 18px;
+            font-weight: 700;
+        }
+        .preview-mobile .section-title {
+            font-size: 12px;
+            font-weight: 700;
+            color: #64748B;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+        }
+        .preview-mobile .tx-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+        }
+        .preview-mobile .tx-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+        }
+        .preview-mobile .tx-info {
+            flex: 1;
+        }
+        .preview-mobile .tx-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: #F1F5F9;
+        }
+        .preview-mobile .tx-cat {
+            font-size: 11px;
+            color: #64748B;
+            margin-top: 2px;
+        }
+        .preview-mobile .tx-amount {
+            font-size: 14px;
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body>
+    <div class="instructions">
+        <h1>SINKPESO Social Media Screenshots</h1>
+        <p>Right-click each image → "Save image as" or take a screenshot. Each is sized for the platform.</p>
+    </div>
+
+    <div class="preview-container">
+
+        <!-- Twitter/LinkedIn -->
+        <div>
+            <div class="preview-label">Twitter / LinkedIn — 1200×628</div>
+            <div class="preview-twitter">
+                <div class="left">
+                    <h2>Track your money.<br><span>Privately.</span></h2>
+                    <p>100% offline. No account required. No data sent anywhere.</p>
+                    <div class="features">
+                        <div class="feature">
+                            <div class="feature-icon">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#00E676" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                            </div>
+                            Track income, expenses & bills
+                        </div>
+                        <div class="feature">
+                            <div class="feature-icon">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#00E676" stroke-width="2"><path d="M12 22a10 10 0 100-20 10 10 0 000 20z M12 18a6 6 0 100-12 6 6 0 000 12z"/></svg>
+                            </div>
+                            Savings vaults for goals
+                        </div>
+                        <div class="feature">
+                            <div class="feature-icon">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#00E676" stroke-width="2"><path d="M12 8v4l3 3 M3.05 11a9 9 0 109.9-8.95"/></svg>
+                            </div>
+                            Bill reminders & trends
+                        </div>
+                    </div>
+                </div>
+                <div class="right">
+                    <div class="mock-app">
+                        <div class="mock-header">
+                            <img src="logosinkpeso.png" class="mock-logo">
+                            <div class="mock-title">SINKPESO</div>
+                        </div>
+                        <div class="mock-balance">₱24,580</div>
+                        <div class="mock-label">Available This Month</div>
+                        <div class="mock-row">
+                            <div class="mock-row-name">Groceries</div>
+                            <div class="mock-row-amount negative">-₱1,200</div>
+                        </div>
+                        <div class="mock-row">
+                            <div class="mock-row-name">Salary</div>
+                            <div class="mock-row-amount positive">+₱35,000</div>
+                        </div>
+                        <div class="mock-row">
+                            <div class="mock-row-name">Electric Bill</div>
+                            <div class="mock-row-amount negative">-₱2,800</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Instagram -->
+        <div>
+            <div class="preview-label">Instagram — 1080×1080</div>
+            <div class="preview-instagram">
+                <img src="logosinkpeso.png" class="logo">
+                <h2>Your Money.<br><span>Your Business.</span></h2>
+                <p>Free budget tracker that works 100% offline. No account. No cloud. No nonsense.</p>
+                <div class="tags">
+                    <div class="tag">100% Offline</div>
+                    <div class="tag">No Account</div>
+                    <div class="tag">Free Forever</div>
+                    <div class="tag">PWA Ready</div>
+                </div>
+                <div class="url">sinkpeso.github.io</div>
+            </div>
+        </div>
+
+        <!-- Facebook -->
+        <div>
+            <div class="preview-label">Facebook — 1200×630</div>
+            <div class="preview-facebook">
+                <div class="left">
+                    <h2>Finally. A budget app that <span>respects your privacy.</span></h2>
+                    <p>Track income, expenses, bills & savings. Works offline. No account needed. Your data stays on your device.</p>
+                    <div class="btn">Try Free → sinkpeso.github.io</div>
+                </div>
+                <div class="right">
+                    <div class="chart-mock">
+                        <div style="font-size: 14px; font-weight: 700; color: #F1F5F9; margin-bottom: 16px;">Spending Trends</div>
+                        <div class="chart-bar">
+                            <div class="bar" style="height: 60%; background: #00E676;"></div>
+                            <div class="bar" style="height: 80%; background: #00E676;"></div>
+                            <div class="bar" style="height: 45%; background: #00E676;"></div>
+                            <div class="bar" style="height: 90%; background: #00E676;"></div>
+                            <div class="bar" style="height: 70%; background: #00E676;"></div>
+                            <div class="bar" style="height: 55%; background: #00E676;"></div>
+                        </div>
+                        <div class="bar-labels">
+                            <div class="bar-label">Jan</div>
+                            <div class="bar-label">Feb</div>
+                            <div class="bar-label">Mar</div>
+                            <div class="bar-label">Apr</div>
+                            <div class="bar-label">May</div>
+                            <div class="bar-label">Jun</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Preview -->
+        <div>
+            <div class="preview-label">Mobile App Preview — 390×844</div>
+            <div class="preview-mobile">
+                <div class="status-bar">
+                    <div class="status-time">9:41</div>
+                    <div class="status-icons">
+                        <svg width="16" height="12" viewBox="0 0 16 12" fill="#fff"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="4" y="5" width="3" height="7" rx="1"/><rect x="8" y="2" width="3" height="10" rx="1"/><rect x="12" y="0" width="3" height="12" rx="1"/></svg>
+                        <svg width="16" height="12" viewBox="0 0 16 12" fill="#fff"><path d="M8 2C5 2 2.5 3.5 1 6l1.5 1.5C3.5 5.5 5.5 4 8 4s4.5 1.5 5.5 3.5L15 6C13.5 3.5 11 2 8 2z"/><circle cx="8" cy="10" r="2"/></svg>
+                        <svg width="24" height="12" viewBox="0 0 24 12" fill="none" stroke="#fff" stroke-width="1.5"><rect x="0.5" y="0.5" width="20" height="11" rx="2"/><path d="M22 4v4" stroke-linecap="round"/><rect x="2" y="2" width="14" height="7" rx="1" fill="#00E676"/></svg>
+                    </div>
+                </div>
+                <div class="app-header">
+                    <img src="logosinkpeso.png" class="app-logo">
+                    <div class="app-name">SINKPESO</div>
+                </div>
+                <div class="balance-section">
+                    <div class="balance-label">Available This Month</div>
+                    <div class="balance-amount">₱24,580</div>
+                    <div class="balance-sub">Income minus expenses, bills & savings</div>
+                </div>
+                <div class="quick-stats">
+                    <div class="stat-card">
+                        <div class="stat-label">Income</div>
+                        <div class="stat-value" style="color: #00E676;">₱35,000</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Spent</div>
+                        <div class="stat-value" style="color: #EF4444;">₱10,420</div>
+                    </div>
+                </div>
+                <div class="section-title">Recent Activity</div>
+                <div class="tx-row">
+                    <div style="display: flex; align-items: center;">
+                        <div class="tx-icon" style="background: rgba(239,68,68,0.1);">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 002-2V2 M7 2v20"/></svg>
+                        </div>
+                        <div class="tx-info">
+                            <div class="tx-name">Groceries</div>
+                            <div class="tx-cat">Food • Today</div>
+                        </div>
+                    </div>
+                    <div class="tx-amount" style="color: #EF4444;">-₱1,200</div>
+                </div>
+                <div class="tx-row">
+                    <div style="display: flex; align-items: center;">
+                        <div class="tx-icon" style="background: rgba(0,230,118,0.1);">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#00E676" stroke-width="2"><path d="M23 6l-9.5 9.5-5-5L1 18"/></svg>
+                        </div>
+                        <div class="tx-info">
+                            <div class="tx-name">Salary</div>
+                            <div class="tx-cat">Income • May 15</div>
+                        </div>
+                    </div>
+                    <div class="tx-amount" style="color: #00E676;">+₱35,000</div>
+                </div>
+                <div class="tx-row">
+                    <div style="display: flex; align-items: center;">
+                        <div class="tx-icon" style="background: rgba(168,85,247,0.1);">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A855F7" stroke-width="2"><path d="M4 2h16v20l-8-4-8 4z"/></svg>
+                        </div>
+                        <div class="tx-info">
+                            <div class="tx-name">Electric Bill</div>
+                            <div class="tx-cat">Bills • May 20</div>
+                        </div>
+                    </div>
+                    <div class="tx-amount" style="color: #EF4444;">-₱2,800</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</body>
+</html>
