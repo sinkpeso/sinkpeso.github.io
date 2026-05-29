@@ -24,6 +24,7 @@
     <script src="actions.js"></script>
     <script src="walleticons.js"></script>
     <script src="persistence.js"></script>
+    <script src="license.js"></script>
 
         <link rel="apple-touch-icon" href="logosinkpeso.png">
     <link rel="icon" href="logosinkpeso.png" type="image/png">
@@ -336,6 +337,10 @@
 
             const handleCreate = () => {
                 if (!form.name) return;
+                if (!window.license.canAddItem("wallets", wallets.length)) {
+                    showToast("Free limit reached (3 wallets). Upgrade to Premium for unlimited.");
+                    return;
+                }
                 setWallets([...wallets, { id: uid(), name: form.name.trim(), openingBalanceCents: tc(form.balanceCents || "0"), color: form.color }]);
                 setForm({ name: "", balanceCents: "", color: WALLET_COLORS[0] });
                 setModal(false);
@@ -466,6 +471,47 @@ e(EmptyState, { icon:"creditcard", title:"No wallets yet", sub:"Add Cash, GCash,
                     e('div', { style: { display: "flex", gap: 10 } },
                         e(Btn, { v: "ghost", style: { flex: 1 }, onClick: onCancel }, "Cancel"),
                         e(Btn, { v: "danger", style: { flex: 1 }, onClick: onForce }, "Force Spend")
+                    )
+                )
+            );
+        }
+
+        // ── LICENSE INPUT COMPONENT ────────────────────────────────────────────
+        function LicenseInput({ showToast }) {
+            const [key, setKey] = useState("");
+            const [error, setError] = useState("");
+
+            const handleActivate = () => {
+                setError("");
+                if (!key.trim()) { setError("Please enter a license key."); return; }
+                var result = window.license.activate(key);
+                if (result.ok) {
+                    showToast("✓ Premium activated!");
+                    setTimeout(() => window.location.reload(), 1000);
+                } else {
+                    setError(result.message);
+                }
+            };
+
+            return e('div', null,
+                e('div', { style: { marginBottom: 12 } },
+                    e(Inp, {
+                        placeholder: "SINKPESO-XXXX-XXXX-XXXX",
+                        value: key,
+                        onChange: ev => { setKey(ev.target.value); setError(""); },
+                        onKeyDown: ev => ev.key === "Enter" && handleActivate(),
+                        style: { marginBottom: 0, fontFamily: "'DM Mono', monospace", letterSpacing: "0.05em" }
+                    })
+                ),
+                error && e('div', { style: { color: "#EF4444", fontSize: 12, marginBottom: 12, fontWeight: 600 } }, error),
+                e(Btn, { v: "accent", style: { width: "100%" }, onClick: handleActivate }, "Activate Premium"),
+                e('div', { style: { marginTop: 16, paddingTop: 16, borderTop: "1px solid var(--border)" } },
+                    e('div', { style: { fontSize: 12, fontWeight: 700, color: "var(--text-muted)", marginBottom: 10, letterSpacing: "0.05em" } }, "PREMIUM INCLUDES"),
+                    ["Unlimited wallets & vaults", "Encrypted backups", "Recurring expenses", "PDF reports", "Multi-currency display"].map(f =>
+                        e('div', { key: f, style: { display: "flex", alignItems: "center", gap: 8, fontSize: 12, color: "var(--text-muted)", marginBottom: 6 } },
+                            e(Icon, { name: "shield", size: 12, color: "var(--text-muted)" }),
+                            f
+                        )
                     )
                 )
             );
@@ -1029,7 +1075,10 @@ e('footer', {
                 });
                 const password = prompt("Set a password to encrypt backup (leave blank for unencrypted):");
                 let blob;
-                if (password) {
+                if (password && !window.license.canUseFeature("encryptedBackup")) {
+                    showToast("Encrypted backups require Premium. Exporting unencrypted.");
+                }
+                if (password && window.license.canUseFeature("encryptedBackup")) {
                     const enc = new TextEncoder();
                     const salt = crypto.getRandomValues(new Uint8Array(16));
                     const iv = crypto.getRandomValues(new Uint8Array(12));
@@ -1144,7 +1193,13 @@ e('footer', {
                             e(Field, { label: "Currency" }, e(Sel, { value: settings?.currency || 'PHP', onChange: ev => setSettings({...settings, currency: ev.target.value}) },
                                 Object.keys(CURRENCIES).map(c => e('option', { key: c, value: c }, c))
                             )),
-                            e(Field, { label: "Secondary Currency (optional)" }, e(Sel, { value: settings?.secondaryCurrency || '', onChange: ev => setSettings({...settings, secondaryCurrency: ev.target.value}) },
+                            e(Field, { label: "Secondary Currency (optional)" }, e(Sel, { value: settings?.secondaryCurrency || '', onChange: ev => {
+                                if (ev.target.value && !window.license.canUseFeature("multiCurrency")) {
+                                    showToast("Multi-currency requires Premium.");
+                                    return;
+                                }
+                                setSettings({...settings, secondaryCurrency: ev.target.value});
+                            } },
                                 e('option', { value: "" }, "None"),
                                 Object.keys(CURRENCIES).filter(c => c !== settings?.currency).map(c => e('option', { key: c, value: c }, c))
                             ))
@@ -1190,6 +1245,31 @@ e('footer', {
                                     style: { background:"var(--bg-input)", color:"var(--text-main)", padding:"10px 12px", borderRadius:10, width:"100%", border:"1px solid var(--border-input)", fontSize:13 }
                                 })
                             )
+                        ),
+
+                        e(SettingGroup, { title: "Premium License", icon: "shield" },
+                            e('p', { style: { fontSize:13, color:"var(--text-muted)", marginBottom:16, lineHeight:1.5 } },
+                                window.license.isPremium()
+                                    ? "Premium active. All features unlocked."
+                                    : "Enter a license key to unlock premium features."
+                            ),
+                            window.license.isPremium()
+                                ? e('div', null,
+                                    e('div', { style: { display:"flex", flexDirection:"column", gap:8, marginBottom:16 } },
+                                        ["Unlimited wallets & vaults", "Encrypted backups", "Recurring expenses", "PDF reports", "Multi-currency display"].map(f =>
+                                            e('div', { key: f, style: { display:"flex", alignItems:"center", gap:8, fontSize:13 } },
+                                                e(Icon, { name:"shield", size:14, color:"#00E676" }),
+                                                e('span', { style: { color:"var(--text-main)" } }, f)
+                                            )
+                                        )
+                                    ),
+                                    e(Btn, { v:"ghost", style: { width:"100%" }, onClick: () => {
+                                        window.license.deactivate();
+                                        showToast("License removed. Reload to apply.");
+                                        setTimeout(() => window.location.reload(), 1000);
+                                    } }, "Remove License")
+                                )
+                                : e(LicenseInput, { showToast })
                         ),
 
                         e(SettingGroup, { title: "About", icon: "shield" },
@@ -1560,7 +1640,13 @@ e('footer', {
                         e('div', { style: { flex: 2 } }, e(Inp, { value: name, placeholder: "What did you pay for?", onChange: ev => setName(ev.target.value) })),
                         e('div', { style: { flex: 1 } }, e(Inp, { type: "number", value: amount, placeholder: "Amount", onChange: ev => setAmount(ev.target.value) })),
                         e('div', { style: { width: 130 } }, e(Sel, { value: category, onChange: ev => setCategory(ev.target.value) }, CATEGORIES.map(c => e('option', { key: c, value: c }, c)))),
-                        e('div', { style: { width: 120 } }, e(Sel, { value: recurring, onChange: ev => setRecurring(ev.target.value) }, e('option', { value: "none" }, "One-Time"), e('option', { value: "monthly" }, "Monthly"), e('option', { value: "weekly" }, "Weekly"))),
+                        e('div', { style: { width: 120 } }, e(Sel, { value: recurring, onChange: ev => {
+                            if (ev.target.value !== "none" && !window.license.canUseFeature("recurring")) {
+                                showToast("Recurring expenses require Premium.");
+                                return;
+                            }
+                            setRecurring(ev.target.value);
+                        } }, e('option', { value: "none" }, "One-Time"), e('option', { value: "monthly" }, "Monthly"), e('option', { value: "weekly" }, "Weekly"))),
                         wallets && wallets.length > 0 && e('div', { style: { flex: "1.2 1 360px", minWidth: 280 } },
                             e(WalletPicker, { wallets, value: walletId, onChange: setWalletId }),
                             isWalletEmpty && e('div', { style: { fontSize: 11, color: "#F59E0B", marginTop: 6, display: "flex", alignItems: "center", gap: 4 } },
@@ -1609,7 +1695,7 @@ e('footer', {
             const [actionWalletId, setActionWalletId] = useState(CASH_WALLET_ID);
             const [openMenu, setOpenMenu] = useState(null); const [editVault, setEditVault] = useState(null); const [editVaultForm, setEditVaultForm] = useState({ iconId: "landmark", name: "", goal: "", start: "0" });
 
-            const handleCreateVault = () => { if (!form.name || !form.goal) return; setFunds([...funds, { id: uid(), iconId: form.iconId, name: form.name.trim(), goalCents: tc(form.goal), startCents: tc(form.start || "0") }]); setForm({ iconId: "landmark", name: "", goal: "", start: "0" }); setModal(false); };
+            const handleCreateVault = () => { if (!form.name || !form.goal) return; if (!window.license.canAddItem("vaults", funds.length)) { showToast("Free limit reached (2 vaults). Upgrade to Premium for unlimited."); return; } setFunds([...funds, { id: uid(), iconId: form.iconId, name: form.name.trim(), goalCents: tc(form.goal), startCents: tc(form.start || "0") }]); setForm({ iconId: "landmark", name: "", goal: "", start: "0" }); setModal(false); };
             
             const handleLogVaultTxn = () => {
                 if (!actionAmt || !actionModal) return;

@@ -14,6 +14,7 @@ const ASSETS = [
   './actions.js',
   './walleticons.js',
   './persistence.js',
+  './license.js',
   './service-worker.js',
   './manifest.json',
   './logosinkpeso.png'
