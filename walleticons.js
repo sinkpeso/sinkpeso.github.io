@@ -12,6 +12,14 @@
     "use strict";
     const e = React.createElement;
 
+    // Sanitize SVG strings: strip script tags, event handlers, and javascript: URIs
+    function sanitizeSvg(svg) {
+        return svg
+            .replace(/<script[\s\S]*?<\/script>/gi, '')
+            .replace(/\son\w+\s*=\s*["'][^"']*["']/gi, '')
+            .replace(/javascript:/gi, '');
+    }
+
     // ─────────────────────────────────────────────────────────────────────────
     // 1. NORMALIZER
     //    Step A: lowercase + strip every non-alphanumeric character
@@ -579,7 +587,7 @@ cash: {
                     display: "flex", alignItems: "center", justifyContent: "center",
                     boxShadow: "0 1px 4px rgba(0,0,0,0.32)",
                 },
-                dangerouslySetInnerHTML: { __html: brand.svg }
+                dangerouslySetInnerHTML: { __html: sanitizeSvg(brand.svg) }
             });
         }
 

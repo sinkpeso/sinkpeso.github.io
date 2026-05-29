@@ -39,7 +39,7 @@
     const { SLabel, PBar } = window.components;
     const { safeDiv, getDaysRemaining } = window.utils;
 
-    function DashboardOverview({ totals, bills, dailyExpenses, budgets, wallets, fc, incomes, txns, funds, archives, onNavigate }) {
+    function DashboardOverview({ totals, bills, dailyExpenses, budgets, wallets, fc, fc2, incomes, txns, funds, archives, onNavigate }) {
         const spendPercentage = totals.totalIncome > 0 ? (totals.totalDailySpent + totals.paidBills) / totals.totalIncome : 0;
         // Wallet total = sum of all real wallet balances (persists across months)
         const walletTotal = (wallets || []).reduce((s, w) => s + (w.balanceCents || 0), 0);
@@ -59,6 +59,7 @@
                         // ── Available This Month ───────────────────────────────────
                         e(SLabel, { style: { color: "var(--text-light)", marginBottom: 6 } }, "Available This Month"),
                         e('div', { style: { fontSize: 38, fontWeight: 800, color: "#00E676", letterSpacing: "-0.025em", fontVariantNumeric: "tabular-nums" } }, fc(totals.netAvailable)),
+                        fc2 && e('div', { style: { fontSize: 14, color: "var(--text-muted)", marginTop: 2 } }, `≈ ${fc2(totals.netAvailable)}`),
                         e('div', { style: { fontSize: 11, color: "var(--text-muted)", marginTop: 2, marginBottom: 16 } }, "Income minus expenses, bills paid & savings this month"),
 
                         // ── Wallet Total (separate — persists across months) ────────
@@ -161,21 +162,5 @@
 
     // Expose globally so index.html can use it without any other changes
     window.DashboardOverview = DashboardOverview;
-
-    if (window.PropTypes) {
-        DashboardOverview.propTypes = {
-            totals: PropTypes.object.isRequired,
-            bills: PropTypes.array.isRequired,
-            dailyExpenses: PropTypes.array.isRequired,
-            budgets: PropTypes.array.isRequired,
-            wallets: PropTypes.array.isRequired,
-            fc: PropTypes.func.isRequired,
-            incomes: PropTypes.array,
-            txns: PropTypes.array,
-            funds: PropTypes.array,
-            archives: PropTypes.array,
-            onNavigate: PropTypes.func,
-        };
-    }
 
 })();

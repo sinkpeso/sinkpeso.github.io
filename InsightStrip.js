@@ -131,13 +131,4 @@
     // Expose to window so index.html can use it as a global
     window.InsightStrip = InsightStrip;
 
-    if (window.PropTypes) {
-        InsightStrip.propTypes = {
-            totals: PropTypes.object.isRequired,
-            bills: PropTypes.array.isRequired,
-            budgets: PropTypes.array.isRequired,
-            fc: PropTypes.func.isRequired,
-        };
-    }
-
 })();

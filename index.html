@@ -11,7 +11,6 @@
     
     <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin integrity="sha384-DGyLxAyjq0f9SPpVevD6IgztCFlnMF6oW/XQGmfe+IsZ8TqEiDrcHkMLKI6fiB/Z"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin integrity="sha384-gTGxhz21lVGYNMcdJOyq01Edg0jhn/c22nsx0kyqP0TxaV5WVdsSH1fSDUf5YJj1"></script>
-    <script src="https://unpkg.com/prop-types@15/prop-types.min.js" crossorigin integrity="sha384-/AfDwVDXNopzPvhxMPQ11y1OCpR6mVkWx47qzSwIiquvxkcMkZddEzDNtIOtfCpk"></script>
 
     <link rel="stylesheet" href="styles.css">
     <script src="utils.js"></script>
@@ -160,6 +159,15 @@
             "JPY": { style: "currency", currency: "JPY", minimumFractionDigits: 0 }
         };
 
+        // Approximate exchange rates relative to PHP (for secondary currency display)
+        const EXCHANGE_RATES = {
+            "PHP": 1,
+            "USD": 0.018,
+            "EUR": 0.016,
+            "GBP": 0.014,
+            "JPY": 2.65
+        };
+
         // ── RESOLVE GLOBALS ───────────────────────────────────────────────────
         // Pull utils, UI primitives and external components from their own files.
         // Keeps this file thin; avoids re-defining what is already loaded.
@@ -168,6 +176,45 @@
         const EmptyState = window.EmptyState;
 
 
+
+        // ── VIRTUAL LIST — renders only visible items for performance ────────
+        function VirtualList({ items, itemHeight = 60, overscan = 5, renderItem, emptyContent }) {
+            const containerRef = useRef(null);
+            const [scrollTop, setScrollTop] = useState(0);
+            const [containerHeight, setContainerHeight] = useState(600);
+
+            useEffect(() => {
+                const el = containerRef.current;
+                if (!el) return;
+                const observer = new ResizeObserver(entries => {
+                    setContainerHeight(entries[0].contentRect.height);
+                });
+                observer.observe(el);
+                return () => observer.disconnect();
+            }, []);
+
+            const totalHeight = items.length * itemHeight;
+            const startIndex = Math.max(0, Math.floor(scrollTop / itemHeight) - overscan);
+            const endIndex = Math.min(items.length, Math.ceil((scrollTop + containerHeight) / itemHeight) + overscan);
+            const visibleItems = items.slice(startIndex, endIndex);
+
+            if (items.length === 0 && emptyContent) return emptyContent;
+
+            return e('div', {
+                ref: containerRef,
+                onScroll: ev => setScrollTop(ev.target.scrollTop),
+                style: { overflow: "auto", position: "relative" }
+            },
+                e('div', { style: { height: totalHeight, position: "relative" } },
+                    visibleItems.map((item, i) =>
+                        e('div', {
+                            key: item.id || startIndex + i,
+                            style: { position: "absolute", top: (startIndex + i) * itemHeight, left: 0, right: 0 }
+                        }, renderItem(item, startIndex + i))
+                    )
+                )
+            );
+        }
 
         function DotMenu({ itemId, openMenu, setOpenMenu, onEdit, onDelete }) {
             const isOpen = openMenu === itemId;
@@ -272,7 +319,7 @@
         }
 
         // ── MODULE: WALLETS ────────────────────────────────────────────────────
-        function WalletsView({ wallets, rawWallets, setWallets, incomes, dailyExpenses, txns, fc, requestConfirm, showToast }) {
+        const WalletsView = React.memo(function WalletsView({ wallets, rawWallets, setWallets, incomes, dailyExpenses, txns, fc, requestConfirm, showToast }) {
             const [modal, setModal] = useState(false);
             const [form, setForm] = useState({ name: "", balanceCents: "", color: WALLET_COLORS[0] });
             const [editWallet, setEditWallet] = useState(null);
@@ -387,7 +434,8 @@ e(EmptyState, { icon:"creditcard", title:"No wallets yet", sub:"Add Cash, GCash,
                     )
                 )
             );
-        }
+        });
+        // WalletsView is now wrapped with React.memo
 
         // ── QUICK ADD MODAL ────────────────────────────────────────────────
         // ── INSUFFICIENT BALANCE MODAL ─────────────────────────────────────────
@@ -479,20 +527,39 @@ e(EmptyState, { icon:"creditcard", title:"No wallets yet", sub:"Add Cash, GCash,
         function PinScreen({ targetPin, onUnlock }) {
             const [input, setInput] = useState("");
             const [error, setError] = useState(false);
+            const [attempts, setAttempts] = useState(0);
+            const [lockedUntil, setLockedUntil] = useState(0);
+            const [lockMsg, setLockMsg] = useState("");
+
+            const isLocked = Date.now() < lockedUntil;
 
             const handleAttempt = () => {
+                if (isLocked) return;
                 if (input.length < 4) { setError(true); setTimeout(() => setError(false), 1000); return; }
-                // Support both hashed (64 hex chars) and legacy plaintext PINs
+
+                const onSuccess = () => onUnlock();
+                const onFail = () => {
+                    const newAttempts = attempts + 1;
+                    setAttempts(newAttempts);
+                    setError(true); setInput("");
+                    setTimeout(() => setError(false), 1000);
+                    if (newAttempts >= 5) {
+                        const delay = Math.min(30000, 1000 * Math.pow(2, newAttempts - 5));
+                        setLockedUntil(Date.now() + delay);
+                        setLockMsg(`Too many attempts. Wait ${Math.ceil(delay / 1000)}s.`);
+                        setTimeout(() => { setLockMsg(""); }, delay);
+                    }
+                };
+
                 var isHashed = /^[0-9a-f]{64}$/.test(targetPin);
                 if (isHashed) {
                     window.hashPin(input).then(function (hashed) {
-                        if (hashed === targetPin) onUnlock();
-                        else { setError(true); setInput(""); setTimeout(() => setError(false), 1000); }
+                        if (hashed === targetPin) onSuccess();
+                        else onFail();
                     });
                 } else {
-                    // Legacy plaintext comparison
-                    if (input === targetPin) onUnlock();
-                    else { setError(true); setInput(""); setTimeout(() => setError(false), 1000); }
+                    if (input === targetPin) onSuccess();
+                    else onFail();
                 }
             };
 
@@ -512,21 +579,23 @@ e(EmptyState, { icon:"creditcard", title:"No wallets yet", sub:"Add Cash, GCash,
                     onKeyDown: e => e.key === 'Enter' && handleAttempt(),
                     style: { borderColor: error ? "#EF4444" : "var(--border-input)", animation: error ? "shake 0.4s" : "none" }
                 }),
+                lockMsg && e('div', { style: { color: "#EF4444", fontSize: 12, marginBottom: 8, fontWeight: 600 } }, lockMsg),
                 e('button', {
                     onClick: handleAttempt,
+                    disabled: isLocked,
                     style: {
                         marginTop: 16, width: 240, minHeight: 44,
                         background: "transparent",
-                        border: "1px solid rgba(0,230,118,0.4)",
-                        color: "#00E676",
+                        border: `1px solid ${isLocked ? "rgba(255,255,255,0.1)" : "rgba(0,230,118,0.4)"}`,
+                        color: isLocked ? "var(--text-muted)" : "#00E676",
                         borderRadius: 10, fontSize: 13, fontWeight: 700,
-                        cursor: "pointer", letterSpacing: "0.04em",
+                        cursor: isLocked ? "not-allowed" : "pointer", letterSpacing: "0.04em",
                         transition: "background 0.18s, border-color 0.18s",
                         fontFamily: "inherit", display: "inline-flex",
                         alignItems: "center", justifyContent: "center",
                     },
                     className: "pin-unlock-btn",
-                }, "Unlock App"),
+                }, isLocked ? "Locked" : "Unlock App"),
                 // Footer
                 e('div', { style: { position: "absolute", bottom: 32, left: 0, right: 0, textAlign: "center" } },
                     e('div', { style: { fontSize: 11, fontWeight: 800, letterSpacing: "0.18em", color: "var(--text-muted)", textTransform: "uppercase", opacity: 0.5 } }, "LODOY GOES RANDOM")
@@ -559,7 +628,7 @@ e(EmptyState, { icon:"creditcard", title:"No wallets yet", sub:"Add Cash, GCash,
             useEffect(() => { window.scrollTo(0, 0); }, [tab]);
 
             const saved = window.persistence.loadState();
-            const defaultSettings = { currency: 'PHP', theme: 'dark', pin: '' };
+            const defaultSettings = { currency: 'PHP', secondaryCurrency: '', theme: 'dark', pin: '' };
             const [settings, setSettings] = useState(() => ({ ...defaultSettings, ...saved.settings }));
             const [isUnlocked, setIsUnlocked] = useState(!settings.pin);
 
@@ -594,6 +663,13 @@ e(EmptyState, { icon:"creditcard", title:"No wallets yet", sub:"Add Cash, GCash,
             const fc = useMemo(() => {
                 return (c) => new Intl.NumberFormat("en-PH", CURRENCIES[settings.currency] || CURRENCIES.PHP).format((Number(c) || 0) / 100);
             }, [settings.currency]);
+
+            // Secondary currency formatter (optional)
+            const fc2 = useMemo(() => {
+                if (!settings.secondaryCurrency || settings.secondaryCurrency === settings.currency) return null;
+                const rate = (EXCHANGE_RATES[settings.secondaryCurrency] || 1) / (EXCHANGE_RATES[settings.currency] || 1);
+                return (c) => new Intl.NumberFormat("en-PH", CURRENCIES[settings.secondaryCurrency] || CURRENCIES.PHP).format(((Number(c) || 0) / 100) * rate);
+            }, [settings.currency, settings.secondaryCurrency]);
 
             const displayWallets = useMemo(() => {
                 return window.finance.deriveWallets(wallets, { incomes, bills, dailyExpenses, txns });
@@ -657,7 +733,11 @@ e(EmptyState, { icon:"creditcard", title:"No wallets yet", sub:"Add Cash, GCash,
                     return { ...w, openingBalanceCents: (w.balanceCents || 0) - vaultDelta };
                 }));
                 setTxns(prev => prev.filter(t => t.fundId));
-                setDailyExpenses([]);
+                // Copy recurring expenses to new month
+                const recurringExpenses = dailyExpenses.filter(e => e.recurring && e.recurring !== "none").map(e => ({
+                    ...e, id: uid(), date: todayStr()
+                }));
+                setDailyExpenses(recurringExpenses);
                 setIncomes([]);
                 // FIX #2: advance dueDate for recurring bills, then reset isPaid
                 setBills(prev => prev.map(b => {
@@ -778,7 +858,7 @@ e(EmptyState, { icon:"creditcard", title:"No wallets yet", sub:"Add Cash, GCash,
                 ),
                 
                 e('div', { className: "page-wrap", style: { maxWidth: 1140, margin: "0 auto", padding: "clamp(16px, 4vw, 32px) clamp(12px, 4vw, 24px) 80px" } },
-                    tab === "dashboard" && e(DashboardOverview, { totals, bills, dailyExpenses, budgets, wallets: displayWallets, fc, incomes, txns, funds, archives, onNavigate: setTab }),
+                    tab === "dashboard" && e(DashboardOverview, { totals, bills, dailyExpenses, budgets, wallets: displayWallets, fc, fc2, incomes, txns, funds, archives, onNavigate: setTab }),
                     tab === "limits" && e(BudgetLimitsView, { budgets, setBudgets, fc, requestConfirm }),
                     tab === "wallets" && e(WalletsView, { wallets: displayWallets, rawWallets: wallets, setWallets, incomes, dailyExpenses, txns, fc, requestConfirm, showToast }),
                     tab === "budget" && e(BudgetBillsView, { incomes, setIncomes, bills, setBills, wallets: displayWallets, setWallets, txns, setTxns, fc, requestConfirm, showToast }),
@@ -937,17 +1017,30 @@ e('footer', {
         const SettingGroup = window.SettingGroup;
 
         // ── MODULE: SETTINGS ─────────────────────────────────────────────────
-        function SettingsView({ settings, setSettings, setIncomes, setBills, setDailyExpenses, setFunds, setTxns, setArchives, setBudgets, showToast, totals, bills, budgets, fc }) {
+        const SettingsView = React.memo(function SettingsView({ settings, setSettings, setIncomes, setBills, setDailyExpenses, setFunds, setTxns, setArchives, setBudgets, showToast, totals, bills, budgets, fc }) {
             const safeSettings = settings || {};
             const [pinInput, setPinInput] = useState(safeSettings?.pin || '');
 
-            const handleExport = () => {
+            const handleExport = async () => {
                 const keys = window.persistence.getAllRawKeys();
                 const data = {};
                 Object.values(keys).forEach(lsKey => {
                     data[lsKey] = localStorage.getItem(lsKey);
                 });
-                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                const password = prompt("Set a password to encrypt backup (leave blank for unencrypted):");
+                let blob;
+                if (password) {
+                    const enc = new TextEncoder();
+                    const salt = crypto.getRandomValues(new Uint8Array(16));
+                    const iv = crypto.getRandomValues(new Uint8Array(12));
+                    const keyMaterial = await crypto.subtle.importKey("raw", enc.encode(password), "PBKDF2", false, ["deriveKey"]);
+                    const key = await crypto.subtle.deriveKey({ name: "PBKDF2", salt, iterations: 100000, hash: "SHA-256" }, keyMaterial, { name: "AES-GCM", length: 256 }, false, ["encrypt"]);
+                    const encrypted = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, enc.encode(JSON.stringify(data)));
+                    const payload = { _encrypted: true, salt: Array.from(salt), iv: Array.from(iv), data: Array.from(new Uint8Array(encrypted)) };
+                    blob = new Blob([JSON.stringify(payload)], { type: 'application/json' });
+                } else {
+                    blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                }
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a'); a.href = url; a.download = `sinkpeso_backup_${todayStr()}.json`; a.click();
             };
@@ -956,9 +1049,24 @@ e('footer', {
                 const file = ev.target.files[0];
                 if (!file) return;
                 const reader = new FileReader();
-                reader.onload = (e) => {
+                reader.onload = async (e) => {
                     try {
-                        const data = JSON.parse(e.target.result);
+                        const raw = JSON.parse(e.target.result);
+                        let data;
+                        if (raw._encrypted) {
+                            const password = prompt("Enter backup password:");
+                            if (!password) { showToast("Password required for encrypted backup."); return; }
+                            const enc = new TextEncoder();
+                            const salt = new Uint8Array(raw.salt);
+                            const iv = new Uint8Array(raw.iv);
+                            const encrypted = new Uint8Array(raw.data);
+                            const keyMaterial = await crypto.subtle.importKey("raw", enc.encode(password), "PBKDF2", false, ["deriveKey"]);
+                            const key = await crypto.subtle.deriveKey({ name: "PBKDF2", salt, iterations: 100000, hash: "SHA-256" }, keyMaterial, { name: "AES-GCM", length: 256 }, false, ["decrypt"]);
+                            const decrypted = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, encrypted);
+                            data = JSON.parse(new TextDecoder().decode(decrypted));
+                        } else {
+                            data = raw;
+                        }
                         const validKeys = Object.values(window.persistence.getAllRawKeys());
                         window.persistence.clearState();
                         Object.keys(data).forEach(k => {
@@ -966,9 +1074,23 @@ e('footer', {
                         });
                         showToast("Backup restored! Reloading...");
                         setTimeout(() => window.location.reload(), 800);
-                    } catch (err) { showToast("Invalid backup file format."); }
+                    } catch (err) { showToast("Invalid backup file or wrong password."); }
                 };
                 reader.readAsText(file);
+            };
+
+            const handleExportCSV = () => {
+                const saved = window.persistence.loadState();
+                const rows = [["Type", "Name", "Amount", "Category", "Date", "Wallet"]];
+                (saved.incomes || []).forEach(i => rows.push(["Income", i.name, (i.amountCents/100).toFixed(2), "", i.date, i.walletNameSnapshot || ""]));
+                (saved.daily || []).forEach(d => rows.push(["Expense", d.name, (d.amountCents/100).toFixed(2), d.category, d.date, d.walletNameSnapshot || ""]));
+                (saved.bills || []).forEach(b => rows.push(["Bill", b.name, (b.amountCents/100).toFixed(2), b.category || "Bills", b.dueDate, b.isPaid ? "Paid" : "Unpaid"]));
+                (saved.txns || []).filter(t => t.fundId).forEach(t => rows.push(["Vault " + t.type, "", (t.amountCents/100).toFixed(2), "", t.date, t.walletNameSnapshot || ""]));
+                const csv = rows.map(r => r.map(c => '"' + String(c).replace(/"/g, '""') + '"').join(",")).join("\n");
+                const blob = new Blob(["﻿" + csv], { type: "text/csv;charset=utf-8" });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a'); a.href = url; a.download = `sinkpeso_export_${todayStr()}.csv`; a.click();
+                showToast("✓ CSV exported!");
             };
 
             return e('div', null,
@@ -1021,6 +1143,10 @@ e('footer', {
                             ),
                             e(Field, { label: "Currency" }, e(Sel, { value: settings?.currency || 'PHP', onChange: ev => setSettings({...settings, currency: ev.target.value}) },
                                 Object.keys(CURRENCIES).map(c => e('option', { key: c, value: c }, c))
+                            )),
+                            e(Field, { label: "Secondary Currency (optional)" }, e(Sel, { value: settings?.secondaryCurrency || '', onChange: ev => setSettings({...settings, secondaryCurrency: ev.target.value}) },
+                                e('option', { value: "" }, "None"),
+                                Object.keys(CURRENCIES).filter(c => c !== settings?.currency).map(c => e('option', { key: c, value: c }, c))
                             ))
                         ),
 
@@ -1055,6 +1181,9 @@ e('footer', {
                             e(Btn, { v: "ghost", style: { width:"100%", marginBottom:10 }, onClick: handleExport },
                                 "⬇ Export Backup (.json)"
                             ),
+                            e(Btn, { v: "ghost", style: { width:"100%", marginBottom:10 }, onClick: handleExportCSV },
+                                "⬇ Export Transactions (.csv)"
+                            ),
                             e('div', { style: { borderTop:"1px solid var(--border)", paddingTop:16, marginTop:6 } },
                                 e(SLabel, { style: { marginBottom:10 } }, "Restore from backup"),
                                 e('input', { type:"file", accept:".json", onChange: handleImport,
@@ -1082,12 +1211,12 @@ e('footer', {
                     )
                 )
             );
-        }
+        });
 
         // InsightStrip is defined in InsightStrip.js (window.InsightStrip)
 
         // ── MODULE: BUDGET LIMITS ───────────────────────────────────────────
-        function BudgetLimitsView({ budgets, setBudgets, fc, requestConfirm }) {
+        const BudgetLimitsView = React.memo(function BudgetLimitsView({ budgets, setBudgets, fc, requestConfirm }) {
             const [category, setCategory] = useState("Food");
             const [limitAmt, setLimitAmt] = useState("");
             const [openMenu, setOpenMenu] = useState(null);
@@ -1137,7 +1266,7 @@ e('footer', {
                     e('div', { style: S.formFooter }, e(Btn, { v: "ghost", style: { flex: 1 }, onClick: () => setEditBudget(null) }, "Cancel"), e(Btn, { v: "accent", style: { flex: 1 }, onClick: saveEditBudget }, "Save"))
                 ))
             );
-        }
+        });
 
         // ── PAY BILL MODAL ────────────────────────────────────────────────────────────
         // Modal to select wallet and confirm bill payment
@@ -1191,7 +1320,7 @@ e('footer', {
         }
 
         // ── MODULE: BILLS & INCOME ──────────────────────────────────────────
-        function BudgetBillsView({ incomes, setIncomes, bills, setBills, wallets, setWallets, txns, setTxns, fc, requestConfirm, showToast }) {
+        const BudgetBillsView = React.memo(function BudgetBillsView({ incomes, setIncomes, bills, setBills, wallets, setWallets, txns, setTxns, fc, requestConfirm, showToast }) {
             const [incName, setIncName] = useState(""); const [incAmt, setIncAmt] = useState(""); const [incWalletId, setIncWalletId] = useState(CASH_WALLET_ID);
             const [billName, setBillName] = useState(""); const [billAmt, setBillAmt] = useState(""); const [billDate, setBillDate] = useState(""); const [billRecurring, setBillRecurring] = useState("none"); const [billCat, setBillCat] = useState("Bills");
 
@@ -1339,11 +1468,12 @@ e('footer', {
                 editIncome && e('div', { className: "modal-overlay" }, e('div', { className: "modal-container" }, e('h3', { style: { marginBottom: 20 } }, "Edit Income"), e(Field, { label: "Source" }, e(Inp, { value: editIncForm.name, onChange: ev => setEditIncForm({ ...editIncForm, name: ev.target.value }) })), e(Field, { label: "Amount" }, e(Inp, { type: "number", value: editIncForm.amount, onChange: ev => setEditIncForm({ ...editIncForm, amount: ev.target.value }) })), e(Field, { label: "Receiving Source" }, e(IncomeSourcePicker, { wallets, setWallets, value: editIncForm.walletId, onChange: v => setEditIncForm({ ...editIncForm, walletId: v }) })), e('div', { style: { display: "flex", gap: 12, marginTop: 8 } }, e(Btn, { v: "ghost", style: { flex: 1 }, onClick: () => setEditIncome(null) }, "Cancel"), e(Btn, { v: "primary", style: { flex: 1 }, onClick: saveEditIncome }, "Save")))),
                 editBill && e('div', { className: "modal-overlay" }, e('div', { className: "modal-container" }, e('h3', { style: { marginBottom: 20 } }, "Edit Bill"), e(Field, { label: "Bill Label" }, e(Inp, { value: editBillForm.name, onChange: ev => setEditBillForm({ ...editBillForm, name: ev.target.value }) })), e(Field, { label: "Amount" }, e(Inp, { type: "number", value: editBillForm.amount, onChange: ev => setEditBillForm({ ...editBillForm, amount: ev.target.value }) })), e(Field, { label: "Due Date" }, e(Inp, { type: "date", value: editBillForm.dueDate, onChange: ev => setEditBillForm({ ...editBillForm, dueDate: ev.target.value }) })), e(Field, { label: "Category" }, e(Sel, { value: editBillForm.category, onChange: ev => setEditBillForm({ ...editBillForm, category: ev.target.value }) }, CATEGORIES.map(c => e('option', {key: c, value: c}, c)))), e(Field, { label: "Recurring" }, e(Sel, { value: editBillForm.recurring, onChange: ev => setEditBillForm({ ...editBillForm, recurring: ev.target.value }) }, e('option', { value: "none" }, "One-Time"), e('option', { value: "monthly" }, "Monthly"), e('option', { value: "weekly" }, "Weekly"))), e('div', { style: { display: "flex", gap: 12 } }, e(Btn, { v: "ghost", style: { flex: 1 }, onClick: () => setEditBill(null) }, "Cancel"), e(Btn, { v: "accent", style: { flex: 1 }, onClick: saveEditBill }, "Save"))))
             );
-        }
+        });
 
         // ── MODULE: DAILY EXPENSES ──────────────────────────────────────────
-        function DailyExpensesView({ dailyExpenses, setDailyExpenses, wallets, setWallets, fc, requestConfirm, showToast }) {
-            const [name, setName] = useState(""); const [amount, setAmount] = useState(""); const [category, setCategory] = useState("Food"); 
+        const DailyExpensesView = React.memo(function DailyExpensesView({ dailyExpenses, setDailyExpenses, wallets, setWallets, fc, requestConfirm, showToast }) {
+            const [name, setName] = useState(""); const [amount, setAmount] = useState(""); const [category, setCategory] = useState("Food");
+            const [recurring, setRecurring] = useState("none");
             const [walletId, setWalletId] = useState(wallets.length > 0 ? (wallets.find(w => w.id === CASH_WALLET_ID) ? CASH_WALLET_ID : wallets[0].id) : "");
             const [openMenu, setOpenMenu] = useState(null); const [editExp, setEditExp] = useState(null); const [editForm, setEditForm] = useState({ name: "", amount: "", category: "Food", walletId: "" });
             const [pendingExpense, setPendingExpense] = useState(null);      // { rec, type: "add"|"edit" }
@@ -1405,11 +1535,13 @@ e('footer', {
                 const amtCents = tc(amount);
                 if (amtCents <= 0) { showToast("Amount must be greater than zero."); return; }
                 const selW = wallets.find(w => w.id === walletId);
+                const rec = { id: uid(), name: name.trim(), amountCents: amtCents, category, date: todayStr(), walletId: walletId || null, walletNameSnapshot: selW ? selW.name : null, recurring: recurring };
                 if (selW && (selW.balanceCents || 0) < amtCents) {
-                    setPendingExpense({ selWallet: selW, amtCents, type: "add", rec: { id: uid(), name: name.trim(), amountCents: amtCents, category, date: todayStr(), walletId: walletId || null, walletNameSnapshot: selW.name } });
+                    setPendingExpense({ selWallet: selW, amtCents, type: "add", rec });
                     return;
                 }
-                commitAddExpense({ id: uid(), name: name.trim(), amountCents: amtCents, category, date: todayStr(), walletId: walletId || null, walletNameSnapshot: selW ? selW.name : null });
+                commitAddExpense(rec);
+                setName(""); setAmount(""); setRecurring("none");
                 showToast("✓ Expense logged!");
             };
 
@@ -1427,7 +1559,8 @@ e('footer', {
                     e('div', { className: "tf" },
                         e('div', { style: { flex: 2 } }, e(Inp, { value: name, placeholder: "What did you pay for?", onChange: ev => setName(ev.target.value) })),
                         e('div', { style: { flex: 1 } }, e(Inp, { type: "number", value: amount, placeholder: "Amount", onChange: ev => setAmount(ev.target.value) })),
-                        e('div', { style: { width: 180 } }, e(Sel, { value: category, onChange: ev => setCategory(ev.target.value) }, CATEGORIES.map(c => e('option', { key: c, value: c }, c)))),
+                        e('div', { style: { width: 130 } }, e(Sel, { value: category, onChange: ev => setCategory(ev.target.value) }, CATEGORIES.map(c => e('option', { key: c, value: c }, c)))),
+                        e('div', { style: { width: 120 } }, e(Sel, { value: recurring, onChange: ev => setRecurring(ev.target.value) }, e('option', { value: "none" }, "One-Time"), e('option', { value: "monthly" }, "Monthly"), e('option', { value: "weekly" }, "Weekly"))),
                         wallets && wallets.length > 0 && e('div', { style: { flex: "1.2 1 360px", minWidth: 280 } },
                             e(WalletPicker, { wallets, value: walletId, onChange: setWalletId }),
                             isWalletEmpty && e('div', { style: { fontSize: 11, color: "#F59E0B", marginTop: 6, display: "flex", alignItems: "center", gap: 4 } },
@@ -1448,7 +1581,10 @@ e('footer', {
                         const expWallet = liveWallet ? liveWallet.name : (exp.walletNameSnapshot || null);
                         return e('div', { key: exp.id, className: "stream-row" },
                             e('div', null,
-                                e('div', { style: { fontWeight: 600, color: "var(--text-main)" } }, exp.name),
+                                e('div', { style: { display: "flex", alignItems: "center", gap: 8 } },
+                                    e('span', { style: { fontWeight: 600, color: "var(--text-main)" } }, exp.name),
+                                    exp.recurring && exp.recurring !== "none" && e('span', { style: { fontSize: 10, fontWeight: 700, padding: "2px 7px", borderRadius: 5, background: "rgba(99,102,241,0.15)", color: "#818CF8" } }, exp.recurring === "weekly" ? "Weekly" : "Monthly")
+                                ),
                                 e('div', { style: { fontSize: 11, color: "var(--text-muted)", marginTop: 2 } }, `${exp.date} • ${exp.category}`),
                                 expWallet && e('div', { style: { fontSize: 11, color: "var(--text-light)", marginTop: 3, display: "flex", alignItems: "center", gap: 4 } },
                                     e('span', { style: { color: "var(--text-muted)", fontWeight: 500 } }, "Wallet: "),
@@ -1464,10 +1600,10 @@ e('footer', {
                 ),
                 editExp && e('div', { className: "modal-overlay" }, e('div', { className: "modal-container" }, e('h3', { style: { marginBottom: 20 } }, "Edit Expense"), e(Field, { label: "Description" }, e(Inp, { value: editForm.name, onChange: ev => setEditForm({ ...editForm, name: ev.target.value }) })), e(Field, { label: "Amount" }, e(Inp, { type: "number", value: editForm.amount, onChange: ev => setEditForm({ ...editForm, amount: ev.target.value }) })), e(Field, { label: "Category" }, e(Sel, { value: editForm.category, onChange: ev => setEditForm({ ...editForm, category: ev.target.value }) }, CATEGORIES.map(c => e('option', { key: c, value: c }, c)))), wallets && wallets.length > 0 && e(Field, { label: "Wallet" }, e(WalletPicker, { wallets, value: editForm.walletId, onChange: v => setEditForm({ ...editForm, walletId: v }) })), e('div', { style: S.formFooter }, e(Btn, { v: "ghost", style: { flex: 1 }, onClick: () => setEditExp(null) }, "Cancel"), e(Btn, { v: "accent", style: { flex: 1 }, onClick: () => saveEditExp(false) }, "Save"))))
             );
-        }
+        });
 
         // ── MODULE: SAVINGS VAULTS ──────────────────────────────────────────
-        function SinkingFundsView({ funds, setFunds, enrichedFunds, txns, setTxns, wallets, setWallets, fc, requestConfirm, showToast }) {
+        const SinkingFundsView = React.memo(function SinkingFundsView({ funds, setFunds, enrichedFunds, txns, setTxns, wallets, setWallets, fc, requestConfirm, showToast }) {
             const [modal, setModal] = useState(false); const [form, setForm] = useState({ iconId: "landmark", name: "", goal: "", start: "0" });
             const [actionModal, setActionModal] = useState(null); const [actionAmt, setActionAmt] = useState("");
             const [actionWalletId, setActionWalletId] = useState(CASH_WALLET_ID);
@@ -1524,10 +1660,10 @@ e('footer', {
                     )
                 ))
             );
-        }
+        });
 
         // ── MODULE: ALL TRANSACTIONS LOG ─────────────────────────────────────────
-        function AllTransactionsView({ txns, setTxns, funds, incomes, dailyExpenses, bills, wallets, fc, requestConfirm }) {
+        const AllTransactionsView = React.memo(function AllTransactionsView({ txns, setTxns, funds, incomes, dailyExpenses, bills, wallets, fc, requestConfirm }) {
             const [search, setSearch] = useState("");
             const [walletFilter, setWalletFilter] = useState("all");
             const [dateFrom, setDateFrom] = useState("");
@@ -1592,47 +1728,52 @@ e('footer', {
                 ),
 
                 // ── Unified Transaction List ────────────────────────────────────
-                e('div', { className: "premium-panel" },
-                    filtered.length === 0 ? e('div', { style: { padding: "36px 0", textAlign: "center" } },
-                        e('div', { style: { marginBottom: 14, opacity: 0.35, display: "flex", justifyContent: "center" } },
-                            e(Icon, { name: "clipboardlist", size: 38, color: "var(--text-muted)" })
-                        ),
-                        e('div', { style: { fontWeight: 700, fontSize: 15, color: "var(--text-light)", marginBottom: 6 } },
-                            allItems.length === 0 ? "No transactions yet" : "No matching transactions"),
-                        e('div', { style: { fontSize: 13, color: "var(--text-muted)" } },
-                            allItems.length === 0 ? "Add an expense, income, or pay a bill to start tracking." : "Try a different search or wallet filter.")
-                    ) :
-                    filtered.map(item => {
-                        const canEdit = item.source === "vault";
-                        return e('div', { key: item.id, className: "stream-row" },
-                            e('div', { style: { display: "flex", alignItems: "flex-start", gap: 12 } },
-                                e('div', { style: {
-                                    width: 36, height: 36, borderRadius: 10, flexShrink: 0,
-                                    background: item.amountColor + "15",
-                                    border: "1px solid " + item.amountColor + "35",
-                                    display: "flex", alignItems: "center", justifyContent: "center"
-                                } }, e(Icon, { name: item.icon, size: 16, color: item.amountColor })),
-                                e('div', null,
-                                    e('div', { style: { fontWeight: 600, color: "var(--text-main)" } }, item.title),
-                                    e('div', { style: { fontSize: 11, color: "var(--text-muted)", marginTop: 2 } }, item.subtitle),
-                                    item.walletName && e('div', { style: { fontSize: 11, color: "var(--text-light)", marginTop: 3, display: "flex", alignItems: "center", gap: 4 } },
-                                        e('span', { style: { color: "var(--text-muted)", fontWeight: 500 } }, "Wallet: "),
-                                        e('span', { style: { fontWeight: 700 } }, item.walletName)
-                                    )
-                                )
+                e('div', { className: "premium-panel", style: { padding: 0, maxHeight: 500, overflow: "hidden" } },
+                    e(VirtualList, {
+                        items: filtered,
+                        itemHeight: 70,
+                        overscan: 5,
+                        emptyContent: e('div', { style: { padding: "36px 24px", textAlign: "center" } },
+                            e('div', { style: { marginBottom: 14, opacity: 0.35, display: "flex", justifyContent: "center" } },
+                                e(Icon, { name: "clipboardlist", size: 38, color: "var(--text-muted)" })
                             ),
-                            e('div', { style: { display: "flex", alignItems: "center", gap: 10, flexShrink: 0 } },
-                                e('div', { style: { textAlign: "right" } },
-                                    e('div', { style: { fontWeight: 700, color: item.amountColor, fontVariantNumeric: "tabular-nums" } }, `${item.amountPrefix}${fc(item.amountCents)}`),
-                                    e('div', { style: { fontSize: 10, color: "var(--text-muted)", marginTop: 2 } }, item.date)
+                            e('div', { style: { fontWeight: 700, fontSize: 15, color: "var(--text-light)", marginBottom: 6 } },
+                                allItems.length === 0 ? "No transactions yet" : "No matching transactions"),
+                            e('div', { style: { fontSize: 13, color: "var(--text-muted)" } },
+                                allItems.length === 0 ? "Add an expense, income, or pay a bill to start tracking." : "Try a different search or wallet filter.")
+                        ),
+                        renderItem: (item) => {
+                            const canEdit = item.source === "vault";
+                            return e('div', { className: "stream-row", style: { height: 70 } },
+                                e('div', { style: { display: "flex", alignItems: "flex-start", gap: 12 } },
+                                    e('div', { style: {
+                                        width: 36, height: 36, borderRadius: 10, flexShrink: 0,
+                                        background: item.amountColor + "15",
+                                        border: "1px solid " + item.amountColor + "35",
+                                        display: "flex", alignItems: "center", justifyContent: "center"
+                                    } }, e(Icon, { name: item.icon, size: 16, color: item.amountColor })),
+                                    e('div', null,
+                                        e('div', { style: { fontWeight: 600, color: "var(--text-main)" } }, item.title),
+                                        e('div', { style: { fontSize: 11, color: "var(--text-muted)", marginTop: 2 } }, item.subtitle),
+                                        item.walletName && e('div', { style: { fontSize: 11, color: "var(--text-light)", marginTop: 3, display: "flex", alignItems: "center", gap: 4 } },
+                                            e('span', { style: { color: "var(--text-muted)", fontWeight: 500 } }, "Wallet: "),
+                                            e('span', { style: { fontWeight: 700 } }, item.walletName)
+                                        )
+                                    )
                                 ),
-                                canEdit && e(DotMenu, {
-                                    itemId: item.rawId, openMenu, setOpenMenu,
-                                    onEdit: () => { const t = (txns||[]).find(x => x.id === item.rawId); if (t) openEditTxn(t); },
-                                    onDelete: () => deleteTxn(item.rawId)
-                                })
-                            )
-                        );
+                                e('div', { style: { display: "flex", alignItems: "center", gap: 10, flexShrink: 0 } },
+                                    e('div', { style: { textAlign: "right" } },
+                                        e('div', { style: { fontWeight: 700, color: item.amountColor, fontVariantNumeric: "tabular-nums" } }, `${item.amountPrefix}${fc(item.amountCents)}`),
+                                        e('div', { style: { fontSize: 10, color: "var(--text-muted)", marginTop: 2 } }, item.date)
+                                    ),
+                                    canEdit && e(DotMenu, {
+                                        itemId: item.rawId, openMenu, setOpenMenu,
+                                        onEdit: () => { const t = (txns||[]).find(x => x.id === item.rawId); if (t) openEditTxn(t); },
+                                        onDelete: () => deleteTxn(item.rawId)
+                                    })
+                                )
+                            );
+                        }
                     })
                 ),
 
@@ -1649,7 +1790,7 @@ e('footer', {
                         e(Btn, { v: "primary", style: { flex: 1 }, onClick: saveEditTxn }, "Save Changes"))
                 ))
             );
-        }
+        });
 
         // ── COMPONENT: RECENT ACTIVITY SECTION (Dashboard) ──────────────────────
         function RecentActivitySection({ incomes, dailyExpenses, bills, txns, funds, wallets, archives, fc, onNavigate }) {
@@ -1721,7 +1862,7 @@ e('footer', {
         }
 
         // ── MODULE: HISTORY & TRENDS ──────────────────────────────────────────
-        function HistoryView({ archives, fc }) {
+        const HistoryView = React.memo(function HistoryView({ archives, fc }) {
             const [selected, setSelected] = useState(null);
             const [detailTab, setDetailTab] = useState("income");
             const fmt = (iso) => new Date(iso).toLocaleDateString("en-PH", { month: "short", day: "numeric", year: "numeric" });
@@ -1804,7 +1945,7 @@ e('footer', {
                     )
                 )
             );
-        }
+        });
 
         const container = document.getElementById('root');
         const root = ReactDOM.createRoot(container);
