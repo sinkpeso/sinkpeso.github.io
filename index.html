@@ -375,7 +375,7 @@
                         e('div', { style: { fontSize:13, color:"var(--text-muted)", marginTop:4 } }, 'Track where your money lives. '),
                         e('div', { style: { fontSize:11, color:"var(--text-light)", marginTop:3, fontStyle:"italic" } }, 'Wallet balances persist across months.')
                     ),
-                    e(Btn, { v:"accent", onClick: () => setModal(true) }, "+ Add Wallet")
+                    e(Btn, { v:"accent", onClick: () => { alert("Add Wallet clicked!"); setModal(true); } }, "+ Add Wallet")
                 ),
 
                 wallets.length === 0
