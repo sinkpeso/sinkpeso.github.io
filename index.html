@@ -336,8 +336,9 @@
             };
 
             const handleCreate = () => {
+                console.log("[wallet] handleCreate called!");
+                alert("handleCreate called! Name: " + form.name + " Count: " + wallets.length);
                 if (!form.name) return;
-                alert("Creating wallet. Current count: " + wallets.length);
                 // License check
                 if (wallets.length >= 3) {
                     alert("BLOCKED: Free limit reached!");
@@ -410,7 +411,7 @@ e(EmptyState, { icon:"creditcard", title:"No wallets yet", sub:"Add Cash, GCash,
                     ),
 
                 // CREATE MODAL
-                modal && e('div', { className:"modal-overlay", onClick:() => setModal(false) },
+                modal && e('div', { className:"modal-overlay", onClick:() => { console.log("[modal] Overlay clicked"); setModal(false); } },
                     e('div', { className:"modal-container", style:{maxWidth:400}, onClick:ev=>ev.stopPropagation() },
                         e('div', { style:S.modalHeader },
                             e('div', { style:S.modalTitle }, "Add Wallet"),
