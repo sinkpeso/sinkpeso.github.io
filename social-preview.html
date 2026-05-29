@@ -9,149 +9,528 @@
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'DM Sans', sans-serif; background: #1a1a2e; padding: 40px 20px; }
+        body { font-family: 'DM Sans', sans-serif; background: #0f0f1a; padding: 40px 20px; }
 
         .instructions {
-            max-width: 800px;
+            max-width: 900px;
             margin: 0 auto 40px;
             color: #fff;
             text-align: center;
         }
-        .instructions h1 { font-size: 24px; margin-bottom: 12px; }
-        .instructions p { color: #94A3B8; font-size: 14px; }
+        .instructions h1 { font-size: 28px; margin-bottom: 12px; }
+        .instructions p { color: #94A3B8; font-size: 15px; line-height: 1.6; }
+        .instructions .tip { background: rgba(0,230,118,0.1); border: 1px solid rgba(0,230,118,0.2); border-radius: 8px; padding: 12px 16px; margin-top: 16px; font-size: 13px; color: #00E676; }
+
+        .section-title {
+            color: #00E676;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            margin-bottom: 16px;
+            text-align: center;
+        }
 
         .preview-container {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 60px;
+            gap: 80px;
+            max-width: 1400px;
+            margin: 0 auto;
         }
 
         .preview-label {
-            color: #94A3B8;
-            font-size: 12px;
-            font-weight: 600;
+            color: #64748B;
+            font-size: 11px;
+            font-weight: 700;
             letter-spacing: 0.1em;
             text-transform: uppercase;
             margin-bottom: 12px;
             text-align: center;
         }
 
-        /* Twitter/LinkedIn - 1200x628 */
-        .preview-twitter {
+        .preview-size {
+            color: #475569;
+            font-size: 10px;
+            margin-top: 4px;
+        }
+
+        /* ══════════════════════════════════════════════════════════════
+           VARIATION 1: Problem → Solution (Twitter/LinkedIn)
+           ══════════════════════════════════════════════════════════════ */
+        .v1 {
             width: 1200px;
             height: 628px;
-            background: linear-gradient(135deg, #020810 0%, #0A0E1A 100%);
+            background: #020810;
             border-radius: 12px;
             overflow: hidden;
-            position: relative;
             display: flex;
-            padding: 60px;
         }
-        .preview-twitter .left {
+        .v1 .left {
             flex: 1;
+            padding: 60px;
             display: flex;
             flex-direction: column;
             justify-content: center;
         }
-        .preview-twitter .right {
-            width: 400px;
+        .v1 .pill {
+            display: inline-flex;
+            padding: 6px 14px;
+            background: rgba(239,68,68,0.1);
+            border: 1px solid rgba(239,68,68,0.2);
+            border-radius: 20px;
+            color: #EF4444;
+            font-size: 12px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            width: fit-content;
+        }
+        .v1 h2 {
+            font-size: 42px;
+            font-weight: 800;
+            color: #F1F5F9;
+            line-height: 1.15;
+            margin-bottom: 16px;
+        }
+        .v1 h2 span { color: #00E676; }
+        .v1 p {
+            font-size: 18px;
+            color: #94A3B8;
+            line-height: 1.6;
+            margin-bottom: 28px;
+        }
+        .v1 .cta {
+            display: inline-flex;
+            padding: 14px 28px;
+            background: #00E676;
+            color: #020810;
+            font-weight: 700;
+            font-size: 15px;
+            border-radius: 10px;
+            width: fit-content;
+        }
+        .v1 .right {
+            width: 450px;
+            background: #0A0E1A;
             display: flex;
             align-items: center;
             justify-content: center;
+            padding: 40px;
+            border-left: 1px solid rgba(255,255,255,0.06);
         }
-        .preview-twitter h2 {
-            font-size: 48px;
-            font-weight: 800;
-            color: #F1F5F9;
-            line-height: 1.1;
+        .v1 .compare {
+            width: 100%;
+        }
+        .v1 .compare-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+        }
+        .v1 .compare-item.bad {
+            background: rgba(239,68,68,0.06);
+            border: 1px solid rgba(239,68,68,0.12);
+        }
+        .v1 .compare-item.good {
+            background: rgba(0,230,118,0.06);
+            border: 1px solid rgba(0,230,118,0.12);
+        }
+        .v1 .compare-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .v1 .compare-text {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        /* ══════════════════════════════════════════════════════════════
+           VARIATION 2: Feature Showcase (Instagram)
+           ══════════════════════════════════════════════════════════════ */
+        .v2 {
+            width: 1080px;
+            height: 1080px;
+            background: #020810;
+            border-radius: 12px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            padding: 60px;
+        }
+        .v2 .header {
+            text-align: center;
+            margin-bottom: 48px;
+        }
+        .v2 .header img {
+            width: 64px;
+            height: 64px;
+            border-radius: 16px;
             margin-bottom: 20px;
         }
-        .preview-twitter h2 span { color: #00E676; }
-        .preview-twitter p {
-            font-size: 20px;
+        .v2 .header h2 {
+            font-size: 40px;
+            font-weight: 800;
+            color: #F1F5F9;
+            line-height: 1.15;
+        }
+        .v2 .header h2 span { color: #00E676; }
+        .v2 .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            flex: 1;
+        }
+        .v2 .card {
+            background: #0A0E1A;
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 16px;
+            padding: 28px;
+            display: flex;
+            flex-direction: column;
+        }
+        .v2 .card-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 16px;
+        }
+        .v2 .card h3 {
+            font-size: 18px;
+            font-weight: 700;
+            color: #F1F5F9;
+            margin-bottom: 8px;
+        }
+        .v2 .card p {
+            font-size: 14px;
             color: #94A3B8;
             line-height: 1.5;
-            margin-bottom: 32px;
         }
-        .preview-twitter .features {
+        .v2 .footer {
+            text-align: center;
+            margin-top: 32px;
+            font-size: 18px;
+            color: #64748B;
+            font-family: 'DM Mono', monospace;
+        }
+
+        /* ══════════════════════════════════════════════════════════════
+           VARIATION 3: Testimonial Style (Facebook)
+           ══════════════════════════════════════════════════════════════ */
+        .v3 {
+            width: 1200px;
+            height: 630px;
+            background: #020810;
+            border-radius: 12px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            padding: 60px;
+            gap: 60px;
+        }
+        .v3 .left {
+            flex: 1;
+        }
+        .v3 .quote {
+            font-size: 32px;
+            font-weight: 700;
+            color: #F1F5F9;
+            line-height: 1.4;
+            margin-bottom: 24px;
+        }
+        .v3 .quote span { color: #00E676; }
+        .v3 .author {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .v3 .avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #00E676, #00C853);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: 800;
+            color: #020810;
+        }
+        .v3 .author-info .name {
+            font-size: 16px;
+            font-weight: 700;
+            color: #F1F5F9;
+        }
+        .v3 .author-info .role {
+            font-size: 13px;
+            color: #64748B;
+        }
+        .v3 .right {
+            width: 400px;
+            background: #0A0E1A;
+            border-radius: 16px;
+            padding: 32px;
+            border: 1px solid rgba(255,255,255,0.06);
+        }
+        .v3 .stat-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 16px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+        }
+        .v3 .stat-row:last-child { border-bottom: none; }
+        .v3 .stat-label {
+            font-size: 14px;
+            color: #94A3B8;
+        }
+        .v3 .stat-value {
+            font-size: 14px;
+            font-weight: 700;
+            color: #00E676;
+        }
+
+        /* ══════════════════════════════════════════════════════════════
+           VARIATION 4: Before/After (Twitter)
+           ══════════════════════════════════════════════════════════════ */
+        .v4 {
+            width: 1200px;
+            height: 628px;
+            background: #020810;
+            border-radius: 12px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            padding: 48px;
+        }
+        .v4 .top {
+            text-align: center;
+            margin-bottom: 36px;
+        }
+        .v4 .top h2 {
+            font-size: 36px;
+            font-weight: 800;
+            color: #F1F5F9;
+        }
+        .v4 .top h2 span { color: #00E676; }
+        .v4 .cards {
+            display: flex;
+            gap: 24px;
+            flex: 1;
+        }
+        .v4 .card {
+            flex: 1;
+            border-radius: 16px;
+            padding: 32px;
+            display: flex;
+            flex-direction: column;
+        }
+        .v4 .card.before {
+            background: rgba(239,68,68,0.04);
+            border: 1px solid rgba(239,68,68,0.15);
+        }
+        .v4 .card.after {
+            background: rgba(0,230,118,0.04);
+            border: 1px solid rgba(0,230,118,0.15);
+        }
+        .v4 .card-label {
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+        }
+        .v4 .card.before .card-label { color: #EF4444; }
+        .v4 .card.after .card-label { color: #00E676; }
+        .v4 .card h3 {
+            font-size: 22px;
+            font-weight: 700;
+            color: #F1F5F9;
+            margin-bottom: 16px;
+        }
+        .v4 .card ul {
+            list-style: none;
             display: flex;
             flex-direction: column;
             gap: 12px;
         }
-        .preview-twitter .feature {
+        .v4 .card li {
             display: flex;
             align-items: center;
             gap: 10px;
-            font-size: 16px;
-            color: #F1F5F9;
+            font-size: 15px;
+            color: #94A3B8;
         }
-        .preview-twitter .feature-icon {
-            width: 24px;
-            height: 24px;
-            border-radius: 6px;
-            background: rgba(0,230,118,0.15);
+        .v4 .card li svg { flex-shrink: 0; }
+
+        /* ══════════════════════════════════════════════════════════════
+           VARIATION 5: Stats Focus (LinkedIn)
+           ══════════════════════════════════════════════════════════════ */
+        .v5 {
+            width: 1200px;
+            height: 628px;
+            background: #020810;
+            border-radius: 12px;
+            overflow: hidden;
             display: flex;
             align-items: center;
-            justify-content: center;
+            padding: 60px;
+            gap: 60px;
         }
-        .preview-twitter .mock-app {
-            width: 320px;
+        .v5 .left {
+            flex: 1;
+        }
+        .v5 .left h2 {
+            font-size: 40px;
+            font-weight: 800;
+            color: #F1F5F9;
+            line-height: 1.15;
+            margin-bottom: 16px;
+        }
+        .v5 .left h2 span { color: #00E676; }
+        .v5 .left p {
+            font-size: 18px;
+            color: #94A3B8;
+            line-height: 1.6;
+            margin-bottom: 32px;
+        }
+        .v5 .left .cta {
+            display: inline-flex;
+            padding: 14px 28px;
+            background: #00E676;
+            color: #020810;
+            font-weight: 700;
+            font-size: 15px;
+            border-radius: 10px;
+        }
+        .v5 .right {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            width: 400px;
+        }
+        .v5 .stat-card {
             background: #0A0E1A;
-            border: 1px solid rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.06);
             border-radius: 16px;
             padding: 24px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            text-align: center;
         }
-        .preview-twitter .mock-header {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        .preview-twitter .mock-logo {
-            width: 32px;
-            height: 32px;
-            border-radius: 8px;
-        }
-        .preview-twitter .mock-title {
-            font-size: 16px;
-            font-weight: 800;
-            color: #fff;
-        }
-        .preview-twitter .mock-balance {
-            font-size: 32px;
+        .v5 .stat-card .value {
+            font-size: 36px;
             font-weight: 800;
             color: #00E676;
             margin-bottom: 8px;
         }
-        .preview-twitter .mock-label {
-            font-size: 12px;
-            color: #64748B;
-            margin-bottom: 20px;
+        .v5 .stat-card .label {
+            font-size: 13px;
+            color: #94A3B8;
         }
-        .preview-twitter .mock-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 12px 0;
-            border-top: 1px solid rgba(255,255,255,0.06);
-        }
-        .preview-twitter .mock-row-name {
-            font-size: 14px;
-            color: #F1F5F9;
-        }
-        .preview-twitter .mock-row-amount {
-            font-size: 14px;
-            font-weight: 700;
-        }
-        .preview-twitter .mock-row-amount.negative { color: #EF4444; }
-        .preview-twitter .mock-row-amount.positive { color: #00E676; }
 
-        /* Instagram - 1080x1080 */
-        .preview-instagram {
+        /* ══════════════════════════════════════════════════════════════
+           VARIATION 6: How It Works (Instagram Story - 1080x1920)
+           ══════════════════════════════════════════════════════════════ */
+        .v6 {
+            width: 1080px;
+            height: 1920px;
+            background: #020810;
+            border-radius: 12px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            padding: 80px 60px;
+        }
+        .v6 .header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+        .v6 .header img {
+            width: 80px;
+            height: 80px;
+            border-radius: 20px;
+            margin-bottom: 24px;
+        }
+        .v6 .header h2 {
+            font-size: 48px;
+            font-weight: 800;
+            color: #F1F5F9;
+            line-height: 1.15;
+        }
+        .v6 .header h2 span { color: #00E676; }
+        .v6 .steps {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            flex: 1;
+        }
+        .v6 .step {
+            display: flex;
+            gap: 20px;
+            background: #0A0E1A;
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 16px;
+            padding: 28px;
+        }
+        .v6 .step-num {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: rgba(0,230,118,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: 800;
+            color: #00E676;
+            flex-shrink: 0;
+        }
+        .v6 .step-content h3 {
+            font-size: 20px;
+            font-weight: 700;
+            color: #F1F5F9;
+            margin-bottom: 8px;
+        }
+        .v6 .step-content p {
+            font-size: 15px;
+            color: #94A3B8;
+            line-height: 1.5;
+        }
+        .v6 .cta {
+            text-align: center;
+            margin-top: 40px;
+        }
+        .v6 .cta .btn {
+            display: inline-flex;
+            padding: 18px 40px;
+            background: #00E676;
+            color: #020810;
+            font-weight: 700;
+            font-size: 18px;
+            border-radius: 12px;
+        }
+        .v6 .cta .url {
+            margin-top: 16px;
+            font-size: 16px;
+            color: #64748B;
+            font-family: 'DM Mono', monospace;
+        }
+
+        /* ══════════════════════════════════════════════════════════════
+           VARIATION 7: Carousel Slide 1 (Instagram - 1080x1080)
+           ══════════════════════════════════════════════════════════════ */
+        .v7 {
             width: 1080px;
             height: 1080px;
-            background: linear-gradient(135deg, #020810 0%, #0A0E1A 100%);
+            background: #020810;
             border-radius: 12px;
             overflow: hidden;
             display: flex;
@@ -161,431 +540,599 @@
             padding: 80px;
             text-align: center;
         }
-        .preview-instagram .logo {
+        .v7 .emoji {
+            font-size: 64px;
+            margin-bottom: 32px;
+        }
+        .v7 h2 {
+            font-size: 52px;
+            font-weight: 800;
+            color: #F1F5F9;
+            line-height: 1.15;
+            margin-bottom: 20px;
+        }
+        .v7 h2 span { color: #00E676; }
+        .v7 p {
+            font-size: 22px;
+            color: #94A3B8;
+            line-height: 1.5;
+            max-width: 600px;
+            margin-bottom: 40px;
+        }
+        .v7 .swipe {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 16px;
+            color: #64748B;
+        }
+
+        /* ══════════════════════════════════════════════════════════════
+           VARIATION 8: Carousel Slide 2 - Features (Instagram)
+           ══════════════════════════════════════════════════════════════ */
+        .v8 {
+            width: 1080px;
+            height: 1080px;
+            background: #020810;
+            border-radius: 12px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            padding: 60px;
+        }
+        .v8 h2 {
+            font-size: 36px;
+            font-weight: 800;
+            color: #F1F5F9;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .v8 .list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            flex: 1;
+        }
+        .v8 .list-item {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            background: #0A0E1A;
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 14px;
+            padding: 20px 24px;
+        }
+        .v8 .list-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: rgba(0,230,118,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .v8 .list-text h3 {
+            font-size: 17px;
+            font-weight: 700;
+            color: #F1F5F9;
+            margin-bottom: 4px;
+        }
+        .v8 .list-text p {
+            font-size: 13px;
+            color: #94A3B8;
+        }
+
+        /* ══════════════════════════════════════════════════════════════
+           VARIATION 9: Carousel Slide 3 - CTA (Instagram)
+           ══════════════════════════════════════════════════════════════ */
+        .v9 {
+            width: 1080px;
+            height: 1080px;
+            background: #020810;
+            border-radius: 12px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 80px;
+            text-align: center;
+        }
+        .v9 img {
             width: 100px;
             height: 100px;
             border-radius: 24px;
             margin-bottom: 32px;
             box-shadow: 0 12px 40px rgba(0,230,118,0.2);
         }
-        .preview-instagram h2 {
-            font-size: 56px;
+        .v9 h2 {
+            font-size: 48px;
             font-weight: 800;
             color: #F1F5F9;
             margin-bottom: 16px;
         }
-        .preview-instagram h2 span { color: #00E676; }
-        .preview-instagram p {
-            font-size: 24px;
-            color: #94A3B8;
-            line-height: 1.5;
-            margin-bottom: 48px;
-            max-width: 600px;
-        }
-        .preview-instagram .tags {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-        .preview-instagram .tag {
-            padding: 10px 20px;
-            border-radius: 8px;
-            background: rgba(0,230,118,0.1);
-            border: 1px solid rgba(0,230,118,0.2);
-            color: #00E676;
-            font-size: 16px;
-            font-weight: 600;
-        }
-        .preview-instagram .url {
-            margin-top: 48px;
+        .v9 h2 span { color: #00E676; }
+        .v9 p {
             font-size: 20px;
+            color: #94A3B8;
+            margin-bottom: 40px;
+        }
+        .v9 .btn {
+            display: inline-flex;
+            padding: 18px 40px;
+            background: #00E676;
+            color: #020810;
+            font-weight: 700;
+            font-size: 18px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+        .v9 .url {
+            font-size: 18px;
             color: #64748B;
             font-family: 'DM Mono', monospace;
         }
 
-        /* Facebook - 1200x630 */
-        .preview-facebook {
-            width: 1200px;
-            height: 630px;
-            background: #020810;
+        /* ══════════════════════════════════════════════════════════════
+           VARIATION 10: TikTok/Reels Cover (1080x1920)
+           ══════════════════════════════════════════════════════════════ */
+        .v10 {
+            width: 1080px;
+            height: 1920px;
+            background: linear-gradient(180deg, #020810 0%, #0A0E1A 100%);
             border-radius: 12px;
             overflow: hidden;
-            display: flex;
-        }
-        .preview-facebook .left {
-            flex: 1;
-            padding: 60px;
             display: flex;
             flex-direction: column;
-            justify-content: center;
-        }
-        .preview-facebook .right {
-            width: 500px;
-            background: #0A0E1A;
-            display: flex;
             align-items: center;
             justify-content: center;
-            padding: 40px;
-        }
-        .preview-facebook h2 {
-            font-size: 44px;
-            font-weight: 800;
-            color: #F1F5F9;
-            line-height: 1.15;
-            margin-bottom: 16px;
-        }
-        .preview-facebook h2 span { color: #00E676; }
-        .preview-facebook p {
-            font-size: 18px;
-            color: #94A3B8;
-            line-height: 1.6;
-            margin-bottom: 32px;
-        }
-        .preview-facebook .btn {
-            display: inline-flex;
-            padding: 16px 32px;
-            background: #00E676;
-            color: #020810;
-            font-weight: 700;
-            font-size: 16px;
-            border-radius: 10px;
-        }
-        .preview-facebook .chart-mock {
-            width: 100%;
-        }
-        .preview-facebook .chart-bar {
-            display: flex;
-            align-items: flex-end;
-            gap: 8px;
-            height: 200px;
-            padding: 0 20px;
-        }
-        .preview-facebook .bar {
-            flex: 1;
-            border-radius: 4px 4px 0 0;
-            transition: height 0.3s;
-        }
-        .preview-facebook .bar-labels {
-            display: flex;
-            gap: 8px;
-            padding: 0 20px;
-            margin-top: 8px;
-        }
-        .preview-facebook .bar-label {
-            flex: 1;
+            padding: 80px;
             text-align: center;
-            font-size: 11px;
-            color: #64748B;
         }
-
-        /* Mobile App Store - 1242x2688 (scaled down) */
-        .preview-mobile {
-            width: 390px;
-            height: 844px;
-            background: #020810;
-            border-radius: 40px;
-            overflow: hidden;
-            border: 4px solid #1a1a2e;
-            padding: 20px 16px;
-        }
-        .preview-mobile .status-bar {
-            display: flex;
-            justify-content: space-between;
-            padding: 0 8px;
-            margin-bottom: 20px;
-        }
-        .preview-mobile .status-time {
-            font-size: 14px;
-            font-weight: 600;
-            color: #fff;
-        }
-        .preview-mobile .status-icons {
-            display: flex;
-            gap: 4px;
-        }
-        .preview-mobile .app-header {
-            display: flex;
-            align-items: center;
-            gap: 10px;
+        .v10 .hook {
+            font-size: 20px;
+            font-weight: 700;
+            color: #00E676;
+            letter-spacing: 0.05em;
             margin-bottom: 24px;
         }
-        .preview-mobile .app-logo {
-            width: 32px;
-            height: 32px;
-            border-radius: 8px;
-        }
-        .preview-mobile .app-name {
-            font-size: 18px;
+        .v10 h2 {
+            font-size: 64px;
             font-weight: 800;
-            color: #fff;
+            color: #F1F5F9;
+            line-height: 1.1;
+            margin-bottom: 24px;
         }
-        .preview-mobile .balance-section {
-            background: linear-gradient(135deg, #141E32, #0A0E1A);
-            border: 1px solid rgba(255,255,255,0.08);
-            border-left: 3px solid #00E676;
-            border-radius: 16px;
-            padding: 24px;
-            margin-bottom: 20px;
-        }
-        .preview-mobile .balance-label {
-            font-size: 12px;
+        .v10 h2 span { color: #00E676; }
+        .v10 p {
+            font-size: 24px;
             color: #94A3B8;
-            margin-bottom: 8px;
+            line-height: 1.5;
+            margin-bottom: 48px;
         }
-        .preview-mobile .balance-amount {
-            font-size: 36px;
-            font-weight: 800;
-            color: #00E676;
-            margin-bottom: 4px;
-        }
-        .preview-mobile .balance-sub {
-            font-size: 12px;
-            color: #64748B;
-        }
-        .preview-mobile .quick-stats {
+        .v10 .features {
             display: flex;
+            flex-direction: column;
+            gap: 16px;
+            width: 100%;
+            max-width: 500px;
+            margin-bottom: 48px;
+        }
+        .v10 .feature {
+            display: flex;
+            align-items: center;
             gap: 12px;
-            margin-bottom: 20px;
-        }
-        .preview-mobile .stat-card {
-            flex: 1;
-            background: #0A0E1A;
-            border: 1px solid rgba(255,255,255,0.06);
+            background: rgba(0,230,118,0.06);
+            border: 1px solid rgba(0,230,118,0.15);
             border-radius: 12px;
-            padding: 14px;
+            padding: 16px 20px;
         }
-        .preview-mobile .stat-label {
-            font-size: 11px;
-            color: #64748B;
-            margin-bottom: 6px;
-        }
-        .preview-mobile .stat-value {
-            font-size: 18px;
-            font-weight: 700;
-        }
-        .preview-mobile .section-title {
-            font-size: 12px;
-            font-weight: 700;
-            color: #64748B;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            margin-bottom: 12px;
-        }
-        .preview-mobile .tx-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 14px 0;
-            border-bottom: 1px solid rgba(255,255,255,0.04);
-        }
-        .preview-mobile .tx-icon {
-            width: 36px;
-            height: 36px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-right: 12px;
-        }
-        .preview-mobile .tx-info {
-            flex: 1;
-        }
-        .preview-mobile .tx-name {
-            font-size: 14px;
+        .v10 .feature svg { flex-shrink: 0; }
+        .v10 .feature span {
+            font-size: 16px;
             font-weight: 600;
             color: #F1F5F9;
         }
-        .preview-mobile .tx-cat {
-            font-size: 11px;
-            color: #64748B;
-            margin-top: 2px;
-        }
-        .preview-mobile .tx-amount {
-            font-size: 14px;
-            font-weight: 700;
+        .v10 .cta {
+            display: inline-flex;
+            padding: 20px 48px;
+            background: #00E676;
+            color: #020810;
+            font-weight: 800;
+            font-size: 20px;
+            border-radius: 14px;
         }
     </style>
 </head>
 <body>
     <div class="instructions">
         <h1>SINKPESO Social Media Screenshots</h1>
-        <p>Right-click each image → "Save image as" or take a screenshot. Each is sized for the platform.</p>
+        <p>10 ready-to-use images for Twitter, LinkedIn, Instagram, Facebook, and TikTok.<br>
+        Right-click → "Save image as" or use your device's screenshot tool.</p>
+        <div class="tip">Tip: Open on desktop for best quality. Each image is sized for the platform.</div>
     </div>
 
     <div class="preview-container">
 
-        <!-- Twitter/LinkedIn -->
+        <!-- ══════════════════════════════════════════════════════════════
+             VARIATION 1: Problem → Solution
+             ══════════════════════════════════════════════════════════════ -->
         <div>
-            <div class="preview-label">Twitter / LinkedIn — 1200×628</div>
-            <div class="preview-twitter">
+            <div class="preview-label">1. Problem → Solution</div>
+            <div class="preview-size">Twitter / LinkedIn — 1200×628</div>
+            <div class="v1">
                 <div class="left">
-                    <h2>Track your money.<br><span>Privately.</span></h2>
-                    <p>100% offline. No account required. No data sent anywhere.</p>
-                    <div class="features">
-                        <div class="feature">
-                            <div class="feature-icon">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#00E676" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                            </div>
-                            Track income, expenses & bills
-                        </div>
-                        <div class="feature">
-                            <div class="feature-icon">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#00E676" stroke-width="2"><path d="M12 22a10 10 0 100-20 10 10 0 000 20z M12 18a6 6 0 100-12 6 6 0 000 12z"/></svg>
-                            </div>
-                            Savings vaults for goals
-                        </div>
-                        <div class="feature">
-                            <div class="feature-icon">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#00E676" stroke-width="2"><path d="M12 8v4l3 3 M3.05 11a9 9 0 109.9-8.95"/></svg>
-                            </div>
-                            Bill reminders & trends
-                        </div>
-                    </div>
+                    <div class="pill">Tired of budget apps that sell your data?</div>
+                    <h2>There's a <span>better way</span> to track your money.</h2>
+                    <p>SINKPESO runs 100% on your device. No account. No cloud. No tracking. Just simple, private budgeting.</p>
+                    <div class="cta">Try Free → sinkpeso.github.io</div>
                 </div>
                 <div class="right">
-                    <div class="mock-app">
-                        <div class="mock-header">
-                            <img src="logosinkpeso.png" class="mock-logo">
-                            <div class="mock-title">SINKPESO</div>
+                    <div class="compare">
+                        <div class="compare-item bad">
+                            <div class="compare-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                            </div>
+                            <div class="compare-text" style="color: #EF4444;">Other apps: Account required, data collected</div>
                         </div>
-                        <div class="mock-balance">₱24,580</div>
-                        <div class="mock-label">Available This Month</div>
-                        <div class="mock-row">
-                            <div class="mock-row-name">Groceries</div>
-                            <div class="mock-row-amount negative">-₱1,200</div>
+                        <div class="compare-item bad">
+                            <div class="compare-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                            </div>
+                            <div class="compare-text" style="color: #EF4444;">Cloud sync = your data on their servers</div>
                         </div>
-                        <div class="mock-row">
-                            <div class="mock-row-name">Salary</div>
-                            <div class="mock-row-amount positive">+₱35,000</div>
+                        <div class="compare-item bad">
+                            <div class="compare-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                            </div>
+                            <div class="compare-text" style="color: #EF4444;">Subscription fees for basic features</div>
                         </div>
-                        <div class="mock-row">
-                            <div class="mock-row-name">Electric Bill</div>
-                            <div class="mock-row-amount negative">-₱2,800</div>
+                        <div class="compare-item good" style="margin-top: 8px;">
+                            <div class="compare-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#00E676" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+                            </div>
+                            <div class="compare-text" style="color: #00E676;">SINKPESO: Free, private, offline-first</div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Instagram -->
+        <!-- ══════════════════════════════════════════════════════════════
+             VARIATION 2: Feature Showcase
+             ══════════════════════════════════════════════════════════════ -->
         <div>
-            <div class="preview-label">Instagram — 1080×1080</div>
-            <div class="preview-instagram">
-                <img src="logosinkpeso.png" class="logo">
-                <h2>Your Money.<br><span>Your Business.</span></h2>
-                <p>Free budget tracker that works 100% offline. No account. No cloud. No nonsense.</p>
-                <div class="tags">
-                    <div class="tag">100% Offline</div>
-                    <div class="tag">No Account</div>
-                    <div class="tag">Free Forever</div>
-                    <div class="tag">PWA Ready</div>
+            <div class="preview-label">2. Feature Showcase</div>
+            <div class="preview-size">Instagram — 1080×1080</div>
+            <div class="v2">
+                <div class="header">
+                    <img src="logosinkpeso.png">
+                    <h2>Everything you need.<br><span>Nothing you don't.</span></h2>
                 </div>
+                <div class="grid">
+                    <div class="card">
+                        <div class="card-icon" style="background: rgba(0,230,118,0.1);">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#00E676" stroke-width="2"><path d="M21 12V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2h14a2 2 0 002-2v-5"/></svg>
+                        </div>
+                        <h3>Track Everything</h3>
+                        <p>Income, expenses, bills, and savings. See where every peso goes.</p>
+                    </div>
+                    <div class="card">
+                        <div class="card-icon" style="background: rgba(168,85,247,0.1);">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#A855F7" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                        </div>
+                        <h3>100% Private</h3>
+                        <p>Your data never leaves your device. No tracking. No ads.</p>
+                    </div>
+                    <div class="card">
+                        <div class="card-icon" style="background: rgba(59,130,246,0.1);">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="2"><path d="M12 22a10 10 0 100-20 10 10 0 000 20z M12 18a6 6 0 100-12 6 6 0 000 12z"/></svg>
+                        </div>
+                        <h3>Savings Vaults</h3>
+                        <p>Isolate money for goals. Track progress visually.</p>
+                    </div>
+                    <div class="card">
+                        <div class="card-icon" style="background: rgba(245,158,11,0.1);">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2"><path d="M12 8v4l3 3 M3.05 11a9 9 0 109.9-8.95"/></svg>
+                        </div>
+                        <h3>Bill Reminders</h3>
+                        <p>Never miss a payment. Get alerts before due dates.</p>
+                    </div>
+                </div>
+                <div class="footer">sinkpeso.github.io</div>
+            </div>
+        </div>
+
+        <!-- ══════════════════════════════════════════════════════════════
+             VARIATION 3: Testimonial
+             ══════════════════════════════════════════════════════════════ -->
+        <div>
+            <div class="preview-label">3. Testimonial Style</div>
+            <div class="preview-size">Facebook — 1200×630</div>
+            <div class="v3">
+                <div class="left">
+                    <div class="quote">"Finally, a budget app that <span>doesn't sell my data</span>. I can track everything offline."</div>
+                    <div class="author">
+                        <div class="avatar">M</div>
+                        <div class="author-info">
+                            <div class="name">Maria, Manila</div>
+                            <div class="role">Freelance Designer</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="right">
+                    <div style="font-size: 15px; font-weight: 700; color: #F1F5F9; margin-bottom: 20px;">Maria's first month:</div>
+                    <div class="stat-row">
+                        <div class="stat-label">Tracked expenses</div>
+                        <div class="stat-value">87 transactions</div>
+                    </div>
+                    <div class="stat-row">
+                        <div class="stat-label">Saved to vaults</div>
+                        <div class="stat-value">₱8,500</div>
+                    </div>
+                    <div class="stat-row">
+                        <div class="stat-label">Bills paid on time</div>
+                        <div class="stat-value">100%</div>
+                    </div>
+                    <div class="stat-row">
+                        <div class="stat-label">Data sent to cloud</div>
+                        <div class="stat-value" style="color: #EF4444;">Zero</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══════════════════════════════════════════════════════════════
+             VARIATION 4: Before/After
+             ══════════════════════════════════════════════════════════════ -->
+        <div>
+            <div class="preview-label">4. Before / After</div>
+            <div class="preview-size">Twitter — 1200×628</div>
+            <div class="v4">
+                <div class="top">
+                    <h2>Your finances: <span>Before</span> vs <span>After</span> SINKPESO</h2>
+                </div>
+                <div class="cards">
+                    <div class="card before">
+                        <div class="card-label">Before</div>
+                        <h3>Money mystery</h3>
+                        <ul>
+                            <li>
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                                Where did my salary go?
+                            </li>
+                            <li>
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                                Missed bill payments
+                            </li>
+                            <li>
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                                No savings progress
+                            </li>
+                            <li>
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                                Apps selling my data
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="card after">
+                        <div class="card-label">After</div>
+                        <h3>Financial clarity</h3>
+                        <ul>
+                            <li>
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#00E676" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+                                See every peso clearly
+                            </li>
+                            <li>
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#00E676" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+                                Bills always on time
+                            </li>
+                            <li>
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#00E676" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+                                Savings growing steadily
+                            </li>
+                            <li>
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#00E676" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+                                100% private & free
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══════════════════════════════════════════════════════════════
+             VARIATION 5: Stats Focus
+             ══════════════════════════════════════════════════════════════ -->
+        <div>
+            <div class="preview-label">5. Stats Focus</div>
+            <div class="preview-size">LinkedIn — 1200×628</div>
+            <div class="v5">
+                <div class="left">
+                    <h2>Stop paying to <span>track your own money.</span></h2>
+                    <p>SINKPESO is free, private, and works offline. No subscriptions. No data collection. No nonsense.</p>
+                    <div class="cta">Start Free → sinkpeso.github.io</div>
+                </div>
+                <div class="right">
+                    <div class="stat-card">
+                        <div class="value">₱0</div>
+                        <div class="label">Cost to start</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="value">0</div>
+                        <div class="label">Accounts needed</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="value">100%</div>
+                        <div class="label">Offline capable</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="value">∞</div>
+                        <div class="label">Data privacy</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══════════════════════════════════════════════════════════════
+             VARIATION 6: How It Works (Story)
+             ══════════════════════════════════════════════════════════════ -->
+        <div>
+            <div class="preview-label">6. How It Works</div>
+            <div class="preview-size">Instagram Story / TikTok — 1080×1920</div>
+            <div class="v6">
+                <div class="header">
+                    <img src="logosinkpeso.png">
+                    <h2>Start tracking in<br><span>30 seconds.</span></h2>
+                </div>
+                <div class="steps">
+                    <div class="step">
+                        <div class="step-num">1</div>
+                        <div class="step-content">
+                            <h3>Open the app</h3>
+                            <p>No sign-up. No email. Just open and start.</p>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <div class="step-num">2</div>
+                        <div class="step-content">
+                            <h3>Add your wallets</h3>
+                            <p>Cash, GCash, Maya, bank accounts — however you store money.</p>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <div class="step-num">3</div>
+                        <div class="step-content">
+                            <h3>Log expenses</h3>
+                            <p>Tap the + button. Enter amount. Done.</p>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <div class="step-num">4</div>
+                        <div class="step-content">
+                            <h3>See your progress</h3>
+                            <p>Watch your spending trends and savings grow over time.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="cta">
+                    <div class="btn">Try Free Now</div>
+                    <div class="url">sinkpeso.github.io</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══════════════════════════════════════════════════════════════
+             VARIATION 7: Carousel Slide 1 - Hook
+             ══════════════════════════════════════════════════════════════ -->
+        <div>
+            <div class="preview-label">7. Carousel Slide 1 — Hook</div>
+            <div class="preview-size">Instagram Carousel — 1080×1080</div>
+            <div class="v7">
+                <div class="emoji">🔒</div>
+                <h2>What if your budget app<br><span>couldn't see</span><br>your data?</h2>
+                <p>SINKPESO runs 100% on your device. No cloud. No account. No tracking.</p>
+                <div class="swipe">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    Swipe to see how
+                </div>
+            </div>
+        </div>
+
+        <!-- ══════════════════════════════════════════════════════════════
+             VARIATION 8: Carousel Slide 2 - Features
+             ══════════════════════════════════════════════════════════════ -->
+        <div>
+            <div class="preview-label">8. Carousel Slide 2 — Features</div>
+            <div class="preview-size">Instagram Carousel — 1080×1080</div>
+            <div class="v8">
+                <h2>What you get (for free)</h2>
+                <div class="list">
+                    <div class="list-item">
+                        <div class="list-icon">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#00E676" stroke-width="2"><path d="M21 12V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2h14a2 2 0 002-2v-5"/></svg>
+                        </div>
+                        <div class="list-text">
+                            <h3>Expense Tracking</h3>
+                            <p>Log every transaction with categories and wallet tags</p>
+                        </div>
+                    </div>
+                    <div class="list-item">
+                        <div class="list-icon">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#00E676" stroke-width="2"><path d="M4 2h16v20l-8-4-8 4z"/></svg>
+                        </div>
+                        <div class="list-text">
+                            <h3>Bill Management</h3>
+                            <p>Track due dates, get reminders, mark as paid</p>
+                        </div>
+                    </div>
+                    <div class="list-item">
+                        <div class="list-icon">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#00E676" stroke-width="2"><path d="M12 22a10 10 0 100-20 10 10 0 000 20z M12 18a6 6 0 100-12 6 6 0 000 12z"/></svg>
+                        </div>
+                        <div class="list-text">
+                            <h3>Savings Vaults</h3>
+                            <p>Isolate money for goals and track progress</p>
+                        </div>
+                    </div>
+                    <div class="list-item">
+                        <div class="list-icon">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#00E676" stroke-width="2"><path d="M12 8v4l3 3 M3.05 11a9 9 0 109.9-8.95"/></svg>
+                        </div>
+                        <div class="list-text">
+                            <h3>Spending Trends</h3>
+                            <p>See your financial health over time with charts</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══════════════════════════════════════════════════════════════
+             VARIATION 9: Carousel Slide 3 - CTA
+             ══════════════════════════════════════════════════════════════ -->
+        <div>
+            <div class="preview-label">9. Carousel Slide 3 — CTA</div>
+            <div class="preview-size">Instagram Carousel — 1080×1080</div>
+            <div class="v9">
+                <img src="logosinkpeso.png">
+                <h2>Ready to take<br><span>control?</span></h2>
+                <p>Start tracking in 30 seconds. No sign-up needed.</p>
+                <div class="btn">Try Free Now</div>
                 <div class="url">sinkpeso.github.io</div>
             </div>
         </div>
 
-        <!-- Facebook -->
+        <!-- ══════════════════════════════════════════════════════════════
+             VARIATION 10: TikTok/Reels Cover
+             ══════════════════════════════════════════════════════════════ -->
         <div>
-            <div class="preview-label">Facebook — 1200×630</div>
-            <div class="preview-facebook">
-                <div class="left">
-                    <h2>Finally. A budget app that <span>respects your privacy.</span></h2>
-                    <p>Track income, expenses, bills & savings. Works offline. No account needed. Your data stays on your device.</p>
-                    <div class="btn">Try Free → sinkpeso.github.io</div>
-                </div>
-                <div class="right">
-                    <div class="chart-mock">
-                        <div style="font-size: 14px; font-weight: 700; color: #F1F5F9; margin-bottom: 16px;">Spending Trends</div>
-                        <div class="chart-bar">
-                            <div class="bar" style="height: 60%; background: #00E676;"></div>
-                            <div class="bar" style="height: 80%; background: #00E676;"></div>
-                            <div class="bar" style="height: 45%; background: #00E676;"></div>
-                            <div class="bar" style="height: 90%; background: #00E676;"></div>
-                            <div class="bar" style="height: 70%; background: #00E676;"></div>
-                            <div class="bar" style="height: 55%; background: #00E676;"></div>
-                        </div>
-                        <div class="bar-labels">
-                            <div class="bar-label">Jan</div>
-                            <div class="bar-label">Feb</div>
-                            <div class="bar-label">Mar</div>
-                            <div class="bar-label">Apr</div>
-                            <div class="bar-label">May</div>
-                            <div class="bar-label">Jun</div>
-                        </div>
+            <div class="preview-label">10. TikTok / Reels Cover</div>
+            <div class="preview-size">TikTok / Instagram Reels — 1080×1920</div>
+            <div class="v10">
+                <div class="hook">POV: You finally found a private budget app</div>
+                <h2>Track your money.<br><span>Privately.</span></h2>
+                <p>100% offline. No account. No data collection.</p>
+                <div class="features">
+                    <div class="feature">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#00E676" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+                        <span>Track income & expenses</span>
+                    </div>
+                    <div class="feature">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#00E676" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+                        <span>Savings vaults for goals</span>
+                    </div>
+                    <div class="feature">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#00E676" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+                        <span>Bill reminders</span>
+                    </div>
+                    <div class="feature">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#00E676" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+                        <span>Works without internet</span>
                     </div>
                 </div>
-            </div>
-        </div>
-
-        <!-- Mobile Preview -->
-        <div>
-            <div class="preview-label">Mobile App Preview — 390×844</div>
-            <div class="preview-mobile">
-                <div class="status-bar">
-                    <div class="status-time">9:41</div>
-                    <div class="status-icons">
-                        <svg width="16" height="12" viewBox="0 0 16 12" fill="#fff"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="4" y="5" width="3" height="7" rx="1"/><rect x="8" y="2" width="3" height="10" rx="1"/><rect x="12" y="0" width="3" height="12" rx="1"/></svg>
-                        <svg width="16" height="12" viewBox="0 0 16 12" fill="#fff"><path d="M8 2C5 2 2.5 3.5 1 6l1.5 1.5C3.5 5.5 5.5 4 8 4s4.5 1.5 5.5 3.5L15 6C13.5 3.5 11 2 8 2z"/><circle cx="8" cy="10" r="2"/></svg>
-                        <svg width="24" height="12" viewBox="0 0 24 12" fill="none" stroke="#fff" stroke-width="1.5"><rect x="0.5" y="0.5" width="20" height="11" rx="2"/><path d="M22 4v4" stroke-linecap="round"/><rect x="2" y="2" width="14" height="7" rx="1" fill="#00E676"/></svg>
-                    </div>
-                </div>
-                <div class="app-header">
-                    <img src="logosinkpeso.png" class="app-logo">
-                    <div class="app-name">SINKPESO</div>
-                </div>
-                <div class="balance-section">
-                    <div class="balance-label">Available This Month</div>
-                    <div class="balance-amount">₱24,580</div>
-                    <div class="balance-sub">Income minus expenses, bills & savings</div>
-                </div>
-                <div class="quick-stats">
-                    <div class="stat-card">
-                        <div class="stat-label">Income</div>
-                        <div class="stat-value" style="color: #00E676;">₱35,000</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-label">Spent</div>
-                        <div class="stat-value" style="color: #EF4444;">₱10,420</div>
-                    </div>
-                </div>
-                <div class="section-title">Recent Activity</div>
-                <div class="tx-row">
-                    <div style="display: flex; align-items: center;">
-                        <div class="tx-icon" style="background: rgba(239,68,68,0.1);">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 002-2V2 M7 2v20"/></svg>
-                        </div>
-                        <div class="tx-info">
-                            <div class="tx-name">Groceries</div>
-                            <div class="tx-cat">Food • Today</div>
-                        </div>
-                    </div>
-                    <div class="tx-amount" style="color: #EF4444;">-₱1,200</div>
-                </div>
-                <div class="tx-row">
-                    <div style="display: flex; align-items: center;">
-                        <div class="tx-icon" style="background: rgba(0,230,118,0.1);">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#00E676" stroke-width="2"><path d="M23 6l-9.5 9.5-5-5L1 18"/></svg>
-                        </div>
-                        <div class="tx-info">
-                            <div class="tx-name">Salary</div>
-                            <div class="tx-cat">Income • May 15</div>
-                        </div>
-                    </div>
-                    <div class="tx-amount" style="color: #00E676;">+₱35,000</div>
-                </div>
-                <div class="tx-row">
-                    <div style="display: flex; align-items: center;">
-                        <div class="tx-icon" style="background: rgba(168,85,247,0.1);">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A855F7" stroke-width="2"><path d="M4 2h16v20l-8-4-8 4z"/></svg>
-                        </div>
-                        <div class="tx-info">
-                            <div class="tx-name">Electric Bill</div>
-                            <div class="tx-cat">Bills • May 20</div>
-                        </div>
-                    </div>
-                    <div class="tx-amount" style="color: #EF4444;">-₱2,800</div>
-                </div>
+                <div class="cta">Try Free →</div>
             </div>
         </div>
 
