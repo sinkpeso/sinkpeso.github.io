@@ -1703,27 +1703,23 @@ e('footer', {
 
                 // ── Search + Filters ──────────────────────────────────────────────
                 e('div', { className: "premium-panel", style: { marginBottom: 14 } },
-                    e('div', { style: { display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" } },
-                        e('div', { style: { flex: "1 1 200px" } },
-                            e(Inp, { placeholder: "Search title, category, wallet…", value: search, onChange: ev => setSearch(ev.target.value), style: { marginBottom: 0 } })
+                    e(Inp, { placeholder: "Search title, category, wallet…", value: search, onChange: ev => setSearch(ev.target.value), style: { marginBottom: 10 } }),
+                    e('div', { className: "filter-row", style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 } },
+                        e(Sel, { value: walletFilter, onChange: ev => setWalletFilter(ev.target.value), style: { marginBottom: 0 } },
+                            e('option', { value: "all" }, "All Wallets"),
+                            (wallets || []).map(w => e('option', { key: w.id, value: w.id }, w.name))
                         ),
-                        e('div', { style: { flex: "0 0 170px" } },
-                            e(Sel, { value: walletFilter, onChange: ev => setWalletFilter(ev.target.value), style: { marginBottom: 0 } },
-                                e('option', { value: "all" }, "All Wallets"),
-                                (wallets || []).map(w => e('option', { key: w.id, value: w.id }, w.name))
-                            )
-                        )
+                        (dateFrom || dateTo) ? e('button', { onClick: () => { setDateFrom(""); setDateTo(""); }, style: { background: "var(--hover-bg)", border: "1px solid var(--border)", color: "var(--text-main)", fontSize: 12, fontWeight: 600, cursor: "pointer", padding: "10px 12px", borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center", gap: 6 } }, e(Icon, { name: "x", size: 12 }), "Clear Dates") : e('div')
                     ),
-                    e('div', { className: "date-filter-row", style: { display: "flex", gap: 10, marginTop: 10, flexWrap: "wrap", alignItems: "center" } },
-                        e('div', { style: { fontSize: 12, color: "var(--text-muted)", fontWeight: 600, flexShrink: 0 } }, "From:"),
-                        e('div', { style: { flex: "1 1 140px" } },
+                    e('div', { className: "filter-row", style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginTop: 10 } },
+                        e('div', null,
+                            e('div', { style: { fontSize: 11, fontWeight: 700, color: "var(--text-muted)", marginBottom: 4, letterSpacing: "0.05em" } }, "FROM DATE"),
                             e(Inp, { type: "date", value: dateFrom, onChange: ev => setDateFrom(ev.target.value), style: { marginBottom: 0 } })
                         ),
-                        e('div', { style: { fontSize: 12, color: "var(--text-muted)", fontWeight: 600, flexShrink: 0 } }, "To:"),
-                        e('div', { style: { flex: "1 1 140px" } },
+                        e('div', null,
+                            e('div', { style: { fontSize: 11, fontWeight: 700, color: "var(--text-muted)", marginBottom: 4, letterSpacing: "0.05em" } }, "TO DATE"),
                             e(Inp, { type: "date", value: dateTo, onChange: ev => setDateTo(ev.target.value), style: { marginBottom: 0 } })
-                        ),
-                        (dateFrom || dateTo) && e('button', { onClick: () => { setDateFrom(""); setDateTo(""); }, style: { background: "transparent", border: "none", color: "var(--text-muted)", fontSize: 12, fontWeight: 600, cursor: "pointer", padding: "8px 4px", flexShrink: 0 } }, "Clear")
+                        )
                     )
                 ),
 
