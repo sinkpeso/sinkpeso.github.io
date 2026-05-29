@@ -337,7 +337,9 @@
 
             const handleCreate = () => {
                 if (!form.name) return;
-                if (!window.license.canAddItem("wallets", wallets.length)) {
+                // License check - inline fallback
+                const walletLimit = window.license ? window.license.canAddItem("wallets", wallets.length) : (wallets.length < 3);
+                if (!walletLimit) {
                     showToast("Free limit reached (3 wallets). Upgrade to Premium for unlimited.");
                     return;
                 }
@@ -1695,7 +1697,7 @@ e('footer', {
             const [actionWalletId, setActionWalletId] = useState(CASH_WALLET_ID);
             const [openMenu, setOpenMenu] = useState(null); const [editVault, setEditVault] = useState(null); const [editVaultForm, setEditVaultForm] = useState({ iconId: "landmark", name: "", goal: "", start: "0" });
 
-            const handleCreateVault = () => { if (!form.name || !form.goal) return; if (!window.license.canAddItem("vaults", funds.length)) { showToast("Free limit reached (2 vaults). Upgrade to Premium for unlimited."); return; } setFunds([...funds, { id: uid(), iconId: form.iconId, name: form.name.trim(), goalCents: tc(form.goal), startCents: tc(form.start || "0") }]); setForm({ iconId: "landmark", name: "", goal: "", start: "0" }); setModal(false); };
+            const handleCreateVault = () => { if (!form.name || !form.goal) return; const vaultLimit = window.license ? window.license.canAddItem("vaults", funds.length) : (funds.length < 2); if (!vaultLimit) { showToast("Free limit reached (2 vaults). Upgrade to Premium for unlimited."); return; } setFunds([...funds, { id: uid(), iconId: form.iconId, name: form.name.trim(), goalCents: tc(form.goal), startCents: tc(form.start || "0") }]); setForm({ iconId: "landmark", name: "", goal: "", start: "0" }); setModal(false); };
             
             const handleLogVaultTxn = () => {
                 if (!actionAmt || !actionModal) return;
