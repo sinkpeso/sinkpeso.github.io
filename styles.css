@@ -241,3 +241,134 @@ input, select, textarea { font-size: 16px !important; }
 .empty-state-icon { opacity: 0.3; margin-bottom: var(--sp-1); }
 .empty-state-title { font-size: var(--t-base); font-weight: 700; color: var(--text-light); }
 .empty-state-sub { font-size: var(--t-sm); max-width: 220px; line-height: 1.6; }
+
+/* ══════════════════════════════════════════════════════════════════
+   MOBILE UI FIXES (≤ 600px)
+   ══════════════════════════════════════════════════════════════════ */
+
+/* ── HEADER / NAV ── */
+@media (max-width: 600px) {
+    .nav-scroll { padding: 0 8px 0 !important; }
+    .nav-btn { padding: 10px 8px !important; font-size: 11px !important; }
+    .desktop-tabs { gap: 0; }
+}
+
+/* ── PAGE WRAP ── */
+@media (max-width: 600px) {
+    .page-wrap { padding: 12px 10px 100px !important; }
+}
+
+/* ── FORM FIELDS ── */
+@media (max-width: 600px) {
+    .tf { flex-direction: column; gap: 10px; }
+    .tf > div, .tf > button { width: 100% !important; flex: none !important; }
+    input[type="text"], input[type="number"], input[type="date"], input[type="password"],
+    select, textarea {
+        font-size: 16px !important;
+        padding: 12px 14px !important;
+        min-height: 44px;
+    }
+}
+
+/* ── MODAL ── */
+@media (max-width: 600px) {
+    .modal-overlay { padding: 8px; align-items: flex-end; }
+    .modal-container {
+        padding: 20px 16px !important;
+        border-radius: 18px 18px 0 0 !important;
+        max-height: 90vh;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    .modal-container h3 { font-size: 17px !important; }
+}
+
+/* ── QUICK ADD MODAL ── */
+@media (max-width: 600px) {
+    .quick-add-amount { font-size: 28px !important; }
+    .cat-grid { grid-template-columns: repeat(3, 1fr); gap: 6px; }
+    .cat-btn { padding: 8px 4px; font-size: 11px; }
+}
+
+/* ── BALANCE CARD ── */
+@media (max-width: 600px) {
+    .balance-gradient-card { padding: 20px 16px !important; }
+    .balance-gradient-card h1 { font-size: 22px !important; }
+}
+
+/* ── STREAM ROWS ── */
+@media (max-width: 600px) {
+    .stream-row { padding: 10px 0; gap: 8px; }
+    .stream-row > div:first-child { min-width: 0; flex: 1; }
+    .stream-row > div:last-child { flex-shrink: 0; }
+}
+
+/* ── CATEGORY GRID ── */
+@media (max-width: 600px) {
+    .category-box-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+    .category-mini-card { padding: 10px; }
+}
+
+/* ── VAULTS GRID ── */
+@media (max-width: 600px) {
+    .vaults-grid { grid-template-columns: 1fr; gap: 10px; }
+}
+
+/* ── BOTTOM NAV ── */
+@media (max-width: 768px) {
+    .bottom-nav { padding: 4px 0 env(safe-area-inset-bottom, 8px); }
+    .bnav-btn { padding: 8px 2px 6px; font-size: 10px; }
+    .bnav-btn svg { width: 20px; height: 20px; }
+}
+
+/* ── FAB ── */
+@media (max-width: 768px) {
+    .fab { right: 16px; bottom: 80px; width: 48px; height: 48px; }
+    .fab svg { width: 22px; height: 22px; }
+}
+
+/* ── TOAST ── */
+@media (max-width: 600px) {
+    .toast { bottom: 90px; font-size: 12px; padding: 8px 16px; max-width: 90vw; white-space: normal; text-align: center; }
+}
+
+/* ── BOTTOM SHEET ── */
+@media (max-width: 600px) {
+    .sheet-row { padding: 14px 20px; }
+    .sheet-row-label { font-size: 14px; }
+    .sheet-row-sub { font-size: 12px; }
+}
+
+/* ── SETTINGS ── */
+@media (max-width: 600px) {
+    .dashboard-grid { grid-template-columns: 1fr; gap: 12px; }
+}
+
+/* ── WALLET PICKER ── */
+@media (max-width: 600px) {
+    .wallet-picker-btn { padding: 8px 10px 8px 8px !important; }
+}
+
+/* �─ DATE FILTER ROW ── */
+@media (max-width: 600px) {
+    .date-filter-row { flex-direction: column; gap: 8px; }
+    .date-filter-row > div { width: 100% !important; flex: none !important; }
+}
+
+/* ── CHART ── */
+@media (max-width: 600px) {
+    .chart-container { height: 140px; gap: 8px; padding: 12px 0; }
+    .chart-bar { width: 14px; }
+}
+
+/* ── PIN SCREEN ── */
+@media (max-width: 600px) {
+    .pin-input { width: 200px; font-size: 24px !important; letter-spacing: 10px; }
+    .pin-unlock-btn { width: 200px !important; min-height: 48px; }
+}
+
+/* ── SAFE AREA (notch devices) ── */
+@supports (padding: env(safe-area-inset-top)) {
+    .bottom-nav { padding-bottom: env(safe-area-inset-bottom, 8px); }
+    .sheet-panel { padding-bottom: env(safe-area-inset-bottom, 16px); }
+}
