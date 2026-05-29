@@ -1049,10 +1049,377 @@
             z-index: 1;
         }
 
+        /* ═══════════════════════════════════════════════════════════════
+           VIRAL 1: CONTROVERSIAL — "Budget apps are spyware"
+           ═══════════════════════════════════════════════════════════════ */
+        .viral1 {
+            width: 1080px;
+            height: 1080px;
+            background: #000;
+            border-radius: 16px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            padding: 60px;
+            position: relative;
+        }
+        .viral1::before {
+            content: '';
+            position: absolute;
+            top: -200px;
+            right: -200px;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(239,68,68,0.15) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        .viral1 .hot-take {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: rgba(239,68,68,0.1);
+            border: 1px solid rgba(239,68,68,0.3);
+            border-radius: 100px;
+            margin-bottom: 40px;
+            width: fit-content;
+            position: relative;
+            z-index: 1;
+        }
+        .viral1 .hot-take-icon {
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .viral1 .hot-take-text {
+            font-size: 14px;
+            font-weight: 800;
+            color: #EF4444;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+        .viral1 h2 {
+            font-size: 72px;
+            font-weight: 900;
+            color: #fff;
+            line-height: 1.05;
+            letter-spacing: -0.03em;
+            margin-bottom: 32px;
+            position: relative;
+            z-index: 1;
+        }
+        .viral1 h2 em { font-style: normal; color: #EF4444; }
+        .viral1 .evidence {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-bottom: 40px;
+            position: relative;
+            z-index: 1;
+        }
+        .viral1 .evidence-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 20px;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 14px;
+        }
+        .viral1 .evidence-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background: rgba(239,68,68,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .viral1 .evidence-text {
+            font-size: 17px;
+            font-weight: 600;
+            color: #E2E8F0;
+        }
+        .viral1 .bottom {
+            margin-top: auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            position: relative;
+            z-index: 1;
+        }
+        .viral1 .solution {
+            font-size: 18px;
+            color: #00E676;
+            font-weight: 700;
+        }
+        .viral1 .url {
+            font-size: 14px;
+            color: #475569;
+            font-family: 'DM Mono', monospace;
+        }
+
+        /* ═══════════════════════════════════════════════════════════════
+           VIRAL 2: SHOCKING STAT — "87% sell your data"
+           ═══════════════════════════════════════════════════════════════ */
+        .viral2 {
+            width: 1080px;
+            height: 1080px;
+            background: #000;
+            border-radius: 16px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 80px;
+            text-align: center;
+            position: relative;
+        }
+        .viral2::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(239,68,68,0.08) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        .viral2 .stat-number {
+            font-size: 160px;
+            font-weight: 900;
+            color: #EF4444;
+            line-height: 1;
+            margin-bottom: 16px;
+            position: relative;
+            z-index: 1;
+            text-shadow: 0 0 80px rgba(239,68,68,0.3);
+        }
+        .viral2 .stat-label {
+            font-size: 28px;
+            font-weight: 800;
+            color: #fff;
+            margin-bottom: 12px;
+            position: relative;
+            z-index: 1;
+        }
+        .viral2 .stat-sub {
+            font-size: 18px;
+            color: #64748B;
+            line-height: 1.5;
+            max-width: 500px;
+            margin-bottom: 48px;
+            position: relative;
+            z-index: 1;
+        }
+        .viral2 .divider {
+            width: 60px;
+            height: 4px;
+            background: #00E676;
+            border-radius: 2px;
+            margin-bottom: 48px;
+            position: relative;
+            z-index: 1;
+        }
+        .viral2 .solution-box {
+            padding: 24px 32px;
+            background: rgba(0,230,118,0.06);
+            border: 1px solid rgba(0,230,118,0.15);
+            border-radius: 16px;
+            position: relative;
+            z-index: 1;
+        }
+        .viral2 .solution-text {
+            font-size: 20px;
+            font-weight: 700;
+            color: #00E676;
+        }
+        .viral2 .solution-sub {
+            font-size: 14px;
+            color: #64748B;
+            margin-top: 8px;
+        }
+
+        /* ═══════════════════════════════════════════════════════════════
+           VIRAL 3: RELATABLE — "Salary gone in 2 weeks"
+           ═══════════════════════════════════════════════════════════════ */
+        .viral3 {
+            width: 1080px;
+            height: 1080px;
+            background: #000;
+            border-radius: 16px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            padding: 60px;
+            position: relative;
+        }
+        .viral3 .scene {
+            font-size: 16px;
+            font-weight: 700;
+            color: #475569;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            margin-bottom: 32px;
+        }
+        .viral3 .timeline {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+            margin-bottom: 40px;
+            position: relative;
+        }
+        .viral3 .timeline::before {
+            content: '';
+            position: absolute;
+            left: 24px;
+            top: 24px;
+            bottom: 24px;
+            width: 2px;
+            background: rgba(255,255,255,0.06);
+        }
+        .viral3 .timeline-item {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            padding: 20px 0;
+        }
+        .viral3 .timeline-dot {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 20px;
+            position: relative;
+            z-index: 1;
+        }
+        .viral3 .timeline-content {
+            flex: 1;
+        }
+        .viral3 .timeline-day {
+            font-size: 13px;
+            font-weight: 700;
+            color: #475569;
+            margin-bottom: 4px;
+        }
+        .viral3 .timeline-text {
+            font-size: 20px;
+            font-weight: 700;
+            color: #E2E8F0;
+        }
+        .viral3 .timeline-amount {
+            font-size: 20px;
+            font-weight: 800;
+            flex-shrink: 0;
+        }
+        .viral3 .punchline {
+            margin-top: auto;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+        .viral3 .punchline-main {
+            font-size: 36px;
+            font-weight: 900;
+            color: #fff;
+            margin-bottom: 12px;
+        }
+        .viral3 .punchline-sub {
+            font-size: 18px;
+            color: #00E676;
+            font-weight: 600;
+        }
+
+        /* ═══════════════════════════════════════════════════════════════
+           VIRAL 4: CURIOSITY GAP — "App that can't see your balance"
+           ═══════════════════════════════════════════════════════════════ */
+        .viral4 {
+            width: 1080px;
+            height: 1080px;
+            background: #000;
+            border-radius: 16px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 80px;
+            text-align: center;
+            position: relative;
+        }
+        .viral4::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background:
+                radial-gradient(circle at 30% 30%, rgba(0,230,118,0.04) 0%, transparent 50%),
+                radial-gradient(circle at 70% 70%, rgba(59,130,246,0.04) 0%, transparent 50%);
+            pointer-events: none;
+        }
+        .viral4 .question-mark {
+            font-size: 120px;
+            color: rgba(0,230,118,0.1);
+            font-weight: 900;
+            line-height: 1;
+            margin-bottom: -20px;
+            position: relative;
+            z-index: 1;
+        }
+        .viral4 h2 {
+            font-size: 52px;
+            font-weight: 900;
+            color: #fff;
+            line-height: 1.1;
+            letter-spacing: -0.02em;
+            margin-bottom: 24px;
+            position: relative;
+            z-index: 1;
+        }
+        .viral4 h2 em { font-style: normal; color: #00E676; }
+        .viral4 .paradox {
+            font-size: 20px;
+            color: #64748B;
+            line-height: 1.6;
+            max-width: 550px;
+            margin-bottom: 48px;
+            position: relative;
+            z-index: 1;
+        }
+        .viral4 .paradox strong { color: #fff; }
+        .viral4 .features {
+            display: flex;
+            gap: 16px;
+            position: relative;
+            z-index: 1;
+        }
+        .viral4 .feat {
+            padding: 16px 24px;
+            background: rgba(0,230,118,0.04);
+            border: 1px solid rgba(0,230,118,0.12);
+            border-radius: 12px;
+        }
+        .viral4 .feat-text {
+            font-size: 15px;
+            font-weight: 700;
+            color: #00E676;
+        }
+
         @media (max-width: 1300px) {
             .tw1, .fb1, .li1 { width: 100%; height: auto; aspect-ratio: 1200/675; }
             .ig1, .ig2, .car1, .car2, .car3, .car4 { width: 100%; height: auto; aspect-ratio: 1; }
             .tt1 { width: 100%; height: auto; aspect-ratio: 1080/1920; }
+            .viral1, .viral2, .viral3, .viral4 { width: 100%; height: auto; aspect-ratio: 1; }
         }
     </style>
 </head>
@@ -1399,7 +1766,7 @@
         <div class="preview-wrap">
             <div class="platform-tag">1080 × 1920</div>
             <div class="tt1" id="tt1">
-                <div class="hook-hook">STOP SCROLLING IF YOU</div>
+                <div class="hook-text">STOP SCROLLING IF YOU</div>
                 <h2>want to track your money <em>privately.</em></h2>
                 <div class="sub">No account. No cloud. No data selling. Just you and your budget.</div>
                 <div class="features">
@@ -1431,6 +1798,154 @@
                 <div class="cta">Try Free →</div>
             </div>
             <button class="download-btn" onclick="download('tt1', 'sinkpeso-tiktok')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+                Download
+            </button>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         VIRAL IMAGES — Scroll-stopping content
+         ═══════════════════════════════════════════════════════════════ -->
+
+    <div class="section">
+        <div class="section-label" style="color: #EF4444;">Viral Content</div>
+        <div class="section-title">4 Scroll-Stopping Formats (High engagement)</div>
+
+        <!-- VIRAL 1: CONTROVERSIAL -->
+        <div class="preview-wrap" style="margin-bottom: 60px;">
+            <div class="platform-tag">Controversial Hot Take • 1080×1080</div>
+            <div class="viral1" id="viral1">
+                <div class="hot-take">
+                    <div class="hot-take-icon">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2"><path d="M12 2v20M2 12h20"/></svg>
+                    </div>
+                    <div class="hot-take-text">Hot Take</div>
+                </div>
+                <h2>Budget apps are<br><em>spyware</em> with<br>pretty UIs.</h2>
+                <div class="evidence">
+                    <div class="evidence-item">
+                        <div class="evidence-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                        </div>
+                        <div class="evidence-text">They store your salary data on their servers</div>
+                    </div>
+                    <div class="evidence-item">
+                        <div class="evidence-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                        </div>
+                        <div class="evidence-text">They track where you spend every peso</div>
+                    </div>
+                    <div class="evidence-item">
+                        <div class="evidence-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                        </div>
+                        <div class="evidence-text">They sell insights to advertisers & banks</div>
+                    </div>
+                </div>
+                <div class="bottom">
+                    <div class="solution">SINKPESO: Zero data collection.</div>
+                    <div class="url">sinkpeso.github.io</div>
+                </div>
+            </div>
+            <button class="download-btn" onclick="download('viral1', 'sinkpeso-viral-controversial')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+                Download
+            </button>
+        </div>
+
+        <!-- VIRAL 2: SHOCKING STAT -->
+        <div class="preview-wrap" style="margin-bottom: 60px;">
+            <div class="platform-tag">Shocking Statistic • 1080×1080</div>
+            <div class="viral2" id="viral2">
+                <div class="stat-number">87%</div>
+                <div class="stat-label">of budget apps sell your data</div>
+                <div class="stat-sub">Your salary. Your spending habits. Your debts. All packaged and sold to the highest bidder.</div>
+                <div class="divider"></div>
+                <div class="solution-box">
+                    <div class="solution-text">SINKPESO: 0% data collection</div>
+                    <div class="solution-sub">Your data never leaves your device. Period.</div>
+                </div>
+            </div>
+            <button class="download-btn" onclick="download('viral2', 'sinkpeso-viral-stat')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+                Download
+            </button>
+        </div>
+
+        <!-- VIRAL 3: RELATABLE -->
+        <div class="preview-wrap" style="margin-bottom: 60px;">
+            <div class="platform-tag">Relatable Scenario • 1080×1080</div>
+            <div class="viral3" id="viral3">
+                <div class="scene">THE SALARY CYCLE:</div>
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-dot" style="background: rgba(0,230,118,0.15);">💰</div>
+                        <div class="timeline-content">
+                            <div class="timeline-day">Day 1</div>
+                            <div class="timeline-text">Salary received!</div>
+                        </div>
+                        <div class="timeline-amount" style="color: #00E676;">₱35,000</div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-dot" style="background: rgba(245,158,11,0.15);">🏠</div>
+                        <div class="timeline-content">
+                            <div class="timeline-day">Day 3</div>
+                            <div class="timeline-text">Rent + bills paid</div>
+                        </div>
+                        <div class="timeline-amount" style="color: #F59E0B;">-₱18,000</div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-dot" style="background: rgba(239,68,68,0.15);">🛒</div>
+                        <div class="timeline-content">
+                            <div class="timeline-day">Day 14</div>
+                            <div class="timeline-text">Food + luho + transpo</div>
+                        </div>
+                        <div class="timeline-amount" style="color: #EF4444;">-₱15,000</div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-dot" style="background: rgba(239,68,68,0.2);">😱</div>
+                        <div class="timeline-content">
+                            <div class="timeline-day">Day 15</div>
+                            <div class="timeline-text">Where did it go?!</div>
+                        </div>
+                        <div class="timeline-amount" style="color: #EF4444;">₱2,000</div>
+                    </div>
+                </div>
+                <div class="punchline">
+                    <div class="punchline-main">Track every peso. Automatically.</div>
+                    <div class="punchline-sub">SINKPESO — Free, offline, private.</div>
+                </div>
+            </div>
+            <button class="download-btn" onclick="download('viral3', 'sinkpeso-viral-relatable')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+                Download
+            </button>
+        </div>
+
+        <!-- VIRAL 4: CURIOSITY GAP -->
+        <div class="preview-wrap">
+            <div class="platform-tag">Curiosity Gap • 1080×1080</div>
+            <div class="viral4" id="viral4">
+                <div class="question-mark">?</div>
+                <h2>The budget app that<br><em>can't see</em><br>your balance.</h2>
+                <div class="paradox">
+                    <strong>That's not a bug. That's the feature.</strong><br>
+                    SINKPESO runs 100% on your device. It literally cannot access your data. And that's exactly the point.
+                </div>
+                <div class="features">
+                    <div class="feat">
+                        <div class="feat-text">No Cloud</div>
+                    </div>
+                    <div class="feat">
+                        <div class="feat-text">No Account</div>
+                    </div>
+                    <div class="feat">
+                        <div class="feat-text">No Tracking</div>
+                    </div>
+                </div>
+            </div>
+            <button class="download-btn" onclick="download('viral4', 'sinkpeso-viral-curiosity')">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
                 Download
             </button>
@@ -1476,8 +1991,8 @@
             btn.textContent = 'Downloading all...';
             btn.disabled = true;
 
-            const ids = ['tw1', 'ig1', 'ig2', 'fb1', 'li1', 'car1', 'car2', 'car3', 'car4', 'tt1'];
-            const names = ['twitter', 'instagram-pain', 'instagram-pov', 'facebook', 'linkedin', 'carousel-1', 'carousel-2', 'carousel-3', 'carousel-4', 'tiktok'];
+            const ids = ['tw1', 'ig1', 'ig2', 'fb1', 'li1', 'car1', 'car2', 'car3', 'car4', 'tt1', 'viral1', 'viral2', 'viral3', 'viral4'];
+            const names = ['twitter', 'instagram-pain', 'instagram-pov', 'facebook', 'linkedin', 'carousel-1', 'carousel-2', 'carousel-3', 'carousel-4', 'tiktok', 'viral-controversial', 'viral-stat', 'viral-relatable', 'viral-curiosity'];
 
             for (let i = 0; i < ids.length; i++) {
                 await download(ids[i], 'sinkpeso-' + names[i]);
