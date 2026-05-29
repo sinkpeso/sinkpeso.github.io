@@ -65,7 +65,7 @@
             style: {
                 background: "var(--bg-input)", color: "var(--text-main)",
                 border: "1px solid var(--border-input)", borderRadius: 10,
-                padding: "13px 15px", fontSize: 15, width: "100%",
+                padding: "13px 15px", fontSize: 16, width: "100%",
                 boxSizing: "border-box", outline: "none",
                 transition: "border-color 0.2s", minHeight: 46,
                 fontFamily: "inherit",
@@ -83,7 +83,7 @@
             style: {
                 background: "var(--bg-input)", color: "var(--text-main)",
                 border: "1px solid var(--border-input)", borderRadius: 10,
-                padding: "13px 15px", fontSize: 15, width: "100%",
+                padding: "13px 15px", fontSize: 16, width: "100%",
                 boxSizing: "border-box", outline: "none", minHeight: 46,
                 fontFamily: "inherit",
                 ...(p.style || {})

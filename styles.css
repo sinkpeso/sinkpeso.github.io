@@ -64,8 +64,26 @@ body {
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 999px; }
 ::-webkit-scrollbar-thumb:hover { background: #00E676; }
 
-/* ── iOS SAFARI ZOOM PREVENTION ── */
-input, select, textarea { font-size: 16px !important; }
+/* ── iOS SAFARI ZOOM PREVENTION ──
+   Safari auto-zooms when focused input font-size < 16px.
+   We set 16px on ALL inputs including date/time/select to prevent this.
+   The :not([type="file"]) exclusion keeps file inputs unaffected. ── */
+input:not([type="file"]):not([type="hidden"]):not([type="checkbox"]):not([type="radio"]),
+select,
+textarea {
+    font-size: 16px !important;
+    -webkit-text-size-adjust: 100%;
+}
+
+/* ── DATE INPUT FIX: prevent intrinsic width overflow ── */
+input[type="date"],
+input[type="time"],
+input[type="datetime-local"] {
+    min-width: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    -webkit-appearance: none;
+}
 
 .dashboard-grid { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 24px; margin-top: 24px; }
 .category-box-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-top: 16px; }
@@ -359,6 +377,7 @@ input, select, textarea { font-size: 16px !important; }
 }
 
 /* ── FILTER ROWS ── */
+.filter-row > * { min-width: 0; }
 @media (max-width: 600px) {
     .filter-row { grid-template-columns: 1fr !important; gap: 8px !important; }
 }
