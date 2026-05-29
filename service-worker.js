@@ -1,4 +1,4 @@
-const CACHE_NAME = 'sinkpeso-v1';
+const CACHE_NAME = 'sinkpeso-v2';
 const ASSETS = [
   './',
   './index.html',
@@ -14,6 +14,7 @@ const ASSETS = [
   './actions.js',
   './walleticons.js',
   './persistence.js',
+  './service-worker.js',
   './manifest.json',
   './logosinkpeso.png'
 ];
@@ -36,7 +37,7 @@ self.addEventListener('activate', event => {
   self.clients.claim();
 });
 
-// Fetch: cache-first for app assets, network-first for CDN
+// Fetch: network-first for HTML/CSS/JS, cache-first for static assets
 self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
 
@@ -54,7 +55,22 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // App assets: cache-first
+  // App HTML/CSS/JS: network-first (always check for updates)
+  const pathname = url.pathname;
+  if (pathname.endsWith('.html') || pathname.endsWith('.css') || pathname.endsWith('.js') || pathname === '/') {
+    event.respondWith(
+      fetch(event.request)
+        .then(response => {
+          const clone = response.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
+          return response;
+        })
+        .catch(() => caches.match(event.request))
+    );
+    return;
+  }
+
+  // Static assets (images, fonts): cache-first
   event.respondWith(
     caches.match(event.request).then(cached => cached || fetch(event.request))
   );
