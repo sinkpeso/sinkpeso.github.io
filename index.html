@@ -337,12 +337,10 @@
 
             const handleCreate = () => {
                 if (!form.name) return;
-                // Debug: log the check
-                const isPremium = window.license && window.license.isPremium();
-                const currentCount = wallets.length;
-                console.log("[wallet] Creating wallet. Count:", currentCount, "Premium:", isPremium);
+                alert("Creating wallet. Current count: " + wallets.length);
                 // License check
-                if (!isPremium && currentCount >= 3) {
+                if (wallets.length >= 3) {
+                    alert("BLOCKED: Free limit reached!");
                     showToast("Free limit reached (3 wallets). Upgrade to Premium for unlimited.");
                     return;
                 }
