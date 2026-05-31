@@ -267,6 +267,17 @@
 
             const handleCreate = () => {
                 if (!newName.trim()) return;
+                // Enforce tier limit — wallets here is displayWallets; use length as proxy count
+                const canAdd = window.license ? window.license.canAddItem("wallets", wallets.length) : (wallets.length < 3);
+                if (!canAdd) {
+                    // Close the inline form and surface a toast — no alert()
+                    setShowCreate(false);
+                    setNewName("");
+                    // Bubble up via setWallets? No — just surface via the parent's showToast if available.
+                    // As a fallback, we can't call showToast here (not in scope), so we use a friendly no-op.
+                    // The "+ New Source" button will be hidden below when at limit anyway.
+                    return;
+                }
                 const w = { id: uid(), name: newName.trim(), openingBalanceCents: 0, color: newColor };
                 setWallets(prev => [...prev, w]);
                 onChange(w.id);
@@ -290,6 +301,8 @@
                         e(WalletIcon, { name: w.name, color: w.color || "#00E676", size: 24, radius: 7 }),
                         w.name
                     )),
+                    // Only show "+ New Source" if the wallet limit hasn't been reached
+                    (window.license ? window.license.canAddItem("wallets", safeWallets.length) : safeWallets.length < 3) &&
                     e('button', { onClick: () => setShowCreate(!showCreate), style: {
                         padding: "8px 14px", borderRadius: 10,
                         background: "transparent",
@@ -336,23 +349,22 @@
             };
 
             const handleCreate = () => {
-                console.log("[wallet] handleCreate called!");
-                alert("handleCreate called! Name: " + form.name + " Count: " + wallets.length);
                 if (!form.name) return;
-                // License check
-                if (wallets.length >= 3) {
-                    alert("BLOCKED: Free limit reached!");
+                // Enforce tier limit via license system
+                const canAdd = window.license ? window.license.canAddItem("wallets", rawWallets.length) : (rawWallets.length < 3);
+                if (!canAdd) {
                     showToast("Free limit reached (3 wallets). Upgrade to Premium for unlimited.");
+                    setModal(false);
                     return;
                 }
-                setWallets([...wallets, { id: uid(), name: form.name.trim(), openingBalanceCents: tc(form.balanceCents || "0"), color: form.color }]);
+                setWallets([...rawWallets, { id: uid(), name: form.name.trim(), openingBalanceCents: tc(form.balanceCents || "0"), color: form.color }]);
                 setForm({ name: "", balanceCents: "", color: WALLET_COLORS[0] });
                 setModal(false);
             };
             const openEdit = (w) => { setEditWallet(w); setEditForm({ name: w.name, color: w.color || WALLET_COLORS[0] }); };
             const saveEdit = () => {
                 if (!editForm.name) return;
-                setWallets(wallets.map(w => w.id === editWallet.id ? { ...w, name: editForm.name.trim(), color: editForm.color } : w));
+                setWallets(rawWallets.map(w => w.id === editWallet.id ? { ...w, name: editForm.name.trim(), color: editForm.color } : w));
                 setEditWallet(null);
             };
             const deleteWallet = (id) => {
@@ -375,7 +387,15 @@
                         e('div', { style: { fontSize:13, color:"var(--text-muted)", marginTop:4 } }, 'Track where your money lives. '),
                         e('div', { style: { fontSize:11, color:"var(--text-light)", marginTop:3, fontStyle:"italic" } }, 'Wallet balances persist across months.')
                     ),
-                    e(Btn, { v:"accent", onClick: () => { alert("Add Wallet clicked!"); setModal(true); } }, "+ Add Wallet")
+                    (() => {
+                        const atLimit = window.license ? !window.license.canAddItem("wallets", rawWallets.length) : rawWallets.length >= 3;
+                        return atLimit && !window.license?.isPremium()
+                            ? e('div', { style: { display:"flex", alignItems:"center", gap:8 } },
+                                e('div', { style: { fontSize:11, fontWeight:700, color:"var(--text-muted)", padding:"8px 12px", background:"var(--hover-bg)", borderRadius:8, border:"1px solid var(--border)" } }, "3/3 wallets (Free limit)"),
+                                e(Btn, { v:"ghost", style:{ fontSize:12, padding:"8px 14px" }, onClick: () => showToast("Upgrade to Premium for unlimited wallets.") }, "Upgrade")
+                              )
+                            : e(Btn, { v:"accent", onClick: () => setModal(true) }, "+ Add Wallet");
+                    })()
                 ),
 
                 wallets.length === 0
@@ -411,7 +431,7 @@ e(EmptyState, { icon:"creditcard", title:"No wallets yet", sub:"Add Cash, GCash,
                     ),
 
                 // CREATE MODAL
-                modal && e('div', { className:"modal-overlay", onClick:() => { console.log("[modal] Overlay clicked"); setModal(false); } },
+                modal && e('div', { className:"modal-overlay", onClick:() => setModal(false) },
                     e('div', { className:"modal-container", style:{maxWidth:400}, onClick:ev=>ev.stopPropagation() },
                         e('div', { style:S.modalHeader },
                             e('div', { style:S.modalTitle }, "Add Wallet"),
