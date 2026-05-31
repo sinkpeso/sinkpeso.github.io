@@ -412,3 +412,222 @@ a:active { opacity: 0.8; }
 
 /* ── SELECTION ── */
 ::selection { background: var(--accent-dim); color: var(--text-main); }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   BENTO BOX DASHBOARD
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Design tokens ───────────────────────────────────────────────────────── */
+:root {
+    --bn-green:  #00FF87;
+    --bn-cyan:   #00C8FF;
+    --bn-amber:  #FFB800;
+    --bn-red:    #FF3D5A;
+    --bn-cell:   #0B0B14;
+    --bn-cell-2: #0F0F1C;
+    --bn-border: rgba(255,255,255,0.07);
+    --bn-gap:    12px;
+    --bn-r:      20px;
+}
+
+/* Light mode overrides */
+[data-theme="light"] {
+    --bn-cell:   #FFFFFF;
+    --bn-cell-2: #F6F8FC;
+    --bn-border: rgba(0,0,0,0.08);
+    --bn-green:  #00A854;
+    --bn-amber:  #D97706;
+    --bn-red:    #E02040;
+}
+
+/* ── Outer wrapper ───────────────────────────────────────────────────────── */
+.bn-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: var(--bn-gap);
+    margin-top: 4px;
+}
+
+/* ── Base cell ───────────────────────────────────────────────────────────── */
+.bn-cell {
+    background: var(--bn-cell);
+    border: 1px solid var(--bn-border);
+    border-radius: var(--bn-r);
+    padding: 22px;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Hairline shimmer on top edge — dark mode only */
+.bn-cell::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 16px; right: 16px;
+    height: 1px;
+    background: linear-gradient(90deg,
+        transparent 0%, rgba(255,255,255,0.10) 50%, transparent 100%);
+    pointer-events: none;
+}
+[data-theme="light"] .bn-cell::after { opacity: 0; }
+
+/* ── Row layouts ─────────────────────────────────────────────────────────── */
+.bn-row1, .bn-row2, .bn-row3 {
+    display: flex;
+    gap: var(--bn-gap);
+    align-items: stretch;
+}
+
+/* Row 1 — balance takes ~62% */
+.bn-balance { flex: 1.65; min-width: 0; }
+.bn-ring    { flex: 1; min-width: 0;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; }
+
+/* Row 2 — wallets equal; unpaid fixed */
+.bn-wallet  { flex: 1; min-width: 0; }
+.bn-unpaid  { flex: 0 0 140px; }
+
+/* Row 3 — expenses wider */
+.bn-expenses { flex: 1.4; min-width: 0; }
+.bn-bills    { flex: 1; min-width: 0; }
+
+/* ── Balance hero specifics ──────────────────────────────────────────────── */
+.bn-balance { background: linear-gradient(145deg, #0D0D1A 0%, #080810 100%); }
+
+/* ambient green orb */
+.bn-orb {
+    position: absolute;
+    top: -60px; right: -40px;
+    width: 200px; height: 200px;
+    background: radial-gradient(circle,
+        rgba(0,255,135,0.07) 0%, transparent 70%);
+    pointer-events: none;
+}
+[data-theme="light"] .bn-orb { display: none; }
+
+/* stat strip */
+.bn-stats-strip {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    margin-top: 22px;
+    padding-top: 18px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    flex-wrap: wrap;
+}
+[data-theme="light"] .bn-stats-strip { border-top-color: rgba(0,0,0,0.07); }
+
+.bn-stat { display: flex; flex-direction: column; gap: 3px; }
+.bn-stat-lbl {
+    font-size: 10px; font-weight: 700;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--text-muted);
+}
+.bn-stat-val {
+    font-size: 15px; font-weight: 700;
+    color: var(--text-main); font-variant-numeric: tabular-nums;
+}
+.bn-muted-val { color: var(--text-muted) !important; }
+.bn-divider {
+    width: 1px; height: 26px;
+    background: rgba(255,255,255,0.07);
+    flex-shrink: 0;
+}
+[data-theme="light"] .bn-divider { background: rgba(0,0,0,0.08); }
+
+/* ── Wallet cell ─────────────────────────────────────────────────────────── */
+.bn-wallet {
+    background: var(--bn-cell-2);
+    transition: border-color 0.2s, transform 0.2s;
+}
+.bn-wallet:hover {
+    border-color: rgba(255,255,255,0.13);
+    transform: translateY(-1px);
+}
+
+/* ── Category grid ───────────────────────────────────────────────────────── */
+.bn-categories { background: var(--bn-cell-2); }
+
+.bn-cat-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+}
+
+.bn-cat-item {
+    background: rgba(255,255,255,0.025);
+    border: 1px solid rgba(255,255,255,0.05);
+    border-radius: 14px;
+    padding: 14px;
+    transition: border-color 0.2s;
+}
+.bn-cat-item:hover { border-color: rgba(255,255,255,0.1); }
+[data-theme="light"] .bn-cat-item {
+    background: rgba(0,0,0,0.025);
+    border-color: rgba(0,0,0,0.06);
+}
+
+/* ── List rows (expenses / bills) ────────────────────────────────────────── */
+.bn-row-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+}
+
+.bn-view-all {
+    background: transparent; border: none;
+    color: var(--text-muted); font-size: 11px;
+    font-weight: 600; cursor: pointer; padding: 0;
+    font-family: inherit; letter-spacing: 0.02em;
+    transition: color 0.15s;
+}
+.bn-view-all:hover { color: var(--text-light); }
+
+.bn-list { display: flex; flex-direction: column; }
+
+.bn-list-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    gap: 10px;
+}
+
+.bn-exp-icon {
+    width: 32px; height: 32px; flex-shrink: 0;
+    border-radius: 9px;
+    background: rgba(255,61,90,0.10);
+    border: 1px solid rgba(255,61,90,0.18);
+    display: flex; align-items: center; justify-content: center;
+}
+
+.bn-empty {
+    color: var(--text-muted); font-size: 13px;
+    padding: 16px 0; text-align: center;
+}
+
+/* ── Responsive ──────────────────────────────────────────────────────────── */
+@media (max-width: 800px) {
+    .bn-cat-grid { grid-template-columns: repeat(2, 1fr); }
+    .bn-balance  { flex: unset; width: 100%; }
+    .bn-ring     { flex: unset; width: 100%; flex-direction: row;
+                   justify-content: space-around; padding: 18px 22px; }
+    .bn-row1     { flex-direction: column; }
+    .bn-unpaid   { flex: 1; }
+}
+
+@media (max-width: 600px) {
+    :root { --bn-gap: 10px; --bn-r: 16px; }
+    .bn-cell { padding: 16px; }
+    .bn-row2 { flex-wrap: wrap; }
+    .bn-wallet { flex: 1 1 calc(50% - 5px); }
+    .bn-unpaid { flex: 1 1 calc(50% - 5px); }
+    .bn-row3   { flex-direction: column; }
+    .bn-cat-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
+    .bn-cat-item { padding: 11px; border-radius: 12px; }
+    .bn-stats-strip { gap: 12px; }
+}
+
+@media (max-width: 380px) {
+    .bn-cat-grid { grid-template-columns: 1fr; }
+}

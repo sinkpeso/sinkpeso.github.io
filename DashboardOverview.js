@@ -1,247 +1,337 @@
-// DashboardOverview.js — Main dashboard panel for SINKPESO
+// DashboardOverview.js — Bento Box dashboard for SINKPESO
 //
-// Renders (4 visual blocks):
-//   1. Page heading + health status badge
-//   2. LEFT column: Balance card (available this month, wallet total, income, spent, safe daily spend)
-//                   Category spending grid (6 categories with progress bars)
-//   3. RIGHT column: Donut chart (monthly budget used %)
-//                    Upcoming unpaid bills list (up to 3)
-//   4. Recent activity section (conditionally rendered when onNavigate is provided)
+// Layout (4 rows of bento cells):
+//   Row 1 — BALANCE HERO (wide) + BURN RING (narrow)
+//   Row 2 — WALLET CARDS (up to 3, equal) + UNPAID TOTAL
+//   Row 3 — RECENT EXPENSES (wide) + UPCOMING BILLS (narrow)
+//   Row 4 — CATEGORY SPENDING (full width, 3-col grid)
 //
-// This component is DISPLAY ONLY — no useState, no localStorage, no mutations.
-// All data is passed in as props from App().
+// Display only — no useState, no localStorage, no mutations.
 //
-// Dependencies (must be loaded before this file):
-//   - React             (via CDN <script>)
-//   - components.js     → SLabel, PBar    (via window.components)
-//   - utils.js          → safeDiv, getDaysRemaining  (via window.utils)
-//   - Icon              (global function defined in index.html main <script>)
-//   - CATEGORIES        (global constant defined in index.html main <script>)
-//   - RecentActivitySection (global function defined in index.html main <script>)
+// Dependencies: React, useMemo (global), Icon (global), CATEGORIES (global),
+//   RecentActivitySection (global from index.html),
+//   window.components.{SLabel,PBar}, window.utils.{safeDiv,getDaysRemaining},
+//   window.walleticons.WalletIcon
 //
-// Props:
-//   totals         — pre-computed object from App()'s useMemo
-//   bills          — array of bill objects { id, name, amountCents, isPaid, dueDate }
-//   dailyExpenses  — array of daily expense objects
-//   budgets        — array of budget objects { id, category, limitCents }
-//   wallets        — derived wallet array with balanceCents computed
-//   fc             — currency formatter function, e.g. fc(1000) → "₱10.00"
-//   incomes        — array of income records
-//   txns           — array of transaction records
-//   funds          — array of sinking fund objects
-//   archives       — array of archived month snapshots
-//   onNavigate     — callback to switch tabs, e.g. onNavigate("transactions")
+// Props: totals, bills, dailyExpenses, budgets, wallets, fc, fc2,
+//        incomes, txns, funds, archives, onNavigate
 
 (function () {
     const e = React.createElement;
-
-    // Pull helpers from already-loaded files
-    const { SLabel, PBar } = window.components;
     const { safeDiv, getDaysRemaining } = window.utils;
+    // NOTE: window.walleticons loads AFTER this file, so WalletIcon is
+    // resolved lazily inside the function body — not here at IIFE time.
 
-    function DashboardOverview({ totals, bills, dailyExpenses, budgets, wallets, fc, fc2, incomes, txns, funds, archives, onNavigate }) {
-        const spendPercentage = totals.totalIncome > 0 ? (totals.totalDailySpent + totals.paidBills) / totals.totalIncome : 0;
-        // Wallet total = sum of all real wallet balances (persists across months)
+    // ── tiny helpers ───────────────────────────────────────────────────────
+    const glow = (color, strength = 0.35) =>
+        `0 0 24px ${color}${Math.round(strength * 255).toString(16).padStart(2,'0')}, 0 0 48px ${color}${Math.round(strength * 0.5 * 255).toString(16).padStart(2,'0')}`;
+
+    const NeonNum = ({ value, color = 'var(--bn-green)', size = 42 }) =>
+        e('div', {
+            style: {
+                fontSize: size, fontWeight: 800, lineHeight: 1,
+                color, letterSpacing: '-0.03em',
+                fontVariantNumeric: 'tabular-nums',
+                textShadow: glow(color === 'var(--bn-green)' ? '#00FF87' : color),
+            }
+        }, value);
+
+    const BentoLabel = ({ children, style = {} }) =>
+        e('div', {
+            style: {
+                fontSize: 10, fontWeight: 700, letterSpacing: '0.1em',
+                textTransform: 'uppercase', color: 'var(--text-muted)',
+                marginBottom: 10, ...style
+            }
+        }, children);
+
+    const ThinBar = ({ pct, color }) =>
+        e('div', { style: { height: 3, background: 'rgba(255,255,255,0.06)', borderRadius: 2, overflow: 'hidden', marginTop: 10 } },
+            e('div', { style: {
+                height: '100%',
+                width: `${Math.min(100, Math.max(0, pct * 100))}%`,
+                background: color,
+                borderRadius: 2,
+                boxShadow: `0 0 8px ${color}70`,
+                transition: 'width 0.5s ease'
+            }})
+        );
+
+    // ── main component ──────────────────────────────────────────────────────
+    function DashboardOverview({ totals, bills, dailyExpenses, budgets,
+                                  wallets, fc, fc2, incomes, txns,
+                                  funds, archives, onNavigate }) {
+
+        // walleticons.js is guaranteed loaded by the time this function runs
+        const { WalletIcon } = window.walleticons;
+
+        const spendPct   = totals.totalIncome > 0
+            ? (totals.totalDailySpent + totals.paidBills) / totals.totalIncome : 0;
         const walletTotal = (wallets || []).reduce((s, w) => s + (w.balanceCents || 0), 0);
 
-        // Spending trends data from archives (last 6 months)
-        const trendData = useMemo(() => {
-            if (!archives || archives.length === 0) return [];
-            return [...archives].reverse().slice(-6).map(a => ({
-                month: a.month.split(' ')[0].substring(0, 3),
-                spent: a.totalSpent + a.totalBills,
-                income: a.totalIncome
-            }));
-        }, [archives]);
+        const today      = new Date();
+        const daysInMo   = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
+        const daysLeft   = Math.max(1, daysInMo - today.getDate());
+        const safeDaily  = totals.netAvailable > 0 ? Math.floor(totals.netAvailable / daysLeft) : 0;
 
-        // Bill reminders (upcoming within 7 days or overdue)
-        const billReminders = useMemo(() => {
-            if (!bills) return [];
-            return bills.filter(b => !b.isPaid && getDaysRemaining(b.dueDate) <= 7)
-                .sort((a, b) => getDaysRemaining(a.dueDate) - getDaysRemaining(b.dueDate));
-        }, [bills]);
+        const ringColor  = spendPct > 0.8 ? 'var(--bn-red)' : 'var(--bn-green)';
+        const ringHex    = spendPct > 0.8 ? '#FF3D5A' : '#00FF87';
+        const circumf    = 50 * 2 * Math.PI;
+        const dashOff    = circumf * (1 - Math.min(spendPct, 1));
 
-        return e('div', null,
-            e('div', { style: { marginBottom: 20 } },
-                e('div', { style: { display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap", marginBottom: 5 } },
-                    e('h1', { style: { fontSize: "clamp(18px, 5vw, 24px)", fontWeight: 800, color: "var(--text-main)", lineHeight: 1.1 } }, "Financial Position"),
-                    e('div', { style: { background: totals.healthStatus.bg, color: totals.healthStatus.color, border: `1px solid ${totals.healthStatus.color}30`, padding: "4px 12px", borderRadius: 20, fontSize: 11, fontWeight: 700, whiteSpace: "nowrap" } }, totals.healthStatus.label)
-                ),
-                e('div', { style: { fontSize: 13, color: "var(--text-muted)" } }, "Simple visual breakdown of your cash health")
-            ),
+        const recentExp  = useMemo(() => (dailyExpenses || []).slice(0, 4), [dailyExpenses]);
+        const upcoming   = useMemo(() =>
+            (bills || []).filter(b => !b.isPaid)
+                .sort((a, b) => (getDaysRemaining(a.dueDate) ?? 999) - (getDaysRemaining(b.dueDate) ?? 999))
+                .slice(0, 4),
+        [bills]);
 
-            e('div', { className: "dashboard-grid" },
-                e('div', { style: { display: "flex", flexDirection: "column", gap: 24 } },
-                    e('div', { className: "balance-gradient-card" },
-                        // ── Available This Month ───────────────────────────────────
-                        e(SLabel, { style: { color: "var(--text-light)", marginBottom: 6 } }, "Available This Month"),
-                        e('div', { style: { fontSize: 38, fontWeight: 800, color: "#00E676", letterSpacing: "-0.025em", fontVariantNumeric: "tabular-nums" } }, fc(totals.netAvailable)),
-                        fc2 && e('div', { style: { fontSize: 14, color: "var(--text-muted)", marginTop: 2 } }, `≈ ${fc2(totals.netAvailable)}`),
-                        e('div', { style: { fontSize: 11, color: "var(--text-muted)", marginTop: 2, marginBottom: 16 } }, "Income minus expenses, bills paid & savings this month"),
+        const catItems = CATEGORIES.map(k => {
+            const val  = totals.catSum[k] || 0;
+            const bObj = budgets.find(x => x.category === k);
+            const lim  = bObj ? bObj.limitCents : null;
+            const pct  = lim ? safeDiv(val, lim) : 0;
+            const col  = !lim ? 'rgba(255,255,255,0.12)'
+                       : pct >= 1   ? 'var(--bn-red)'
+                       : pct >= 0.8 ? 'var(--bn-amber)'
+                       : 'var(--bn-green)';
+            return { k, val, lim, pct, col };
+        });
 
-                        // ── Wallet Total (separate — persists across months) ────────
-                        e('div', { style: { display: "flex", alignItems: "center", justifyContent: "space-between", background: "rgba(255,255,255,0.04)", border: "1px solid var(--border)", borderRadius: 10, padding: "10px 14px" } },
-                            e('div', null,
-                                e(SLabel, { style: { marginBottom: 3 } }, "Wallet Total"),
-                                e('div', { style: { fontSize: 11, color: "var(--text-muted)" } }, "Persists across months")
-                            ),
-                            e('div', { style: { fontSize: 18, fontWeight: 800, color: walletTotal < 0 ? "#EF4444" : "var(--text-main)", fontVariantNumeric: "tabular-nums" } }, fc(walletTotal))
-                        ),
+        return e('div', { className: 'bn-wrap' },
 
-                        (() => {
-                            const daysInMonth = new Date(new Date().getFullYear(), new Date().getMonth()+1, 0).getDate();
-                            const dayOfMonth  = new Date().getDate();
-                            const daysLeft    = Math.max(1, daysInMonth - dayOfMonth);
-                            const safeDailySpend = totals.netAvailable > 0 ? Math.floor(totals.netAvailable / daysLeft) : 0;
-                            return e('div', null,
-                                e('div', { style: { display: "flex", gap: 40, marginTop: 20, borderTop: "1px solid var(--border)", paddingTop: 20 } },
-                                    e('div', null, e(SLabel, { style: { marginBottom: 4 } }, "Total Income"), e('div', { style: { fontSize: 16, fontWeight: 700, color: "var(--text-main)" } }, fc(totals.totalIncome))),
-                                    e('div', null, e(SLabel, { style: { marginBottom: 4 } }, "Total Spent"), e('div', { style: { fontSize: 16, fontWeight: 700, color: "var(--text-muted)" } }, fc(totals.totalDailySpent + totals.paidBills)))
-                                ),
-                                safeDailySpend > 0 && e('div', { className: "safe-chip" },
-                                    e(Icon, { name: "trendingup", size: 13, color: "#00E676" }),
-                                    e('span', null, `Safe daily spend: ${fc(safeDailySpend)} / day (${daysLeft}d left)`)
-                                )
-                            );
-                        })()
+            // ── ROW 1: balance hero + burn ring ───────────────────────────
+            e('div', { className: 'bn-row1' },
+
+                // Balance hero
+                e('div', { className: 'bn-cell bn-balance' },
+                    // ambient glow orb
+                    e('div', { className: 'bn-orb' }),
+
+                    e(BentoLabel, null, 'Available This Month'),
+                    e(NeonNum, { value: fc(totals.netAvailable), size: 'clamp(32px,5vw,50px)' }),
+                    fc2 && totals.netAvailable !== 0 && e('div', {
+                        style: { fontSize: 13, color: 'var(--text-muted)', marginTop: 6, letterSpacing: '0.01em' }
+                    }, `≈ ${fc2(totals.netAvailable)}`),
+
+                    // health pulse badge
+                    e('div', { style: { display: 'inline-flex', alignItems: 'center', gap: 6, marginTop: 14,
+                        background: totals.healthStatus.bg,
+                        border: `1px solid ${totals.healthStatus.color}40`,
+                        padding: '5px 12px', borderRadius: 20 } },
+                        e('div', { style: { width: 6, height: 6, borderRadius: '50%',
+                            background: totals.healthStatus.color,
+                            boxShadow: `0 0 8px ${totals.healthStatus.color}` } }),
+                        e('span', { style: { fontSize: 11, fontWeight: 700, color: totals.healthStatus.color } },
+                            totals.healthStatus.label)
                     ),
 
-                    e('div', { className: "premium-panel" },
-                        e(SLabel, { style: { marginBottom: 16 } }, "Where Your Money Goes"),
-                        e('div', { className: "category-box-grid" },
-                            CATEGORIES.map(cKey => {
-                                const currentVal = totals.catSum[cKey] || 0;
-                                const budgetObj = budgets.find(b => b.category === cKey);
-                                const limit = budgetObj ? budgetObj.limitCents : null;
-                                const percent = limit ? safeDiv(currentVal, limit) : 0;
+                    // stats strip
+                    e('div', { className: 'bn-stats-strip' },
+                        e('div', { className: 'bn-stat' },
+                            e('div', { className: 'bn-stat-lbl' }, 'Income'),
+                            e('div', { className: 'bn-stat-val' }, fc(totals.totalIncome))
+                        ),
+                        e('div', { className: 'bn-divider' }),
+                        e('div', { className: 'bn-stat' },
+                            e('div', { className: 'bn-stat-lbl' }, 'Spent'),
+                            e('div', { className: 'bn-stat-val bn-muted-val' },
+                                fc(totals.totalDailySpent + totals.paidBills))
+                        ),
+                        e('div', { className: 'bn-divider' }),
+                        e('div', { className: 'bn-stat' },
+                            e('div', { className: 'bn-stat-lbl' }, 'All Wallets'),
+                            e('div', { className: 'bn-stat-val',
+                                style: { color: walletTotal < 0 ? 'var(--bn-red)' : 'var(--text-main)' } },
+                                fc(walletTotal))
+                        )
+                    )
+                ),
 
-                                let pColor = "#00E676";
-                                if (limit) {
-                                    if (percent >= 1.0) pColor = "#FF1744"; else if (percent >= 0.8) pColor = "#FFD600";
-                                } else { pColor = "var(--border)"; }
+                // Burn ring
+                e('div', { className: 'bn-cell bn-ring' },
+                    e(BentoLabel, { style: { textAlign: 'center', marginBottom: 16 } }, 'Budget Used'),
 
-                                return e('div', { key: cKey, className: "category-mini-card" },
-                                    e('div', { style: { display: "flex", justifyContent: "space-between", fontSize: 12, fontWeight: 600, color: "var(--text-light)", marginBottom: 4 } },
-                                        e('span', null, cKey), e('span', { style: { color: "var(--text-main)" } }, limit ? `${Math.round(percent * 100)}%` : "-")
+                    e('div', { style: { position: 'relative', display: 'flex', justifyContent: 'center' } },
+                        e('svg', { width: 110, height: 110, style: { transform: 'rotate(-90deg)' } },
+                            // track
+                            e('circle', { fill: 'none', stroke: 'rgba(255,255,255,0.06)',
+                                strokeWidth: 11, r: 50, cx: 55, cy: 55 }),
+                            // fill
+                            e('circle', { fill: 'none', stroke: ringHex,
+                                strokeWidth: 11, strokeLinecap: 'round',
+                                strokeDasharray: circumf, strokeDashoffset: dashOff,
+                                r: 50, cx: 55, cy: 55,
+                                style: { transition: 'stroke-dashoffset 0.7s ease',
+                                         filter: `drop-shadow(0 0 7px ${ringHex}90)` } })
+                        ),
+                        e('div', { style: { position: 'absolute', inset: 0,
+                            display: 'flex', flexDirection: 'column',
+                            alignItems: 'center', justifyContent: 'center' } },
+                            e('span', { style: { fontSize: 22, fontWeight: 800,
+                                color: ringHex, textShadow: glow(ringHex, 0.4) } },
+                                `${Math.round(spendPct * 100)}%`),
+                            e('span', { style: { fontSize: 10, color: 'var(--text-muted)',
+                                fontWeight: 600, marginTop: 2 } }, 'of income')
+                        )
+                    ),
+
+                    safeDaily > 0 && e('div', { style: { textAlign: 'center', marginTop: 16 } },
+                        e('div', { style: { fontSize: 11, color: 'var(--text-muted)',
+                            marginBottom: 3, letterSpacing: '0.05em' } }, 'safe daily spend'),
+                        e('div', { style: { fontSize: 17, fontWeight: 800,
+                            color: 'var(--bn-green)',
+                            textShadow: glow('#00FF87', 0.3) } },
+                            `${fc(safeDaily)}/day`),
+                        e('div', { style: { fontSize: 10, color: 'var(--text-muted)', marginTop: 2 } },
+                            `${daysLeft} days left`)
+                    )
+                )
+            ),
+
+            // ── ROW 2: wallet cards + unpaid pill ─────────────────────────
+            e('div', { className: 'bn-row2' },
+                ...(wallets || []).slice(0, 3).map(w =>
+                    e('div', { key: w.id, className: 'bn-cell bn-wallet' },
+                        e('div', { style: { display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 } },
+                            e(WalletIcon, { name: w.name, color: w.color || '#00E676', size: 28, radius: 8 }),
+                            e('div', { style: { fontSize: 12, fontWeight: 700,
+                                color: 'var(--text-light)',
+                                overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' } },
+                                w.name)
+                        ),
+                        e('div', { style: { fontSize: 20, fontWeight: 800,
+                            color: (w.balanceCents || 0) < 0 ? 'var(--bn-red)' : 'var(--text-main)',
+                            fontVariantNumeric: 'tabular-nums', letterSpacing: '-0.02em' } },
+                            fc(w.balanceCents || 0)),
+                        walletTotal > 0 && e(ThinBar, {
+                            pct: safeDiv(Math.max(0, w.balanceCents || 0), walletTotal),
+                            color: w.color || '#00E676'
+                        })
+                    )
+                ),
+
+                // unpaid bills total
+                e('div', { className: 'bn-cell bn-unpaid' },
+                    e(BentoLabel, null, 'Unpaid Bills'),
+                    e(NeonNum, {
+                        value: fc(totals.unpaidBills),
+                        color: totals.unpaidBills > 0 ? 'var(--bn-amber)' : 'var(--bn-green)',
+                        size: 22
+                    }),
+                    e('div', { style: { fontSize: 11, color: 'var(--text-muted)', marginTop: 6 } },
+                        (() => {
+                            const n = (bills || []).filter(b => !b.isPaid).length;
+                            return n === 0 ? '✓ all clear' : `${n} bill${n > 1 ? 's' : ''} pending`;
+                        })()
+                    )
+                )
+            ),
+
+            // ── ROW 3: recent expenses + upcoming bills ────────────────────
+            e('div', { className: 'bn-row3' },
+
+                // Recent expenses
+                e('div', { className: 'bn-cell bn-expenses' },
+                    e('div', { className: 'bn-row-header' },
+                        e(BentoLabel, { style: { marginBottom: 0 } }, 'Recent Expenses'),
+                        onNavigate && e('button', { className: 'bn-view-all',
+                            onClick: () => onNavigate('daily') }, 'View all →')
+                    ),
+                    recentExp.length === 0
+                        ? e('div', { className: 'bn-empty' }, 'No expenses logged yet')
+                        : e('div', { className: 'bn-list' },
+                            recentExp.map((exp, i) =>
+                                e('div', { key: exp.id, className: 'bn-list-row',
+                                    style: { borderBottom: i < recentExp.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none' } },
+                                    e('div', { style: { display: 'flex', alignItems: 'center', gap: 10 } },
+                                        e('div', { className: 'bn-exp-icon' },
+                                            e(Icon, { name: 'wallet', size: 13, color: 'var(--bn-red)' })
+                                        ),
+                                        e('div', null,
+                                            e('div', { style: { fontSize: 13, fontWeight: 600,
+                                                color: 'var(--text-main)' } }, exp.name),
+                                            e('div', { style: { fontSize: 10, color: 'var(--text-muted)',
+                                                marginTop: 1 } }, `${exp.date} · ${exp.category}`)
+                                        )
                                     ),
-                                    e('div', { style: { fontSize: 16, fontWeight: 700, color: "var(--text-main)", marginTop: 2 } },
-                                        limit ? `${fc(currentVal)} / ${fc(limit)}` : e('span', {style: {fontSize: 13, color: "var(--text-muted)", fontWeight: 600}}, "No limit set")
+                                    e('div', { style: { fontSize: 13, fontWeight: 700,
+                                        color: 'var(--bn-red)', flexShrink: 0 } },
+                                        `-${fc(exp.amountCents)}`)
+                                )
+                            )
+                        )
+                ),
+
+                // Upcoming bills
+                e('div', { className: 'bn-cell bn-bills' },
+                    e('div', { className: 'bn-row-header' },
+                        e(BentoLabel, { style: { marginBottom: 0 } }, 'Upcoming Bills'),
+                        onNavigate && e('button', { className: 'bn-view-all',
+                            onClick: () => onNavigate('budget') }, 'View all →')
+                    ),
+                    upcoming.length === 0
+                        ? e('div', { style: { display: 'flex', alignItems: 'center', gap: 8,
+                            color: 'var(--bn-green)', fontSize: 13, fontWeight: 600,
+                            marginTop: 12 } },
+                            e(Icon, { name: 'shield', size: 14, color: 'var(--bn-green)' }),
+                            'All bills paid')
+                        : e('div', { className: 'bn-list' },
+                            upcoming.map((b, i) => {
+                                const days = getDaysRemaining(b.dueDate);
+                                const oc = days < 0 ? 'var(--bn-red)'
+                                         : days <= 1 ? 'var(--bn-red)'
+                                         : days <= 3 ? 'var(--bn-amber)'
+                                         : 'var(--text-muted)';
+                                const ot = days < 0  ? `${Math.abs(days)}d overdue`
+                                         : days === 0 ? 'Due today'
+                                         : days === 1 ? 'Due tomorrow'
+                                         : `${days}d left`;
+                                return e('div', { key: b.id, className: 'bn-list-row',
+                                    style: { borderBottom: i < upcoming.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none' } },
+                                    e('div', null,
+                                        e('div', { style: { fontSize: 13, fontWeight: 600,
+                                            color: 'var(--text-main)' } }, b.name),
+                                        e('div', { style: { fontSize: 10, color: oc,
+                                            fontWeight: 700, marginTop: 1 } }, ot)
                                     ),
-                                    e(PBar, { pct: limit ? percent : 0, color: pColor })
+                                    e('div', { style: { fontSize: 13, fontWeight: 700,
+                                        color: 'var(--text-main)', flexShrink: 0 } },
+                                        fc(b.amountCents))
                                 );
                             })
                         )
-                    )
-                ),
+                )
+            ),
 
-                e('div', { className: "premium-panel", style: { display: "flex", flexDirection: "column", gap: 24, justifyContent: "space-between" } },
-                    e('div', null,
-                        e(SLabel, { style: { marginBottom: 12, textAlign: "center" } }, "Monthly Budget Used"),
-                        e('div', { style: { display: 'flex', justifyContent: 'center', position: 'relative' } },
-                            e('svg', { height: 140, width: 140, style: { transform: 'rotate(-90deg)' } },
-                                e('circle', { fill: 'none', stroke: 'var(--border-input)', strokeWidth: 14, r: 56, cx: 70, cy: 70 }),
-                                e('circle', { fill: 'none', stroke: spendPercentage > 0.8 ? '#FF1744' : '#00E676', strokeWidth: 14, strokeLinecap: 'round', strokeDasharray: 56 * 2 * Math.PI, strokeDashoffset: (56 * 2 * Math.PI) * (1 - Math.min(spendPercentage, 1)), r: 56, cx: 70, cy: 70, style: { transition: 'stroke-dashoffset 0.5s ease' } })
+            // ── ROW 4: category spending ───────────────────────────────────
+            e('div', { className: 'bn-cell bn-categories' },
+                e(BentoLabel, null, 'Category Spending'),
+                e('div', { className: 'bn-cat-grid' },
+                    catItems.map(({ k, val, lim, pct, col }) =>
+                        e('div', { key: k, className: 'bn-cat-item' },
+                            e('div', { style: { display: 'flex',
+                                justifyContent: 'space-between', alignItems: 'center', marginBottom: 5 } },
+                                e('span', { style: { fontSize: 12, fontWeight: 600,
+                                    color: 'var(--text-light)' } }, k),
+                                lim && e('span', { style: { fontSize: 11, fontWeight: 700, color: col } },
+                                    `${Math.round(pct * 100)}%`)
                             ),
-                            e('div', { style: { position: 'absolute', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', width: 140, height: 140 } },
-                                e('span', { style: { fontSize: 20, fontWeight: 800, color: 'var(--text-main)' } }, `${Math.round(spendPercentage * 100)}%`),
-                                e('span', { style: { fontSize: 11, color: 'var(--text-muted)', fontWeight: 600, marginTop: 2 } }, "used")
-                            )
+                            e('div', { style: { fontSize: 14, fontWeight: 700,
+                                color: 'var(--text-main)', marginBottom: 2 } },
+                                lim ? fc(val)
+                                    : e('span', { style: { fontSize: 12, color: 'var(--text-muted)',
+                                        fontWeight: 500 } }, fc(val))
+                            ),
+                            lim && e('div', { style: { fontSize: 10, color: 'var(--text-muted)',
+                                marginBottom: 4 } }, `of ${fc(lim)}`),
+                            e(ThinBar, { pct: lim ? pct : 0, color: col })
                         )
-                    ),
-
-                    e('div', { style: { borderTop: "1px solid var(--border)", paddingTop: 20 } },
-                        e(SLabel, { style: { marginBottom: 12 } }, "Upcoming Unpaid Bills"),
-                        bills.filter(b => !b.isPaid).length === 0 ? e('div', { style: { color: "#00E676", fontSize: 13, fontWeight: 600, display:"flex", alignItems:"center", gap:6 } }, e(Icon, {name:"shield", size:14, color:"#00E676"}), "All bills paid") :
-                        bills.filter(b => !b.isPaid).slice(0, 3).map(b => {
-                            const days = getDaysRemaining(b.dueDate);
-                            let urgencyColor = "var(--text-muted)"; let urgencyText = "";
-                            if (days < 0) { urgencyColor = "#EF4444"; urgencyText = `Overdue (${Math.abs(days)}d)`; }
-                            else if (days <= 1) { urgencyColor = "#EF4444"; urgencyText = "Due Tomorrow!"; }
-                            else if (days <= 3) { urgencyColor = "#F59E0B"; urgencyText = `Due in ${days} days`; }
-                            else { urgencyText = `Due in ${days} days`; }
-
-                            return e('div', { key: b.id, style: { display: "flex", justifyContent: "space-between", alignItems: "center", background: "var(--hover-bg)", padding: "12px 16px", borderRadius: 12, marginBottom: 8 } },
-                                e('div', null,
-                                    e('div', { style: { fontSize: 13, fontWeight: 600, color: 'var(--text-main)' } }, b.name),
-                                    e('div', { style: { fontSize: 11, color: urgencyColor, marginTop: 2, fontWeight: days <= 3 ? 700 : 500 } }, urgencyText)
-                                ),
-                                e('div', { style: { fontSize: 13, fontWeight: 700, color: 'var(--text-main)' } }, fc(b.amountCents))
-                            )
-                        })
                     )
                 )
-            ),
-
-            // ── Spending Trends Chart ───────────────────────────────────────
-            trendData.length > 1 && e('div', { className: "premium-panel", style: { marginTop: 20 } },
-                e(SLabel, { style: { marginBottom: 16 } }, "Spending Trends (Last 6 Months)"),
-                e('div', { style: { display: "flex", alignItems: "flex-end", gap: 8, height: 120, padding: "0 4px" } },
-                    trendData.map((d, i) => {
-                        const maxVal = Math.max(...trendData.map(x => x.spent), 1);
-                        const height = (d.spent / maxVal) * 100;
-                        return e('div', { key: i, style: { flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 6 } },
-                            e('div', { style: { width: "100%", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "flex-end", height: 80 } },
-                                e('div', { style: {
-                                    width: "100%", maxWidth: 32, height: `${height}%`,
-                                    background: "linear-gradient(to top, #00E676, #00C853)",
-                                    borderRadius: "4px 4px 0 0",
-                                    transition: "height 0.5s ease"
-                                } })
-                            ),
-                            e('span', { style: { fontSize: 10, color: "var(--text-muted)", fontWeight: 600 } }, d.month)
-                        );
-                    })
-                ),
-                e('div', { style: { display: "flex", justifyContent: "space-between", marginTop: 12, paddingTop: 12, borderTop: "1px solid var(--border)" } },
-                    e('div', { style: { display: "flex", alignItems: "center", gap: 6 } },
-                        e('div', { style: { width: 8, height: 8, borderRadius: 2, background: "#00E676" } }),
-                        e('span', { style: { fontSize: 11, color: "var(--text-muted)" } }, "Spent")
-                    ),
-                    e('div', { style: { fontSize: 11, color: "var(--text-muted)" } },
-                        `Avg: ${fc(trendData.reduce((s, d) => s + d.spent, 0) / trendData.length)}`
-                    )
-                )
-            ),
-
-            // ── Bill Reminders ──────────────────────────────────────────────
-            billReminders.length > 0 && e('div', { className: "premium-panel", style: { marginTop: 20, borderLeft: "3px solid #F59E0B" } },
-                e('div', { style: { display: "flex", alignItems: "center", gap: 8, marginBottom: 14 } },
-                    e(Icon, { name: "calendar", size: 16, color: "#F59E0B" }),
-                    e(SLabel, { style: { marginBottom: 0, color: "#F59E0B" } }, "Bill Reminders")
-                ),
-                billReminders.map(b => {
-                    const days = getDaysRemaining(b.dueDate);
-                    let bgColor, textColor, badgeText;
-                    if (days < 0) { bgColor = "rgba(239,68,68,0.08)"; textColor = "#EF4444"; badgeText = `${Math.abs(days)}d overdue`; }
-                    else if (days === 0) { bgColor = "rgba(239,68,68,0.08)"; textColor = "#EF4444"; badgeText = "Due today"; }
-                    else if (days === 1) { bgColor = "rgba(245,158,11,0.08)"; textColor = "#F59E0B"; badgeText = "Due tomorrow"; }
-                    else { bgColor = "rgba(245,158,11,0.05)"; textColor = "#F59E0B"; badgeText = `Due in ${days}d`; }
-
-                    return e('div', { key: b.id, style: { display: "flex", justifyContent: "space-between", alignItems: "center", background: bgColor, padding: "12px 14px", borderRadius: 10, marginBottom: 8 } },
-                        e('div', { style: { display: "flex", alignItems: "center", gap: 10 } },
-                            e('div', { style: { width: 36, height: 36, borderRadius: 10, background: textColor + "15", display: "flex", alignItems: "center", justifyContent: "center" } },
-                                e(Icon, { name: "receipt", size: 16, color: textColor })
-                            ),
-                            e('div', null,
-                                e('div', { style: { fontSize: 13, fontWeight: 600, color: "var(--text-main)" } }, b.name),
-                                e('div', { style: { fontSize: 11, color: textColor, fontWeight: 600, marginTop: 2 } }, badgeText)
-                            )
-                        ),
-                        e('div', { style: { fontSize: 14, fontWeight: 700, color: "var(--text-main)" } }, fc(b.amountCents))
-                    );
-                }),
-                billReminders.length > 3 && e('button', {
-                    onClick: () => onNavigate("budget"),
-                    style: { background: "transparent", border: "none", color: "var(--text-muted)", fontSize: 12, fontWeight: 600, cursor: "pointer", padding: "8px 0", width: "100%", textAlign: "center" }
-                }, `View all ${billReminders.length} bills →`)
-            ),
-
-            // ── Recent Activity ─────────────────────────────────────────────
-            onNavigate && e(RecentActivitySection, { incomes, dailyExpenses, bills, txns, funds, wallets, archives, fc, onNavigate })
+            )
         );
     }
 
-    // Expose globally so index.html can use it without any other changes
     window.DashboardOverview = DashboardOverview;
-
 })();
