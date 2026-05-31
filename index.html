@@ -260,7 +260,7 @@
 
         // ── INCOME SOURCE PICKER ───────────────────────────────────────────────
         // Always renders. Defaults to Cash. Supports inline quick-create.
-        function IncomeSourcePicker({ wallets, setWallets, value, onChange }) {
+        function IncomeSourcePicker({ wallets, setWallets, value, onChange, showToast }) {
             const [showCreate, setShowCreate] = useState(false);
             const [newName, setNewName]       = useState("");
             const [newColor, setNewColor]     = useState(WALLET_COLORS[1]);
@@ -270,12 +270,9 @@
                 // Enforce tier limit — wallets here is displayWallets; use length as proxy count
                 const canAdd = window.license ? window.license.canAddItem("wallets", wallets.length) : (wallets.length < 3);
                 if (!canAdd) {
-                    // Close the inline form and surface a toast — no alert()
                     setShowCreate(false);
                     setNewName("");
-                    // Bubble up via setWallets? No — just surface via the parent's showToast if available.
-                    // As a fallback, we can't call showToast here (not in scope), so we use a friendly no-op.
-                    // The "+ New Source" button will be hidden below when at limit anyway.
+                    if (showToast) showToast("Free limit reached (3 wallets). Upgrade to Premium for unlimited.");
                     return;
                 }
                 const w = { id: uid(), name: newName.trim(), openingBalanceCents: 0, color: newColor };
@@ -1479,7 +1476,7 @@ e('footer', {
                                 e('div', { style: { flex: 3 } }, e(Inp, { value: incName, placeholder: "Source name", onChange: ev => setIncName(ev.target.value) })),
                                 e('div', { style: { flex: 2 } }, e(Inp, { type: "number", value: incAmt, placeholder: "₱ Amount", onChange: ev => setIncAmt(ev.target.value) }))
                             ),
-                            e(IncomeSourcePicker, { wallets, setWallets, value: incWalletId, onChange: setIncWalletId }),
+                            e(IncomeSourcePicker, { wallets, setWallets, value: incWalletId, onChange: setIncWalletId, showToast }),
                             e(Btn, { v: "accent", style: { width: "100%" }, onClick: () => {
                                 if(!incName || !incAmt) return;
                                 if(tc(incAmt) <= 0) { showToast("Amount must be greater than zero."); return; }
@@ -1570,7 +1567,7 @@ e('footer', {
                     }
                 }),
                 // Edit Modals
-                editIncome && e('div', { className: "modal-overlay" }, e('div', { className: "modal-container" }, e('h3', { style: { marginBottom: 20 } }, "Edit Income"), e(Field, { label: "Source" }, e(Inp, { value: editIncForm.name, onChange: ev => setEditIncForm({ ...editIncForm, name: ev.target.value }) })), e(Field, { label: "Amount" }, e(Inp, { type: "number", value: editIncForm.amount, onChange: ev => setEditIncForm({ ...editIncForm, amount: ev.target.value }) })), e(Field, { label: "Receiving Source" }, e(IncomeSourcePicker, { wallets, setWallets, value: editIncForm.walletId, onChange: v => setEditIncForm({ ...editIncForm, walletId: v }) })), e('div', { style: { display: "flex", gap: 12, marginTop: 8 } }, e(Btn, { v: "ghost", style: { flex: 1 }, onClick: () => setEditIncome(null) }, "Cancel"), e(Btn, { v: "primary", style: { flex: 1 }, onClick: saveEditIncome }, "Save")))),
+                editIncome && e('div', { className: "modal-overlay" }, e('div', { className: "modal-container" }, e('h3', { style: { marginBottom: 20 } }, "Edit Income"), e(Field, { label: "Source" }, e(Inp, { value: editIncForm.name, onChange: ev => setEditIncForm({ ...editIncForm, name: ev.target.value }) })), e(Field, { label: "Amount" }, e(Inp, { type: "number", value: editIncForm.amount, onChange: ev => setEditIncForm({ ...editIncForm, amount: ev.target.value }) })), e(Field, { label: "Receiving Source" }, e(IncomeSourcePicker, { wallets, setWallets, value: editIncForm.walletId, onChange: v => setEditIncForm({ ...editIncForm, walletId: v }), showToast })), e('div', { style: { display: "flex", gap: 12, marginTop: 8 } }, e(Btn, { v: "ghost", style: { flex: 1 }, onClick: () => setEditIncome(null) }, "Cancel"), e(Btn, { v: "primary", style: { flex: 1 }, onClick: saveEditIncome }, "Save")))),
                 editBill && e('div', { className: "modal-overlay" }, e('div', { className: "modal-container" }, e('h3', { style: { marginBottom: 20 } }, "Edit Bill"), e(Field, { label: "Bill Label" }, e(Inp, { value: editBillForm.name, onChange: ev => setEditBillForm({ ...editBillForm, name: ev.target.value }) })), e(Field, { label: "Amount" }, e(Inp, { type: "number", value: editBillForm.amount, onChange: ev => setEditBillForm({ ...editBillForm, amount: ev.target.value }) })), e(Field, { label: "Due Date" }, e(Inp, { type: "date", value: editBillForm.dueDate, onChange: ev => setEditBillForm({ ...editBillForm, dueDate: ev.target.value }) })), e(Field, { label: "Category" }, e(Sel, { value: editBillForm.category, onChange: ev => setEditBillForm({ ...editBillForm, category: ev.target.value }) }, CATEGORIES.map(c => e('option', {key: c, value: c}, c)))), e(Field, { label: "Recurring" }, e(Sel, { value: editBillForm.recurring, onChange: ev => setEditBillForm({ ...editBillForm, recurring: ev.target.value }) }, e('option', { value: "none" }, "One-Time"), e('option', { value: "monthly" }, "Monthly"), e('option', { value: "weekly" }, "Weekly"))), e('div', { style: { display: "flex", gap: 12 } }, e(Btn, { v: "ghost", style: { flex: 1 }, onClick: () => setEditBill(null) }, "Cancel"), e(Btn, { v: "accent", style: { flex: 1 }, onClick: saveEditBill }, "Save"))))
             );
         });
@@ -1749,7 +1746,21 @@ e('footer', {
             const deleteVault = (id) => { requestConfirm("Delete this vault? All linked transactions will also be removed.", () => { setFunds(funds.filter(f => f.id !== id)); setTxns(txns.filter(t => t.fundId !== id)); }); };
 
             return e('div', null,
-                e('div', { style: S.pageHeader }, e('div', null, e('h2', { style: { fontSize: 22, fontWeight: 800 } }, 'Savings Vaults'), e('div', { style: { fontSize: 14, color: "var(--text-muted)", marginTop: 4 } }, 'Isolate cash balances cleanly.')), e(Btn, { v: "accent", onClick: () => setModal(true) }, "+ Create New Vault")),
+                e('div', { style: S.pageHeader },
+                    e('div', null,
+                        e('h2', { style: { fontSize: 22, fontWeight: 800 } }, 'Savings Vaults'),
+                        e('div', { style: { fontSize: 14, color: "var(--text-muted)", marginTop: 4 } }, 'Isolate cash balances cleanly.')
+                    ),
+                    (() => {
+                        const atLimit = window.license ? !window.license.canAddItem("vaults", funds.length) : funds.length >= 2;
+                        return atLimit && !window.license?.isPremium()
+                            ? e('div', { style: { display:"flex", alignItems:"center", gap:8 } },
+                                e('div', { style: { fontSize:11, fontWeight:700, color:"var(--text-muted)", padding:"8px 12px", background:"var(--hover-bg)", borderRadius:8, border:"1px solid var(--border)" } }, "2/2 vaults (Free limit)"),
+                                e(Btn, { v:"ghost", style:{ fontSize:12, padding:"8px 14px" }, onClick: () => showToast("Upgrade to Premium for unlimited vaults.") }, "Upgrade")
+                              )
+                            : e(Btn, { v: "accent", onClick: () => setModal(true) }, "+ Create New Vault");
+                    })()
+                ),
                 enrichedFunds.length === 0 ? e('div', { className: "premium-panel", style: { textAlign: "center", padding: "40px 0", color: "var(--text-muted)" } }, e("div", { className: "empty-state" }, e("div", { className: "empty-state-icon" }, e(Icon, { name: "landmark", size: 32, color: "var(--text-muted)" })), e("div", { className: "empty-state-title" }, "No Savings Vaults yet"), e("div", { className: "empty-state-sub" }, "Create a vault to isolate money for a specific goal."))) :
                 e('div', { className: "vaults-grid" }, enrichedFunds.map(f => e('div', { key: f.id, className: "premium-panel", style: { display: "flex", flexDirection: "column", justifyContent: "space-between" } }, e('div', null, e('div', { style: { display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12 } }, e('div', { style: { width: 40, height: 40, borderRadius: 12, background: "var(--hover-bg)", border: "1px solid var(--border)", display: "flex", alignItems: "center", justifyContent: "center" } }, e(Icon, { name: resolveVaultIcon(f.iconId || f.emoji), size: 20, color: "#2563EB" })), e('div', { style: S.row8 }, e('span', { style: { fontSize: 12, fontWeight: 700, color: f.pct >= 1 ? "#00E676" : "#2563EB", background: f.pct >= 1 ? "rgba(0,230,118,0.1)" : "rgba(37,99,235,0.1)", padding: "4px 10px", borderRadius: 8 } }, f.pct >= 1 ? "Fully Funded" : `${Math.round(f.pct * 100)}%`), e(DotMenu, { itemId: f.id, openMenu, setOpenMenu, onEdit: () => openEditVault(f), onDelete: () => deleteVault(f.id) }))), e('h3', { style: { fontSize: 18, fontWeight: 700, color: "var(--text-main)" } }, f.name), e('div', { style: { display: "flex", justifyContent: "space-between", margin: "14px 0 6px", fontSize: 14 } }, e('span', { style: { fontWeight: 700, color: "var(--text-main)" } }, fc(f.bal)), e('span', { style: { color: "var(--text-muted)" } }, `Target: ${fc(f.goalCents)}`)), e(PBar, { pct: f.pct, color: f.pct >= 1 ? "#00E676" : "#2563EB" })), e('div', { style: { display: "flex", gap: 10, marginTop: 20 } }, e(Btn, { v: "ghost", style: { flex: 1, padding: "8px 12px", fontSize: 12 }, onClick: () => setActionModal({ type: 'withdrawal', fund: f }) }, "Withdraw"), e(Btn, { v: "primary", style: { flex: 1, padding: "8px 12px", fontSize: 12 }, onClick: () => setActionModal({ type: 'deposit', fund: f }) }, "Deposit"))))),
                 
