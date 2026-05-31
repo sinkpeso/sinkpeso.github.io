@@ -165,7 +165,6 @@
     }
 
     // ── EXPOSE TO WINDOW ───────────────────────────────────────────────────
-    console.log("[license] License system loaded. Free limits:", FREE_LIMITS);
     window.license = {
         isPremium: isPremium,
         getLimits: getLimits,
