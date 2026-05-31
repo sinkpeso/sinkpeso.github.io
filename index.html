@@ -421,7 +421,9 @@ e(EmptyState, { icon:"creditcard", title:"No wallets yet", sub:"Add Cash, GCash,
                                         e('div', { style:{ fontWeight:700, fontVariantNumeric:"tabular-nums", color: (w.balanceCents||0) < 0 ? "#EF4444" : "var(--text-main)" } }, fc(w.balanceCents||0)),
                                         e('div', { style:{ fontSize:10, color:"var(--text-muted)", marginTop:1 } }, "current balance")
                                     ),
-                                    e(DotMenu, { itemId:w.id, openMenu, setOpenMenu, onEdit:() => openEdit(w), onDelete:() => deleteWallet(w.id) })
+                                    w.id === CASH_WALLET_ID
+                                        ? e('div', { style:{ fontSize:10, fontWeight:700, color:"var(--text-muted)", padding:"4px 8px", background:"var(--hover-bg)", borderRadius:6, border:"1px solid var(--border)", letterSpacing:"0.06em", whiteSpace:"nowrap", flexShrink:0 } }, "SYSTEM")
+                                        : e(DotMenu, { itemId:w.id, openMenu, setOpenMenu, onEdit:() => openEdit(w), onDelete:() => deleteWallet(w.id) })
                                 )
                             );
                         })
@@ -1826,30 +1828,35 @@ e('footer', {
                 // ── Search + Filters ──────────────────────────────────────────────
                 e('div', { className: "premium-panel", style: { marginBottom: 14 } },
                     e(Inp, { placeholder: "Search title, category, wallet…", value: search, onChange: ev => setSearch(ev.target.value), style: { marginBottom: 10 } }),
-                    e('div', { className: "filter-row", style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 } },
+                    e('div', { className: "txn-filter-row" },
                         e(Sel, { value: walletFilter, onChange: ev => setWalletFilter(ev.target.value), style: { marginBottom: 0 } },
                             e('option', { value: "all" }, "All Wallets"),
                             (wallets || []).map(w => e('option', { key: w.id, value: w.id }, w.name))
                         ),
-                        (dateFrom || dateTo) ? e('button', { onClick: () => { setDateFrom(""); setDateTo(""); }, style: { background: "var(--hover-bg)", border: "1px solid var(--border)", color: "var(--text-main)", fontSize: 12, fontWeight: 600, cursor: "pointer", padding: "10px 12px", borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center", gap: 6 } }, e(Icon, { name: "x", size: 12 }), "Clear Dates") : e('div')
+                        (dateFrom || dateTo)
+                            ? e('button', {
+                                onClick: () => { setDateFrom(""); setDateTo(""); },
+                                style: { background: "var(--hover-bg)", border: "1px solid var(--border)", color: "var(--text-main)", fontSize: 12, fontWeight: 600, cursor: "pointer", padding: "10px 12px", borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, whiteSpace: "nowrap" }
+                              }, e(Icon, { name: "x", size: 12 }), "Clear")
+                            : e('div')
                     ),
-                    e('div', { className: "filter-row", style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginTop: 10 } },
-                        e('div', null,
-                            e('div', { style: { fontSize: 11, fontWeight: 700, color: "var(--text-muted)", marginBottom: 4, letterSpacing: "0.05em" } }, "FROM DATE"),
+                    e('div', { className: "txn-date-row" },
+                        e('div', { className: "txn-date-field" },
+                            e('div', { className: "txn-date-label" }, "From Date"),
                             e(Inp, { type: "date", value: dateFrom, onChange: ev => setDateFrom(ev.target.value), style: { marginBottom: 0 } })
                         ),
-                        e('div', null,
-                            e('div', { style: { fontSize: 11, fontWeight: 700, color: "var(--text-muted)", marginBottom: 4, letterSpacing: "0.05em" } }, "TO DATE"),
+                        e('div', { className: "txn-date-field" },
+                            e('div', { className: "txn-date-label" }, "To Date"),
                             e(Inp, { type: "date", value: dateTo, onChange: ev => setDateTo(ev.target.value), style: { marginBottom: 0 } })
                         )
                     )
                 ),
 
                 // ── Unified Transaction List ────────────────────────────────────
-                e('div', { className: "premium-panel", style: { padding: 0, maxHeight: 500, overflow: "hidden" } },
+                e('div', { className: "premium-panel", style: { padding: 0, maxHeight: 520, overflow: "hidden" } },
                     e(VirtualList, {
                         items: filtered,
-                        itemHeight: 70,
+                        itemHeight: 76,
                         overscan: 5,
                         emptyContent: e('div', { style: { padding: "36px 24px", textAlign: "center" } },
                             e('div', { style: { marginBottom: 14, opacity: 0.35, display: "flex", justifyContent: "center" } },
@@ -1862,33 +1869,38 @@ e('footer', {
                         ),
                         renderItem: (item) => {
                             const canEdit = item.source === "vault";
-                            return e('div', { className: "stream-row", style: { height: 70 } },
-                                e('div', { style: { display: "flex", alignItems: "flex-start", gap: 12 } },
-                                    e('div', { style: {
-                                        width: 36, height: 36, borderRadius: 10, flexShrink: 0,
+                            return e('div', {
+                                className: "txn-row",
+                            },
+                                // ── Left: icon + text ──────────────────────────────
+                                e('div', { className: "txn-left" },
+                                    e('div', { className: "txn-icon", style: {
                                         background: item.amountColor + "15",
                                         border: "1px solid " + item.amountColor + "35",
-                                        display: "flex", alignItems: "center", justifyContent: "center"
-                                    } }, e(Icon, { name: item.icon, size: 16, color: item.amountColor })),
-                                    e('div', null,
-                                        e('div', { style: { fontWeight: 600, color: "var(--text-main)" } }, item.title),
-                                        e('div', { style: { fontSize: 11, color: "var(--text-muted)", marginTop: 2 } }, item.subtitle),
-                                        item.walletName && e('div', { style: { fontSize: 11, color: "var(--text-light)", marginTop: 3, display: "flex", alignItems: "center", gap: 4 } },
-                                            e('span', { style: { color: "var(--text-muted)", fontWeight: 500 } }, "Wallet: "),
-                                            e('span', { style: { fontWeight: 700 } }, item.walletName)
+                                    }}, e(Icon, { name: item.icon, size: 15, color: item.amountColor })),
+                                    e('div', { className: "txn-text" },
+                                        e('div', { className: "txn-title" }, item.title),
+                                        e('div', { className: "txn-sub" }, item.subtitle),
+                                        item.walletName && e('div', { className: "txn-wallet-tag" },
+                                            e('span', { style: { color: "var(--text-muted)" } }, "Wallet: "),
+                                            e('span', { style: { fontWeight: 700, color: "var(--text-light)" } }, item.walletName)
                                         )
                                     )
                                 ),
-                                e('div', { style: { display: "flex", alignItems: "center", gap: 10, flexShrink: 0 } },
-                                    e('div', { style: { textAlign: "right" } },
-                                        e('div', { style: { fontWeight: 700, color: item.amountColor, fontVariantNumeric: "tabular-nums" } }, `${item.amountPrefix}${fc(item.amountCents)}`),
-                                        e('div', { style: { fontSize: 10, color: "var(--text-muted)", marginTop: 2 } }, item.date)
+                                // ── Right: amount + date + menu ────────────────────
+                                e('div', { className: "txn-right" },
+                                    e('div', { className: "txn-amount-col" },
+                                        e('div', { className: "txn-amount", style: { color: item.amountColor } },
+                                            `${item.amountPrefix}${fc(item.amountCents)}`),
+                                        e('div', { className: "txn-date" }, item.date)
                                     ),
-                                    canEdit && e(DotMenu, {
-                                        itemId: item.rawId, openMenu, setOpenMenu,
-                                        onEdit: () => { const t = (txns||[]).find(x => x.id === item.rawId); if (t) openEditTxn(t); },
-                                        onDelete: () => deleteTxn(item.rawId)
-                                    })
+                                    canEdit
+                                        ? e(DotMenu, {
+                                            itemId: item.rawId, openMenu, setOpenMenu,
+                                            onEdit: () => { const t = (txns||[]).find(x => x.id === item.rawId); if (t) openEditTxn(t); },
+                                            onDelete: () => deleteTxn(item.rawId)
+                                          })
+                                        : e('div', { style: { width: 34 } }) // spacer keeps alignment when no menu
                                 )
                             );
                         }
