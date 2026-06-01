@@ -60,10 +60,15 @@
     // ── main component ──────────────────────────────────────────────────────
     function DashboardOverview({ totals, bills, dailyExpenses, budgets,
                                   wallets, fc, fc2, incomes, txns,
-                                  funds, archives, onNavigate }) {
+                                  funds, archives, photoDiary, onNavigate }) {
 
         // walleticons.js is guaranteed loaded by the time this function runs
         const { WalletIcon } = window.walleticons;
+
+        // Recent photo diary entries (latest 6 for the strip)
+        const recentPhotos = useMemo(() =>
+            (photoDiary || []).filter(p => p.imageData).slice(0, 6),
+        [photoDiary]);
 
         const spendPct   = totals.totalIncome > 0
             ? (totals.totalDailySpent + totals.paidBills) / totals.totalIncome : 0;
@@ -99,6 +104,24 @@
         });
 
         return e('div', { className: 'bn-wrap' },
+
+            // ── PHOTO DIARY STRIP (when entries exist) ─────────────────────
+            recentPhotos.length > 0 && e('div', { className: 'pd-strip-section' },
+                e('div', { style: { display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:10 } },
+                    e('div', { style:{ fontSize:11, fontWeight:700, letterSpacing:'0.08em', textTransform:'uppercase', color:'var(--text-muted)' } }, '📷 Recent Moments'),
+                    onNavigate && e('button', { onClick:() => onNavigate('photo-diary'), style:{ background:'transparent', border:'none', color:'var(--text-muted)', fontSize:11, fontWeight:600, cursor:'pointer', padding:0, letterSpacing:'0.02em' } }, 'View all →')
+                ),
+                e('div', { className: 'pd-strip' },
+                    recentPhotos.map(p =>
+                        e('div', { key: p.id, className: 'pd-strip-card', onClick: () => onNavigate && onNavigate('photo-diary') },
+                            e('img', { src: p.imageData, className: 'pd-strip-img', alt: p.name }),
+                            e('div', { className: 'pd-strip-overlay' },
+                                e('div', { className: 'pd-strip-amt' }, fc(p.amountCents))
+                            )
+                        )
+                    )
+                )
+            ),
 
             // ── ROW 1: balance hero + burn ring ───────────────────────────
             e('div', { className: 'bn-row1' },

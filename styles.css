@@ -781,3 +781,208 @@ a:active { opacity: 0.8; }
     .txn-amount-col { min-width: 60px; }
     .txn-title { font-size: 12px; }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   PHOTO DIARY FEED
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Masonry 2-column grid ───────────────────────────────────────────────── */
+.pd-grid {
+    columns: 2;
+    column-gap: 12px;
+    margin-top: 4px;
+}
+
+/* ── Individual card ─────────────────────────────────────────────────────── */
+.pd-card {
+    break-inside: avoid;
+    margin-bottom: 12px;
+    border-radius: 18px;
+    overflow: hidden;
+    position: relative;
+    cursor: pointer;
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    display: block;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.pd-card:active { transform: scale(0.97); }
+.pd-card:hover  { box-shadow: 0 8px 28px rgba(0,0,0,0.35); }
+
+/* ── Photo image ─────────────────────────────────────────────────────────── */
+.pd-img {
+    width: 100%;
+    display: block;
+    object-fit: cover;
+    min-height: 120px;
+    max-height: 340px;
+}
+
+/* ── No-image fallback ───────────────────────────────────────────────────── */
+.pd-no-img {
+    min-height: 140px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-input);
+}
+
+/* ── Bottom gradient overlay with amount + meta ──────────────────────────── */
+.pd-overlay {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.4) 60%, transparent 100%);
+    padding: 36px 13px 13px;
+}
+[data-theme="light"] .pd-overlay {
+    background: linear-gradient(to top, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.3) 60%, transparent 100%);
+}
+
+.pd-amount {
+    font-size: 17px;
+    font-weight: 800;
+    color: #00FF87;
+    text-shadow: 0 0 14px rgba(0,255,135,0.5);
+    line-height: 1.15;
+    font-variant-numeric: tabular-nums;
+}
+[data-theme="light"] .pd-amount { text-shadow: none; color: #00E676; }
+
+.pd-cat-badge {
+    display: inline-block;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    background: rgba(255,255,255,0.18);
+    color: rgba(255,255,255,0.92);
+    padding: 2px 8px;
+    border-radius: 20px;
+}
+
+.pd-date {
+    font-size: 10px;
+    color: rgba(255,255,255,0.55);
+}
+
+/* ── Image picker (in add modal) ─────────────────────────────────────────── */
+.pd-picker {
+    aspect-ratio: 4 / 3;
+    border: 2px dashed var(--border-input);
+    border-radius: 14px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    position: relative;
+    overflow: hidden;
+    background: var(--bg-input);
+    margin-bottom: 16px;
+}
+.pd-picker:hover { border-color: var(--accent); background: var(--accent-dim); }
+
+.pd-preview {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    position: absolute; inset: 0;
+}
+
+.pd-picker-change {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0,0,0,0.65);
+    color: rgba(255,255,255,0.85);
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 20px;
+    pointer-events: none;
+}
+
+/* ── Fullscreen lightbox ─────────────────────────────────────────────────── */
+.pd-lightbox {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.96);
+    z-index: 2000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+.pd-lightbox-img {
+    position: absolute;
+    inset: 0;
+    width: 100%; height: 100%;
+    object-fit: contain;
+}
+
+.pd-lightbox-footer {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, transparent 100%);
+    padding: 70px 22px 44px;
+}
+
+/* ── Dashboard recent-moments strip ──────────────────────────────────────── */
+.pd-strip-section {
+    margin-bottom: 4px;
+}
+
+.pd-strip {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    -webkit-overflow-scrolling: touch;
+}
+.pd-strip::-webkit-scrollbar { display: none; }
+
+.pd-strip-card {
+    flex-shrink: 0;
+    width: 110px;
+    height: 110px;
+    border-radius: 14px;
+    overflow: hidden;
+    position: relative;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    transition: transform 0.2s;
+}
+.pd-strip-card:active { transform: scale(0.95); }
+
+.pd-strip-img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.pd-strip-overlay {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.82) 0%, transparent 60%);
+    padding: 22px 8px 8px;
+}
+
+.pd-strip-amt {
+    font-size: 11px;
+    font-weight: 800;
+    color: #00FF87;
+    font-variant-numeric: tabular-nums;
+}
+[data-theme="light"] .pd-strip-amt { color: #00A854; }
+
+/* ── Responsive ──────────────────────────────────────────────────────────── */
+@media (max-width: 480px) {
+    .pd-grid        { column-gap: 8px; }
+    .pd-card        { border-radius: 14px; margin-bottom: 8px; }
+    .pd-amount      { font-size: 15px; }
+    .pd-strip-card  { width: 90px; height: 90px; border-radius: 12px; }
+}

@@ -126,6 +126,9 @@
             creditcard:  "M1 4h22v16H1z M1 10h22",
             banknote:    "M2 7h20v14H2z M16 14a2 2 0 000-4H8 M6 14h.01",
             calendar:    "M3 4h18a2 2 0 012 2v14a2 2 0 01-2 2H3a2 2 0 01-2-2V6a2 2 0 012-2z M16 2v4 M8 2v4 M1 10h22",
+            camera:      "M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z M12 17a4 4 0 100-8 4 4 0 000 8z",
+            image:       "M21 19V5a2 2 0 00-2-2H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2z M8.5 10a1.5 1.5 0 100-3 1.5 1.5 0 000 3z M21 15l-5-5L5 21",
+            zoomin:      "M21 21l-4.35-4.35 M17 11A6 6 0 105 11a6 6 0 0012 0z M11 8v6 M8 11h6",
         };
         function Icon({ name, size = 18, color = "currentColor", style: st = {} }) {
             const path = ICONS[name] || ICONS.target;
@@ -690,6 +693,229 @@ e(EmptyState, { icon:"creditcard", title:"No wallets yet", sub:"Add Cash, GCash,
             }
         }
 
+        // ── IMAGE COMPRESSION UTILITY ─────────────────────────────────────────
+        // Resizes to max 900px and converts to JPEG @72% quality (~30–80KB output)
+        function compressImage(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onerror = reject;
+                reader.onload = (ev) => {
+                    const img = new Image();
+                    img.onerror = reject;
+                    img.onload = () => {
+                        const MAX = 900;
+                        const ratio = Math.min(MAX / img.width, MAX / img.height, 1);
+                        const w = Math.round(img.width * ratio);
+                        const h = Math.round(img.height * ratio);
+                        const canvas = document.createElement('canvas');
+                        canvas.width = w; canvas.height = h;
+                        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+                        resolve(canvas.toDataURL('image/jpeg', 0.72));
+                    };
+                    img.src = ev.target.result;
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        // ── MODULE: PHOTO DIARY ───────────────────────────────────────────────
+        const PhotoDiaryView = React.memo(function PhotoDiaryView({
+            photoDiary, setPhotoDiary, dailyExpenses, setDailyExpenses,
+            wallets, setWallets, fc, showToast, requestConfirm
+        }) {
+            const [showAdd,      setShowAdd]      = useState(false);
+            const [preview,      setPreview]      = useState(null);   // base64
+            const [compressing,  setCompressing]  = useState(false);
+            const [viewEntry,    setViewEntry]     = useState(null);   // lightbox
+            const [form, setForm] = useState({
+                amountRaw: "", name: "", note: "",
+                category: "Food", walletId: wallets.find(w => w.id === CASH_WALLET_ID)?.id || (wallets[0]?.id || "")
+            });
+
+            const catIcons = { Food:"utensils", Gas:"car", Bills:"receipt", Business:"briefcase", Personal:"shoppingbag", Savings:"landmark" };
+
+            const resetForm = () => {
+                setForm({ amountRaw: "", name: "", note: "", category: "Food", walletId: wallets.find(w => w.id === CASH_WALLET_ID)?.id || (wallets[0]?.id || "") });
+                setPreview(null); setShowAdd(false);
+            };
+
+            const handlePickImage = async (ev) => {
+                const file = ev.target.files[0];
+                if (!file) return;
+                setCompressing(true);
+                try {
+                    const compressed = await compressImage(file);
+                    setPreview(compressed);
+                } catch { showToast("Could not load image. Try another."); }
+                finally { setCompressing(false); }
+            };
+
+            const handleSave = () => {
+                const amtCents = tc(form.amountRaw || "0");
+                if (amtCents <= 0) { showToast("Enter an amount first."); return; }
+                const id = uid();
+                const expId = uid();
+                const today = todayStr();
+                // Create the matching daily expense so totals stay accurate
+                const expense = { id: expId, name: form.name.trim() || form.category, amountCents: amtCents, category: form.category, date: today, walletId: form.walletId || null, fromDiary: true };
+                // Create the photo diary entry
+                const entry  = { id, expenseId: expId, imageData: preview || null, amountCents: amtCents, name: expense.name, category: form.category, date: today, note: form.note.trim(), walletId: form.walletId || null };
+                setDailyExpenses(prev => [expense, ...prev]);
+                setPhotoDiary(prev => [entry, ...prev]);
+                window.finance.processFinancialTransaction({ type: "expense", walletId: form.walletId, amountCents: amtCents, wallets, setWallets });
+                resetForm();
+                showToast("✓ Photo expense saved!");
+            };
+
+            const handleDelete = (entry) => {
+                requestConfirm("Delete this photo expense?", () => {
+                    setPhotoDiary(prev => prev.filter(x => x.id !== entry.id));
+                    setDailyExpenses(prev => prev.filter(x => x.id !== entry.expenseId));
+                    window.finance.processFinancialTransaction({ type: "expense_delete", walletId: entry.walletId, amountCents: entry.amountCents, wallets, setWallets });
+                    if (viewEntry?.id === entry.id) setViewEntry(null);
+                    showToast("Deleted.");
+                });
+            };
+
+            const fmtDate = (d) => {
+                if (!d) return "";
+                const dt = new Date(d + "T00:00:00");
+                const diff = Math.round((new Date(todayStr()) - dt) / 86400000);
+                if (diff === 0) return "Today";
+                if (diff === 1) return "Yesterday";
+                if (diff < 7)  return `${diff}d ago`;
+                return dt.toLocaleDateString("en-PH", { month: "short", day: "numeric" });
+            };
+
+            // ── LIGHTBOX ─────────────────────────────────────────────────────
+            if (viewEntry) return e('div', { className: "pd-lightbox" },
+                viewEntry.imageData
+                    ? e('img', { src: viewEntry.imageData, className: "pd-lightbox-img", alt: viewEntry.name })
+                    : e('div', { className: "pd-lightbox-img", style: { background: "var(--bg-input)", display:"flex", alignItems:"center", justifyContent:"center" } },
+                        e(Icon, { name: "image", size: 60, color: "var(--text-muted)" })
+                      ),
+                e('div', { className: "pd-lightbox-footer" },
+                    e('div', { style: { display:"flex", justifyContent:"space-between", alignItems:"flex-end" } },
+                        e('div', null,
+                            e('div', { style: { fontSize: 28, fontWeight: 800, color: "#00FF87", textShadow: "0 0 20px rgba(0,255,135,0.45)", lineHeight: 1.1, fontVariantNumeric:"tabular-nums" } }, fc(viewEntry.amountCents)),
+                            e('div', { style: { fontSize: 15, fontWeight: 600, color: "#fff", marginTop: 4 } }, viewEntry.name),
+                            viewEntry.note && e('div', { style: { fontSize: 13, color: "rgba(255,255,255,0.6)", marginTop: 3 } }, viewEntry.note),
+                            e('div', { style: { display:"flex", gap:8, marginTop:8, alignItems:"center" } },
+                                e('span', { style: { fontSize: 11, fontWeight: 700, background:"rgba(255,255,255,0.15)", color:"rgba(255,255,255,0.9)", padding:"3px 10px", borderRadius:20 } }, viewEntry.category),
+                                e('span', { style: { fontSize: 11, color:"rgba(255,255,255,0.5)" } }, fmtDate(viewEntry.date))
+                            )
+                        ),
+                        e('div', { style: { display:"flex", gap:10 } },
+                            e('button', { onClick: () => handleDelete(viewEntry), style: { background:"rgba(239,68,68,0.18)", border:"1px solid rgba(239,68,68,0.35)", color:"#EF4444", padding:"10px 14px", borderRadius:10, cursor:"pointer", fontSize:12, fontWeight:700 } }, "Delete"),
+                            e('button', { onClick: () => setViewEntry(null),       style: { background:"rgba(255,255,255,0.12)", border:"1px solid rgba(255,255,255,0.2)", color:"#fff",      padding:"10px 14px", borderRadius:10, cursor:"pointer", fontSize:12, fontWeight:700 } }, "Close")
+                        )
+                    )
+                )
+            );
+
+            return e('div', null,
+                // ── PAGE HEADER ─────────────────────────────────────────────
+                e('div', { style: { ...S.pageHeader, marginBottom: 16 } },
+                    e('div', null,
+                        e('h2', { style: S.pageTitle }, "Photo Diary"),
+                        e('div', { style: { fontSize: 13, color: "var(--text-muted)", marginTop: 4 } },
+                            photoDiary.length === 0 ? "Snap a photo, log what you spent." : `${photoDiary.length} entr${photoDiary.length === 1 ? "y" : "ies"} — your spending in pictures.`
+                        )
+                    ),
+                    e(Btn, { v:"accent", onClick: () => setShowAdd(true) },
+                        e(Icon, { name:"camera", size:14, color:"#030712", style:{ marginRight:6 } }),
+                        "Add Photo"
+                    )
+                ),
+
+                // ── EMPTY STATE ──────────────────────────────────────────────
+                photoDiary.length === 0 && e('div', { className:"premium-panel", style:{ textAlign:"center", padding:"60px 24px" } },
+                    e('div', { style: { opacity:0.25, marginBottom:16, display:"flex", justifyContent:"center" } },
+                        e(Icon, { name:"camera", size:56, color:"var(--text-muted)" })
+                    ),
+                    e('div', { style: { fontSize:17, fontWeight:700, color:"var(--text-light)", marginBottom:8 } }, "Your spending, in photos"),
+                    e('div', { style: { fontSize:13, color:"var(--text-muted)", maxWidth:260, margin:"0 auto", lineHeight:1.65 } },
+                        "Snap a quick photo of what you bought. Your diary will look like a scroll of real life — not a tax report."
+                    ),
+                    e(Btn, { v:"accent", style:{ marginTop:24 }, onClick:() => setShowAdd(true) }, "+ Add First Photo")
+                ),
+
+                // ── PHOTO GRID ───────────────────────────────────────────────
+                photoDiary.length > 0 && e('div', { className: "pd-grid" },
+                    photoDiary.map(entry =>
+                        e('div', { key: entry.id, className: "pd-card", onClick: () => setViewEntry(entry) },
+                            entry.imageData
+                                ? e('img', { src: entry.imageData, className: "pd-img", alt: entry.name })
+                                : e('div', { className: "pd-img pd-no-img" },
+                                    e(Icon, { name:"image", size:28, color:"var(--text-muted)" })
+                                  ),
+                            e('div', { className: "pd-overlay" },
+                                e('div', { className: "pd-amount" }, fc(entry.amountCents)),
+                                e('div', { style:{ display:"flex", alignItems:"center", gap:6, marginTop:3 } },
+                                    e('span', { className: "pd-cat-badge" }, entry.category),
+                                    e('span', { className: "pd-date" }, fmtDate(entry.date))
+                                ),
+                                entry.name && e('div', { style:{ fontSize:11, color:"rgba(255,255,255,0.7)", marginTop:3, fontWeight:500 } }, entry.name)
+                            )
+                        )
+                    )
+                ),
+
+                // ── ADD MODAL ────────────────────────────────────────────────
+                showAdd && e('div', { className:"modal-overlay", onClick: resetForm },
+                    e('div', { className:"modal-container", style:{ maxWidth:420 }, onClick: ev => ev.stopPropagation() },
+                        // Header
+                        e('div', { style: S.modalHeader },
+                            e('div', null,
+                                e('div', { style: S.modalTitle }, "New Photo Expense"),
+                                e('div', { style:{ fontSize:12, color:"var(--text-muted)", marginTop:3 } }, "Snap or pick a photo, then log the amount.")
+                            ),
+                            e('button', { onClick: resetForm, style: S.closeBtn }, e(Icon, { name:"x", size:16 }))
+                        ),
+
+                        // Image picker
+                        e('label', { className: "pd-picker", htmlFor: "pd-file-input", style: compressing ? { opacity:0.6 } : undefined },
+                            preview
+                                ? e('img', { src: preview, className: "pd-preview", alt:"preview" })
+                                : e('div', { style:{ display:"flex", flexDirection:"column", alignItems:"center", gap:8, color:"var(--text-muted)" } },
+                                    e(Icon, { name: compressing ? "target" : "camera", size:32 }),
+                                    e('div', { style:{ fontSize:13, fontWeight:600, color:"var(--text-light)" } }, compressing ? "Compressing…" : "Tap to add photo"),
+                                    e('div', { style:{ fontSize:11, color:"var(--text-muted)" } }, "Camera or gallery — auto compressed")
+                                  ),
+                            preview && e('div', { className: "pd-picker-change" }, "Tap to change"),
+                            e('input', { id:"pd-file-input", type:"file", accept:"image/*", capture:"environment", style:{ display:"none" }, onChange: handlePickImage })
+                        ),
+
+                        // Amount
+                        e('input', { className:"quick-add-amount", type:"number", inputMode:"decimal", placeholder:"0.00", value: form.amountRaw, autoFocus:true, onChange: ev => setForm(f => ({...f, amountRaw: ev.target.value})) }),
+
+                        // Category grid
+                        e('div', { className:"cat-grid" },
+                            CATEGORIES.map(c => e('button', { key:c, className:"cat-btn" + (form.category === c ? " selected" : ""), onClick:() => setForm(f => ({...f, category:c})) },
+                                e('div', { style:{ marginBottom:3, opacity:0.8 } }, e(Icon, { name: catIcons[c]||"target", size:17 })),
+                                c
+                            ))
+                        ),
+
+                        // Name / note
+                        e(Inp, { placeholder:"What did you get? (optional)", value: form.name, onChange: ev => setForm(f => ({...f, name: ev.target.value})), style:{ marginBottom:10 } }),
+                        e(Inp, { placeholder:"Caption / note (optional)",    value: form.note, onChange: ev => setForm(f => ({...f, note: ev.target.value})), style:{ marginBottom:14 } }),
+
+                        // Wallet
+                        wallets.length > 0 && e(Field, { label:"Pay from" },
+                            e(WalletPicker, { wallets, value: form.walletId, onChange: v => setForm(f => ({...f, walletId: v})) })
+                        ),
+
+                        // Actions
+                        e('div', { style: S.modalFooter },
+                            e(Btn, { v:"ghost",  style:{ flex:1 }, onClick: resetForm }, "Cancel"),
+                            e(Btn, { v:"accent", style:{ flex:1 }, onClick: handleSave }, "Save")
+                        )
+                    )
+                )
+            );
+        });
+
         // ── CORE APPLICATION ──────────────────────────────────────────────────
         function App() {
             const [tab, setTab] = useState("dashboard");
@@ -708,6 +934,9 @@ e(EmptyState, { icon:"creditcard", title:"No wallets yet", sub:"Add Cash, GCash,
             const [dailyExpenses, setDailyExpenses] = useState(saved.daily);
             const [archives, setArchives] = useState(saved.archives);
             const [budgets, setBudgets] = useState(saved.budgets);
+            const [photoDiary, setPhotoDiary] = useState(() => {
+                try { return JSON.parse(localStorage.getItem("sp_photo_diary")) || []; } catch { return []; }
+            });
             const [wallets, setWallets] = useState(() => {
                 const w = saved.wallets;
                 const withCash = w.find(x => x.id === CASH_WALLET_ID) ? w : [CASH_WALLET, ...w];
@@ -726,6 +955,7 @@ e(EmptyState, { icon:"creditcard", title:"No wallets yet", sub:"Add Cash, GCash,
             useEffect(() => { window.persistence.saveKey("daily", dailyExpenses); }, [dailyExpenses]);
             useEffect(() => { window.persistence.saveKey("archives", archives); }, [archives]);
             useEffect(() => { window.persistence.saveKey("budgets", budgets); }, [budgets]);
+            useEffect(() => { localStorage.setItem("sp_photo_diary", JSON.stringify(photoDiary)); }, [photoDiary]);
             useEffect(() => { window.persistence.saveKey("wallets", wallets); }, [wallets]);
 
             // Currency Formatter bound to state
@@ -901,10 +1131,11 @@ e(EmptyState, { icon:"creditcard", title:"No wallets yet", sub:"Add Cash, GCash,
 
                         // Primary tabs
                         [
-                            { id: "dashboard", label: "Dashboard" },
-                            { id: "budget",    label: "Bills & Income" },
-                            { id: "daily",     label: "Daily Expenses" },
-                            { id: "goals",     label: "Savings Vaults" },
+                            { id: "dashboard",   label: "Dashboard" },
+                            { id: "budget",      label: "Bills & Income" },
+                            { id: "daily",       label: "Daily Expenses" },
+                            { id: "goals",       label: "Savings Vaults" },
+                            { id: "photo-diary", label: "Photo Diary" },
                         ].map(t => e('button', {
                             key: t.id, className: "nav-btn", onClick: () => setTab(t.id),
                             style: { background: "transparent", color: tab === t.id ? "var(--text-main)" : "var(--text-muted)", border: "none", borderBottom: tab === t.id ? "2px solid #00E676" : "2px solid transparent", padding: "12px 16px", cursor: "pointer", fontSize: 13, fontWeight: tab === t.id ? 700 : 500, whiteSpace: "nowrap", flexShrink: 0, transition: "all 0.18s" }
@@ -927,7 +1158,7 @@ e(EmptyState, { icon:"creditcard", title:"No wallets yet", sub:"Add Cash, GCash,
                 ),
                 
                 e('div', { className: "page-wrap", style: { maxWidth: 1140, margin: "0 auto", padding: "clamp(16px, 4vw, 32px) clamp(12px, 4vw, 24px) 80px" } },
-                    tab === "dashboard" && e(DashboardOverview, { totals, bills, dailyExpenses, budgets, wallets: displayWallets, fc, fc2, incomes, txns, funds, archives, onNavigate: setTab }),
+                    tab === "dashboard" && e(DashboardOverview, { totals, bills, dailyExpenses, budgets, wallets: displayWallets, fc, fc2, incomes, txns, funds, archives, photoDiary, onNavigate: setTab }),
                     tab === "limits" && e(BudgetLimitsView, { budgets, setBudgets, fc, requestConfirm }),
                     tab === "wallets" && e(WalletsView, { wallets: displayWallets, rawWallets: wallets, setWallets, incomes, dailyExpenses, txns, fc, requestConfirm, showToast }),
                     tab === "budget" && e(BudgetBillsView, { incomes, setIncomes, bills, setBills, wallets: displayWallets, setWallets, txns, setTxns, fc, requestConfirm, showToast }),
@@ -935,6 +1166,7 @@ e(EmptyState, { icon:"creditcard", title:"No wallets yet", sub:"Add Cash, GCash,
                     tab === "goals" && e(SinkingFundsView, { funds, setFunds, enrichedFunds: totals.enrichedFunds, txns, setTxns, wallets: displayWallets, setWallets, fc, requestConfirm, showToast }),
                     tab === "transactions" && e(AllTransactionsView, { txns, setTxns, funds, incomes, dailyExpenses, bills, wallets: displayWallets, fc, requestConfirm }),
                     tab === "history" && e(HistoryView, { archives, fc }),
+                    tab === "photo-diary" && e(PhotoDiaryView, { photoDiary, setPhotoDiary, dailyExpenses, setDailyExpenses, wallets: displayWallets, setWallets, fc, showToast, requestConfirm }),
                     tab === "settings" && e(SettingsView, { settings, setSettings, setIncomes, setBills, setDailyExpenses, setFunds, setTxns, setArchives, setBudgets, showToast, totals, bills, budgets, fc }),
 
 e('footer', { 
@@ -972,14 +1204,14 @@ e('footer', {
                 // ── MOBILE BOTTOM NAV ───────────────────────────────────────
                 e('div', { className: "bottom-nav" },
                     [
-                        { id: "dashboard", icon: "home",    label: "Home" },
-                        { id: "daily",     icon: "wallet",  label: "Expenses" },
-                        { id: "budget",    icon: "receipt", label: "Bills" },
-                        { id: "goals",     icon: "landmark",label: "Savings" },
-                        { id: "more",      icon: "more",    label: "More" }
+                        { id: "dashboard",   icon: "home",    label: "Home" },
+                        { id: "daily",       icon: "wallet",  label: "Expenses" },
+                        { id: "photo-diary", icon: "camera",  label: "Diary" },
+                        { id: "goals",       icon: "landmark",label: "Savings" },
+                        { id: "more",        icon: "more",    label: "More" }
                     ].map(t => e('button', {
                         key: t.id,
-                        className: "bnav-btn" + (tab === t.id || (t.id === "more" && ["wallets","limits","transactions","history","settings"].includes(tab)) ? " active" : ""),
+                        className: "bnav-btn" + (tab === t.id || (t.id === "more" && ["wallets","limits","transactions","history","settings","budget"].includes(tab)) ? " active" : ""),
                         onClick: () => t.id === "more" ? setShowMoreSheet(true) : setTab(t.id)
                     },
                         e(Icon, { name: t.icon, size: 22 }),
@@ -992,11 +1224,12 @@ e('footer', {
                     e('div', { className: "sheet-panel", onClick: ev => ev.stopPropagation() },
                         e('div', { className: "sheet-handle" }),
                         [
-                            { id: "wallets",      icon: "creditcard", label: "Wallets",        sub: "Cash, GCash, bank accounts" },
-                            { id: "limits",       icon: "grid",    label: "Budget Limits",  sub: "Set spending caps per category" },
-                            { id: "transactions", icon: "list",    label: "Transaction Log",  sub: "All expenses, income, bills & vaults" },
-                            { id: "history",      icon: "history", label: "Month History",   sub: "Archived monthly snapshots" },
-                            { id: "settings",     icon: "settings",label: "Settings",        sub: "Preferences, PIN, backup" },
+                            { id: "budget",       icon: "receipt",      label: "Bills & Income",    sub: "Track bills, income, recurring" },
+                            { id: "wallets",      icon: "creditcard",   label: "Wallets",            sub: "Cash, GCash, bank accounts" },
+                            { id: "limits",       icon: "grid",         label: "Budget Limits",      sub: "Set spending caps per category" },
+                            { id: "transactions", icon: "list",         label: "Transaction Log",    sub: "All expenses, income, bills & vaults" },
+                            { id: "history",      icon: "history",      label: "Month History",      sub: "Archived monthly snapshots" },
+                            { id: "settings",     icon: "settings",     label: "Settings",           sub: "Preferences, PIN, backup" },
                         ].map(t => {
                             const isActive = tab === t.id;
                             return e('div', { key: t.id, className: "sheet-row", style: isActive ? { background: "var(--hover-bg)" } : undefined, onClick: () => { setTab(t.id); setShowMoreSheet(false); } },
