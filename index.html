@@ -751,15 +751,21 @@ e(EmptyState, { icon:"creditcard", title:"No wallets yet", sub:"Add Cash, GCash,
             };
 
             const handleSave = () => {
+                if (!preview) { showToast("Take a photo or picture first"); return; }
+
                 const amtCents = tc(form.amountRaw || "0");
                 if (amtCents <= 0) { showToast("Enter an amount first."); return; }
+
+                const walletCheck = window.finance.validateExpenseWalletBalance(wallets, form.walletId, amtCents);
+                if (!walletCheck.ok) { showToast(walletCheck.error || "Wallet is empty — add income or fund first"); return; }
+
                 const id = uid();
                 const expId = uid();
                 const today = todayStr();
                 // Create the matching daily expense so totals stay accurate
                 const expense = { id: expId, name: form.name.trim() || form.category, amountCents: amtCents, category: form.category, date: today, walletId: form.walletId || null, fromDiary: true };
                 // Create the photo diary entry
-                const entry  = { id, expenseId: expId, imageData: preview || null, amountCents: amtCents, name: expense.name, category: form.category, date: today, note: form.note.trim(), walletId: form.walletId || null };
+                const entry  = { id, expenseId: expId, imageData: preview, amountCents: amtCents, name: expense.name, category: form.category, date: today, note: form.note.trim(), walletId: form.walletId || null };
                 setDailyExpenses(prev => [expense, ...prev]);
                 setPhotoDiary(prev => [entry, ...prev]);
                 window.finance.processFinancialTransaction({ type: "expense", walletId: form.walletId, amountCents: amtCents, wallets, setWallets });
@@ -768,13 +774,11 @@ e(EmptyState, { icon:"creditcard", title:"No wallets yet", sub:"Add Cash, GCash,
             };
 
             const handleDelete = (entry) => {
-                requestConfirm("Delete this photo expense?", () => {
-                    setPhotoDiary(prev => prev.filter(x => x.id !== entry.id));
-                    setDailyExpenses(prev => prev.filter(x => x.id !== entry.expenseId));
-                    window.finance.processFinancialTransaction({ type: "expense_delete", walletId: entry.walletId, amountCents: entry.amountCents, wallets, setWallets });
-                    if (viewEntry?.id === entry.id) setViewEntry(null);
-                    showToast("Deleted.");
-                });
+                setPhotoDiary(prev => prev.filter(x => x.id !== entry.id));
+                setDailyExpenses(prev => prev.filter(x => x.id !== entry.expenseId));
+                window.finance.processFinancialTransaction({ type: "expense_delete", walletId: entry.walletId, amountCents: entry.amountCents, wallets, setWallets });
+                setViewEntry(null);
+                showToast("Deleted.");
             };
 
             const fmtDate = (d) => {

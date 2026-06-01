@@ -58,6 +58,19 @@
         }));
     }
 
+    function validateExpenseWalletBalance(wallets, walletId, amountCents) {
+        const amt = validatePositiveCents(amountCents, "expense amount");
+        if (!walletId) return { ok: true };
+
+        const wallet = (wallets || []).find(w => w.id === walletId);
+        if (!wallet) return { ok: false, error: "Wallet not found." };
+        if (ensureIntCents(wallet.balanceCents) < amt) {
+            return { ok: false, error: "Wallet is empty — add income or fund first" };
+        }
+
+        return { ok: true };
+    }
+
     function migrateWallets(wallets, sources = {}) {
         return (Array.isArray(wallets) ? wallets : []).map(wallet => {
             if (wallet.openingBalanceCents !== undefined) return wallet;
@@ -151,6 +164,7 @@
         deriveWalletBalance,
         getWalletDelta,
         migrateWallets,
+        validateExpenseWalletBalance,
         processFinancialTransaction,
         checkIncomeDeleteSafe
     };
