@@ -783,6 +783,128 @@ a:active { opacity: 0.8; }
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
+   BENTO FILTER PANEL — compact filter container for expenses/transactions
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.bento-filter {
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: var(--r-xl);
+    padding: var(--sp-5);
+    margin-bottom: var(--sp-4);
+}
+
+/* Search row: full-width input */
+.bento-filter-search {
+    margin-bottom: var(--sp-3);
+}
+
+/* Control row: dropdowns/buttons side-by-side */
+.bento-filter-controls {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    align-items: start;
+}
+
+/* Single-column controls row (for transaction log: wallet + clear) */
+.bento-filter-controls--trio {
+    grid-template-columns: 1fr auto;
+}
+
+/* Date range row: two equal fields */
+.bento-filter-dates {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: var(--sp-3);
+}
+
+.bento-filter-date-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    min-width: 0;
+}
+
+.bento-filter-date-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 5px;
+}
+
+@media (max-width: 480px) {
+    .bento-filter { padding: var(--sp-4); border-radius: var(--r-lg); }
+    .bento-filter-controls { grid-template-columns: 1fr; }
+    .bento-filter-controls--trio { grid-template-columns: 1fr; }
+    .bento-filter-dates { grid-template-columns: 1fr; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   BENTO SUMMARY — stat cards grid for expenses/transactions
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.bento-summary {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--sp-3);
+    margin-bottom: var(--sp-4);
+}
+
+.bento-summary-card {
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+    padding: var(--sp-4);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.bento-summary-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    line-height: 1.3;
+}
+
+.bento-summary-value {
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--text-main);
+    font-variant-numeric: tabular-nums;
+    line-height: 1.2;
+}
+
+/* Accent variants for summary values */
+.bento-summary-value--red { color: #EF4444; }
+.bento-summary-value--blue { color: #2563EB; }
+.bento-summary-value--green { color: #00E676; }
+.bento-summary-value--muted { color: var(--text-muted); font-size: 14px; }
+
+@media (max-width: 480px) {
+    .bento-summary { grid-template-columns: 1fr; gap: var(--sp-2); }
+    .bento-summary-card { padding: var(--sp-3); }
+    .bento-summary-value { font-size: 16px; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   BENTO TRANSACTION LIST CONTAINER
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.bento-txn-list {
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: var(--r-xl);
+    overflow: hidden;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
    PHOTO DIARY FEED
    ═══════════════════════════════════════════════════════════════════════════ */
 

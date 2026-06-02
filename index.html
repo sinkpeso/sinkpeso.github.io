@@ -1918,8 +1918,8 @@ e('footer', {
                         e(Btn, { v: "accent", onClick: handleLogItem }, "Log Item")
                     )
                 ),
-                e('div', { className: "premium-panel" },
-                    e(SLabel, { style: { marginBottom: 12 } }, "Spending Log Timeline"),
+                e('div', { className: "bento-txn-list" },
+                    e(SLabel, { style: { marginBottom: 12, padding: "16px 16px 0" } }, "Spending Log Timeline"),
                     dailyExpenses.length === 0 ? e('div', { style: { color: "var(--text-muted)", fontSize: 13, padding: "14px 0" } }, e("div", { className: "empty-state" }, e("div", { className: "empty-state-icon" }, e(Icon, { name: "wallet", size: 28, color: "var(--text-muted)" })), e("div", { className: "empty-state-title" }, "No expenses yet"), e("div", { className: "empty-state-sub" }, "Tap + to log your first expense."))) :
                     dailyExpenses.map(exp => {
                         // Derive wallet name dynamically — walletId is source of truth.
@@ -2062,10 +2062,12 @@ e('footer', {
                 e('h2', { style: { fontSize: 22, fontWeight: 800, marginBottom: 4 } }, 'Transaction Log'),
                 e('div', { style: { fontSize: 14, color: "var(--text-muted)", marginBottom: 20 } }, 'Full history — expenses, income, bills, and vault actions.'),
 
-                // ── Search + Filters ──────────────────────────────────────────────
-                e('div', { className: "premium-panel", style: { marginBottom: 14 } },
-                    e(Inp, { placeholder: "Search title, category, wallet…", value: search, onChange: ev => setSearch(ev.target.value), style: { marginBottom: 10 } }),
-                    e('div', { className: "txn-filter-row" },
+                // ── Search + Filters (Bento) ─────────────────────────────────────
+                e('div', { className: "bento-filter", style: { marginBottom: 14 } },
+                    e('div', { className: "bento-filter-search" },
+                        e(Inp, { placeholder: "Search title, category, wallet…", value: search, onChange: ev => setSearch(ev.target.value), style: { marginBottom: 0 } })
+                    ),
+                    e('div', { className: "bento-filter-controls bento-filter-controls--trio" },
                         e(Sel, { value: walletFilter, onChange: ev => setWalletFilter(ev.target.value), style: { marginBottom: 0 } },
                             e('option', { value: "all" }, "All Wallets"),
                             (wallets || []).map(w => e('option', { key: w.id, value: w.id }, w.name))
@@ -2076,7 +2078,9 @@ e('footer', {
                                 style: { background: "var(--hover-bg)", border: "1px solid var(--border)", color: "var(--text-main)", fontSize: 12, fontWeight: 600, cursor: "pointer", padding: "10px 12px", borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, whiteSpace: "nowrap" }
                               }, e(Icon, { name: "x", size: 12 }), "Clear")
                             : e('div')
-                    ),
+                    )
+                ),
+                e('div', { className: "bento-filter-row" },
                     e('div', { className: "txn-date-row" },
                         e('div', { className: "txn-date-field" },
                             e('div', { className: "txn-date-label" }, "From Date"),
@@ -2090,7 +2094,7 @@ e('footer', {
                 ),
 
                 // ── Unified Transaction List ────────────────────────────────────
-                e('div', { className: "premium-panel", style: { padding: 0, maxHeight: 520, overflow: "hidden" } },
+                e('div', { className: "bento-txn-list", style: { maxHeight: 520, overflow: "hidden" } },
                     e(VirtualList, {
                         items: filtered,
                         itemHeight: 76,
