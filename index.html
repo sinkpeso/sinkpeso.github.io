@@ -1166,7 +1166,7 @@ e(EmptyState, { icon:"creditcard", title:"No wallets yet", sub:"Add Cash, GCash,
                     tab === "limits" && e(BudgetLimitsView, { budgets, setBudgets, fc, requestConfirm }),
                     tab === "wallets" && e(WalletsView, { wallets: displayWallets, rawWallets: wallets, setWallets, incomes, dailyExpenses, txns, fc, requestConfirm, showToast }),
                     tab === "budget" && e(BudgetBillsView, { incomes, setIncomes, bills, setBills, wallets: displayWallets, setWallets, txns, setTxns, fc, requestConfirm, showToast }),
-                    tab === "daily" && e(DailyExpensesView, { dailyExpenses, setDailyExpenses, wallets: displayWallets, setWallets, fc, requestConfirm, showToast }),
+                    tab === "daily" && e(DailyExpensesView, { dailyExpenses, setDailyExpenses, photoDiary, setPhotoDiary, wallets: displayWallets, setWallets, fc, requestConfirm, showToast }),
                     tab === "goals" && e(SinkingFundsView, { funds, setFunds, enrichedFunds: totals.enrichedFunds, txns, setTxns, wallets: displayWallets, setWallets, fc, requestConfirm, showToast }),
                     tab === "transactions" && e(AllTransactionsView, { txns, setTxns, funds, incomes, dailyExpenses, bills, wallets: displayWallets, fc, requestConfirm }),
                     tab === "history" && e(HistoryView, { archives, fc }),
@@ -1812,7 +1812,7 @@ e('footer', {
         });
 
         // ── MODULE: DAILY EXPENSES ──────────────────────────────────────────
-        const DailyExpensesView = React.memo(function DailyExpensesView({ dailyExpenses, setDailyExpenses, wallets, setWallets, fc, requestConfirm, showToast }) {
+        const DailyExpensesView = React.memo(function DailyExpensesView({ dailyExpenses, setDailyExpenses, photoDiary, setPhotoDiary, wallets, setWallets, fc, requestConfirm, showToast }) {
             const [name, setName] = useState(""); const [amount, setAmount] = useState(""); const [category, setCategory] = useState("Food");
             const [recurring, setRecurring] = useState("none");
             const [walletId, setWalletId] = useState(wallets.length > 0 ? (wallets.find(w => w.id === CASH_WALLET_ID) ? CASH_WALLET_ID : wallets[0].id) : "");
@@ -1868,7 +1868,10 @@ e('footer', {
             };
 
             const deleteExp = (id) => {
-                requestConfirm("Delete this expense entry?", () => window.actions.deleteExpense({ id, dailyExpenses, setDailyExpenses, wallets, setWallets }));
+                requestConfirm("Delete this expense entry?", () => {
+                    window.actions.deleteExpense({ id, dailyExpenses, setDailyExpenses, wallets, setWallets });
+                    setPhotoDiary(prev => prev.filter(e => e.expenseId !== id));
+                });
             };
 
             const handleLogItem = () => {
