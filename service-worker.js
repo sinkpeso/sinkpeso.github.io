@@ -1,4 +1,4 @@
-const CACHE_NAME = 'sinkpeso-v4';
+rstconst CACHE_NAME = 'sinkpeso-v4';
 const ASSETS = [
   './',
   './index.html',
