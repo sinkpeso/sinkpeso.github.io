@@ -9,6 +9,8 @@
 //
 // Depends on: utils.js, finance.js
 //
+// @module actions
+//
 // Usage:
 //   window.actions.addExpense({ rec, wallets, setDailyExpenses, setWallets });
 //   window.actions.deleteIncome({ id, incomes, setIncomes, wallets, setWallets });
@@ -18,8 +20,11 @@
 
     // ── EXPENSE ACTIONS ───────────────────────────────────────────────────────
 
-    // Append a pre-built expense record and deduct from the source wallet.
-    // Caller is responsible for any balance validation before calling.
+    /**
+     * Append a pre-built expense record and deduct from the source wallet.
+     * Caller is responsible for any balance validation before calling.
+     * @param {{ rec: Object, wallets: Array, setDailyExpenses: Function, setWallets: Function }} opts
+     */
     function addExpense({ rec, wallets, setDailyExpenses, setWallets }) {
         setDailyExpenses(prev => [rec, ...prev]);
         fin().processFinancialTransaction({
@@ -31,7 +36,10 @@
         });
     }
 
-    // Reverse the old wallet deduction, apply the updated amount/wallet, patch record.
+    /**
+     * Reverse the old wallet deduction, apply the updated amount/wallet, patch record.
+     * @param {{ expId: string, editForm: Object, oldRecord: Object, wallets: Array, dailyExpenses: Array, setDailyExpenses: Function, setWallets: Function }} opts
+     */
     function editExpense({ expId, editForm, oldRecord, wallets, dailyExpenses, setDailyExpenses, setWallets }) {
         const newAmt      = window.utils.tc(editForm.amount);
         const newWalletId = editForm.walletId || null;
@@ -51,7 +59,10 @@
         ));
     }
 
-    // Restore the wallet balance and remove the expense record.
+    /**
+     * Restore the wallet balance and remove the expense record.
+     * @param {{ id: string, dailyExpenses: Array, setDailyExpenses: Function, wallets: Array, setWallets: Function }} opts
+     */
     function deleteExpense({ id, dailyExpenses, setDailyExpenses, wallets, setWallets }) {
         const old = dailyExpenses.find(ex => ex.id === id);
         fin().processFinancialTransaction({
@@ -66,7 +77,10 @@
 
     // ── INCOME ACTIONS ────────────────────────────────────────────────────────
 
-    // Append an income record and credit the receiving wallet.
+    /**
+     * Append an income record and credit the receiving wallet.
+     * @param {{ rec: Object, wallets: Array, setIncomes: Function, setWallets: Function }} opts
+     */
     function addIncome({ rec, wallets, setIncomes, setWallets }) {
         setIncomes(prev => [...prev, rec]);
         fin().processFinancialTransaction({
@@ -78,7 +92,10 @@
         });
     }
 
-    // Reverse the old wallet credit, apply updated amount/wallet, patch record.
+    /**
+     * Reverse the old wallet credit, apply updated amount/wallet, patch record.
+     * @param {{ incId: string, editForm: Object, oldRecord: Object, wallets: Array, incomes: Array, setIncomes: Function, setWallets: Function }} opts
+     */
     function editIncome({ incId, editForm, oldRecord, wallets, incomes, setIncomes, setWallets }) {
         const newAmt = window.utils.tc(editForm.amount);
         fin().processFinancialTransaction({
@@ -97,7 +114,10 @@
         ));
     }
 
-    // Reverse the wallet credit and remove the income record.
+    /**
+     * Reverse the wallet credit and remove the income record.
+     * @param {{ id: string, incomes: Array, setIncomes: Function, wallets: Array, setWallets: Function }} opts
+     */
     function deleteIncome({ id, incomes, setIncomes, wallets, setWallets }) {
         const old = incomes.find(i => i.id === id);
         fin().processFinancialTransaction({

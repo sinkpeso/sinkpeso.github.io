@@ -3,13 +3,27 @@
 // Important rule:
 // Wallet balances are derived from records. They are not manually pushed up and
 // down as separate saved values. This keeps balances, edits, and deletes aligned.
+//
+// @module finance
 
 (function () {
+    /**
+     * Safely convert a value to integer cents. Returns 0 for NaN/Infinity/null/undefined.
+     * @param {number|string|null|undefined} value - Raw monetary value
+     * @returns {number} Integer cents (e.g., 1250 for $12.50)
+     */
     function ensureIntCents(value) {
         const n = Math.round(Number(value) || 0);
         return Number.isFinite(n) ? n : 0;
     }
 
+    /**
+     * Validate that amountCents is a positive integer. Throws on failure.
+     * @param {number} amountCents - Amount in cents
+     * @param {string} [label="amount"] - Label for error message
+     * @returns {number} Validated integer cents
+     * @throws {Error} If amount is not positive
+     */
     function validatePositiveCents(amountCents, label = "amount") {
         const n = ensureIntCents(amountCents);
         if (n <= 0) {
@@ -18,6 +32,13 @@
         return n;
     }
 
+    /**
+     * Calculate net financial delta for a single wallet from all record sources.
+     * Sums: incomes (+), expenses (-), bill payments (-), vault deposits (-), vault withdrawals (+).
+     * @param {string} walletId - Target wallet ID
+     * @param {{ incomes?: Object[], dailyExpenses?: Object[], txns?: Object[] }} sources
+     * @returns {number} Net delta in cents
+     */
     function getWalletDelta(walletId, sources = {}) {
         if (!walletId) return 0;
 
@@ -46,11 +67,23 @@
         return total;
     }
 
+    /**
+     * Derive current balance for a wallet: openingBalanceCents + getWalletDelta.
+     * @param {{ id: string, openingBalanceCents: number }} wallet
+     * @param {{ incomes?: Object[], dailyExpenses?: Object[], txns?: Object[] }} sources
+     * @returns {number} Current balance in cents
+     */
     function deriveWalletBalance(wallet, sources = {}) {
         if (!wallet) return 0;
         return ensureIntCents(wallet.openingBalanceCents) + getWalletDelta(wallet.id, sources);
     }
 
+    /**
+     * Derive balances for all wallets. Each wallet gets a computed `balanceCents` field.
+     * @param {Array<{ id: string, openingBalanceCents: number }>} wallets
+     * @param {{ incomes?: Object[], dailyExpenses?: Object[], txns?: Object[], bills?: Object[] }} sources
+     * @returns {Array<Object>} Wallets with added `balanceCents` field
+     */
     function deriveWallets(wallets, sources = {}) {
         return (Array.isArray(wallets) ? wallets : []).map(wallet => ({
             ...wallet,
@@ -58,6 +91,13 @@
         }));
     }
 
+    /**
+     * Check if a wallet has sufficient balance for an expense.
+     * @param {Array<{ id: string, balanceCents: number }>} wallets
+     * @param {string} walletId
+     * @param {number} amountCents
+     * @returns {{ ok: boolean, error?: string }}
+     */
     function validateExpenseWalletBalance(wallets, walletId, amountCents) {
         const amt = validatePositiveCents(amountCents, "expense amount");
         if (!walletId) return { ok: true };
@@ -71,6 +111,12 @@
         return { ok: true };
     }
 
+    /**
+     * Migrate legacy wallets (without openingBalanceCents) by computing it from saved balance minus record delta.
+     * @param {Array<Object>} wallets
+     * @param {{ incomes?: Object[], dailyExpenses?: Object[], txns?: Object[], bills?: Object[] }} sources
+     * @returns {Array<Object>} Wallets with `openingBalanceCents` field added
+     */
     function migrateWallets(wallets, sources = {}) {
         return (Array.isArray(wallets) ? wallets : []).map(wallet => {
             if (wallet.openingBalanceCents !== undefined) return wallet;
@@ -85,8 +131,11 @@
         });
     }
 
-    // Validates transaction amounts and wallet balance sufficiency.
-    // Does NOT mutate state — wallet balances are derived via deriveWallets().
+    /**
+     * Validate a financial transaction. Does NOT mutate state.
+     * @param {{ type: string, amountCents?: number, newAmountCents?: number, oldAmountCents?: number, walletId?: string, wallets?: Array }} opts
+     * @returns {{ ok: boolean, error?: string }}
+     */
     function processFinancialTransaction(opts = {}) {
         try {
             const type = opts.type;
@@ -147,6 +196,13 @@
     //                 (e.g. the displayWallets from App's useMemo)
     //
     // Returns: { safe: bool, walletName: string|null, projectedBalance: number }
+    /**
+     * Check if deleting an income entry would cause any wallet balance to go negative.
+     * @param {string} walletId
+     * @param {number} amountCents
+     * @param {Array<{ id: string, name: string, balanceCents: number }>} derivedWallets
+     * @returns {{ safe: boolean, walletName: string|null, projectedBalance: number }}
+     */
     function checkIncomeDeleteSafe(walletId, amountCents, derivedWallets) {
         if (!walletId) return { safe: true, walletName: null, projectedBalance: 0 };
         const wallet = (derivedWallets || []).find(w => w.id === walletId);

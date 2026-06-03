@@ -16,18 +16,17 @@
 (function () {
     const { safeDiv, getDaysRemaining } = window.utils;
 
-    // ── computeTotals ─────────────────────────────────────────────────────────
-    // Derives the full financial summary from raw state arrays.
-    //
-    // @param {object} opts
-    //   incomes       Array of income records      { amountCents }
-    //   bills         Array of bill records         { amountCents, isPaid, dueDate }
-    //   funds         Array of vault records        { id, startCents, goalCents }
-    //   txns          Array of transaction records  { fundId, type, amountCents }
-    //   dailyExpenses Array of expense records      { amountCents, category }
-    //
-    // @returns {object}  totals — see return statement for full shape
-    //
+    /**
+     * Derive the full financial summary from raw state arrays.
+     * Pure function — safe to useMemo over.
+     * @param {Object} opts
+     * @param {Array<{ amountCents: number }>} opts.incomes
+     * @param {Array<{ amountCents: number, isPaid: boolean, dueDate: string }>} opts.bills
+     * @param {Array<{ id: string, startCents: number, goalCents: number }>} opts.funds
+     * @param {Array<{ fundId: string, type: string, amountCents: number }>} opts.txns
+     * @param {Array<{ amountCents: number, category: string }>} opts.dailyExpenses
+     * @returns {{ totalIncome: number, paidBills: number, unpaidBills: number, totalDailySpent: number, totalInGoals: number, netAvailable: number, enrichedFunds: Array, budgetProgress: Array, burnRate: Object, categoryBreakdown: Object }}
+     */
     function computeTotals({ incomes, bills, funds, txns, dailyExpenses }) {
         // ── Core money flows ─────────────────────────────────────────────────
         const totalIncome     = incomes.reduce((s, i) => s + i.amountCents, 0);
