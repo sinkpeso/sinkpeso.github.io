@@ -66,6 +66,40 @@
         );
     }
 
+    // ── CRASH REPORT PANEL ───────────────────────────────────────────────
+    function CrashReportPanel({ showToast }) {
+        const [reports, setReports] = React.useState([]);
+
+        React.useEffect(() => {
+            if (window.crashreport) setReports(window.crashreport.getReports());
+        }, []);
+
+        if (!window.crashreport) return e('p', { style: { fontSize: 13, color: "var(--text-muted)" } }, "Crash reporting not loaded.");
+
+        const count = reports.length;
+        return e('div', null,
+            e('div', { style: { fontSize: 13, color: "var(--text-muted)", marginBottom: 12 } },
+                count === 0
+                    ? "No crash reports. App is running smoothly."
+                    : `${count} crash report${count !== 1 ? "s" : ""} recorded. All data stays on your device.`
+            ),
+            count > 0 && e('div', { style: { display: "flex", gap: 8, flexWrap: "wrap" } },
+                e(Btn, { v: "ghost", style: { fontSize: 12 }, onClick: () => {
+                    const text = window.crashreport.exportText();
+                    const blob = new Blob([text], { type: "text/plain" });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement("a"); a.href = url; a.download = `sinkpeso_crash_log_${todayStr()}.txt`; a.click();
+                    showToast("Crash log exported.");
+                } }, "Export Log"),
+                e(Btn, { v: "ghost", style: { fontSize: 12 }, onClick: () => {
+                    window.crashreport.clearReports();
+                    setReports([]);
+                    showToast("Crash reports cleared.");
+                } }, "Clear All")
+            )
+        );
+    }
+
     function SettingsView({ settings, setSettings, setIncomes, setBills, setDailyExpenses, setFunds, setTxns, setArchives, setBudgets, showToast, totals, bills, budgets, fc }) {
         const safeSettings = settings || {};
         const [pinInput, setPinInput] = React.useState(safeSettings?.pin || '');
@@ -334,6 +368,10 @@
 
                     e(SettingGroup, { title: "Storage Usage", icon: "inbox" },
                         e(StorageUsagePanel, { showToast })
+                    ),
+
+                    e(SettingGroup, { title: "Crash Reports", icon: "target" },
+                        e(CrashReportPanel, { showToast })
                     ),
 
                     e(SettingGroup, { title: "About", icon: "shield" },

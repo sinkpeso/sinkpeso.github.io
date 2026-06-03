@@ -73,7 +73,18 @@
             window.actions.editIncome({ incId: editIncome.id, editForm: editIncForm, oldRecord, wallets, incomes, setIncomes, setWallets });
             setEditIncome(null); showToast("✓ Income updated!");
         };
-        const deleteIncome = (id) => { requestConfirm("Delete this income entry?", () => window.actions.deleteIncome({ id, incomes, setIncomes, wallets, setWallets })); };
+        const deleteIncome = (id) => {
+            const inc = incomes.find(i => i.id === id);
+            if (!inc) return;
+            window.actions.deleteIncome({ id, incomes, setIncomes, wallets, setWallets });
+            showToast("Income deleted", () => {
+                setIncomes(prev => [...prev, inc]);
+                window.finance.processFinancialTransaction({
+                    type: "income", walletId: inc.walletId,
+                    amountCents: inc.amountCents, wallets, setWallets
+                });
+            }, 5000);
+        };
 
         const openEditBill = (item) => { setEditBill(item); setEditBillForm({ name: item.name, amount: String((item.amountCents / 100).toFixed(2)), dueDate: item.dueDate, recurring: item.recurring || "none", category: item.category || "Bills" }); };
         const saveEditBill = () => {

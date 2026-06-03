@@ -91,10 +91,20 @@
         };
 
         const deleteExp = (id) => {
-            requestConfirm("Delete this expense entry?", () => {
-                window.actions.deleteExpense({ id, dailyExpenses, setDailyExpenses, wallets, setWallets });
-                setPhotoDiary(prev => prev.filter(x => x.expenseId !== id));
-            });
+            const exp = dailyExpenses.find(x => x.id === id);
+            if (!exp) return;
+            // Delete immediately
+            window.actions.deleteExpense({ id, dailyExpenses, setDailyExpenses, wallets, setWallets });
+            setPhotoDiary(prev => prev.filter(x => x.expenseId !== id));
+            // Show undo toast — restore if clicked within 5s
+            showToast("Expense deleted", () => {
+                setDailyExpenses(prev => [exp, ...prev]);
+                // Restore wallet deduction
+                window.finance.processFinancialTransaction({
+                    type: "expense", walletId: exp.walletId,
+                    amountCents: exp.amountCents, wallets, setWallets
+                });
+            }, 5000);
         };
 
         const handleLogItem = () => {

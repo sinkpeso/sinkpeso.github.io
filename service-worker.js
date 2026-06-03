@@ -31,6 +31,7 @@ const ASSETS = [
   './OnboardingScreen.js',
   './UndoToast.js',
   './HelpTooltip.js',
+  './crashreport.js',
   './service-worker.js',
   './manifest.json',
   './logosinkpeso.png',
