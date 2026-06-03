@@ -1108,3 +1108,7 @@ a:active { opacity: 0.8; }
     .pd-amount      { font-size: 15px; }
     .pd-strip-card  { width: 90px; height: 90px; border-radius: 12px; }
 }
+/* ── UI AUDIT FIXES ── */
+.nav-btn:active { background: var(--hover-bg) !important; }
+.chart-bar-group span { font-size: 11px; }
+.stream-row > div:first-child { min-width: 0; overflow: hidden; }
