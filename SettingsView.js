@@ -85,6 +85,15 @@
             } catch (err) {
                 console.warn("[export] Could not fetch photos from IndexedDB:", err);
             }
+            // Include archives from IndexedDB (not localStorage)
+            try {
+                const archives = await window.archivedb.getAll();
+                if (archives && archives.length > 0) {
+                    data["sp_archives"] = JSON.stringify({ _v: 2, data: archives });
+                }
+            } catch (err) {
+                console.warn("[export] Could not fetch archives from IndexedDB:", err);
+            }
             const password = prompt("Set a password to encrypt backup (leave blank for unencrypted):");
             let blob;
             if (password && !window.license.canUseFeature("encryptedBackup")) {
@@ -131,8 +140,8 @@
                     const validKeys = Object.values(window.persistence.getAllRawKeys());
                     window.persistence.clearState();
                     Object.keys(data).forEach(k => {
-                        // Skip photo diary — it goes to IndexedDB, not localStorage
-                        if (k === "sp_photo_diary") return;
+                        // Skip photo diary and archives — they go to IndexedDB, not localStorage
+                        if (k === "sp_photo_diary" || k === "sp_archives") return;
                         if (validKeys.includes(k) && data[k]) localStorage.setItem(k, data[k]);
                     });
                     // Restore photo diary to IndexedDB
@@ -140,7 +149,6 @@
                         try {
                             let photos;
                             const parsed = JSON.parse(data["sp_photo_diary"]);
-                            // Handle versioned envelope or raw array
                             if (parsed && typeof parsed === "object" && "_v" in parsed && Array.isArray(parsed.data)) {
                                 photos = parsed.data;
                             } else if (Array.isArray(parsed)) {
@@ -151,6 +159,23 @@
                             }
                         } catch (err) {
                             console.warn("[import] Could not restore photos to IndexedDB:", err);
+                        }
+                    }
+                    // Restore archives to IndexedDB
+                    if (data["sp_archives"]) {
+                        try {
+                            let arch;
+                            const parsed = JSON.parse(data["sp_archives"]);
+                            if (parsed && typeof parsed === "object" && "_v" in parsed && Array.isArray(parsed.data)) {
+                                arch = parsed.data;
+                            } else if (Array.isArray(parsed)) {
+                                arch = parsed;
+                            }
+                            if (arch && arch.length > 0) {
+                                await window.archivedb.saveAll(arch);
+                            }
+                        } catch (err) {
+                            console.warn("[import] Could not restore archives to IndexedDB:", err);
                         }
                     }
                     showToast("Backup restored! Reloading...");

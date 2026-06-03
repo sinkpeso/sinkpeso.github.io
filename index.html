@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+    <html lang="en" dir="ltr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
@@ -26,6 +26,7 @@
     <script src="persistence.js"></script>
     <script src="license.js"></script>
     <script src="photodb.js"></script>
+    <script src="archivedb.js"></script>
     <script src="constants.js"></script>
     <script src="PhotoDiaryView.js"></script>
     <script src="SettingsView.js"></script>
@@ -37,6 +38,7 @@
     <script src="HistoryView.js"></script>
     <script src="BudgetLimitsView.js"></script>
     <script src="RecentActivitySection.js"></script>
+    <script src="OnboardingScreen.js"></script>
 
         <link rel="apple-touch-icon" href="logosinkpeso.png">
     <link rel="icon" href="logosinkpeso.png" type="image/png">
@@ -561,6 +563,9 @@
         // ── CORE APPLICATION ──────────────────────────────────────────────────
         function App() {
             const [tab, setTab] = useState("dashboard");
+            const [showOnboarding, setShowOnboarding] = useState(() => {
+                try { return window.shouldShowOnboarding && window.shouldShowOnboarding(); } catch(e) { return false; }
+            });
 
             useEffect(() => { window.scrollTo(0, 0); }, [tab]);
 
@@ -574,10 +579,27 @@
             const [incomes, setIncomes] = useState(saved.incomes);
             const [bills, setBills] = useState(saved.bills);
             const [dailyExpenses, setDailyExpenses] = useState(saved.daily);
-            const [archives, setArchives] = useState(saved.archives);
+            const [archives, setArchives] = useState([]);
+            const [archivesLoaded, setArchivesLoaded] = useState(false);
             const [budgets, setBudgets] = useState(saved.budgets);
             const [photoDiary, setPhotoDiary] = useState([]);
             const [photoDiaryLoaded, setPhotoDiaryLoaded] = useState(false);
+
+            // Load archives from IndexedDB on mount, with localStorage migration
+            useEffect(() => {
+                window.archivedb.open().then(() => {
+                    return window.archivedb.migrateFromLS();
+                }).then(() => {
+                    return window.archivedb.getAll();
+                }).then(entries => {
+                    setArchives(entries || []);
+                    setArchivesLoaded(true);
+                }).catch(err => {
+                    console.warn("[app] IndexedDB archive load failed, falling back to localStorage:", err);
+                    try { setArchives(JSON.parse(localStorage.getItem("sp_archives")) || []); } catch { setArchives([]); }
+                    setArchivesLoaded(true);
+                });
+            }, []);
 
             // Load photo diary from IndexedDB on mount, with localStorage migration
             useEffect(() => {
@@ -617,7 +639,17 @@
             useEffect(() => { window.persistence.saveKey("incomes", incomes); }, [incomes]);
             useEffect(() => { window.persistence.saveKey("bills", bills); }, [bills]);
             useEffect(() => { window.persistence.saveKey("daily", dailyExpenses); }, [dailyExpenses]);
-            useEffect(() => { window.persistence.saveKey("archives", archives); }, [archives]);
+            // Persist archives to IndexedDB (not localStorage — snapshots are large)
+            useEffect(() => {
+                if (!archivesLoaded) return;
+                const timer = setTimeout(() => {
+                    window.archivedb.saveAll(archives).catch(err => {
+                        console.warn("[app] IndexedDB archive save failed:", err);
+                        try { localStorage.setItem("sp_archives", JSON.stringify(archives)); } catch(e) {}
+                    });
+                }, 300);
+                return () => clearTimeout(timer);
+            }, [archives, archivesLoaded]);
             useEffect(() => { window.persistence.saveKey("budgets", budgets); }, [budgets]);
             // Persist photo diary to IndexedDB (not localStorage — too large for photos)
             useEffect(() => {
@@ -701,8 +733,13 @@
 
             if (!isUnlocked) return e(PinScreen, { targetPin: settings.pin, onUnlock: () => setIsUnlocked(true) });
 
+            // Onboarding screen for first-time users
+            if (showOnboarding && window.OnboardingScreen) {
+                return e(window.OnboardingScreen, { onDismiss: () => setShowOnboarding(false) });
+            }
+
             // ── LOADING STATE (must be after all hooks) ──
-            if (!photoDiaryLoaded) return e('div', { className: 'pin-screen', style: { background: 'var(--bg-body)' } },
+            if (!photoDiaryLoaded || !archivesLoaded) return e('div', { className: 'pin-screen', style: { background: 'var(--bg-body)' } },
                 e('div', { style: { textAlign: 'center' } },
                     e('div', { style: { fontSize: 48, marginBottom: 16, opacity: 0.5 } }, e(Icon, { name: 'archive', size: 48, color: 'var(--text-muted)' })),
                     e('div', { style: { color: 'var(--text-muted)', fontSize: 14, fontWeight: 600 } }, 'Loading your data...')
@@ -844,7 +881,7 @@
                     ),
 
                     // ── ROW 2: Nav Tabs — Primary + Secondary ─────────────────
-                    e('div', { className: "nav-scroll desktop-tabs", style: { display: "flex", alignItems: "center", overflowX: "auto", padding: "0 12px 0", borderTop: "1px solid var(--border)" } },
+                e('div', { role: "tablist", "aria-label": "Main navigation", className: "nav-scroll desktop-tabs", style: { display: "flex", alignItems: "center", overflowX: "auto", padding: "0 12px 0", borderTop: "1px solid var(--border)" } },
 
                         // Primary tabs
                         [
@@ -874,7 +911,7 @@
                     )
                 ),
                 
-                e('div', { className: "page-wrap", style: { maxWidth: 1140, margin: "0 auto", padding: "clamp(16px, 4vw, 32px) clamp(12px, 4vw, 24px) 80px" } },
+                e('div', { role: "tabpanel", id: "tab-panel-" + tab, className: "page-wrap", style: { maxWidth: 1140, margin: "0 auto", padding: "clamp(16px, 4vw, 32px) clamp(12px, 4vw, 24px) 80px" } },
                     tab === "dashboard" && e(DashboardOverview, { totals, bills, dailyExpenses, budgets, wallets: displayWallets, fc, fc2, incomes, txns, funds, archives, photoDiary, onNavigate: setTab }),
                     tab === "limits" && e(BudgetLimitsView, { budgets, setBudgets, fc, requestConfirm, showToast }),
                     tab === "wallets" && e(WalletsView, { wallets: displayWallets, rawWallets: wallets, setWallets, incomes, dailyExpenses, txns, fc, requestConfirm, showToast }),
@@ -916,10 +953,10 @@ e('footer', {
                 ),
 
                 // ── FLOATING QUICK ADD BUTTON ───────────────────────────────
-                e('button', { className: "fab", title: "Quick Add Expense", onClick: () => setShowQuickAdd(true) }, e(Icon, { name: "plus", size: 26, color: "#030712" })),
+                e('button', { className: "fab", title: "Quick Add Expense", "aria-label": "Quick Add Expense", onClick: () => setShowQuickAdd(true) }, e(Icon, { name: "plus", size: 26, color: "#030712" })),
 
                 // ── MOBILE BOTTOM NAV ───────────────────────────────────────
-                e('div', { className: "bottom-nav" },
+                e('div', { role: "navigation", "aria-label": "Bottom navigation", className: "bottom-nav" },
                     [
                         { id: "dashboard",   icon: "home",    label: "Home" },
                         { id: "daily",       icon: "wallet",  label: "Expenses" },
