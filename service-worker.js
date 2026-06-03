@@ -16,6 +16,8 @@ const ASSETS = [
   './persistence.js',
   './license.js',
   './photodb.js',
+  './constants.js',
+  './PhotoDiaryView.js',
   './service-worker.js',
   './manifest.json',
   './logosinkpeso.png'
