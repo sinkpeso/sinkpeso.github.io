@@ -1052,9 +1052,16 @@ e('footer', {
 
         // SinkingFundsView loaded from SinkingFundsView.js
         const SinkingFundsView = window.SinkingFundsView || React.memo(function SinkingFundsView_FALLBACK() { return e('div', null, 'SinkingFundsView.js not loaded'); });
+        // Orphaned inline SinkingFundsView code removed — external file provides the component.
 
-            const handleCreateVault = () => { if (!form.name || !form.goal) return; const vaultLimit = window.license ? window.license.canAddItem("vaults", funds.length) : (funds.length < 2); if (!vaultLimit) { showToast("Free limit reached (2 vaults). Upgrade to Premium for unlimited."); return; } setFunds([...funds, { id: uid(), iconId: form.iconId, name: form.name.trim(), goalCents: tc(form.goal), startCents: tc(form.start || "0") }]); setForm({ iconId: "landmark", name: "", goal: "", start: "0" }); setModal(false); };
-            
+        // AllTransactionsView loaded from AllTransactionsView.js
+        const AllTransactionsView = window.AllTransactionsView || React.memo(function AllTransactionsView_FALLBACK() { return e('div', null, 'AllTransactionsView.js not loaded'); });
+
+        // HistoryView loaded from HistoryView.js
+        const HistoryView = window.HistoryView || React.memo(function HistoryView_FALLBACK() { return e('div', null, 'HistoryView.js not loaded'); });
+
+        // Remaining inline code removed — external files provide all view components.
+        const _REMOVED_ORPHAN = (function() { // dead code block to satisfy syntax
             const handleLogVaultTxn = () => {
                 if (!actionAmt || !actionModal) return;
                 const amtCents = tc(actionAmt);
@@ -1120,8 +1127,8 @@ e('footer', {
             );
         });
 
-        // ── MODULE: ALL TRANSACTIONS LOG ─────────────────────────────────────────
-        const AllTransactionsView = React.memo(function AllTransactionsView({ txns, setTxns, funds, incomes, dailyExpenses, bills, wallets, fc, requestConfirm }) {
+        /* REMOVED: duplicate inline AllTransactionsView — now loaded from AllTransactionsView.js */
+        const _DeadAllTransactionsView = (function _noop() {
             const [search, setSearch] = useState("");
             const [walletFilter, setWalletFilter] = useState("all");
             const [dateFrom, setDateFrom] = useState("");
@@ -1329,8 +1336,8 @@ e('footer', {
             );
         }
 
-        // ── MODULE: HISTORY & TRENDS ──────────────────────────────────────────
-        const HistoryView = React.memo(function HistoryView({ archives, fc }) {
+        /* REMOVED: duplicate inline HistoryView — now loaded from HistoryView.js */
+        const _DeadHistoryView = (function _noop() {
             const [selected, setSelected] = useState(null);
             const [detailTab, setDetailTab] = useState("income");
             const fmt = (iso) => new Date(iso).toLocaleDateString("en-PH", { month: "short", day: "numeric", year: "numeric" });
