@@ -44,6 +44,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#020810">
 </head>
 <body>
     <div id="root"></div>
@@ -650,10 +651,13 @@
             // ── CLOSE MONTH (hook must be before any conditional return) ────
             const [showCloseModal, setShowCloseModal] = useState(false);
             const [showMoreSheet, setShowMoreSheet] = useState(false);
+            const [sheetDragY, setSheetDragY] = useState(0);
+            const sheetSwipeRef = useRef({ startY: 0, currentY: 0, swiping: false });
             const [showQuickAdd, setShowQuickAdd]   = useState(false);
             const [showUtilMenu, setShowUtilMenu]   = useState(false);
             const [toast, setToast] = useState(null);
             const toastTimer = useRef(null);
+            const haptic = useCallback((pattern) => { try { if (navigator.vibrate) navigator.vibrate(pattern || 10); } catch(e) {} }, []);
             const showToast = useCallback((msg) => {
                 if (toastTimer.current) clearTimeout(toastTimer.current);
                 setToast(msg);
@@ -926,7 +930,7 @@ e('footer', {
 
                 // ── MORE BOTTOM SHEET ───────────────────────────────────────
                 showMoreSheet && e('div', { className: "sheet-overlay", onClick: () => setShowMoreSheet(false) },
-                    e('div', { className: "sheet-panel", onClick: ev => ev.stopPropagation() },
+                    e('div', { className: "sheet-panel" + (sheetDragY > 0 ? " swiping" : "") + (sheetDragY > 120 ? " dismiss" : ""), onClick: ev => ev.stopPropagation(), style: sheetDragY > 0 && sheetDragY <= 120 ? { transform: 'translateY(' + sheetDragY + 'px)' } : undefined, onTouchStart: (ev) => { sheetSwipeRef.current = { startY: ev.touches[0].clientY, currentY: 0, swiping: false }; }, onTouchMove: (ev) => { const dy = ev.touches[0].clientY - sheetSwipeRef.current.startY; if (dy > 10) { sheetSwipeRef.current.swiping = true; setSheetDragY(Math.max(0, dy)); } }, onTouchEnd: () => { if (sheetDragY > 120) { setShowMoreSheet(false); } setSheetDragY(0); sheetSwipeRef.current = { startY: 0, currentY: 0, swiping: false }; } },
                         e('div', { className: "sheet-handle" }),
                         [
                             { id: "budget",       icon: "receipt",      label: "Bills & Income",    sub: "Track bills, income, recurring" },

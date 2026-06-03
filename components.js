@@ -25,7 +25,7 @@
     function PageTitle({ children, sub }) {
         return e('div', { style: { marginBottom: 24 } },
             e('h2', { style: { fontSize: 22, fontWeight: 800, color: "var(--text-main)", lineHeight: 1.15, letterSpacing: "-0.02em" } }, children),
-            sub && e('div', { style: { fontSize: 13, color: "var(--text-muted)", marginTop: 4 } }, sub)
+            sub && e('div', { style: { fontSize: 16, color: "var(--text-muted)", marginTop: 4 } }, sub)
         );
     }
 
@@ -110,7 +110,7 @@
             ...p,
             style: {
                 ...vs[v],
-                borderRadius: 10, padding: "12px 20px", fontSize: 13,
+                borderRadius: 10, padding: "12px 20px", fontSize: 16,
                 fontWeight: 600, cursor: "pointer",
                 border: vs[v].border || "none",
                 transition: "all 0.15s ease", minHeight: 44,
