@@ -661,10 +661,40 @@
             }, []);
 
             // ── CONFIRM DIALOG ───────────────────────────────────────────────────
+            // ── MODAL SCROLL LOCK ──
+            const hasOpenModal = showCloseModal || showQuickAdd || showMoreSheet || confirmState;
+            useEffect(() => {
+                if (hasOpenModal) { document.body.classList.add('modal-open'); }
+                else { document.body.classList.remove('modal-open'); }
+                return () => document.body.classList.remove('modal-open');
+            }, [hasOpenModal]);
+
             const [confirmState, setConfirmState] = useState(null);
             const requestConfirm = useCallback((message, onConfirm) => {
                 setConfirmState({ message, onConfirm });
             }, []);
+
+            // ── KEYBOARD SHORTCUTS ──
+            useEffect(() => {
+                const handleKeyDown = (ev) => {
+                    if (isUnlocked && !ev.target.closest('input, textarea, select')) {
+                        if (ev.key === 'Escape') {
+                            setShowCloseModal(false); setShowQuickAdd(false); setShowMoreSheet(false);
+                            setConfirmState(null);
+                        }
+                    }
+                };
+                window.addEventListener('keydown', handleKeyDown);
+                return () => window.removeEventListener('keydown', handleKeyDown);
+            }, [isUnlocked]);
+
+            // ── LOADING STATE ──
+            if (!photoDiaryLoaded) return e('div', { className: 'pin-screen', style: { background: 'var(--bg-body)' } },
+                e('div', { style: { textAlign: 'center' } },
+                    e('div', { style: { fontSize: 48, marginBottom: 16, opacity: 0.5 } }, e(Icon, { name: 'archive', size: 48, color: 'var(--text-muted)' })),
+                    e('div', { style: { color: 'var(--text-muted)', fontSize: 14, fontWeight: 600 } }, 'Loading your data...')
+                )
+            );
 
             if (!isUnlocked) return e(PinScreen, { targetPin: settings.pin, onUnlock: () => setIsUnlocked(true) });
 
@@ -834,7 +864,7 @@
                 
                 e('div', { className: "page-wrap", style: { maxWidth: 1140, margin: "0 auto", padding: "clamp(16px, 4vw, 32px) clamp(12px, 4vw, 24px) 80px" } },
                     tab === "dashboard" && e(DashboardOverview, { totals, bills, dailyExpenses, budgets, wallets: displayWallets, fc, fc2, incomes, txns, funds, archives, photoDiary, onNavigate: setTab }),
-                    tab === "limits" && e(BudgetLimitsView, { budgets, setBudgets, fc, requestConfirm }),
+                    tab === "limits" && e(BudgetLimitsView, { budgets, setBudgets, fc, requestConfirm, showToast }),
                     tab === "wallets" && e(WalletsView, { wallets: displayWallets, rawWallets: wallets, setWallets, incomes, dailyExpenses, txns, fc, requestConfirm, showToast }),
                     tab === "budget" && e(BudgetBillsView, { incomes, setIncomes, bills, setBills, wallets: displayWallets, setWallets, txns, setTxns, fc, requestConfirm, showToast }),
                     tab === "daily" && e(DailyExpensesView, { dailyExpenses, setDailyExpenses, photoDiary, setPhotoDiary, wallets: displayWallets, setWallets, fc, requestConfirm, showToast }),

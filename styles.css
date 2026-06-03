@@ -356,7 +356,7 @@ input[type="datetime-local"] {
 
 /* ── TOAST ── */
 @media (max-width: 600px) {
-    .toast { bottom: 90px; font-size: 12px; padding: 8px 16px; max-width: 90vw; white-space: normal; text-align: center; }
+    .toast { bottom: 140px; font-size: 12px; padding: 8px 16px; max-width: 90vw; white-space: normal; text-align: center; }
 }
 
 /* ── BOTTOM SHEET ── */
@@ -1112,3 +1112,6 @@ a:active { opacity: 0.8; }
 .nav-btn:active { background: var(--hover-bg) !important; }
 .chart-bar-group span { font-size: 11px; }
 .stream-row > div:first-child { min-width: 0; overflow: hidden; }
+
+/* ── MODAL SCROLL LOCK ── */
+body.modal-open { overflow: hidden; position: fixed; width: 100%; }

@@ -10,7 +10,7 @@
     const { tc, uid } = window.utils;
     const { Field, Inp, Sel, Btn, SLabel, PageTitle } = window.components;
 
-    function BudgetLimitsView({ budgets, setBudgets, fc, requestConfirm }) {
+    function BudgetLimitsView({ budgets, setBudgets, fc, requestConfirm, showToast }) {
         const [category, setCategory] = React.useState("Food");
         const [limitAmt, setLimitAmt] = React.useState("");
         const [openMenu, setOpenMenu] = React.useState(null);
