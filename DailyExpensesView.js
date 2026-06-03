@@ -151,27 +151,57 @@
             e('div', { className: "bento-txn-list" },
                 e(SLabel, { style: { marginBottom: 12, padding: "16px 16px 0" } }, "Spending Log Timeline"),
                 dailyExpenses.length === 0 ? e('div', { style: { color: "var(--text-muted)", fontSize: 13, padding: "14px 0" } }, e("div", { className: "empty-state" }, e("div", { className: "empty-state-icon" }, e(Icon, { name: "wallet", size: 28, color: "var(--text-muted)" })), e("div", { className: "empty-state-title" }, "No expenses yet"), e("div", { className: "empty-state-sub" }, "Tap + to log your first expense."))) :
-                dailyExpenses.map(exp => {
-                    const liveWallet = (wallets || []).find(w => w.id === exp.walletId);
-                    const expWallet = liveWallet ? liveWallet.name : (exp.walletNameSnapshot || null);
-                    return e('div', { key: exp.id, className: "stream-row" },
-                        e('div', null,
-                            e('div', { style: { display: "flex", alignItems: "center", gap: 8 } },
-                                e('span', { style: { fontWeight: 600, color: "var(--text-main)" } }, exp.name),
-                                exp.recurring && exp.recurring !== "none" && e('span', { style: { fontSize: 10, fontWeight: 700, padding: "2px 7px", borderRadius: 5, background: "rgba(99,102,241,0.15)", color: "#818CF8" } }, exp.recurring === "weekly" ? "Weekly" : "Monthly")
+                dailyExpenses.length > 100 && window.VirtualList
+                    ? e('div', { className: "virt-list-container" },
+                        e(SLabel, { style: { padding: "16px 16px 0", marginBottom: 8 } }, `Showing ${dailyExpenses.length} expenses`),
+                        e(window.VirtualList, {
+                            items: dailyExpenses,
+                            itemHeight: 72,
+                            overscan: 5,
+                            renderItem: (exp) => {
+                                const liveWallet = (wallets || []).find(w => w.id === exp.walletId);
+                                const expWallet = liveWallet ? liveWallet.name : (exp.walletNameSnapshot || null);
+                                return e('div', { className: "stream-row" },
+                                    e('div', null,
+                                        e('div', { style: { display: "flex", alignItems: "center", gap: 8 } },
+                                            e('span', { style: { fontWeight: 600, color: "var(--text-main)" } }, exp.name),
+                                            exp.recurring && exp.recurring !== "none" && e('span', { style: { fontSize: 10, fontWeight: 700, padding: "2px 7px", borderRadius: 5, background: "rgba(99,102,241,0.15)", color: "#818CF8" } }, exp.recurring === "weekly" ? "Weekly" : "Monthly")
+                                        ),
+                                        e('div', { style: { fontSize: 11, color: "var(--text-muted)", marginTop: 2 } }, `${exp.date} • ${exp.category}`),
+                                        expWallet && e('div', { style: { fontSize: 11, color: "var(--text-light)", marginTop: 3, display: "flex", alignItems: "center", gap: 4 } },
+                                            e('span', { style: { color: "var(--text-muted)", fontWeight: 500 } }, "Wallet: "),
+                                            e('span', { style: { fontWeight: 700 } }, expWallet)
+                                        )
+                                    ),
+                                    e('div', { style: S.row10 },
+                                        e('div', { style: { fontWeight: 700, color: "#EF4444" } }, `-${fc(exp.amountCents)}`),
+                                        e(DotMenu, { itemId: exp.id, openMenu, setOpenMenu, onEdit: () => openEditExp(exp), onDelete: () => deleteExp(exp.id) })
+                                    )
+                                );
+                            }
+                        })
+                    )
+                    : dailyExpenses.map(exp => {
+                        const liveWallet = (wallets || []).find(w => w.id === exp.walletId);
+                        const expWallet = liveWallet ? liveWallet.name : (exp.walletNameSnapshot || null);
+                        return e('div', { key: exp.id, className: "stream-row" },
+                            e('div', null,
+                                e('div', { style: { display: "flex", alignItems: "center", gap: 8 } },
+                                    e('span', { style: { fontWeight: 600, color: "var(--text-main)" } }, exp.name),
+                                    exp.recurring && exp.recurring !== "none" && e('span', { style: { fontSize: 10, fontWeight: 700, padding: "2px 7px", borderRadius: 5, background: "rgba(99,102,241,0.15)", color: "#818CF8" } }, exp.recurring === "weekly" ? "Weekly" : "Monthly")
+                                ),
+                                e('div', { style: { fontSize: 11, color: "var(--text-muted)", marginTop: 2 } }, `${exp.date} • ${exp.category}`),
+                                expWallet && e('div', { style: { fontSize: 11, color: "var(--text-light)", marginTop: 3, display: "flex", alignItems: "center", gap: 4 } },
+                                    e('span', { style: { color: "var(--text-muted)", fontWeight: 500 } }, "Wallet: "),
+                                    e('span', { style: { fontWeight: 700 } }, expWallet)
+                                )
                             ),
-                            e('div', { style: { fontSize: 11, color: "var(--text-muted)", marginTop: 2 } }, `${exp.date} • ${exp.category}`),
-                            expWallet && e('div', { style: { fontSize: 11, color: "var(--text-light)", marginTop: 3, display: "flex", alignItems: "center", gap: 4 } },
-                                e('span', { style: { color: "var(--text-muted)", fontWeight: 500 } }, "Wallet: "),
-                                e('span', { style: { fontWeight: 700 } }, expWallet)
+                            e('div', { style: S.row10 },
+                                e('div', { style: { fontWeight: 700, color: "#EF4444" } }, `-${fc(exp.amountCents)}`),
+                                e(DotMenu, { itemId: exp.id, openMenu, setOpenMenu, onEdit: () => openEditExp(exp), onDelete: () => deleteExp(exp.id) })
                             )
-                        ),
-                        e('div', { style: S.row10 },
-                            e('div', { style: { fontWeight: 700, color: "#EF4444" } }, `-${fc(exp.amountCents)}`),
-                            e(DotMenu, { itemId: exp.id, openMenu, setOpenMenu, onEdit: () => openEditExp(exp), onDelete: () => deleteExp(exp.id) })
-                        )
-                    );
-                })
+                        );
+                    })
             ),
             editExp && e('div', { className: "modal-overlay" }, e('div', { className: "modal-container" }, e('h3', { style: { marginBottom: 20 } }, "Edit Expense"), e(Field, { label: "Description" }, e(Inp, { value: editForm.name, onChange: ev => setEditForm({ ...editForm, name: ev.target.value }) })), e(Field, { label: "Amount" }, e(Inp, { type: "number", value: editForm.amount, onChange: ev => setEditForm({ ...editForm, amount: ev.target.value }) })), e(Field, { label: "Category" }, e(Sel, { value: editForm.category, onChange: ev => setEditForm({ ...editForm, category: ev.target.value }) }, CATEGORIES.map(c => e('option', { key: c, value: c }, c)))), wallets && wallets.length > 0 && e(Field, { label: "Wallet" }, e(WalletPicker, { wallets, value: editForm.walletId, onChange: v => setEditForm({ ...editForm, walletId: v }) })), e('div', { style: S.formFooter }, e(Btn, { v: "ghost", style: { flex: 1 }, onClick: () => setEditExp(null) }, "Cancel"), e(Btn, { v: "accent", style: { flex: 1 }, onClick: () => saveEditExp(false) }, "Save"))))
         );
