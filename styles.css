@@ -342,6 +342,13 @@ input[type="datetime-local"] {
 }
 
 /* ── BOTTOM NAV ── */
+/* Hide secondary tabs (Wallets, Limits, Logs, History) on mobile —
+   they're accessible via the "More" bottom sheet */
+@media (max-width: 768px) {
+    .desktop-tabs .nav-btn:nth-child(n+7) { display: none; }
+    .desktop-tabs > div[style*="width: 1px"] { display: none; }
+}
+
 @media (max-width: 768px) {
     .bottom-nav { padding: 4px 0 env(safe-area-inset-bottom, 8px); }
     .bnav-btn { padding: 8px 2px 6px; font-size: 10px; }

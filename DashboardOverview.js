@@ -79,6 +79,13 @@
         const daysLeft   = Math.max(1, daysInMo - today.getDate());
         const safeDaily  = totals.netAvailable > 0 ? Math.floor(totals.netAvailable / daysLeft) : 0;
 
+        // Spending trend: compare current spending to last month's archive
+        const prevArchive = (archives || []).length > 0 ? archives[0] : null;
+        const currentSpent = totals.totalDailySpent + totals.paidBills;
+        const trendPct = prevArchive && prevArchive.totalSpent > 0
+            ? Math.round(((currentSpent - prevArchive.totalSpent) / prevArchive.totalSpent) * 100)
+            : null;
+
         const ringColor  = spendPct > 0.8 ? 'var(--bn-red)' : 'var(--bn-green)';
         const ringHex    = spendPct > 0.8 ? '#FF3D5A' : '#00FF87';
         const circumf    = 50 * 2 * Math.PI;
@@ -195,7 +202,15 @@
                                 color: ringHex, textShadow: glow(ringHex, 0.4) } },
                                 `${Math.round(spendPct * 100)}%`),
                             e('span', { style: { fontSize: 10, color: 'var(--text-muted)',
-                                fontWeight: 600, marginTop: 2 } }, 'of income')
+                                fontWeight: 600, marginTop: 2 } }, 'of income'),
+                            trendPct !== null && e('span', { style: {
+                                fontSize: 10, fontWeight: 700, marginTop: 4,
+                                color: trendPct > 0 ? 'var(--bn-red)' : trendPct < 0 ? 'var(--bn-green)' : 'var(--text-muted)',
+                                display: 'flex', alignItems: 'center', gap: 3
+                            } },
+                                trendPct > 0 ? '↑' : trendPct < 0 ? '↓' : '→',
+                                ` ${Math.abs(trendPct)}% vs last month`
+                            )
                         )
                     ),
 
