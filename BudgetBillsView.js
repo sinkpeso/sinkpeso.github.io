@@ -131,20 +131,40 @@
                     ),
                     e(SLabel, { style: { marginBottom: 12 } }, "Income History List"),
                     incomes.length === 0 ? e('div', { style: { color: "var(--text-muted)", fontSize: 13, padding: "10px 0" } }, e("div", { className: "empty-state" }, e("div", { className: "empty-state-icon" }, e(Icon, { name: "inbox", size: 28, color: "var(--text-muted)" })), e("div", { className: "empty-state-title" }, "No income added"), e("div", { className: "empty-state-sub" }, "Add a salary, freelance, or any cash in."))) :
-                    incomes.map(i => {
-                        const srcWallet = (wallets||[]).find(w => w.id === i.walletId);
-                        return e('div', { key: i.id, className: "stream-row" },
-                            e('div', null,
-                                e('div', { style: { fontWeight: 600 } }, i.name),
-                                e('div', { style: { display:"flex", alignItems:"center", gap:6, marginTop:2 } },
-                                    e('div', { style: { fontSize: 11, color: "var(--text-muted)" } }, i.date),
-                                    srcWallet && e('div', { style: { display:"flex", alignItems:"center", gap:4, fontSize:10, fontWeight:700, color: srcWallet.color||"#00E676", background:"rgba(0,0,0,0.15)", padding:"2px 7px", borderRadius:6 } },
-                                        e('div', { style:{ width:6, height:6, borderRadius:"50%", background: srcWallet.color||"#00E676" } }), srcWallet.name)
-                                )
-                            ),
-                            e('div', { style: S.row10 }, e('div', { style: { color: "#00E676", fontWeight: 700 } }, `+${fc(i.amountCents)}`), e(DotMenu, { itemId: i.id, openMenu: openMenuInc, setOpenMenu: setOpenMenuInc, onEdit: () => openEditIncome(i), onDelete: () => deleteIncome(i.id) }))
-                        );
-                    })
+                    incomes.length > 100 && window.VirtualList
+                        ? e(window.VirtualList, {
+                            items: incomes,
+                            itemHeight: 56,
+                            overscan: 5,
+                            renderItem: (i) => {
+                                const srcWallet = (wallets||[]).find(w => w.id === i.walletId);
+                                return e('div', { className: "stream-row" },
+                                    e('div', null,
+                                        e('div', { style: { fontWeight: 600 } }, i.name),
+                                        e('div', { style: { display:"flex", alignItems:"center", gap:6, marginTop:2 } },
+                                            e('div', { style: { fontSize: 11, color: "var(--text-muted)" } }, i.date),
+                                            srcWallet && e('div', { style: { display:"flex", alignItems:"center", gap:4, fontSize:10, fontWeight:700, color: srcWallet.color||"#00E676", background:"rgba(0,0,0,0.15)", padding:"2px 7px", borderRadius:6 } },
+                                                e('div', { style:{ width:6, height:6, borderRadius:"50%", background: srcWallet.color||"#00E676" } }), srcWallet.name)
+                                        )
+                                    ),
+                                    e('div', { style: S.row10 }, e('div', { style: { color: "#00E676", fontWeight: 700 } }, `+${fc(i.amountCents)}`), e(DotMenu, { itemId: i.id, openMenu: openMenuInc, setOpenMenu: setOpenMenuInc, onEdit: () => openEditIncome(i), onDelete: () => deleteIncome(i.id) }))
+                                );
+                            }
+                        })
+                        : incomes.map(i => {
+                            const srcWallet = (wallets||[]).find(w => w.id === i.walletId);
+                            return e('div', { key: i.id, className: "stream-row" },
+                                e('div', null,
+                                    e('div', { style: { fontWeight: 600 } }, i.name),
+                                    e('div', { style: { display:"flex", alignItems:"center", gap:6, marginTop:2 } },
+                                        e('div', { style: { fontSize: 11, color: "var(--text-muted)" } }, i.date),
+                                        srcWallet && e('div', { style: { display:"flex", alignItems:"center", gap:4, fontSize:10, fontWeight:700, color: srcWallet.color||"#00E676", background:"rgba(0,0,0,0.15)", padding:"2px 7px", borderRadius:6 } },
+                                            e('div', { style:{ width:6, height:6, borderRadius:"50%", background: srcWallet.color||"#00E676" } }), srcWallet.name)
+                                    )
+                                ),
+                                e('div', { style: S.row10 }, e('div', { style: { color: "#00E676", fontWeight: 700 } }, `+${fc(i.amountCents)}`), e(DotMenu, { itemId: i.id, openMenu: openMenuInc, setOpenMenu: setOpenMenuInc, onEdit: () => openEditIncome(i), onDelete: () => deleteIncome(i.id) }))
+                            );
+                        })
                 ),
                 e('div', { className: "premium-panel" },
                     e(SLabel, { style: { marginBottom: 16 } }, "Add Due Bill"),
