@@ -1,0 +1,10 @@
+{
+  "name": "sinkpeso",
+  "version": "2.1.0",
+  "private": true,
+  "description": "Premium offline budget tracker for the Philippines",
+  "scripts": {
+    "test": "node tests/utils.test.js && node tests/finance.test.js && node tests/selectors.test.js",
+    "test:watch": "node --watch tests/run-all.js"
+  }
+}

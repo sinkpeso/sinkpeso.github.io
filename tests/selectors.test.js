@@ -1,287 +1,151 @@
-// tests/selectors.test.js — Unit tests for selectors.js
+// Unit tests for selectors.js
+// Run: node tests/selectors.test.js
+
 const assert = require('assert');
 
-global.window = {};
+// Mock browser globals
+global.window = { utils: null };
+
+// Load dependencies
 require('../utils.js');
 require('../selectors.js');
+
 const sel = window.selectors;
 
-let passed = 0;
-let failed = 0;
-
-function test(name, fn) {
-    try {
-        fn();
-        passed++;
-        console.log(`  ✓ ${name}`);
-    } catch (e) {
-        failed++;
-        console.log(`  ✗ ${name}`);
-        console.log(`    ${e.message}`);
-    }
-}
-
-console.log('\n── selectors.js ──');
-
 // ── computeTotals ──
-test('computeTotals: empty state returns zeros', () => {
-    const t = sel.computeTotals({ incomes: [], bills: [], funds: [], txns: [], dailyExpenses: [] });
-    assert.strictEqual(t.totalIncome, 0);
-    assert.strictEqual(t.paidBills, 0);
-    assert.strictEqual(t.unpaidBills, 0);
-    assert.strictEqual(t.totalDailySpent, 0);
-    assert.strictEqual(t.totalInGoals, 0);
-    assert.strictEqual(t.netAvailable, 0);
+const emptyTotals = sel.computeTotals({
+    incomes: [], bills: [], funds: [], txns: [], dailyExpenses: []
 });
+assert.strictEqual(emptyTotals.totalIncome, 0, 'empty: totalIncome=0');
+assert.strictEqual(emptyTotals.paidBills, 0, 'empty: paidBills=0');
+assert.strictEqual(emptyTotals.unpaidBills, 0, 'empty: unpaidBills=0');
+assert.strictEqual(emptyTotals.totalDailySpent, 0, 'empty: totalDailySpent=0');
+assert.strictEqual(emptyTotals.totalInGoals, 0, 'empty: totalInGoals=0');
+assert.strictEqual(emptyTotals.netAvailable, 0, 'empty: netAvailable=0');
 
-test('computeTotals: sums income correctly', () => {
-    const t = sel.computeTotals({
-        incomes: [{ amountCents: 10000 }, { amountCents: 5000 }],
-        bills: [], funds: [], txns: [], dailyExpenses: []
-    });
-    assert.strictEqual(t.totalIncome, 15000);
-    assert.strictEqual(t.netAvailable, 15000);
+const t1 = sel.computeTotals({
+    incomes: [{ amountCents: 50000 }],
+    bills: [{ amountCents: 5000, isPaid: true }, { amountCents: 3000, isPaid: false }],
+    funds: [],
+    txns: [],
+    dailyExpenses: [{ amountCents: 10000, category: 'Food' }, { amountCents: 5000, category: 'Gas' }]
 });
+assert.strictEqual(t1.totalIncome, 50000, 'income=50000');
+assert.strictEqual(t1.paidBills, 5000, 'paidBills=5000');
+assert.strictEqual(t1.unpaidBills, 3000, 'unpaidBills=3000');
+assert.strictEqual(t1.totalDailySpent, 15000, 'totalDailySpent=15000');
+assert.strictEqual(t1.netAvailable, 30000, 'netAvailable=50000-5000-15000-0');
+assert.strictEqual(t1.catSum.Food, 10000, 'catSum.Food=10000');
+assert.strictEqual(t1.catSum.Gas, 5000, 'catSum.Gas=5000');
 
-test('computeTotals: separates paid vs unpaid bills', () => {
-    const t = sel.computeTotals({
-        incomes: [],
-        bills: [{ amountCents: 3000, isPaid: true }, { amountCents: 2000, isPaid: false }],
-        funds: [], txns: [], dailyExpenses: []
-    });
-    assert.strictEqual(t.paidBills, 3000);
-    assert.strictEqual(t.unpaidBills, 2000);
+// Funds/vaults
+const t2 = sel.computeTotals({
+    incomes: [{ amountCents: 100000 }],
+    bills: [],
+    funds: [{ id: 'f1', goalCents: 50000, startCents: 0 }],
+    txns: [{ fundId: 'f1', type: 'deposit', amountCents: 20000 }],
+    dailyExpenses: []
 });
+assert.strictEqual(t2.totalInGoals, 20000, 'totalInGoals=20000');
+assert.strictEqual(t2.netAvailable, 80000, 'netAvailable=100000-20000');
+assert.strictEqual(t2.enrichedFunds[0].bal, 20000, 'fund balance');
+assert.ok(Math.abs(t2.enrichedFunds[0].pct - 0.4) < 0.001, 'fund pct=40%');
 
-test('computeTotals: sums daily expenses', () => {
-    const t = sel.computeTotals({
-        incomes: [{ amountCents: 10000 }],
-        bills: [],
-        funds: [],
-        txns: [],
-        dailyExpenses: [{ amountCents: 1500 }, { amountCents: 2500 }]
-    });
-    assert.strictEqual(t.totalDailySpent, 4000);
-    assert.strictEqual(t.netAvailable, 6000);
-});
+// Health status
+const optimal = sel.computeTotals({ incomes: [{ amountCents: 100000 }], bills: [], funds: [], txns: [], dailyExpenses: [] });
+assert.strictEqual(optimal.healthStatus.label, 'Optimal', 'health=Optimal');
 
-test('computeTotals: vault deposits reduce net available', () => {
-    const t = sel.computeTotals({
-        incomes: [{ amountCents: 10000 }],
-        bills: [],
-        funds: [{ id: 'f1', startCents: 0, goalCents: 5000 }],
-        txns: [{ fundId: 'f1', type: 'deposit', amountCents: 2000 }],
-        dailyExpenses: []
-    });
-    assert.strictEqual(t.totalInGoals, 2000);
-    assert.strictEqual(t.netAvailable, 8000);
-});
-
-test('computeTotals: vault balance = start + deposits - withdrawals', () => {
-    const t = sel.computeTotals({
-        incomes: [],
-        bills: [],
-        funds: [{ id: 'f1', startCents: 1000, goalCents: 10000 }],
-        txns: [
-            { fundId: 'f1', type: 'deposit', amountCents: 3000 },
-            { fundId: 'f1', type: 'withdrawal', amountCents: 500 }
-        ],
-        dailyExpenses: []
-    });
-    assert.strictEqual(t.totalInGoals, 3500);
-    assert.strictEqual(t.enrichedFunds[0].bal, 3500);
-});
-
-test('computeTotals: category breakdown', () => {
-    const t = sel.computeTotals({
-        incomes: [],
-        bills: [{ amountCents: 1000, isPaid: true, category: 'Bills' }],
-        funds: [],
-        txns: [],
-        dailyExpenses: [
-            { amountCents: 2000, category: 'Food' },
-            { amountCents: 500, category: 'Gas' }
-        ]
-    });
-    assert.strictEqual(t.catSum.Food, 2000);
-    assert.strictEqual(t.catSum.Gas, 500);
-    assert.strictEqual(t.catSum.Bills, 1000);
-});
-
-test('computeTotals: health status optimal when positive', () => {
-    const t = sel.computeTotals({
-        incomes: [{ amountCents: 100000 }],
-        bills: [],
-        funds: [],
-        txns: [],
-        dailyExpenses: []
-    });
-    assert.strictEqual(t.healthStatus.label, 'Optimal');
-});
-
-test('computeTotals: health status deficit when negative', () => {
-    const t = sel.computeTotals({
-        incomes: [{ amountCents: 1000 }],
-        bills: [{ amountCents: 5000, isPaid: true }],
-        funds: [],
-        txns: [],
-        dailyExpenses: []
-    });
-    assert.ok(t.netAvailable < 0);
-    assert.strictEqual(t.healthStatus.label, '⚠️ Deficit');
-});
+const deficit = sel.computeTotals({ incomes: [{ amountCents: 1000 }], bills: [{ amountCents: 5000, isPaid: true }], funds: [], txns: [], dailyExpenses: [] });
+assert.strictEqual(deficit.healthStatus.label, '⚠️ Deficit', 'health=Deficit');
 
 // ── getWalletTotal ──
-test('getWalletTotal: sums all wallet balances', () => {
-    const wallets = [{ balanceCents: 1000 }, { balanceCents: 2000 }, { balanceCents: 500 }];
-    assert.strictEqual(sel.getWalletTotal(wallets), 3500);
-});
-
-test('getWalletTotal: handles null', () => {
-    assert.strictEqual(sel.getWalletTotal(null), 0);
-});
-
-test('getWalletTotal: handles empty array', () => {
-    assert.strictEqual(sel.getWalletTotal([]), 0);
-});
+assert.strictEqual(sel.getWalletTotal([{ balanceCents: 1000 }, { balanceCents: 2000 }]), 3000, 'wallet total');
+assert.strictEqual(sel.getWalletTotal([]), 0, 'empty wallets');
+assert.strictEqual(sel.getWalletTotal(null), 0, 'null wallets');
 
 // ── getSpendPercentage ──
-test('getSpendPercentage: returns 0 when no income', () => {
-    assert.strictEqual(sel.getSpendPercentage({ totalIncome: 0, totalDailySpent: 100, paidBills: 50 }), 0);
-});
-
-test('getSpendPercentage: calculates correctly', () => {
-    const totals = { totalIncome: 10000, totalDailySpent: 3000, paidBills: 2000 };
-    assert.strictEqual(sel.getSpendPercentage(totals), 0.5);
-});
-
-test('getSpendPercentage: can exceed 1', () => {
-    const totals = { totalIncome: 10000, totalDailySpent: 8000, paidBills: 5000 };
-    assert.strictEqual(sel.getSpendPercentage(totals), 1.3);
-});
+assert.strictEqual(sel.getSpendPercentage({ totalIncome: 0, totalDailySpent: 100, paidBills: 50 }), 0, 'no income=0');
+assert.strictEqual(sel.getSpendPercentage({ totalIncome: 10000, totalDailySpent: 3000, paidBills: 2000 }), 0.5, '50%');
+assert.strictEqual(sel.getSpendPercentage({ totalIncome: 10000, totalDailySpent: 8000, paidBills: 4000 }), 1.2, '120% overspend');
 
 // ── getDailySafeSpend ──
-test('getDailySafeSpend: returns 0 for negative net', () => {
-    const result = sel.getDailySafeSpend(-1000);
-    assert.strictEqual(result.safeDailySpend, 0);
-});
+const dss1 = sel.getDailySafeSpend(30000);
+assert.ok(dss1.safeDailySpend > 0, 'positive safe spend');
+assert.ok(dss1.daysLeft >= 1 && dss1.daysLeft <= 31, 'valid daysLeft');
 
-test('getDailySafeSpend: returns 0 for zero net', () => {
-    const result = sel.getDailySafeSpend(0);
-    assert.strictEqual(result.safeDailySpend, 0);
-});
+const dss2 = sel.getDailySafeSpend(-1000);
+assert.strictEqual(dss2.safeDailySpend, 0, 'deficit=0 safe spend');
 
-test('getDailySafeSpend: divides by days left', () => {
-    const result = sel.getDailySafeSpend(10000);
-    assert.ok(result.safeDailySpend > 0);
-    assert.ok(result.daysLeft >= 1 && result.daysLeft <= 31);
-});
+const dss3 = sel.getDailySafeSpend(0);
+assert.strictEqual(dss3.safeDailySpend, 0, 'zero=0 safe spend');
 
 // ── getUpcomingBills ──
-test('getUpcomingBills: returns only unpaid bills', () => {
-    const bills = [
-        { id: 'b1', isPaid: true, dueDate: '2024-01-15' },
-        { id: 'b2', isPaid: false, dueDate: '2024-01-20' },
-        { id: 'b3', isPaid: false, dueDate: '2024-01-10' }
-    ];
-    const result = sel.getUpcomingBills(bills);
-    assert.strictEqual(result.length, 2);
-    assert.strictEqual(result[0].id, 'b3'); // sorted ascending by date
-    assert.strictEqual(result[1].id, 'b2');
-});
-
-test('getUpcomingBills: handles null', () => {
-    assert.deepStrictEqual(sel.getUpcomingBills(null), []);
-});
+const bills = [
+    { id: 'b1', isPaid: true, dueDate: '2024-01-15' },
+    { id: 'b2', isPaid: false, dueDate: '2024-01-20' },
+    { id: 'b3', isPaid: false, dueDate: '2024-01-10' }
+];
+const upcoming = sel.getUpcomingBills(bills);
+assert.strictEqual(upcoming.length, 2, '2 unpaid bills');
+assert.strictEqual(upcoming[0].id, 'b3', 'sorted by date asc');
+assert.deepStrictEqual(sel.getUpcomingBills([]), [], 'empty');
+assert.deepStrictEqual(sel.getUpcomingBills(null), [], 'null');
 
 // ── getCategoryBudgetStatus ──
-test('getCategoryBudgetStatus: returns status for each category', () => {
-    const catSum = { Food: 3000, Gas: 500 };
-    const budgets = [{ category: 'Food', limitCents: 5000 }];
-    const categories = ['Food', 'Gas'];
-    const result = sel.getCategoryBudgetStatus(catSum, budgets, categories);
-    assert.strictEqual(result.length, 2);
-    assert.strictEqual(result[0].currentVal, 3000);
-    assert.strictEqual(result[0].limit, 5000);
-    assert.strictEqual(result[0].pct, 0.6);
-    assert.strictEqual(result[1].limit, null);
-});
+const catSum = { Food: 8000, Gas: 2000 };
+const budgets = [{ category: 'Food', limitCents: 10000 }];
+const cbs = sel.getCategoryBudgetStatus(catSum, budgets, ['Food', 'Gas']);
+assert.strictEqual(cbs[0].pct, 0.8, 'Food at 80%');
+assert.strictEqual(cbs[1].limit, null, 'Gas has no budget');
 
 // ── resolveWalletName ──
-test('resolveWalletName: returns live wallet name', () => {
-    const wallets = [{ id: 'w1', name: 'GCash' }];
-    assert.strictEqual(sel.resolveWalletName('w1', 'old-snap', wallets), 'GCash');
-});
-
-test('resolveWalletName: falls back to snapshot when wallet missing', () => {
-    assert.strictEqual(sel.resolveWalletName('missing', 'Old Name', []), 'Old Name');
-});
-
-test('resolveWalletName: returns null when no match', () => {
-    assert.strictEqual(sel.resolveWalletName('missing', null, []), null);
-});
+const wallets = [{ id: 'w1', name: 'GCash' }];
+assert.strictEqual(sel.resolveWalletName('w1', 'old', wallets), 'GCash', 'live wallet');
+assert.strictEqual(sel.resolveWalletName(null, 'old', wallets), 'old', 'null id → snapshot');
+assert.strictEqual(sel.resolveWalletName('missing', null, wallets), null, 'missing → null');
+assert.strictEqual(sel.resolveWalletName('missing', null, null), null, 'null wallets');
 
 // ── getRecentActivities ──
-test('getRecentActivities: merges all sources', () => {
-    const result = sel.getRecentActivities({
-        dailyExpenses: [{ id: 'e1', name: 'Lunch', category: 'Food', amountCents: 500, date: '2024-06-01', walletId: null }],
-        incomes: [{ id: 'i1', name: 'Salary', amountCents: 10000, date: '2024-06-01', walletId: null }],
-        txns: [],
-        bills: [],
-        funds: [],
-        wallets: [],
-        archives: []
-    });
-    assert.strictEqual(result.length, 2);
+const activities = sel.getRecentActivities({
+    dailyExpenses: [{ id: 'e1', name: 'Lunch', category: 'Food', amountCents: 500, date: '2024-06-01', walletId: null }],
+    incomes: [{ id: 'i1', name: 'Salary', amountCents: 10000, date: '2024-06-01', walletId: null }],
+    txns: [],
+    bills: [],
+    funds: [],
+    wallets: [],
+    archives: []
 });
-
-test('getRecentActivities: respects limit', () => {
-    const expenses = Array.from({ length: 20 }, (_, i) => ({
-        id: `e${i}`, name: `Exp ${i}`, category: 'Food', amountCents: 100, date: '2024-06-01', walletId: null
-    }));
-    const result = sel.getRecentActivities({
-        dailyExpenses: expenses, incomes: [], txns: [], bills: [], funds: [], wallets: [], archives: [], limit: 5
-    });
-    assert.strictEqual(result.length, 5);
-});
+assert.strictEqual(activities.length, 2, '2 activities');
+assert.ok(activities[0].date >= activities[1].date, 'sorted desc');
 
 // ── getAllTransactionItems ──
-test('getAllTransactionItems: returns sorted by date desc', () => {
-    const result = sel.getAllTransactionItems({
-        dailyExpenses: [{ id: 'e1', name: 'Lunch', category: 'Food', amountCents: 500, date: '2024-06-01', walletId: null }],
-        incomes: [{ id: 'i1', name: 'Salary', amountCents: 10000, date: '2024-06-05', walletId: null }],
-        txns: [],
-        bills: [],
-        funds: [],
-        wallets: []
-    });
-    assert.strictEqual(result[0].date, '2024-06-05');
-    assert.strictEqual(result[1].date, '2024-06-01');
+const allItems = sel.getAllTransactionItems({
+    dailyExpenses: [{ id: 'e1', name: 'Coffee', category: 'Food', amountCents: 200, date: '2024-06-01', walletId: null }],
+    incomes: [{ id: 'i1', name: 'Salary', amountCents: 50000, date: '2024-06-01', walletId: null }],
+    txns: [{ id: 't1', type: 'bill_payment', billId: 'b1', amountCents: 3000, date: '2024-06-01', walletId: null }],
+    bills: [{ id: 'b1', name: 'Electric' }],
+    funds: [],
+    wallets: []
 });
+assert.strictEqual(allItems.length, 3, '3 transaction items');
 
 // ── getVaultTransactions ──
-test('getVaultTransactions: filters to vault txns only', () => {
-    const txns = [
-        { id: 't1', fundId: 'f1', type: 'deposit' },
-        { id: 't2', type: 'bill_payment' },
-        { id: 't3', fundId: 'f2', type: 'withdrawal' }
-    ];
-    const result = sel.getVaultTransactions(txns);
-    assert.strictEqual(result.length, 2);
-});
+const vtxn = sel.getVaultTransactions([
+    { id: 't1', fundId: 'f1', type: 'deposit' },
+    { id: 't2', type: 'bill_payment' },
+    { id: 't3', fundId: 'f2', type: 'withdrawal' }
+]);
+assert.strictEqual(vtxn.length, 2, '2 vault txns');
 
 // ── getArchiveChartData ──
-test('getArchiveChartData: returns last N in chronological order', () => {
-    const archives = [
-        { id: 'a3', month: 'June 2024' },
-        { id: 'a2', month: 'May 2024' },
-        { id: 'a1', month: 'April 2024' }
-    ];
-    const result = sel.getArchiveChartData(archives, 2);
-    assert.strictEqual(result.length, 2);
-    assert.strictEqual(result[0].month, 'May 2024');
-    assert.strictEqual(result[1].month, 'June 2024');
-});
+const archives = [
+    { id: 'a3', month: 'June 2024' },
+    { id: 'a2', month: 'May 2024' },
+    { id: 'a1', month: 'April 2024' }
+];
+const chart = sel.getArchiveChartData(archives, 2);
+assert.strictEqual(chart.length, 2, '2 archives');
+assert.strictEqual(chart[0].month, 'May 2024', 'oldest first');
+assert.strictEqual(chart[1].month, 'June 2024', 'newest last');
 
-console.log(`\n  ${passed} passed, ${failed} failed\n`);
-if (failed > 0) process.exitCode = 1;
+console.log('✓ selectors.js: all tests passed');

@@ -1,29 +1,16 @@
-// photodb.js — IndexedDB storage layer for SINKPESO Photo Diary
+// photodb.js — IndexedDB wrapper for SINKPESO photo diary storage
 //
-// WHY INDEXEDDB:
-//   localStorage has a 5-10MB hard limit. Base64-encoded photos hit this
-//   at ~50-100 entries. IndexedDB has no practical limit (hundreds of MB)
-//   and supports Blob storage (no 33% base64 overhead).
+// WHY: localStorage has a ~5-10MB limit. Base64-encoded photos hit this fast.
+//      IndexedDB offers hundreds of MB with no per-key size limit.
 //
 // ARCHITECTURE:
-//   window.photodb = {
-//     open()           — open/create the database (returns Promise)
-//     getAll()         — get all photo entries (returns Promise<Array>)
-//     get(id)          — get one entry by id (returns Promise<Object|null>)
-//     save(entry)      — insert or update one entry (returns Promise)
-//     remove(id)       — delete one entry by id (returns Promise)
-//     clear()          — delete all entries (returns Promise)
-//     count()          — count entries (returns Promise<number>)
-//     getUsage()       — estimate storage usage (returns Promise<{used, quota, pct}>)
-//     migrateFromLS()  — move localStorage photos to IndexedDB (returns Promise)
-//   }
+//   - Async API (Promise-based) wrapping IndexedDB
+//   - Single object store: "photos" keyed by entry id
+//   - Migration helper to move existing localStorage data
+//   - Falls back gracefully if IndexedDB unavailable
 //
-// SCHEMA:
-//   Each photo entry: { id, expenseId, imageData, amountCents, name, category, date, note, walletId }
-//   imageData is stored as a base64 data URL (same as current). Future: convert to Blob.
-//
-// DEPENDENCIES: none (uses native IndexedDB API)
-// LOAD ORDER: must load before index.html's main <script> block
+// DEPENDENCIES: none (pure browser APIs)
+// LOAD ORDER: must come before index.html main script
 
 (function () {
     "use strict";
@@ -33,216 +20,177 @@
     var STORE_NAME = "photos";
     var LS_KEY = "sp_photo_diary";
 
-    var _db = null; // cached database reference
+    var _db = null; // cached connection
 
     // ── OPEN DATABASE ──────────────────────────────────────────────────────
     function open() {
         if (_db) return Promise.resolve(_db);
-
         return new Promise(function (resolve, reject) {
-            var request = indexedDB.open(DB_NAME, DB_VERSION);
-
-            request.onupgradeneeded = function (event) {
-                var db = event.target.result;
+            if (!window.indexedDB) {
+                console.warn("[photodb] IndexedDB not available");
+                return reject(new Error("IndexedDB not supported"));
+            }
+            var req = indexedDB.open(DB_NAME, DB_VERSION);
+            req.onupgradeneeded = function (ev) {
+                var db = ev.target.result;
                 if (!db.objectStoreNames.contains(STORE_NAME)) {
-                    var store = db.createObjectStore(STORE_NAME, { keyPath: "id" });
-                    store.createIndex("expenseId", "expenseId", { unique: false });
-                    store.createIndex("date", "date", { unique: false });
+                    db.createObjectStore(STORE_NAME, { keyPath: "id" });
                 }
             };
-
-            request.onsuccess = function (event) {
-                _db = event.target.result;
+            req.onsuccess = function (ev) {
+                _db = ev.target.result;
                 resolve(_db);
             };
-
-            request.onerror = function (event) {
-                console.warn("[photodb] Failed to open IndexedDB:", event.target.error);
-                reject(event.target.error);
+            req.onerror = function (ev) {
+                console.warn("[photodb] open failed:", ev.target.error);
+                reject(ev.target.error);
             };
         });
     }
 
-    // ── GET ALL PHOTO ENTRIES ──────────────────────────────────────────────
+    // ── GET ALL PHOTOS ─────────────────────────────────────────────────────
     function getAll() {
         return open().then(function (db) {
             return new Promise(function (resolve, reject) {
                 var tx = db.transaction(STORE_NAME, "readonly");
                 var store = tx.objectStore(STORE_NAME);
-                var request = store.getAll();
-
-                request.onsuccess = function () { resolve(request.result || []); };
-                request.onerror = function () { reject(request.error); };
+                var req = store.getAll();
+                req.onsuccess = function () { resolve(req.result || []); };
+                req.onerror = function () { reject(req.error); };
             });
         });
     }
 
-    // ── GET ONE ENTRY ─────────────────────────────────────────────────────
-    function get(id) {
-        return open().then(function (db) {
-            return new Promise(function (resolve, reject) {
-                var tx = db.transaction(STORE_NAME, "readonly");
-                var store = tx.objectStore(STORE_NAME);
-                var request = store.get(id);
-
-                request.onsuccess = function () { resolve(request.result || null); };
-                request.onerror = function () { reject(request.error); };
-            });
-        });
-    }
-
-    // ── SAVE ONE ENTRY (upsert) ──────────────────────────────────────────
-    function save(entry) {
-        return open().then(function (db) {
-            return new Promise(function (resolve, reject) {
-                var tx = db.transaction(STORE_NAME, "readwrite");
-                var store = tx.objectStore(STORE_NAME);
-                var request = store.put(entry);
-
-                request.onsuccess = function () { resolve(); };
-                request.onerror = function () { reject(request.error); };
-            });
-        });
-    }
-
-    // ── SAVE MULTIPLE ENTRIES (batch upsert) ─────────────────────────────
+    // ── SAVE ALL PHOTOS (bulk upsert) ─────────────────────────────────────
+    // Replaces entire collection — used for full sync from React state
     function saveAll(entries) {
         return open().then(function (db) {
             return new Promise(function (resolve, reject) {
                 var tx = db.transaction(STORE_NAME, "readwrite");
                 var store = tx.objectStore(STORE_NAME);
-                entries.forEach(function (entry) { store.put(entry); });
-
+                // Clear existing, then put all new entries
+                store.clear();
+                (entries || []).forEach(function (entry) {
+                    store.put(entry);
+                });
                 tx.oncomplete = function () { resolve(); };
                 tx.onerror = function () { reject(tx.error); };
             });
         });
     }
 
-    // ── DELETE ONE ENTRY ──────────────────────────────────────────────────
-    function remove(id) {
+    // ── SAVE SINGLE PHOTO ──────────────────────────────────────────────────
+    function save(entry) {
         return open().then(function (db) {
             return new Promise(function (resolve, reject) {
                 var tx = db.transaction(STORE_NAME, "readwrite");
-                var store = tx.objectStore(STORE_NAME);
-                var request = store.delete(id);
-
-                request.onsuccess = function () { resolve(); };
-                request.onerror = function () { reject(request.error); };
+                tx.objectStore(STORE_NAME).put(entry);
+                tx.oncomplete = function () { resolve(); };
+                tx.onerror = function () { reject(tx.error); };
             });
         });
     }
 
-    // ── DELETE MULTIPLE ENTRIES ───────────────────────────────────────────
-    function removeAll(ids) {
+    // ── DELETE SINGLE PHOTO ────────────────────────────────────────────────
+    function remove(id) {
+        return open().then(function (db) {
+            return new Promise(function (resolve, reject) {
+                var tx = db.transaction(STORE_NAME, "readwrite");
+                tx.objectStore(STORE_NAME).delete(id);
+                tx.oncomplete = function () { resolve(); };
+                tx.onerror = function () { reject(tx.error); };
+            });
+        });
+    }
+
+    // ── DELETE MULTIPLE PHOTOS ─────────────────────────────────────────────
+    function removeByIds(ids) {
         return open().then(function (db) {
             return new Promise(function (resolve, reject) {
                 var tx = db.transaction(STORE_NAME, "readwrite");
                 var store = tx.objectStore(STORE_NAME);
                 ids.forEach(function (id) { store.delete(id); });
-
                 tx.oncomplete = function () { resolve(); };
                 tx.onerror = function () { reject(tx.error); };
             });
         });
     }
 
-    // ── CLEAR ALL ENTRIES ─────────────────────────────────────────────────
+    // ── CLEAR ALL PHOTOS ───────────────────────────────────────────────────
     function clear() {
         return open().then(function (db) {
             return new Promise(function (resolve, reject) {
                 var tx = db.transaction(STORE_NAME, "readwrite");
-                var store = tx.objectStore(STORE_NAME);
-                var request = store.clear();
-
-                request.onsuccess = function () { resolve(); };
-                request.onerror = function () { reject(request.error); };
+                tx.objectStore(STORE_NAME).clear();
+                tx.oncomplete = function () { resolve(); };
+                tx.onerror = function () { reject(tx.error); };
             });
         });
     }
 
-    // ── COUNT ENTRIES ─────────────────────────────────────────────────────
+    // ── COUNT ──────────────────────────────────────────────────────────────
     function count() {
         return open().then(function (db) {
             return new Promise(function (resolve, reject) {
                 var tx = db.transaction(STORE_NAME, "readonly");
-                var store = tx.objectStore(STORE_NAME);
-                var request = store.count();
-
-                request.onsuccess = function () { resolve(request.result); };
-                request.onerror = function () { reject(request.error); };
+                var req = tx.objectStore(STORE_NAME).count();
+                req.onsuccess = function () { resolve(req.result); };
+                req.onerror = function () { reject(req.error); };
             });
         });
     }
 
-    // ── STORAGE USAGE ESTIMATE ────────────────────────────────────────────
-    // Uses the Storage Manager API where available.
+    // ── MIGRATE FROM LOCALSTORAGE ──────────────────────────────────────────
+    // One-time migration: reads sp_photo_diary from localStorage,
+    // writes to IndexedDB, then removes the localStorage key.
+    // Returns { migrated: number, alreadyEmpty: boolean }
+    function migrateFromLS() {
+        var raw;
+        try { raw = localStorage.getItem(LS_KEY); } catch (e) { raw = null; }
+        if (!raw) return Promise.resolve({ migrated: 0, alreadyEmpty: true });
+
+        var entries;
+        try { entries = JSON.parse(raw); } catch (e) { entries = null; }
+        if (!Array.isArray(entries) || entries.length === 0) {
+            return Promise.resolve({ migrated: 0, alreadyEmpty: true });
+        }
+
+        return saveAll(entries).then(function () {
+            try { localStorage.removeItem(LS_KEY); } catch (e) { /* ignore */ }
+            console.log("[photodb] Migrated " + entries.length + " photos from localStorage to IndexedDB");
+            return { migrated: entries.length, alreadyEmpty: false };
+        });
+    }
+
+    // ── STORAGE USAGE ESTIMATE ─────────────────────────────────────────────
+    // Uses the Storage Manager API where available
     function getUsage() {
         if (navigator.storage && navigator.storage.estimate) {
-            return navigator.storage.estimate().then(function (estimate) {
-                var used = estimate.usage || 0;
-                var quota = estimate.quota || 0;
+            return navigator.storage.estimate().then(function (est) {
                 return {
-                    used: used,
-                    quota: quota,
-                    pct: quota > 0 ? used / quota : 0,
-                    usedMB: (used / (1024 * 1024)).toFixed(2),
-                    quotaMB: (quota / (1024 * 1024)).toFixed(0)
+                    used: est.usage || 0,
+                    quota: est.quota || 0,
+                    pct: est.quota ? (est.usage / est.quota) : 0,
+                    usedMB: ((est.usage || 0) / (1024 * 1024)).toFixed(2),
+                    quotaMB: ((est.quota || 0) / (1024 * 1024)).toFixed(0)
                 };
             });
         }
         return Promise.resolve({ used: 0, quota: 0, pct: 0, usedMB: "0", quotaMB: "unknown" });
     }
 
-    // ── MIGRATE FROM LOCALSTORAGE ─────────────────────────────────────────
-    // One-time migration: reads sp_photo_diary from localStorage,
-    // writes all entries to IndexedDB, then removes the localStorage key.
-    // Returns { migrated: number, alreadyEmpty: boolean }
-    function migrateFromLS() {
-        var raw;
-        try {
-            raw = localStorage.getItem(LS_KEY);
-        } catch (e) {
-            return Promise.resolve({ migrated: 0, alreadyEmpty: true, error: e.message });
-        }
-
-        if (!raw) return Promise.resolve({ migrated: 0, alreadyEmpty: true });
-
-        var entries;
-        try {
-            entries = JSON.parse(raw);
-        } catch (e) {
-            return Promise.resolve({ migrated: 0, alreadyEmpty: true, error: "JSON parse failed" });
-        }
-
-        if (!Array.isArray(entries) || entries.length === 0) {
-            return Promise.resolve({ migrated: 0, alreadyEmpty: true });
-        }
-
-        return saveAll(entries).then(function () {
-            // Remove from localStorage after successful migration
-            try { localStorage.removeItem(LS_KEY); } catch (e) { /* ignore */ }
-            console.log("[photodb] Migrated " + entries.length + " photos from localStorage to IndexedDB");
-            return { migrated: entries.length, alreadyEmpty: false };
-        }).catch(function (err) {
-            console.warn("[photodb] Migration failed:", err);
-            return { migrated: 0, alreadyEmpty: false, error: err.message };
-        });
-    }
-
-    // ── EXPOSE ────────────────────────────────────────────────────────────
+    // ── EXPORT ─────────────────────────────────────────────────────────────
     window.photodb = {
         open: open,
         getAll: getAll,
-        get: get,
-        save: save,
         saveAll: saveAll,
+        save: save,
         remove: remove,
-        removeAll: removeAll,
+        removeByIds: removeByIds,
         clear: clear,
         count: count,
-        getUsage: getUsage,
-        migrateFromLS: migrateFromLS
+        migrateFromLS: migrateFromLS,
+        getUsage: getUsage
     };
 
 })();

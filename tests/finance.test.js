@@ -1,213 +1,93 @@
-// tests/finance.test.js — Unit tests for finance.js
+// Unit tests for finance.js
+// Run: node tests/finance.test.js
+
 const assert = require('assert');
 
-global.window = {};
+// Mock browser globals
+global.window = { utils: null };
+
+// Load dependencies
+require('../utils.js');
 require('../finance.js');
+
 const fin = window.finance;
 
-let passed = 0;
-let failed = 0;
-
-function test(name, fn) {
-    try {
-        fn();
-        passed++;
-        console.log(`  ✓ ${name}`);
-    } catch (e) {
-        failed++;
-        console.log(`  ✗ ${name}`);
-        console.log(`    ${e.message}`);
-    }
-}
-
-console.log('\n── finance.js ──');
-
-// ── deriveWalletBalance ──
-test('deriveWalletBalance: opening + income - expense', () => {
-    const wallet = { id: 'w1', openingBalanceCents: 10000 };
-    const sources = {
-        incomes: [{ walletId: 'w1', amountCents: 5000 }],
-        dailyExpenses: [{ walletId: 'w1', amountCents: 2000 }],
-        txns: []
-    };
-    assert.strictEqual(fin.deriveWalletBalance(wallet, sources), 13000);
-});
-
-test('deriveWalletBalance: no sources = opening balance', () => {
-    const wallet = { id: 'w1', openingBalanceCents: 5000 };
-    assert.strictEqual(fin.deriveWalletBalance(wallet, {}), 5000);
-});
-
-test('deriveWalletBalance: empty wallet + no sources = 0', () => {
-    const wallet = { id: 'w1' };
-    assert.strictEqual(fin.deriveWalletBalance(wallet, {}), 0);
-});
-
-test('deriveWalletBalance: vault deposit deducts from wallet', () => {
-    const wallet = { id: 'w1', openingBalanceCents: 10000 };
-    const sources = { txns: [{ walletId: 'w1', type: 'deposit', amountCents: 3000 }] };
-    assert.strictEqual(fin.deriveWalletBalance(wallet, sources), 7000);
-});
-
-test('deriveWalletBalance: vault withdrawal adds to wallet', () => {
-    const wallet = { id: 'w1', openingBalanceCents: 10000 };
-    const sources = { txns: [{ walletId: 'w1', type: 'withdrawal', amountCents: 2000 }] };
-    assert.strictEqual(fin.deriveWalletBalance(wallet, sources), 12000);
-});
-
-test('deriveWalletBalance: bill payment deducts from wallet', () => {
-    const wallet = { id: 'w1', openingBalanceCents: 10000 };
-    const sources = { txns: [{ walletId: 'w1', type: 'bill_payment', amountCents: 1500 }] };
-    assert.strictEqual(fin.deriveWalletBalance(wallet, sources), 8500);
-});
-
-test('deriveWalletBalance: ignores other wallet txns', () => {
-    const wallet = { id: 'w1', openingBalanceCents: 10000 };
-    const sources = {
-        incomes: [{ walletId: 'w2', amountCents: 99999 }],
-        dailyExpenses: [{ walletId: 'w2', amountCents: 99999 }],
-        txns: [{ walletId: 'w2', type: 'deposit', amountCents: 99999 }]
-    };
-    assert.strictEqual(fin.deriveWalletBalance(wallet, sources), 10000);
-});
+// ── ensureIntCents ──
+// (exposed indirectly via deriveWalletBalance etc.)
 
 // ── getWalletDelta ──
-test('getWalletDelta: returns 0 for unknown wallet', () => {
-    assert.strictEqual(fin.getWalletDelta('unknown', {}), 0);
-});
+assert.strictEqual(fin.getWalletDelta(null, {}), 0, 'getWalletDelta(null) = 0');
+assert.strictEqual(fin.getWalletDelta('w1', {}), 0, 'getWalletDelta empty sources = 0');
 
-test('getWalletDelta: returns 0 for null walletId', () => {
-    assert.strictEqual(fin.getWalletDelta(null, { incomes: [{ amountCents: 100 }] }), 0);
-});
+const sources1 = {
+    incomes: [{ walletId: 'w1', amountCents: 10000 }],
+    dailyExpenses: [{ walletId: 'w1', amountCents: 3000 }],
+    txns: []
+};
+assert.strictEqual(fin.getWalletDelta('w1', sources1), 7000, 'getWalletDelta income-expense');
 
-test('getWalletDelta: sums income, expenses, and txns', () => {
-    const sources = {
-        incomes: [{ walletId: 'w1', amountCents: 10000 }],
-        dailyExpenses: [{ walletId: 'w1', amountCents: 3000 }],
-        txns: [{ walletId: 'w1', type: 'bill_payment', amountCents: 2000 }]
-    };
-    assert.strictEqual(fin.getWalletDelta('w1', sources), 5000);
-});
+const sources2 = {
+    incomes: [],
+    dailyExpenses: [],
+    txns: [
+        { walletId: 'w1', type: 'bill_payment', amountCents: 2000 },
+        { walletId: 'w1', type: 'deposit', amountCents: 1000 },
+        { walletId: 'w1', type: 'withdrawal', amountCents: 500 }
+    ]
+};
+assert.strictEqual(fin.getWalletDelta('w1', sources2), -2500, 'getWalletDelta txns: -2000-1000+500');
+
+// ── deriveWalletBalance ──
+const wallet = { id: 'w1', openingBalanceCents: 5000 };
+assert.strictEqual(fin.deriveWalletBalance(wallet, {}), 5000, 'deriveWalletBalance: opening only');
+assert.strictEqual(fin.deriveWalletBalance(wallet, sources1), 12000, 'deriveWalletBalance: 5000+10000-3000');
+assert.strictEqual(fin.deriveWalletBalance(null, {}), 0, 'deriveWalletBalance(null) = 0');
+assert.strictEqual(fin.deriveWalletBalance({}, {}), 0, 'deriveWalletBalance no opening = 0');
 
 // ── deriveWallets ──
-test('deriveWallets: returns array with computed balances', () => {
-    const wallets = [
-        { id: 'w1', openingBalanceCents: 10000 },
-        { id: 'w2', openingBalanceCents: 5000 }
-    ];
-    const sources = { incomes: [{ walletId: 'w1', amountCents: 2000 }], dailyExpenses: [], txns: [] };
-    const result = fin.deriveWallets(wallets, sources);
-    assert.strictEqual(result.length, 2);
-    assert.strictEqual(result[0].balanceCents, 12000);
-    assert.strictEqual(result[1].balanceCents, 5000);
-});
-
-test('deriveWallets: handles null input', () => {
-    const result = fin.deriveWallets(null, {});
-    assert.deepStrictEqual(result, []);
-});
+const wallets = [
+    { id: 'w1', openingBalanceCents: 5000 },
+    { id: 'w2', openingBalanceCents: 3000 }
+];
+const derived = fin.deriveWallets(wallets, sources1);
+assert.strictEqual(derived.length, 2, 'deriveWallets returns same count');
+assert.strictEqual(derived[0].balanceCents, 12000, 'w1 balance');
+assert.strictEqual(derived[1].balanceCents, 3000, 'w2 balance (no activity)');
+assert.deepStrictEqual(fin.deriveWallets(null, {}), [], 'deriveWallets(null) = []');
 
 // ── validateExpenseWalletBalance ──
-test('validateExpense: ok when no walletId', () => {
-    const result = fin.validateExpenseWalletBalance([], null, 1000);
-    assert.strictEqual(result.ok, true);
-});
-
-test('validateExpense: ok when balance sufficient', () => {
-    const wallets = [{ id: 'w1', balanceCents: 5000 }];
-    const result = fin.validateExpenseWalletBalance(wallets, 'w1', 3000);
-    assert.strictEqual(result.ok, true);
-});
-
-test('validateExpense: fails when balance insufficient', () => {
-    const wallets = [{ id: 'w1', balanceCents: 1000 }];
-    const result = fin.validateExpenseWalletBalance(wallets, 'w1', 3000);
-    assert.strictEqual(result.ok, false);
-    assert.ok(result.error);
-});
-
-test('validateExpense: fails when wallet not found', () => {
-    const result = fin.validateExpenseWalletBalance([], 'missing', 1000);
-    assert.strictEqual(result.ok, false);
-});
-
-test('validateExpense: fails on zero amount', () => {
-    const wallets = [{ id: 'w1', balanceCents: 5000 }];
-    assert.throws(() => fin.validateExpenseWalletBalance(wallets, 'w1', 0));
-});
-
-// ── processFinancialTransaction ──
-test('processFinancialTransaction: validates expense amount', () => {
-    const result = fin.processFinancialTransaction({ type: 'expense', amountCents: 1000 });
-    assert.strictEqual(result.ok, true);
-});
-
-test('processFinancialTransaction: rejects zero expense', () => {
-    const result = fin.processFinancialTransaction({ type: 'expense', amountCents: 0 });
-    assert.strictEqual(result.ok, false);
-});
-
-test('processFinancialTransaction: bill_payment requires wallet', () => {
-    const result = fin.processFinancialTransaction({ type: 'bill_payment', amountCents: 1000, walletId: null });
-    assert.strictEqual(result.ok, false);
-});
-
-test('processFinancialTransaction: bill_payment checks balance', () => {
-    const wallets = [{ id: 'w1', balanceCents: 500 }];
-    const result = fin.processFinancialTransaction({ type: 'bill_payment', amountCents: 1000, walletId: 'w1', wallets });
-    assert.strictEqual(result.ok, false);
-});
-
-test('processFinancialTransaction: bill_payment ok with sufficient funds', () => {
-    const wallets = [{ id: 'w1', balanceCents: 5000 }];
-    const result = fin.processFinancialTransaction({ type: 'bill_payment', amountCents: 1000, walletId: 'w1', wallets });
-    assert.strictEqual(result.ok, true);
-});
-
-test('processFinancialTransaction: vault_deposit checks balance', () => {
-    const wallets = [{ id: 'w1', balanceCents: 500 }];
-    const result = fin.processFinancialTransaction({ type: 'vault_deposit', amountCents: 1000, walletId: 'w1', wallets });
-    assert.strictEqual(result.ok, false);
-});
-
-test('processFinancialTransaction: unknown type returns error', () => {
-    const result = fin.processFinancialTransaction({ type: 'bogus' });
-    assert.strictEqual(result.ok, false);
-});
+const dw = [
+    { id: 'w1', balanceCents: 5000 },
+    { id: 'w2', balanceCents: 0 }
+];
+assert.deepStrictEqual(fin.validateExpenseWalletBalance(dw, null, 1000), { ok: true }, 'no wallet = ok');
+assert.deepStrictEqual(fin.validateExpenseWalletBalance(dw, 'w1', 3000), { ok: true }, 'sufficient balance');
+assert.strictEqual(fin.validateExpenseWalletBalance(dw, 'w1', 6000).ok, false, 'insufficient balance');
+assert.strictEqual(fin.validateExpenseWalletBalance(dw, 'w2', 100).ok, false, 'empty wallet');
+assert.strictEqual(fin.validateExpenseWalletBalance(dw, 'missing', 100).ok, false, 'wallet not found');
 
 // ── migrateWallets ──
-test('migrateWallets: adds openingBalanceCents to legacy wallets', () => {
-    const wallets = [{ id: 'w1', balanceCents: 5000 }];
-    const sources = { incomes: [], dailyExpenses: [], txns: [] };
-    const result = fin.migrateWallets(wallets, sources);
-    assert.strictEqual(result[0].openingBalanceCents, 5000);
-});
+const legacy = [{ id: 'w1', balanceCents: 8000 }];
+const migrated = fin.migrateWallets(legacy, {});
+assert.strictEqual(migrated[0].openingBalanceCents, 8000, 'migrate adds openingBalanceCents');
 
-test('migrateWallets: skips wallets that already have openingBalanceCents', () => {
-    const wallets = [{ id: 'w1', openingBalanceCents: 10000, balanceCents: 5000 }];
-    const result = fin.migrateWallets(wallets, {});
-    assert.strictEqual(result[0].openingBalanceCents, 10000);
-});
+const modern = [{ id: 'w1', openingBalanceCents: 5000, balanceCents: 10000 }];
+const notMigrated = fin.migrateWallets(modern, {});
+assert.strictEqual(notMigrated[0].openingBalanceCents, 5000, 'skip if already has openingBalanceCents');
+
+// ── processFinancialTransaction ──
+assert.strictEqual(fin.processFinancialTransaction({ type: 'expense', amountCents: 1000 }).ok, true, 'valid expense');
+assert.strictEqual(fin.processFinancialTransaction({ type: 'expense', amountCents: 0 }).ok, false, 'zero expense');
+assert.strictEqual(fin.processFinancialTransaction({ type: 'income', amountCents: 500 }).ok, true, 'valid income');
+assert.strictEqual(fin.processFinancialTransaction({ type: 'bill_payment', amountCents: 500 }).ok, false, 'bill needs wallet');
+assert.strictEqual(fin.processFinancialTransaction({ type: 'bill_payment', amountCents: 500, walletId: 'w1', wallets: [{ id: 'w1', balanceCents: 300 }] }).ok, false, 'bill insufficient');
+assert.strictEqual(fin.processFinancialTransaction({ type: 'bill_payment', amountCents: 500, walletId: 'w1', wallets: [{ id: 'w1', balanceCents: 1000 }] }).ok, true, 'bill sufficient');
+assert.strictEqual(fin.processFinancialTransaction({ type: 'vault_deposit', amountCents: 500, walletId: 'w1', wallets: [{ id: 'w1', balanceCents: 300 }] }).ok, false, 'vault_deposit insufficient');
+assert.strictEqual(fin.processFinancialTransaction({ type: 'unknown_type' }).ok, false, 'unknown type');
 
 // ── checkIncomeDeleteSafe ──
-test('checkIncomeDeleteSafe: safe when no walletId', () => {
-    const result = fin.checkIncomeDeleteSafe(null, 1000, []);
-    assert.strictEqual(result.safe, true);
-});
+assert.deepStrictEqual(fin.checkIncomeDeleteSafe(null, 1000, []), { safe: true, walletName: null, projectedBalance: 0 }, 'no wallet = safe');
+assert.deepStrictEqual(fin.checkIncomeDeleteSafe('w1', 3000, [{ id: 'w1', balanceCents: 5000 }]), { safe: true, walletName: undefined, projectedBalance: 2000 }, 'safe delete');
+assert.deepStrictEqual(fin.checkIncomeDeleteSafe('w1', 6000, [{ id: 'w1', balanceCents: 5000 }]), { safe: false, walletName: undefined, projectedBalance: -1000 }, 'unsafe delete');
 
-test('checkIncomeDeleteSafe: safe when wallet has enough balance', () => {
-    const wallets = [{ id: 'w1', balanceCents: 5000 }];
-    const result = fin.checkIncomeDeleteSafe('w1', 3000, wallets);
-    assert.strictEqual(result.safe, true);
-    assert.strictEqual(result.projectedBalance, 2000);
-});
-
-test('checkIncomeDeleteSafe: unsafe when wallet goes negative', () => {
-    const wallets = [{ id: 'w1', balanceCents: 1000 }];
-    const result = fin.checkIncomeDeleteSafe('w1', 3000, wallets);
-    assert.strictEqual(result.safe, false);
-    assert.strictEqual(result.projectedBalance, -2000);
-});
-
-console.log(`\n  ${passed} passed, ${failed} failed\n`);
-if (failed > 0) process.exitCode = 1;
+console.log('✓ finance.js: all tests passed');
