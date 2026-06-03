@@ -329,7 +329,10 @@
 
             // ── ROW 4: category spending ───────────────────────────────────
             e('div', { className: 'bn-cell bn-categories' },
-                e(BentoLabel, null, 'Category Spending'),
+                e('div', { style: { display:'flex', alignItems:'center', gap:8 } },
+                    e(BentoLabel, { style: { marginBottom:0 } }, 'Category Spending'),
+                    window.HelpTooltip && e(window.HelpTooltip, { text: 'Your spending per category this month. Set budget limits in Limits tab to track against caps.' })
+                ),
                 e('div', { className: 'bn-cat-grid' },
                     catItems.map(({ k, val, lim, pct, col }) =>
                         e('div', { key: k, className: 'bn-cat-item' },
