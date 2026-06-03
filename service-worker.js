@@ -19,6 +19,12 @@ const ASSETS = [
   './constants.js',
   './PhotoDiaryView.js',
   './SettingsView.js',
+  './WalletsView.js',
+  './BudgetBillsView.js',
+  './DailyExpensesView.js',
+  './SinkingFundsView.js',
+  './AllTransactionsView.js',
+  './HistoryView.js',
   './service-worker.js',
   './manifest.json',
   './logosinkpeso.png'

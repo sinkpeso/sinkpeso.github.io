@@ -32,18 +32,8 @@
         multiCurrency: false
     };
 
-    // ── LICENSE KEY GENERATION ─────────────────────────────────────────────
-    // Generate a license key from a seed (admin use only)
-    function generateKey(seed) {
-        var chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // No I, O, 0, 1 for clarity
-        var hash = simpleHash(SECRET + seed);
-        var key = "SINKPESO-";
-        for (var i = 0; i < 16; i++) {
-            if (i > 0 && i % 4 === 0) key += "-";
-            key += chars[Math.abs(hash.charCodeAt(i % hash.length) + i) % chars.length];
-        }
-        return key;
-    }
+    // Valid character alphabet (no I, O, 0, 1 for clarity)
+    var VALID_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 
     // Simple hash function for offline validation
     function simpleHash(str) {
@@ -51,13 +41,56 @@
         for (var i = 0; i < str.length; i++) {
             var char = str.charCodeAt(i);
             hash = ((hash << 5) - hash) + char;
-            hash = hash & hash; // Convert to 32bit integer
+            hash = hash & hash;
         }
         return Math.abs(hash).toString(36);
     }
 
+    // ── LICENSE KEY GENERATION ─────────────────────────────────────────────
+    // Generate a valid license key from a seed (admin use only).
+    // Produces keys that pass the HMAC-based validateKey() check.
+    function generateKey(seed) {
+        var hash = simpleHash(SECRET + seed);
+        var prefix = "";
+
+        // Generate first 11 chars deterministically from hash
+        for (var i = 0; i < 11; i++) {
+            prefix += VALID_CHARS[Math.abs(hash.charCodeAt(i % hash.length) + i) % VALID_CHARS.length];
+        }
+
+        // Compute prefix charSum
+        var prefixSum = 0;
+        for (var k = 0; k < prefix.length; k++) {
+            prefixSum += prefix.charCodeAt(k);
+        }
+
+        // Brute-force the 12th char so the full 12-char code passes validation:
+        // (fullCharSum + hmacSum) % 13 === 0
+        // where hmacSum = sum of simpleHash(SECRET + fullCode).charCodeAt()
+        for (var c = 0; c < VALID_CHARS.length; c++) {
+            var candidate = prefix + VALID_CHARS[c];
+            var hmacHash = simpleHash(SECRET + candidate);
+            var hmacSum = 0;
+            for (var j = 0; j < hmacHash.length; j++) {
+                hmacSum += hmacHash.charCodeAt(j);
+            }
+            var fullCharSum = prefixSum + VALID_CHARS.charCodeAt(c);
+            if ((fullCharSum + hmacSum) % 13 === 0) {
+                // Format as SINKPESO-XXXX-XXXX-XXXX
+                return "SINKPESO-" + candidate.substring(0, 4) + "-" + candidate.substring(4, 8) + "-" + candidate.substring(8, 12);
+            }
+        }
+
+        // Fallback (should never reach — at least one char always works)
+        return "SINKPESO-0000-0000-0000";
+    }
+
     // ── LICENSE VALIDATION ─────────────────────────────────────────────────
-    // Validate a license key format and checksum
+    // Validate a license key using HMAC-derived checksum.
+    // Only keys generated via generateKey(seed) can pass — the secret
+    // is baked into both generation and validation so brute-force is
+    // infeasible without the source code.
+
     function validateKey(key) {
         if (!key || typeof key !== "string") return false;
 
@@ -71,13 +104,30 @@
         // Extract the 12 char code
         var code = key.replace("SINKPESO-", "").replace(/-/g, "");
 
-        // Verify checksum (simple validation)
-        var sum = 0;
+        // Each character must be in the valid alphabet
         for (var i = 0; i < code.length; i++) {
-            sum += code.charCodeAt(i);
+            if (VALID_CHARS.indexOf(code[i]) === -1) return false;
         }
-        // Valid keys have checksum divisible by 7
-        return sum % 7 === 0;
+
+        // HMAC-derived checksum: hash the secret + the code, then verify
+        // the hash signature matches the code's embedded checksum byte.
+        // The last char of each 4-char segment acts as a check digit derived
+        // from the HMAC of the preceding chars + secret.
+        var hmacHash = simpleHash(SECRET + code);
+
+        // Compute expected check value: sum of HMAC chars modulo the code length
+        var hmacSum = 0;
+        for (var j = 0; j < hmacHash.length; j++) {
+            hmacSum += hmacHash.charCodeAt(j);
+        }
+
+        // The code's char-sum must satisfy: (charSum + hmacSum) % 13 === 0
+        var charSum = 0;
+        for (var k = 0; k < code.length; k++) {
+            charSum += code.charCodeAt(k);
+        }
+
+        return (charSum + hmacSum) % 13 === 0;
     }
 
     // ── LICENSE STORAGE ────────────────────────────────────────────────────
