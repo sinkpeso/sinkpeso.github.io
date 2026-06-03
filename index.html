@@ -25,6 +25,7 @@
     <script src="walleticons.js"></script>
     <script src="persistence.js"></script>
     <script src="license.js"></script>
+    <script src="photodb.js"></script>
 
         <link rel="apple-touch-icon" href="logosinkpeso.png">
     <link rel="icon" href="logosinkpeso.png" type="image/png">
@@ -938,9 +939,24 @@ e(EmptyState, { icon:"creditcard", title:"No wallets yet", sub:"Add Cash, GCash,
             const [dailyExpenses, setDailyExpenses] = useState(saved.daily);
             const [archives, setArchives] = useState(saved.archives);
             const [budgets, setBudgets] = useState(saved.budgets);
-            const [photoDiary, setPhotoDiary] = useState(() => {
-                try { return JSON.parse(localStorage.getItem("sp_photo_diary")) || []; } catch { return []; }
-            });
+            const [photoDiary, setPhotoDiary] = useState([]);
+            const [photoDiaryLoaded, setPhotoDiaryLoaded] = useState(false);
+
+            // Load photo diary from IndexedDB on mount, with localStorage migration
+            useEffect(() => {
+                window.photodb.open().then(() => {
+                    return window.photodb.migrateFromLS();
+                }).then(() => {
+                    return window.photodb.getAll();
+                }).then(entries => {
+                    setPhotoDiary(entries || []);
+                    setPhotoDiaryLoaded(true);
+                }).catch(err => {
+                    console.warn("[app] IndexedDB photo load failed, falling back to localStorage:", err);
+                    try { setPhotoDiary(JSON.parse(localStorage.getItem("sp_photo_diary")) || []); } catch { setPhotoDiary([]); }
+                    setPhotoDiaryLoaded(true);
+                });
+            }, []);
             const [wallets, setWallets] = useState(() => {
                 const w = saved.wallets;
                 const withCash = w.find(x => x.id === CASH_WALLET_ID) ? w : [CASH_WALLET, ...w];
@@ -959,7 +975,19 @@ e(EmptyState, { icon:"creditcard", title:"No wallets yet", sub:"Add Cash, GCash,
             useEffect(() => { window.persistence.saveKey("daily", dailyExpenses); }, [dailyExpenses]);
             useEffect(() => { window.persistence.saveKey("archives", archives); }, [archives]);
             useEffect(() => { window.persistence.saveKey("budgets", budgets); }, [budgets]);
-            useEffect(() => { localStorage.setItem("sp_photo_diary", JSON.stringify(photoDiary)); }, [photoDiary]);
+            // Persist photo diary to IndexedDB (not localStorage — too large for photos)
+            useEffect(() => {
+                if (!photoDiaryLoaded) return; // skip initial empty state before IDB loads
+                // Debounce: only save after 300ms of no changes
+                const timer = setTimeout(() => {
+                    window.photodb.saveAll(photoDiary).catch(err => {
+                        console.warn("[app] IndexedDB photo save failed:", err);
+                        // Fallback: try localStorage (may hit quota)
+                        try { localStorage.setItem("sp_photo_diary", JSON.stringify(photoDiary)); } catch(e) { /* quota exceeded */ }
+                    });
+                }, 300);
+                return () => clearTimeout(timer);
+            }, [photoDiary, photoDiaryLoaded]);
             useEffect(() => { window.persistence.saveKey("wallets", wallets); }, [wallets]);
 
             // Currency Formatter bound to state

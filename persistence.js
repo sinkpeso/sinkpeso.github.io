@@ -73,7 +73,8 @@
         daily    : "sp_daily",
         archives : "sp_archives",
         budgets  : "sp_budgets",
-        wallets  : "sp_wallets",
+        wallets    : "sp_wallets",
+        photoDiary : "sp_photo_diary",
     };
 
     // ── DEFAULT VALUES ────────────────────────────────────────────────────────
@@ -86,8 +87,9 @@
         bills    : [],
         daily    : [],
         archives : [],
-        budgets  : [],
-        wallets  : [],
+        budgets    : [],
+        wallets    : [],
+        photoDiary : [],
     };
 
     // ── INTERNAL: safe JSON read ──────────────────────────────────────────────
@@ -213,6 +215,35 @@
         return Object.assign({}, KEYS);
     }
 
+    // ── QUOTA MONITORING ────────────────────────────────────────────────────
+    // Estimate localStorage usage. Returns { used, quota, pct, usedMB, quotaMB, warning }.
+    // warning is a human-readable string if usage exceeds threshold, or null.
+    function getStorageUsage() {
+        var totalBytes = 0;
+        try {
+            for (var i = 0; i < localStorage.length; i++) {
+                var key = localStorage.key(i);
+                var val = localStorage.getItem(key) || "";
+                totalBytes += key.length + val.length;
+            }
+        } catch (e) {
+            return { used: 0, quota: 5 * 1024 * 1024, pct: 0, usedMB: "0", quotaMB: "5", warning: null };
+        }
+        var quota = 5 * 1024 * 1024;
+        var pct = totalBytes / quota;
+        var warning = null;
+        if (pct >= 0.95) warning = "CRITICAL: Storage is almost full (" + Math.round(pct * 100) + "%). Export a backup now.";
+        else if (pct >= 0.80) warning = "Storage is " + Math.round(pct * 100) + "% full. Consider exporting a backup.";
+        return {
+            used: totalBytes,
+            quota: quota,
+            pct: pct,
+            usedMB: (totalBytes / (1024 * 1024)).toFixed(2),
+            quotaMB: "5",
+            warning: warning
+        };
+    }
+
     // ── EXPOSE ────────────────────────────────────────────────────────────────
     window.persistence = {
         KEYS          : KEYS,
@@ -222,6 +253,7 @@
         clearState    : clearState,
         getRawKey     : getRawKey,
         getAllRawKeys  : getAllRawKeys,
+        getStorageUsage: getStorageUsage,
     };
 
 })();
