@@ -342,6 +342,20 @@
             );
         }
 
+        // Export shared globals for external view files (they can't see block-scoped const)
+        window.S = S;
+        window.Z = Z;
+        window.CASH_WALLET_ID = CASH_WALLET_ID;
+        window.WALLET_COLORS = WALLET_COLORS;
+        window.FUND_ICONS = FUND_ICONS;
+        window.resolveVaultIcon = resolveVaultIcon;
+        window.CATEGORIES = CATEGORIES;
+        window.DotMenu = DotMenu;
+        window.WalletPicker = WalletPicker;
+        window.EmptyState = EmptyState;
+        window.Icon = Icon;
+        window.IncomeSourcePicker = IncomeSourcePicker;
+
         // WalletsView loaded from WalletsView.js (window.WalletsView)
         const WalletsView = window.WalletsView || React.memo(function WalletsView_FALLBACK() { return e('div', null, 'WalletsView.js not loaded'); });
 
