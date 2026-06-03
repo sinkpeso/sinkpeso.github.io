@@ -1,4 +1,4 @@
-rstconst CACHE_NAME = 'sinkpeso-v4';
+const CACHE_NAME = 'sinkpeso-v5';
 const ASSETS = [
   './',
   './index.html',
@@ -27,9 +27,14 @@ const ASSETS = [
   './HistoryView.js',
   './BudgetLimitsView.js',
   './RecentActivitySection.js',
+  './archivedb.js',
+  './OnboardingScreen.js',
+  './UndoToast.js',
+  './HelpTooltip.js',
   './service-worker.js',
   './manifest.json',
-  './logosinkpeso.png'
+  './logosinkpeso.png',
+  './privacy.html'
 ];
 
 // Install: cache all app shell assets

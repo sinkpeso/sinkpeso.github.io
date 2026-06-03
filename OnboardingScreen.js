@@ -50,6 +50,15 @@
                 title: "Your Data, Your Device",
                 body: "Export backups anytime. Set a PIN to lock the app. All data stored locally with IndexedDB for photos and archives.",
                 accent: "#00E676"
+            },
+            {
+                icon: "smartphone",
+                iconColor: "#00C8FF",
+                title: "Install as an App",
+                body: /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream
+                    ? "On iPhone/iPad: tap the Share button (square with ↑), then \"Add to Home Screen.\" SINKPESO will appear as a real app."
+                    : "SINKPESO can be installed as a full-screen app. Look for the \"Install\" banner or check your browser's install option.",
+                accent: "#00C8FF"
             }
         ];
 
