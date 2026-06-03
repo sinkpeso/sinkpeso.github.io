@@ -35,6 +35,8 @@
     <script src="SinkingFundsView.js"></script>
     <script src="AllTransactionsView.js"></script>
     <script src="HistoryView.js"></script>
+    <script src="BudgetLimitsView.js"></script>
+    <script src="RecentActivitySection.js"></script>
 
         <link rel="apple-touch-icon" href="logosinkpeso.png">
     <link rel="icon" href="logosinkpeso.png" type="image/png">
@@ -1004,58 +1006,8 @@ e('footer', {
         // - EmptyState.js → window.EmptyState
         // - SettingGroup.js → window.SettingGroup
 
-        // ── MODULE: BUDGET LIMITS ───────────────────────────────────────────
-        const BudgetLimitsView = React.memo(function BudgetLimitsView({ budgets, setBudgets, fc, requestConfirm }) {
-            const [category, setCategory] = useState("Food");
-            const [limitAmt, setLimitAmt] = useState("");
-            const [openMenu, setOpenMenu] = useState(null);
-            const [editBudget, setEditBudget] = useState(null);
-            const [editForm, setEditForm] = useState({ category: "Food", limit: "" });
-
-            const openEditBudget = (b) => { setEditBudget(b); setEditForm({ category: b.category, limit: String((b.limitCents / 100).toFixed(2)) }); };
-            const saveEditBudget = () => {
-                if (!editForm.limit) return;
-                setBudgets(budgets.map(b => b.id === editBudget.id ? { ...b, category: editForm.category, limitCents: tc(editForm.limit) } : b ));
-                setEditBudget(null);
-            };
-            const deleteBudget = (id) => { requestConfirm("Delete this budget limit?", () => setBudgets(budgets.filter(b => b.id !== id))); };
-
-            return e('div', null,
-                e(PageTitle, null, 'Budget Category Limits'),
-                e('div', { className: "premium-panel", style: { marginBottom: 24 } },
-                    e(SLabel, { style: { marginBottom: 16 } }, "Set New Category Limit"),
-                    e('div', { className: "tf" },
-                        e('div', { style: { width: 200 } }, e(Sel, { value: category, onChange: ev => setCategory(ev.target.value) }, CATEGORIES.map(c => e('option', { key: c, value: c }, c)))),
-                        e('div', { style: { flex: 1 } }, e(Inp, { type: "number", value: limitAmt, placeholder: "Limit Amount", onChange: ev => setLimitAmt(ev.target.value) })),
-                        e(Btn, { v: "accent", onClick: () => {
-                            if(!limitAmt) return;
-                            if(tc(limitAmt) <= 0) { showToast("Amount must be greater than zero."); return; }
-                            const existing = budgets.find(b => b.category === category);
-                            if (existing) setBudgets(budgets.map(b => b.id === existing.id ? { ...b, limitCents: tc(limitAmt) } : b));
-                            else setBudgets([...budgets, { id: uid(), category, limitCents: tc(limitAmt) }]);
-                            setLimitAmt("");
-                            showToast("✓ Budget limit saved!");
-                        } }, "Save Limit")
-                    )
-                ),
-                e('div', { className: "premium-panel" },
-                    budgets.length === 0 ? e('div', { style: { color: "var(--text-muted)", fontSize: 13, padding: "14px 0" } }, e("div", { className: "empty-state" }, e("div", { className: "empty-state-icon" }, e(Icon, { name: "target", size: 28, color: "var(--text-muted)" })), e("div", { className: "empty-state-title" }, "No limits set"), e("div", { className: "empty-state-sub" }, "Set monthly caps to keep spending in check."))) :
-                    budgets.map(b => e('div', { key: b.id, className: "stream-row" },
-                        e('div', null, e('div', { style: { fontWeight: 600, color: "var(--text-main)" } }, b.category), e('div', { style: { fontSize: 11, color: "var(--text-muted)", marginTop: 2 } }, "Monthly Limit")),
-                        e('div', { style: S.row10 },
-                            e('div', { style: { fontWeight: 700, color: "var(--text-main)" } }, fc(b.limitCents)),
-                            e(DotMenu, { itemId: b.id, openMenu, setOpenMenu, onEdit: () => openEditBudget(b), onDelete: () => deleteBudget(b.id) })
-                        )
-                    ))
-                ),
-                editBudget && e('div', { className: "modal-overlay" }, e('div', { className: "modal-container" },
-                    e('h3', { style: { fontSize: 18, fontWeight: 800, marginBottom: 20 } }, "Edit Limit"),
-                    e(Field, { label: "Category" }, e(Sel, { value: editForm.category, onChange: ev => setEditForm({ ...editForm, category: ev.target.value }) }, CATEGORIES.map(c => e('option', { key: c, value: c }, c)))),
-                    e(Field, { label: "Amount" }, e(Inp, { type: "number", value: editForm.limit, onChange: ev => setEditForm({ ...editForm, limit: ev.target.value }) })),
-                    e('div', { style: S.formFooter }, e(Btn, { v: "ghost", style: { flex: 1 }, onClick: () => setEditBudget(null) }, "Cancel"), e(Btn, { v: "accent", style: { flex: 1 }, onClick: saveEditBudget }, "Save"))
-                ))
-            );
-        });
+        // BudgetLimitsView loaded from BudgetLimitsView.js
+        const BudgetLimitsView = window.BudgetLimitsView || React.memo(function BudgetLimitsView_FALLBACK() { return e('div', null, 'BudgetLimitsView.js not loaded'); });
 
         // BudgetBillsView loaded from BudgetBillsView.js (includes PayBillModal)
         const PayBillModal = window.PayBillModal || function() { return null; };
@@ -1074,77 +1026,10 @@ e('footer', {
         // HistoryView loaded from HistoryView.js
         const HistoryView = window.HistoryView || React.memo(function HistoryView_FALLBACK() { return e('div', null, 'HistoryView.js not loaded'); });
 
-        // Remaining inline code removed — external files provide all view components.
-        // ── COMPONENT: RECENT ACTIVITY SECTION (Dashboard) ──────────────────────
-        function RecentActivitySection({ incomes, dailyExpenses, bills, txns, funds, wallets, archives, fc, onNavigate }) {
-            const relTime = (dateStr) => {
-                if (!dateStr) return "";
-                const today = new Date().toISOString().slice(0, 10);
-                if (dateStr === today) return "Today";
-                const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
-                if (dateStr === yesterday) return "Yesterday";
-                const diffDays = Math.floor((new Date(today) - new Date(dateStr)) / 86400000);
-                if (diffDays < 7) return `${diffDays}d ago`;
-                if (diffDays < 30) return `${Math.floor(diffDays / 7)}w ago`;
-                return `${Math.floor(diffDays / 30)}mo ago`;
-            };
+        // RecentActivitySection loaded from RecentActivitySection.js
+        const RecentActivitySection = window.RecentActivitySection || function() { return null; };
 
-            const activities = useMemo(() =>
-                window.selectors.getRecentActivities({ dailyExpenses, incomes, txns, bills, funds, wallets, archives }),
-            [incomes, dailyExpenses, bills, txns, funds, wallets, archives]);
-
-            return e('div', { className: "premium-panel", style: { marginTop: 20 } },
-                e('div', { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 } },
-                    e(SLabel, null, "Recent Activity"),
-                    activities.length > 0 && e('button', {
-                        onClick: () => onNavigate("transactions"),
-                        style: { background: "transparent", border: "none", color: "var(--text-muted)", fontSize: 11, fontWeight: 700, cursor: "pointer", letterSpacing: "0.04em", padding: 0 }
-                    }, "View All →")
-                ),
-
-                activities.length === 0
-                    ? e('div', { style: { padding: "28px 0", textAlign: "center" } },
-                        e('div', { style: { marginBottom: 12, opacity: 0.35, display: "flex", justifyContent: "center" } },
-                            e(Icon, { name: "trendingup", size: 36, color: "var(--text-muted)" })
-                        ),
-                        e('div', { style: { fontWeight: 700, fontSize: 14, color: "var(--text-light)", marginBottom: 6 } }, "No recent activity yet"),
-                        e('div', { style: { fontSize: 12, color: "var(--text-muted)", marginBottom: 14 } }, "Your transactions will appear here"),
-                        e(Btn, { v: "accent", style: { fontSize: 12, padding: "9px 20px" }, onClick: () => onNavigate("daily") }, "Log First Expense")
-                    )
-                    : activities.map(item => e('div', {
-                        key: item.id,
-                        className: "stream-row",
-                        style: { cursor: "pointer" },
-                        onClick: () => onNavigate(item.navTarget)
-                    },
-                        e('div', { style: { display: "flex", alignItems: "center", gap: 11 } },
-                            e('div', { style: {
-                                width: 34, height: 34, borderRadius: 9, flexShrink: 0,
-                                background: item.iconColor + "18",
-                                border: "1px solid " + item.iconColor + "35",
-                                display: "flex", alignItems: "center", justifyContent: "center"
-                            } }, e(Icon, { name: item.icon, size: 15, color: item.iconColor })),
-                            e('div', null,
-                                e('div', { style: { fontWeight: 600, color: "var(--text-main)", fontSize: 13 } }, item.title),
-                                e('div', { style: { display: "flex", gap: 7, alignItems: "center", marginTop: 2, flexWrap: "wrap" } },
-                                    e('span', { style: { fontSize: 11, color: "var(--text-muted)" } }, item.subtitle),
-                                    item.walletName && e('span', { style: {
-                                        fontSize: 10, fontWeight: 700, color: "var(--text-light)",
-                                        background: "var(--hover-bg)", padding: "1px 6px", borderRadius: 4
-                                    } }, item.walletName)
-                                )
-                            )
-                        ),
-                        e('div', { style: { textAlign: "right", flexShrink: 0 } },
-                            item.amountCents != null && e('div', { style: { fontWeight: 700, color: item.amountColor, fontSize: 13, fontVariantNumeric: "tabular-nums" } },
-                                `${item.amountPrefix}${fc(item.amountCents)}`),
-                            e('div', { style: { fontSize: 10, color: "var(--text-muted)", marginTop: 2 } }, relTime(item.date))
-                        )
-                    ))
-            );
-        }
-
-
+        // All view components now loaded from external files.
         const container = document.getElementById('root');
         const root = ReactDOM.createRoot(container);
         root.render(e(ErrorBoundary, null, e(App)));

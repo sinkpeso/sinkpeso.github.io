@@ -25,6 +25,8 @@ const ASSETS = [
   './SinkingFundsView.js',
   './AllTransactionsView.js',
   './HistoryView.js',
+  './BudgetLimitsView.js',
+  './RecentActivitySection.js',
   './service-worker.js',
   './manifest.json',
   './logosinkpeso.png'
