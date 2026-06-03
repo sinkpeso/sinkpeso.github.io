@@ -89,4 +89,75 @@ test.describe('SINKPESO E2E', () => {
         await expect(pinInput).toBeVisible({ timeout: 5000 });
     });
 
+    test('archive month modal opens and closes', async ({ page }) => {
+        await skipOnboarding(page);
+
+        // Open the utility kebab menu
+        const utilMenu = page.locator('.util-menu-btn');
+        if (await utilMenu.isVisible()) {
+            await utilMenu.click();
+            // Click "Archive Month"
+            const archiveBtn = page.locator('text=Archive Month');
+            if (await archiveBtn.isVisible()) {
+                await archiveBtn.click();
+                // Should see the Close This Month modal
+                await expect(page.locator('text=Close This Month')).toBeVisible({ timeout: 5000 });
+                // Close it
+                const cancelBtn = page.locator('button:has-text("Cancel")');
+                await cancelBtn.first().click();
+                await page.waitForTimeout(300);
+            }
+        }
+    });
+
+    test('Bills & Income tab shows income form', async ({ page }) => {
+        await skipOnboarding(page);
+
+        // Navigate to Bills & Income
+        const budgetTab = page.locator('text=Bills & Income').first();
+        if (await budgetTab.isVisible()) {
+            await budgetTab.click();
+            await page.waitForTimeout(500);
+            // Should see income form
+            await expect(page.locator('text=Add Money In')).toBeVisible({ timeout: 5000 });
+        }
+    });
+
+    test('Savings Vaults tab loads empty state', async ({ page }) => {
+        await skipOnboarding(page);
+
+        // Navigate to Savings Vaults
+        const goalsTab = page.locator('text=Savings Vaults').first();
+        if (await goalsTab.isVisible()) {
+            await goalsTab.click();
+            await page.waitForTimeout(500);
+            // Should see either vault cards or empty state
+            const hasVaults = await page.locator('text=No Savings Vaults yet').isVisible().catch(() => false);
+            const hasCreate = await page.locator('text=Create New Vault').isVisible().catch(() => false);
+            const hasTitle = await page.locator('h2:has-text("Savings Vaults")').isVisible().catch(() => false);
+            expect(hasVaults || hasCreate || hasTitle).toBeTruthy();
+        }
+    });
+
+    test('Daily Expenses tab shows expense form', async ({ page }) => {
+        await skipOnboarding(page);
+
+        // Navigate to Daily Expenses
+        const dailyTab = page.locator('text=Daily Expenses').first();
+        if (await dailyTab.isVisible()) {
+            await dailyTab.click();
+            await page.waitForTimeout(500);
+            // Should see the expense form
+            await expect(page.locator('text=Log New Daily Spend Item')).toBeVisible({ timeout: 5000 });
+        }
+    });
+
+    test('app has correct title and meta tags', async ({ page }) => {
+        await page.goto('/');
+        await expect(page).toHaveTitle('SINKPESO');
+        // Check theme color meta tag
+        const themeColor = page.locator('meta[name="theme-color"]');
+        await expect(themeColor).toHaveAttribute('content', '#020810');
+    });
+
 });
