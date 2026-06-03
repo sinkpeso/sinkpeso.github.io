@@ -905,9 +905,12 @@ a:active { opacity: 0.8; }
     padding: 4px 0;
 }
 
-/* Ensure VirtualList rows have enough left margin */
+/* Push VirtualList rows inward from bento edges */
+.bento-txn-list > div {
+    padding: 0 16px;
+}
 .bento-txn-list > div > div > div {
-    padding-left: 0;
+    padding: 0;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
