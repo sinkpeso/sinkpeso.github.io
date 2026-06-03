@@ -121,6 +121,7 @@
             const [deferredInstallPrompt, setDeferredInstallPrompt] = useState(null);
             const [showInstallBanner, setShowInstallBanner] = useState(false);
             const [showIOSGuide, setShowIOSGuide] = useState(false);
+            const [dismissedIOSBanner, setDismissedIOSBanner] = useState(false);
             // Detect iOS Safari (no beforeinstallprompt support)
             const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
             const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
@@ -580,7 +581,7 @@ e('footer', {
                 ),
 
                 // ── iOS INSTALL GUIDE BANNER ───────────────────────────────
-                !isStandalone && isIOS && !showInstallBanner && e('div', {
+                !isStandalone && isIOS && !showInstallBanner && !dismissedIOSBanner && e('div', {
                     style: {
                         position: "fixed", bottom: 140, left: "50%", transform: "translateX(-50%)",
                         background: "var(--bg-panel)", border: "1px solid var(--accent-border)",
@@ -605,7 +606,7 @@ e('footer', {
                         }
                     }, "How?"),
                     e('button', {
-                        onClick: () => { /* dismissed for this session */ },
+                        onClick: () => setDismissedIOSBanner(true),
                         style: {
                             background: "transparent", border: "none", color: "var(--text-muted)",
                             fontSize: 16, cursor: "pointer", padding: "4px 8px", lineHeight: 1
