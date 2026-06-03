@@ -681,7 +681,7 @@ a:active { opacity: 0.8; }
     justify-content: space-between;
     gap: 10px;
     height: 64px;
-    padding: 0 14px;
+    padding: 0 20px;
     border-bottom: 1px solid var(--border);
     box-sizing: border-box;
 }
@@ -902,6 +902,7 @@ a:active { opacity: 0.8; }
     border: 1px solid var(--border);
     border-radius: var(--r-xl);
     overflow: hidden;
+    padding: 4px 0;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
