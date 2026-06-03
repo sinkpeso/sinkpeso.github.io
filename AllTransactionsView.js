@@ -77,7 +77,7 @@
 
             e('div', { className: "bento-txn-list", style: { maxHeight: 520, overflow: "hidden" } },
                 e(VirtualList, {
-                    items: filtered, itemHeight: 76, overscan: 5,
+                    items: filtered, itemHeight: 64, overscan: 5,
                     emptyContent: e('div', { style: { padding: "36px 24px", textAlign: "center" } },
                         e('div', { style: { marginBottom: 14, opacity: 0.35, display: "flex", justifyContent: "center" } }, e(Icon, { name: "clipboardlist", size: 38, color: "var(--text-muted)" })),
                         e('div', { style: { fontWeight: 700, fontSize: 15, color: "var(--text-light)", marginBottom: 6 } }, allItems.length === 0 ? "No transactions yet" : "No matching transactions"),
