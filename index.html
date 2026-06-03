@@ -120,6 +120,10 @@
             const [isOffline, setIsOffline] = useState(!navigator.onLine);
             const [deferredInstallPrompt, setDeferredInstallPrompt] = useState(null);
             const [showInstallBanner, setShowInstallBanner] = useState(false);
+            const [showIOSGuide, setShowIOSGuide] = useState(false);
+            // Detect iOS Safari (no beforeinstallprompt support)
+            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+            const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
 
             // Offline/online detection
             useEffect(() => {
@@ -573,6 +577,69 @@ e('footer', {
                         },
                         "aria-label": "Dismiss install prompt"
                     }, "×")
+                ),
+
+                // ── iOS INSTALL GUIDE BANNER ───────────────────────────────
+                !isStandalone && isIOS && !showInstallBanner && e('div', {
+                    style: {
+                        position: "fixed", bottom: 140, left: "50%", transform: "translateX(-50%)",
+                        background: "var(--bg-panel)", border: "1px solid var(--accent-border)",
+                        borderRadius: 14, padding: "12px 16px", zIndex: 9100,
+                        display: "flex", alignItems: "center", gap: 12,
+                        boxShadow: "0 8px 24px rgba(0,0,0,0.4)", maxWidth: "90vw"
+                    }
+                },
+                    e('div', { style: { display: "flex", alignItems: "center", gap: 10 } },
+                        e('img', { src: "logosinkpeso.png", alt: "", style: { width: 32, height: 32, borderRadius: 8 } }),
+                        e('div', null,
+                            e('div', { style: { fontSize: 13, fontWeight: 700, color: "var(--text-main)" } }, "Install SINKPESO"),
+                            e('div', { style: { fontSize: 11, color: "var(--text-muted)" } }, "Tap Safari's Share button → Add to Home Screen")
+                        )
+                    ),
+                    e('button', {
+                        onClick: () => setShowIOSGuide(true),
+                        style: {
+                            background: "#00E676", color: "#020810", border: "none",
+                            borderRadius: 8, padding: "8px 16px", fontSize: 12, fontWeight: 700,
+                            cursor: "pointer", fontFamily: "inherit", flexShrink: 0
+                        }
+                    }, "How?"),
+                    e('button', {
+                        onClick: () => { /* dismissed for this session */ },
+                        style: {
+                            background: "transparent", border: "none", color: "var(--text-muted)",
+                            fontSize: 16, cursor: "pointer", padding: "4px 8px", lineHeight: 1
+                        },
+                        "aria-label": "Dismiss install guide"
+                    }, "×")
+                ),
+
+                // ── iOS INSTALL GUIDE MODAL ───────────────────────────────
+                showIOSGuide && e('div', { className: "modal-overlay", onClick: () => setShowIOSGuide(false) },
+                    e('div', { className: "modal-container", style: { maxWidth: 380 }, onClick: ev => ev.stopPropagation() },
+                        e('div', { style: { textAlign: "center", marginBottom: 20 } },
+                            e('img', { src: "logosinkpeso.png", alt: "SINKPESO", style: { width: 64, height: 64, borderRadius: 16, marginBottom: 12 } }),
+                            e('h3', { style: { fontSize: 18, fontWeight: 800, color: "var(--text-main)", marginBottom: 4 } }, "Install SINKPESO"),
+                            e('p', { style: { fontSize: 13, color: "var(--text-muted)" } }, "Get the full app experience on your home screen")
+                        ),
+                        // Step-by-step instructions
+                        e('div', { style: { display: "flex", flexDirection: "column", gap: 12, marginBottom: 20 } },
+                            [
+                                ["1", "Tap the Share button", "The square with an arrow ↑ at the bottom of Safari"],
+                                ["2", "Scroll down", "Find \"Add to Home Screen\" in the share menu"],
+                                ["3", "Tap \"Add\"", "SINKPESO will appear on your home screen like a real app"],
+                            ].map(([num, title, sub]) =>
+                                e('div', { key: num, style: { display: "flex", alignItems: "flex-start", gap: 12, padding: "12px", background: "var(--hover-bg)", borderRadius: 10 } },
+                                    e('div', { style: { width: 28, height: 28, borderRadius: "50%", background: "#00E676", color: "#020810", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, fontWeight: 800, flexShrink: 0 } }, num),
+                                    e('div', null,
+                                        e('div', { style: { fontSize: 14, fontWeight: 700, color: "var(--text-main)" } }, title),
+                                        e('div', { style: { fontSize: 12, color: "var(--text-muted)", marginTop: 2 } }, sub)
+                                    )
+                                )
+                            )
+                        ),
+                        e(Btn, { v: "accent", style: { width: "100%" }, onClick: () => setShowIOSGuide(false) }, "Got it!")
+                    )
                 ),
 
                 // ── FLOATING QUICK ADD BUTTON ───────────────────────────────
