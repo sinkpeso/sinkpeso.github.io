@@ -586,7 +586,14 @@
                 }).then(() => {
                     return window.photodb.getAll();
                 }).then(entries => {
-                    setPhotoDiary(entries || []);
+                    // Orphan detection: remove photo diary entries whose expenseId no longer exists
+                    const validExpenseIds = new Set(saved.daily.map(d => d.id));
+                    const cleaned = (entries || []).filter(p => !p.expenseId || validExpenseIds.has(p.expenseId));
+                    if (cleaned.length < (entries || []).length) {
+                        console.warn("[photodb] Removed " + ((entries || []).length - cleaned.length) + " orphaned photo diary entries");
+                        window.photodb.saveAll(cleaned).catch(() => {});
+                    }
+                    setPhotoDiary(cleaned);
                     setPhotoDiaryLoaded(true);
                 }).catch(err => {
                     console.warn("[app] IndexedDB photo load failed, falling back to localStorage:", err);
@@ -723,7 +730,8 @@
                         dailyExpenses: [...dailyExpenses],
                         funds: [...funds],
                         txns:  [...txns],
-                        wallets: [...displayWallets]
+                        wallets: [...displayWallets],
+                        photoDiary: [...photoDiary]
                     }
                 };
 

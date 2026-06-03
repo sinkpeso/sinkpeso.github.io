@@ -11,6 +11,61 @@
     const { todayStr } = window.utils;
     const { Field, Inp, Sel, Btn, SLabel, PageTitle } = window.components;
 
+    // ── STORAGE USAGE PANEL ──────────────────────────────────────────────
+    function StorageUsagePanel({ showToast }) {
+        const [lsUsage, setLsUsage] = React.useState(null);
+        const [idbUsage, setIdbUsage] = React.useState(null);
+        const [photoCount, setPhotoCount] = React.useState(0);
+
+        React.useEffect(() => {
+            // localStorage usage
+            const usage = window.persistence.getStorageUsage();
+            setLsUsage(usage);
+            // IndexedDB usage
+            window.photodb.getUsage().then(setIdbUsage).catch(() => {});
+            window.photodb.count().then(setPhotoCount).catch(() => {});
+        }, []);
+
+        if (!lsUsage) return e('p', { style: { fontSize: 13, color: "var(--text-muted)" } }, "Calculating...");
+
+        const lsPct = Math.round(lsUsage.pct * 100);
+        const barColor = lsPct >= 90 ? "#EF4444" : lsPct >= 70 ? "#F59E0B" : "#00E676";
+
+        return e('div', null,
+            e('div', { style: { fontSize: 13, color: "var(--text-muted)", marginBottom: 12 } },
+                "Your data is stored locally in your browser."
+            ),
+            // localStorage bar
+            e('div', { style: { marginBottom: 14 } },
+                e('div', { style: { display: "flex", justifyContent: "space-between", marginBottom: 6 } },
+                    e('span', { style: { fontSize: 12, fontWeight: 600, color: "var(--text-light)" } }, "localStorage"),
+                    e('span', { style: { fontSize: 12, fontWeight: 600, color: "var(--text-muted)" } },
+                        `${lsUsage.usedMB} / ${lsUsage.quotaMB} MB (${lsPct}%)`)
+                ),
+                e('div', { style: { height: 6, borderRadius: 3, background: "var(--hover-bg)", overflow: "hidden" } },
+                    e('div', { style: { height: "100%", width: `${Math.min(lsPct, 100)}%`, borderRadius: 3, background: barColor, transition: "width 0.3s" } })
+                )
+            ),
+            // IndexedDB info
+            idbUsage && e('div', { style: { marginBottom: 14 } },
+                e('div', { style: { display: "flex", justifyContent: "space-between", marginBottom: 6 } },
+                    e('span', { style: { fontSize: 12, fontWeight: 600, color: "var(--text-light)" } }, "IndexedDB (photos)"),
+                    e('span', { style: { fontSize: 12, fontWeight: 600, color: "var(--text-muted)" } },
+                        `${idbUsage.usedMB} / ${idbUsage.quotaMB} MB`)
+                ),
+                e('div', { style: { fontSize: 12, color: "var(--text-muted)" } },
+                    `${photoCount} photo${photoCount !== 1 ? "s" : ""} stored`
+                )
+            ),
+            // Warning
+            lsUsage.warning && e('div', { style: {
+                fontSize: 12, fontWeight: 600, color: "#F59E0B",
+                background: "rgba(245,158,11,0.08)", border: "1px solid rgba(245,158,11,0.2)",
+                borderRadius: 8, padding: "8px 12px", marginTop: 4
+            } }, lsUsage.warning)
+        );
+    }
+
     function SettingsView({ settings, setSettings, setIncomes, setBills, setDailyExpenses, setFunds, setTxns, setArchives, setBudgets, showToast, totals, bills, budgets, fc }) {
         const safeSettings = settings || {};
         const [pinInput, setPinInput] = React.useState(safeSettings?.pin || '');
@@ -21,6 +76,15 @@
             Object.values(keys).forEach(lsKey => {
                 data[lsKey] = localStorage.getItem(lsKey);
             });
+            // Include photo diary from IndexedDB (not localStorage)
+            try {
+                const photos = await window.photodb.getAll();
+                if (photos && photos.length > 0) {
+                    data["sp_photo_diary"] = JSON.stringify({ _v: 2, data: photos });
+                }
+            } catch (err) {
+                console.warn("[export] Could not fetch photos from IndexedDB:", err);
+            }
             const password = prompt("Set a password to encrypt backup (leave blank for unencrypted):");
             let blob;
             if (password && !window.license.canUseFeature("encryptedBackup")) {
@@ -67,8 +131,28 @@
                     const validKeys = Object.values(window.persistence.getAllRawKeys());
                     window.persistence.clearState();
                     Object.keys(data).forEach(k => {
+                        // Skip photo diary — it goes to IndexedDB, not localStorage
+                        if (k === "sp_photo_diary") return;
                         if (validKeys.includes(k) && data[k]) localStorage.setItem(k, data[k]);
                     });
+                    // Restore photo diary to IndexedDB
+                    if (data["sp_photo_diary"]) {
+                        try {
+                            let photos;
+                            const parsed = JSON.parse(data["sp_photo_diary"]);
+                            // Handle versioned envelope or raw array
+                            if (parsed && typeof parsed === "object" && "_v" in parsed && Array.isArray(parsed.data)) {
+                                photos = parsed.data;
+                            } else if (Array.isArray(parsed)) {
+                                photos = parsed;
+                            }
+                            if (photos && photos.length > 0) {
+                                await window.photodb.saveAll(photos);
+                            }
+                        } catch (err) {
+                            console.warn("[import] Could not restore photos to IndexedDB:", err);
+                        }
+                    }
                     showToast("Backup restored! Reloading...");
                     setTimeout(() => window.location.reload(), 800);
                 } catch (err) { showToast("Invalid backup file or wrong password."); }
@@ -221,6 +305,10 @@
                                 } }, "Remove License")
                             )
                             : e(LicenseInput, { showToast })
+                    ),
+
+                    e(SettingGroup, { title: "Storage Usage", icon: "inbox" },
+                        e(StorageUsagePanel, { showToast })
                     ),
 
                     e(SettingGroup, { title: "About", icon: "shield" },
