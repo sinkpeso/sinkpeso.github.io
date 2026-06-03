@@ -661,6 +661,8 @@
             }, []);
 
             // ── CONFIRM DIALOG ───────────────────────────────────────────────────
+            const [confirmState, setConfirmState] = useState(null);
+
             // ── MODAL SCROLL LOCK ──
             const hasOpenModal = showCloseModal || showQuickAdd || showMoreSheet || confirmState;
             useEffect(() => {
@@ -668,8 +670,6 @@
                 else { document.body.classList.remove('modal-open'); }
                 return () => document.body.classList.remove('modal-open');
             }, [hasOpenModal]);
-
-            const [confirmState, setConfirmState] = useState(null);
             const requestConfirm = useCallback((message, onConfirm) => {
                 setConfirmState({ message, onConfirm });
             }, []);
@@ -688,15 +688,15 @@
                 return () => window.removeEventListener('keydown', handleKeyDown);
             }, [isUnlocked]);
 
-            // ── LOADING STATE ──
+            if (!isUnlocked) return e(PinScreen, { targetPin: settings.pin, onUnlock: () => setIsUnlocked(true) });
+
+            // ── LOADING STATE (must be after all hooks) ──
             if (!photoDiaryLoaded) return e('div', { className: 'pin-screen', style: { background: 'var(--bg-body)' } },
                 e('div', { style: { textAlign: 'center' } },
                     e('div', { style: { fontSize: 48, marginBottom: 16, opacity: 0.5 } }, e(Icon, { name: 'archive', size: 48, color: 'var(--text-muted)' })),
                     e('div', { style: { color: 'var(--text-muted)', fontSize: 14, fontWeight: 600 } }, 'Loading your data...')
                 )
             );
-
-            if (!isUnlocked) return e(PinScreen, { targetPin: settings.pin, onUnlock: () => setIsUnlocked(true) });
 
             const handleCloseMonth = () => {
                 const now = new Date();
