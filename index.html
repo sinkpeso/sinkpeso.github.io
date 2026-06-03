@@ -1064,10 +1064,17 @@ e(EmptyState, { icon:"creditcard", title:"No wallets yet", sub:"Add Cash, GCash,
                     return { ...w, openingBalanceCents: (w.balanceCents || 0) - vaultDelta };
                 }));
                 setTxns(prev => prev.filter(t => t.fundId));
-                // Copy recurring expenses to new month
-                const recurringExpenses = dailyExpenses.filter(e => e.recurring && e.recurring !== "none").map(e => ({
-                    ...e, id: uid(), date: todayStr()
-                }));
+                // Copy recurring expenses to new month (preserve photo diary links)
+                const recurringExpenses = dailyExpenses.filter(e => e.recurring && e.recurring !== "none").map(e => {
+                    const newId = uid();
+                    // Update linked photo diary entry's expenseId to match new expense
+                    if (e.fromDiary) {
+                        setPhotoDiary(prev => prev.map(p =>
+                            p.expenseId === e.id ? { ...p, expenseId: newId } : p
+                        ));
+                    }
+                    return { ...e, id: newId, date: todayStr() };
+                });
                 setDailyExpenses(recurringExpenses);
                 setIncomes([]);
                 // FIX #2: advance dueDate for recurring bills, then reset isPaid

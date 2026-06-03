@@ -16,9 +16,10 @@ window.utils = {
     safeDiv: (a, b) => (b > 0 ? a / b : 0),
 
     // Add n months to a "YYYY-MM-DD" string, returns a new "YYYY-MM-DD" string
+    // Uses T12:00:00 to avoid timezone-induced date shifts (UTC+/- offsets)
     addMonths: (dateStr, n) => {
         if (!dateStr) return window.utils.todayStr();
-        const d = new Date(dateStr + "T00:00:00");
+        const d = new Date(dateStr + "T12:00:00");
         d.setMonth(d.getMonth() + n);
         return d.toISOString().slice(0, 10);
     },
