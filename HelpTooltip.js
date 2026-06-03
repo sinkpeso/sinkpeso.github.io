@@ -11,19 +11,32 @@
 
     function HelpTooltip({ text, style: extraStyle }) {
         const [open, setOpen] = React.useState(false);
-        const ref = React.useRef(null);
+        const [pos, setPos] = React.useState(null);
+        const btnRef = React.useRef(null);
+        const wrapRef = React.useRef(null);
 
         React.useEffect(() => {
-            if (!open) return;
+            if (!open) { setPos(null); return; }
+            if (btnRef.current) {
+                const rect = btnRef.current.getBoundingClientRect();
+                setPos({
+                    position: "fixed",
+                    top: rect.top - 8,
+                    left: rect.left + rect.width / 2,
+                    transform: "translate(-50%, -100%)",
+                    zIndex: 350
+                });
+            }
             const handler = (ev) => {
-                if (ref.current && !ref.current.contains(ev.target)) setOpen(false);
+                if (wrapRef.current && !wrapRef.current.contains(ev.target)) setOpen(false);
             };
             document.addEventListener("click", handler);
             return () => document.removeEventListener("click", handler);
         }, [open]);
 
-        return e('span', { ref, style: { position: "relative", display: "inline-flex", alignItems: "center", ...(extraStyle || {}) } },
+        return e('span', { ref: wrapRef, style: { position: "relative", display: "inline-flex", alignItems: "center", ...(extraStyle || {}) } },
             e('button', {
+                ref: btnRef,
                 onClick: (ev) => { ev.stopPropagation(); setOpen(!open); },
                 "aria-label": "Help",
                 style: {
@@ -34,14 +47,13 @@
                     fontFamily: "inherit", flexShrink: 0
                 }
             }, "?"),
-            open && e('div', {
+            open && pos && e('div', {
                 style: {
-                    position: "absolute", bottom: "calc(100% + 8px)", left: "50%",
-                    transform: "translateX(-50%)", background: "var(--bg-panel)",
+                    ...pos, background: "var(--bg-panel)",
                     border: "1px solid var(--border)", borderRadius: 12,
                     padding: "10px 14px", fontSize: 12, fontWeight: 500,
                     color: "var(--text-light)", lineHeight: 1.6,
-                    whiteSpace: "normal", width: 220, zIndex: 350,
+                    whiteSpace: "normal", width: 220,
                     boxShadow: "0 8px 24px rgba(0,0,0,0.4)",
                     pointerEvents: "auto"
                 }
