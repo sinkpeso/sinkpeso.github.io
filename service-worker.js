@@ -18,6 +18,7 @@ const ASSETS = [
   './photodb.js',
   './constants.js',
   './PhotoDiaryView.js',
+  './SettingsView.js',
   './service-worker.js',
   './manifest.json',
   './logosinkpeso.png'

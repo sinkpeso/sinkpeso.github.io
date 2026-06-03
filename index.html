@@ -28,6 +28,7 @@
     <script src="photodb.js"></script>
     <script src="constants.js"></script>
     <script src="PhotoDiaryView.js"></script>
+    <script src="SettingsView.js"></script>
 
         <link rel="apple-touch-icon" href="logosinkpeso.png">
     <link rel="icon" href="logosinkpeso.png" type="image/png">
@@ -860,7 +861,7 @@ e(EmptyState, { icon:"creditcard", title:"No wallets yet", sub:"Add Cash, GCash,
                     if (b.recurring === "monthly" && b.dueDate) {
                         nextDue = addMonths(b.dueDate, 1);
                     } else if (b.recurring === "weekly" && b.dueDate) {
-                        const d = new Date(b.dueDate + "T00:00:00");
+                        const d = new Date(b.dueDate + "T12:00:00");
                         d.setDate(d.getDate() + 7);
                         nextDue = d.toISOString().slice(0, 10);
                     }
@@ -1133,10 +1134,36 @@ e('footer', {
             );
         }
 
+        // SettingsView loaded from SettingsView.js (window.SettingsView)
         const SettingGroup = window.SettingGroup;
+        const SettingsView = window.SettingsView || React.memo(function SettingsView_FALLBACK() {
+            return e('div', null, 'SettingsView.js not loaded');
+        });
 
-        // ── MODULE: SETTINGS ─────────────────────────────────────────────────
-        const SettingsView = React.memo(function SettingsView({ settings, setSettings, setIncomes, setBills, setDailyExpenses, setFunds, setTxns, setArchives, setBudgets, showToast, totals, bills, budgets, fc }) {
+        // ── LEGACY INLINE SETTINGS (removed — now in SettingsView.js) ──
+        const _LEGACY_SETTINGS_VIEW = React.memo(function SettingsView_DISABLED() {
+            return null; // Dead code — kept as comment anchor for future cleanup
+        });
+        /* The full inline SettingsView (~250 lines) was removed in this commit.
+           SettingsView.js handles all settings rendering via window.SettingsView.
+           The _LEGACY_SETTINGS_VIEW above is a no-op placeholder. */
+
+        /*
+        _LEGACY_SETTINGS_VIEW was:
+            const safeSettings = settings || {};
+            const [pinInput, setPinInput] = useState(safeSettings?.pin || '');
+            ... handleExport, handleImport, handleExportCSV ...
+            ... full render tree with SettingGroup panels ...
+        */
+        // Dead code below is unreachable — the function above returns null.
+        const _DEAD_CODE_SETTINGS = (function() {
+        // SettingsView loaded from SettingsView.js (window.SettingsView)
+        const SettingGroup = window.SettingGroup;
+        const SettingsView = window.SettingsView || React.memo(function SettingsView_FALLBACK() {
+            return e('div', null, 'SettingsView.js not loaded');
+        });
+
+        // Legacy inline SettingsView removed — now in SettingsView.js
             const safeSettings = settings || {};
             const [pinInput, setPinInput] = useState(safeSettings?.pin || '');
 
