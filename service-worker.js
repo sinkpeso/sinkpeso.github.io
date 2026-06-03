@@ -1,7 +1,9 @@
-const CACHE_NAME = 'sinkpeso-v5';
+const CACHE_NAME = 'sinkpeso-v7';
 const ASSETS = [
-  './',
   './index.html',
+  './app.html',
+  './styles.css',
+  './app.js',
   './styles.css',
   './utils.js',
   './components.js',

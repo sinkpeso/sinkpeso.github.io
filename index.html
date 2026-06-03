@@ -1,813 +1,644 @@
 <!DOCTYPE html>
-    <html lang="en" dir="ltr">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>SINKPESO</title>
-    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SINKPESO — Private. Offline. Yours.</title>
+    <meta name="description" content="Track expenses, manage wallets, build savings goals, and remember the moments behind every purchase. The privacy-first finance app that works offline.">
+    <meta name="theme-color" content="#050a14">
+    <meta property="og:title" content="SINKPESO — Every Peso Has a Purpose">
+    <meta property="og:description" content="Track expenses, manage wallets, build savings goals — even offline.">
+    <meta property="og:image" content="logosinkpeso.png">
+    <meta property="og:type" content="website">
+    <link rel="icon" href="logosinkpeso.png" type="image/png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-    
-    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin integrity="sha384-DGyLxAyjq0f9SPpVevD6IgztCFlnMF6oW/XQGmfe+IsZ8TqEiDrcHkMLKI6fiB/Z"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin integrity="sha384-gTGxhz21lVGYNMcdJOyq01Edg0jhn/c22nsx0kyqP0TxaV5WVdsSH1fSDUf5YJj1"></script>
-
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
-    <script src="utils.js"></script>
-    <script src="components.js"></script>
-    <script src="InsightStrip.js"></script>
-    <script src="DashboardOverview.js"></script>
-    <script src="EmptyState.js"></script>
-    <script src="SettingGroup.js"></script>
-    <script src="finance.js"></script>
-    <script src="selectors.js"></script>
-    <script src="actions.js"></script>
-    <script src="walleticons.js"></script>
-    <script src="persistence.js"></script>
-    <script src="license.js"></script>
-    <script src="photodb.js"></script>
-    <script src="archivedb.js"></script>
-    <script src="constants.js"></script>
-    <script src="PhotoDiaryView.js"></script>
-    <script src="SettingsView.js"></script>
-    <script src="WalletsView.js"></script>
-    <script src="BudgetBillsView.js"></script>
-    <script src="DailyExpensesView.js"></script>
-    <script src="SinkingFundsView.js"></script>
-    <script src="AllTransactionsView.js"></script>
-    <script src="HistoryView.js"></script>
-    <script src="BudgetLimitsView.js"></script>
-    <script src="RecentActivitySection.js"></script>
-    <script src="OnboardingScreen.js"></script>
-    <script src="UndoToast.js"></script>
-    <script src="HelpTooltip.js"></script>
-    <script src="crashreport.js"></script>
-    <script src="CoreComponents.js"></script>
-
-        <link rel="apple-touch-icon" href="logosinkpeso.png">
-    <link rel="icon" href="logosinkpeso.png" type="image/png">
-    <link rel="manifest" href="manifest.json">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="theme-color" content="#020810">
 </head>
 <body>
-    <div id="root"></div>
 
-    <script>
-        const { useState, useMemo, useEffect, useRef, useCallback } = React;
-        const e = React.createElement;
-
-        // ── Style tokens + Z-index from constants.js ─────────────────────────
-        const S = window.SINKPESO_S;
-        const Z = window.SINKPESO_Z;
-
-        // ── Icon + Icon paths loaded from constants.js ──────────────────────
-        const ICONS = window.SINKPESO_ICONS;
-        const Icon = window.SINKPESO_Icon;
-
-        // Vault icons, categories, currencies — all from constants.js
-        const { FUND_ICONS, resolveVaultIcon, CATEGORIES, CURRENCIES, EXCHANGE_RATES, WALLET_COLORS, CASH_WALLET_ID, CASH_WALLET } = window.SINKPESO_CONSTANTS;
-
-        // ── RESOLVE GLOBALS ───────────────────────────────────────────────────
-        // Pull utils, UI primitives and external components from their own files.
-        // Keeps this file thin; avoids re-defining what is already loaded.
-        const { tc, uid, todayStr, safeDiv, addMonths, getDaysRemaining } = window.utils;
-        const { SLabel, PageTitle, PBar, Field, Inp, Sel, Btn } = window.components;
-        const EmptyState = window.EmptyState;
-
-
-
-        // ── Components loaded from CoreComponents.js via window.* ──────────────
-        const VirtualList = window.VirtualList;
-        const DotMenu = window.DotMenu;
-        const WalletPicker = window.WalletPicker;
-        const IncomeSourcePicker = window.IncomeSourcePicker;
-        const LicenseInput = window.LicenseInput;
-        const QuickAddModal = window.QuickAddModal;
-        const PinScreen = window.PinScreen;
-        const ErrorBoundary = window.ErrorBoundary;
-
-        // Export shared globals for external view files (they can't see block-scoped const)
-        window.S = S;
-        window.Z = Z;
-        window.CASH_WALLET_ID = CASH_WALLET_ID;
-        window.WALLET_COLORS = WALLET_COLORS;
-        window.FUND_ICONS = FUND_ICONS;
-        window.resolveVaultIcon = resolveVaultIcon;
-        window.CATEGORIES = CATEGORIES;
-        window.DotMenu = DotMenu;
-        window.WalletPicker = WalletPicker;
-        window.EmptyState = EmptyState;
-        window.Icon = Icon;
-        window.IncomeSourcePicker = IncomeSourcePicker;
-
-        // WalletsView loaded from WalletsView.js (window.WalletsView)
-        const WalletsView = window.WalletsView || React.memo(function WalletsView_FALLBACK() { return e('div', null, 'WalletsView.js not loaded'); });
-
-        // InsufficientBalanceModal loaded from DailyExpensesView.js (window.InsufficientBalanceModal)
-        const InsufficientBalanceModal = window.InsufficientBalanceModal || function() { return null; };
-
-        // PhotoDiaryView is now loaded from PhotoDiaryView.js (window.PhotoDiaryView)
-
-        // ── CORE APPLICATION ──────────────────────────────────────────────────
-        function App() {
-            const [tab, setTab] = useState("dashboard");
-            const [showOnboarding, setShowOnboarding] = useState(() => {
-                try { return window.shouldShowOnboarding && window.shouldShowOnboarding(); } catch(e) { return false; }
-            });
-            const [isOffline, setIsOffline] = useState(!navigator.onLine);
-            const [deferredInstallPrompt, setDeferredInstallPrompt] = useState(null);
-            const [showInstallBanner, setShowInstallBanner] = useState(false);
-            const [showIOSGuide, setShowIOSGuide] = useState(false);
-            const [dismissedIOSBanner, setDismissedIOSBanner] = useState(false);
-            // Detect iOS Safari (no beforeinstallprompt support)
-            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-            const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
-
-            // Offline/online detection
-            useEffect(() => {
-                const goOffline = () => setIsOffline(true);
-                const goOnline = () => setIsOffline(false);
-                window.addEventListener("offline", goOffline);
-                window.addEventListener("online", goOnline);
-                return () => { window.removeEventListener("offline", goOffline); window.removeEventListener("online", goOnline); };
-            }, []);
-
-            // Install prompt capture
-            useEffect(() => {
-                const handler = (ev) => {
-                    ev.preventDefault();
-                    setDeferredInstallPrompt(ev);
-                    setShowInstallBanner(true);
-                };
-                window.addEventListener("beforeinstallprompt", handler);
-                return () => window.removeEventListener("beforeinstallprompt", handler);
-            }, []);
-
-            useEffect(() => { window.scrollTo(0, 0); }, [tab]);
-
-            const saved = window.persistence.loadState();
-            const defaultSettings = { currency: 'PHP', secondaryCurrency: '', theme: 'dark', pin: '' };
-            const [settings, setSettings] = useState(() => ({ ...defaultSettings, ...saved.settings }));
-            const [isUnlocked, setIsUnlocked] = useState(!settings.pin);
-
-            const [funds, setFunds] = useState(saved.funds);
-            const [txns, setTxns] = useState(saved.txns);
-            const [incomes, setIncomes] = useState(saved.incomes);
-            const [bills, setBills] = useState(saved.bills);
-            const [dailyExpenses, setDailyExpenses] = useState(saved.daily);
-            const [archives, setArchives] = useState([]);
-            const [archivesLoaded, setArchivesLoaded] = useState(false);
-            const [budgets, setBudgets] = useState(saved.budgets);
-            const [photoDiary, setPhotoDiary] = useState([]);
-            const [photoDiaryLoaded, setPhotoDiaryLoaded] = useState(false);
-
-            // Load archives from IndexedDB on mount, with localStorage migration
-            useEffect(() => {
-                window.archivedb.open().then(() => {
-                    return window.archivedb.migrateFromLS();
-                }).then(() => {
-                    return window.archivedb.getAll();
-                }).then(entries => {
-                    setArchives(entries || []);
-                    setArchivesLoaded(true);
-                }).catch(err => {
-                    console.warn("[app] IndexedDB archive load failed, falling back to localStorage:", err);
-                    try { setArchives(JSON.parse(localStorage.getItem("sp_archives")) || []); } catch { setArchives([]); }
-                    setArchivesLoaded(true);
-                });
-            }, []);
-
-            // Load photo diary from IndexedDB on mount, with localStorage migration
-            useEffect(() => {
-                window.photodb.open().then(() => {
-                    return window.photodb.migrateFromLS();
-                }).then(() => {
-                    return window.photodb.getAll();
-                }).then(entries => {
-                    // Orphan detection: remove photo diary entries whose expenseId no longer exists
-                    const validExpenseIds = new Set(saved.daily.map(d => d.id));
-                    const cleaned = (entries || []).filter(p => !p.expenseId || validExpenseIds.has(p.expenseId));
-                    if (cleaned.length < (entries || []).length) {
-                        console.warn("[photodb] Removed " + ((entries || []).length - cleaned.length) + " orphaned photo diary entries");
-                        window.photodb.saveAll(cleaned).catch(() => {});
-                    }
-                    setPhotoDiary(cleaned);
-                    setPhotoDiaryLoaded(true);
-                }).catch(err => {
-                    console.warn("[app] IndexedDB photo load failed, falling back to localStorage:", err);
-                    try { setPhotoDiary(JSON.parse(localStorage.getItem("sp_photo_diary")) || []); } catch { setPhotoDiary([]); }
-                    setPhotoDiaryLoaded(true);
-                });
-            }, []);
-            const [wallets, setWallets] = useState(() => {
-                const w = saved.wallets;
-                const withCash = w.find(x => x.id === CASH_WALLET_ID) ? w : [CASH_WALLET, ...w];
-                return window.finance.migrateWallets(withCash, { incomes, bills, dailyExpenses, txns });
-            });
-
-            // Sync states to LocalStorage & Apply Theme
-            useEffect(() => {
-                window.persistence.saveKey("settings", settings);
-                document.documentElement.setAttribute('data-theme', settings.theme);
-            }, [settings]);
-            useEffect(() => { window.persistence.saveKey("funds", funds); }, [funds]);
-            useEffect(() => { window.persistence.saveKey("txns", txns); }, [txns]);
-            useEffect(() => { window.persistence.saveKey("incomes", incomes); }, [incomes]);
-            useEffect(() => { window.persistence.saveKey("bills", bills); }, [bills]);
-            useEffect(() => { window.persistence.saveKey("daily", dailyExpenses); }, [dailyExpenses]);
-            // Persist archives to IndexedDB (not localStorage — snapshots are large)
-            useEffect(() => {
-                if (!archivesLoaded) return;
-                const timer = setTimeout(() => {
-                    window.archivedb.saveAll(archives).catch(err => {
-                        console.warn("[app] IndexedDB archive save failed:", err);
-                        try { localStorage.setItem("sp_archives", JSON.stringify(archives)); } catch(e) {}
-                    });
-                }, 300);
-                return () => clearTimeout(timer);
-            }, [archives, archivesLoaded]);
-            useEffect(() => { window.persistence.saveKey("budgets", budgets); }, [budgets]);
-            // Persist photo diary to IndexedDB (not localStorage — too large for photos)
-            useEffect(() => {
-                if (!photoDiaryLoaded) return; // skip initial empty state before IDB loads
-                // Debounce: only save after 300ms of no changes
-                const timer = setTimeout(() => {
-                    window.photodb.saveAll(photoDiary).catch(err => {
-                        console.warn("[app] IndexedDB photo save failed:", err);
-                        // Fallback: try localStorage (may hit quota)
-                        try { localStorage.setItem("sp_photo_diary", JSON.stringify(photoDiary)); } catch(e) { /* quota exceeded */ }
-                    });
-                }, 300);
-                return () => clearTimeout(timer);
-            }, [photoDiary, photoDiaryLoaded]);
-            useEffect(() => { window.persistence.saveKey("wallets", wallets); }, [wallets]);
-
-            // Currency Formatter bound to state
-            const fc = useMemo(() => {
-                return (c) => new Intl.NumberFormat("en-PH", CURRENCIES[settings.currency] || CURRENCIES.PHP).format((Number(c) || 0) / 100);
-            }, [settings.currency]);
-
-            // Secondary currency formatter (optional)
-            const fc2 = useMemo(() => {
-                if (!settings.secondaryCurrency || settings.secondaryCurrency === settings.currency) return null;
-                const rate = (EXCHANGE_RATES[settings.secondaryCurrency] || 1) / (EXCHANGE_RATES[settings.currency] || 1);
-                return (c) => new Intl.NumberFormat("en-PH", CURRENCIES[settings.secondaryCurrency] || CURRENCIES.PHP).format(((Number(c) || 0) / 100) * rate);
-            }, [settings.currency, settings.secondaryCurrency]);
-
-            const displayWallets = useMemo(() => {
-                return window.finance.deriveWallets(wallets, { incomes, bills, dailyExpenses, txns });
-            }, [wallets, incomes, bills, dailyExpenses, txns]);
-
-            const totals = useMemo(
-                () => window.selectors.computeTotals({ incomes, bills, funds, txns, dailyExpenses }),
-                [incomes, bills, funds, txns, dailyExpenses]
-            );
-
-            // ── CLOSE MONTH (hook must be before any conditional return) ────
-            const [showCloseModal, setShowCloseModal] = useState(false);
-            const [showMoreSheet, setShowMoreSheet] = useState(false);
-            const [sheetDragY, setSheetDragY] = useState(0);
-            const sheetSwipeRef = useRef({ startY: 0, currentY: 0, swiping: false });
-            const [showQuickAdd, setShowQuickAdd]   = useState(false);
-            const [showUtilMenu, setShowUtilMenu]   = useState(false);
-            const [toast, setToast] = useState(null);
-            const toastTimer = useRef(null);
-            const haptic = useCallback((pattern) => { try { if (navigator.vibrate) navigator.vibrate(pattern || 10); } catch(e) {} }, []);
-            const showToast = useCallback((msg, undoFn, duration) => {
-                if (toastTimer.current) clearTimeout(toastTimer.current);
-                setToast({ msg, undoFn: undoFn || null, duration: duration || (undoFn ? 5000 : 2600) });
-                if (!undoFn) toastTimer.current = setTimeout(() => setToast(null), 2600);
-            }, []);
-
-            // ── CONFIRM DIALOG ───────────────────────────────────────────────────
-            const [confirmState, setConfirmState] = useState(null);
-
-            // ── MODAL SCROLL LOCK ──
-            const hasOpenModal = showCloseModal || showQuickAdd || showMoreSheet || confirmState;
-            useEffect(() => {
-                if (hasOpenModal) { document.body.classList.add('modal-open'); }
-                else { document.body.classList.remove('modal-open'); }
-                return () => document.body.classList.remove('modal-open');
-            }, [hasOpenModal]);
-            const requestConfirm = useCallback((message, onConfirm) => {
-                setConfirmState({ message, onConfirm });
-            }, []);
-
-            // ── KEYBOARD SHORTCUTS ──
-            useEffect(() => {
-                const handleKeyDown = (ev) => {
-                    if (isUnlocked && !ev.target.closest('input, textarea, select')) {
-                        if (ev.key === 'Escape') {
-                            setShowCloseModal(false); setShowQuickAdd(false); setShowMoreSheet(false);
-                            setConfirmState(null);
-                        }
-                    }
-                };
-                window.addEventListener('keydown', handleKeyDown);
-                return () => window.removeEventListener('keydown', handleKeyDown);
-            }, [isUnlocked]);
-
-            if (!isUnlocked) return e(PinScreen, { targetPin: settings.pin, onUnlock: () => setIsUnlocked(true) });
-
-            // Onboarding screen for first-time users
-            if (showOnboarding && window.OnboardingScreen) {
-                return e(window.OnboardingScreen, { onDismiss: () => setShowOnboarding(false) });
-            }
-
-            // ── LOADING STATE (must be after all hooks) ──
-            if (!photoDiaryLoaded || !archivesLoaded) return e('div', { className: 'pin-screen', style: { background: 'var(--bg-body)' } },
-                e('div', { style: { textAlign: 'center' } },
-                    e('div', { style: { fontSize: 48, marginBottom: 16, opacity: 0.5 } }, e(Icon, { name: 'archive', size: 48, color: 'var(--text-muted)' })),
-                    e('div', { style: { color: 'var(--text-muted)', fontSize: 14, fontWeight: 600 } }, 'Loading your data...')
-                )
-            );
-
-            const handleCloseMonth = () => {
-                const now = new Date();
-                const monthLabel = now.toLocaleDateString("en-PH", { month: "long", year: "numeric" });
-                // FIX #4: use totals.* directly instead of recalculating
-                const totalIncome  = totals.totalIncome;
-                const totalBills   = totals.paidBills;
-                const totalSpent   = totals.totalDailySpent;
-                const totalSavings = totals.totalInGoals;
-                const remaining    = totals.netAvailable;
-
-                const archive = {
-                    id: uid(),
-                    month: monthLabel,
-                    closedAt: now.toISOString(),
-                    totalIncome, totalSpent, totalBills, totalSavings, remaining,
-                    snapshot: {
-                        incomes: [...incomes],
-                        bills:   [...bills],
-                        dailyExpenses: [...dailyExpenses],
-                        funds: [...funds],
-                        txns:  [...txns],
-                        wallets: [...displayWallets],
-                        photoDiary: [...photoDiary]
-                    }
-                };
-
-                setArchives(prev => [archive, ...prev]);
-                setWallets(displayWallets.map(w => {
-                    const activeVaultTxns = txns.filter(t => t.fundId);
-                    const vaultDelta = window.finance.getWalletDelta(w.id, { txns: activeVaultTxns });
-                    return { ...w, openingBalanceCents: (w.balanceCents || 0) - vaultDelta };
-                }));
-                setTxns(prev => prev.filter(t => t.fundId));
-                // Copy recurring expenses to new month (preserve photo diary links)
-                const recurringExpenses = dailyExpenses.filter(e => e.recurring && e.recurring !== "none").map(e => {
-                    const newId = uid();
-                    // Update linked photo diary entry's expenseId to match new expense
-                    if (e.fromDiary) {
-                        setPhotoDiary(prev => prev.map(p =>
-                            p.expenseId === e.id ? { ...p, expenseId: newId } : p
-                        ));
-                    }
-                    return { ...e, id: newId, date: todayStr() };
-                });
-                setDailyExpenses(recurringExpenses);
-                setIncomes([]);
-                // FIX #2: advance dueDate for recurring bills, then reset isPaid
-                setBills(prev => prev.map(b => {
-                    let nextDue = b.dueDate;
-                    if (b.recurring === "monthly" && b.dueDate) {
-                        nextDue = addMonths(b.dueDate, 1);
-                    } else if (b.recurring === "weekly" && b.dueDate) {
-                        const d = new Date(b.dueDate + "T12:00:00");
-                        d.setDate(d.getDate() + 7);
-                        nextDue = d.toISOString().slice(0, 10);
-                    }
-                    return { ...b, isPaid: false, paidTxnId: null, paidWalletId: null, dueDate: nextDue };
-                }));
-                setShowCloseModal(false);
-                showToast("✓ Month archived. Fresh start!");
-            };
-
-            return e('div', null,
-                e('div', { style: { background: "var(--bg-panel)", borderBottom: "1px solid var(--border)", position: "sticky", top: 0, zIndex: Z.STICKY_HEADER } },
-
-                    // ── ROW 1: Logo + Action Buttons ──────────────────────────
-                    e('div', { style: { display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 16px", gap: 8 } },
-                        e('div', { style: S.row10 },
-                            e('img', { src: "logosinkpeso.png", alt: "Logo", style: { height: 30, width: "auto", objectFit: "contain" } }),
-                            e('div', { style: { fontWeight: 900, color: "#FFFFFF", fontSize: 16 }, className: "nav-logo-text" }, 'SINKPESO')
-                        ),
-                        e('div', { style: { display: "flex", gap: 6, alignItems: "center", flexShrink: 0 } },
-
-                            // ── UTILITY KEBAB MENU ─────────────────────────────────────
-                            e('div', { style: { position: "relative" } },
-                                // Backdrop to close on outside click
-                                showUtilMenu && e('div', {
-                                    style: { position: "fixed", inset: 0, zIndex: Z.MENU_BACKDROP },
-                                    onClick: () => setShowUtilMenu(false)
-                                }),
-                                // Three-dot trigger
-                                e('button', {
-                                    onClick: () => setShowUtilMenu(!showUtilMenu),
-                                    title: "More actions",
-                                    className: "util-menu-btn",
-                                    style: {
-                                        background: showUtilMenu ? "var(--hover-bg)" : "transparent",
-                                        border: "1px solid rgba(255,255,255,0.09)",
-                                        color: showUtilMenu ? "var(--text-main)" : "var(--text-muted)",
-                                        width: 34, height: 34, borderRadius: 8,
-                                        cursor: "pointer", display: "flex",
-                                        alignItems: "center", justifyContent: "center",
-                                        transition: "all 0.15s", flexShrink: 0,
-                                    },
-                                },
-                                    e(Icon, { name: "more", size: 16 })
-                                ),
-                                // Dropdown panel
-                                showUtilMenu && e('div', {
-                                    style: {
-                                        position: "absolute", right: 0, top: "calc(100% + 6px)",
-                                        background: "var(--bg-panel)",
-                                        border: "1px solid var(--border)",
-                                        borderRadius: 12, padding: 4,
-                                        zIndex: Z.MENU_DROPDOWN, minWidth: 178,
-                                        boxShadow: "0 8px 28px rgba(0,0,0,0.45)",
-                                    }
-                                },
-                                    e('button', {
-                                        className: "dot-menu-item",
-                                        onClick: () => { setShowUtilMenu(false); setShowCloseModal(true); },
-                                        style: { display: "flex", alignItems: "center", gap: 10, color: "var(--text-main)" }
-                                    },
-                                        e(Icon, { name: "archive", size: 14, color: "var(--text-muted)" }),
-                                        "Archive Month"
-                                    ),
-                                    settings.pin && e('button', {
-                                        className: "dot-menu-item",
-                                        onClick: () => { setShowUtilMenu(false); setIsUnlocked(false); },
-                                        style: { display: "flex", alignItems: "center", gap: 10, color: "var(--text-main)" }
-                                    },
-                                        e(Icon, { name: "lock", size: 14, color: "var(--text-muted)" }),
-                                        "Lock App"
-                                    )
-                                )
-                            ),
-
-                            e('button', { 
-                                onClick: () => setTab("settings"), title: "Settings",
-                                style: { ...S.iconBtn, background: tab === "settings" ? "var(--hover-bg)" : "transparent", color: tab === "settings" ? "var(--text-main)" : "var(--text-muted)" }
-                            }, e(Icon, { name: "settings", size: 16 }))
-                        )
-                    ),
-
-                    // ── ROW 2: Nav Tabs — Primary + Secondary ─────────────────
-                e('div', { role: "tablist", "aria-label": "Main navigation", className: "nav-scroll desktop-tabs", style: { display: "flex", alignItems: "center", overflowX: "auto", padding: "0 12px 0", borderTop: "1px solid var(--border)" } },
-
-                        // Primary tabs
-                        [
-                            { id: "dashboard",   label: "Dashboard" },
-                            { id: "budget",      label: "Bills & Income" },
-                            { id: "daily",       label: "Daily Expenses" },
-                            { id: "goals",       label: "Savings Vaults" },
-                            { id: "photo-diary", label: "Photo Diary" },
-                        ].map(t => e('button', {
-                            key: t.id, className: "nav-btn", onClick: () => setTab(t.id),
-                            style: { background: "transparent", color: tab === t.id ? "var(--text-main)" : "var(--text-muted)", border: "none", borderBottom: tab === t.id ? "2px solid #00E676" : "2px solid transparent", padding: "12px 16px", cursor: "pointer", fontSize: 13, fontWeight: tab === t.id ? 700 : 500, whiteSpace: "nowrap", flexShrink: 0, transition: "all 0.18s" }
-                        }, t.label)),
-
-                        // Divider
-                        e('div', { style: { width: 1, height: 18, background: "var(--border)", margin: "0 8px", flexShrink: 0 } }),
-
-                        // Secondary tabs — smaller, clearly subordinate
-                        [
-                            { id: "wallets",      label: "Wallets" },
-                            { id: "limits",       label: "Limits" },
-                            { id: "transactions", label: "Logs" },
-                            { id: "history",      label: "History" },
-                        ].map(t => e('button', {
-                            key: t.id, className: "nav-btn", onClick: () => setTab(t.id),
-                            style: { background: "transparent", color: tab === t.id ? "var(--text-light)" : "var(--text-muted)", border: "none", borderBottom: tab === t.id ? "2px solid rgba(148,163,184,0.6)" : "2px solid transparent", padding: "12px 12px", cursor: "pointer", fontSize: 12, fontWeight: tab === t.id ? 600 : 400, whiteSpace: "nowrap", flexShrink: 0, transition: "all 0.18s", opacity: tab === t.id ? 1 : 0.7 }
-                        }, t.label))
-                    )
-                ),
-                
-                e('div', { role: "tabpanel", id: "tab-panel-" + tab, className: "page-wrap", style: { maxWidth: 1140, margin: "0 auto", padding: "clamp(16px, 4vw, 32px) clamp(12px, 4vw, 24px) 80px" } },
-                    tab === "dashboard" && e(DashboardOverview, { totals, bills, dailyExpenses, budgets, wallets: displayWallets, fc, fc2, incomes, txns, funds, archives, photoDiary, onNavigate: setTab }),
-                    tab === "limits" && e(BudgetLimitsView, { budgets, setBudgets, fc, requestConfirm, showToast }),
-                    tab === "wallets" && e(WalletsView, { wallets: displayWallets, rawWallets: wallets, setWallets, incomes, dailyExpenses, txns, fc, requestConfirm, showToast }),
-                    tab === "budget" && e(BudgetBillsView, { incomes, setIncomes, bills, setBills, wallets: displayWallets, setWallets, txns, setTxns, fc, requestConfirm, showToast }),
-                    tab === "daily" && e(DailyExpensesView, { dailyExpenses, setDailyExpenses, photoDiary, setPhotoDiary, wallets: displayWallets, setWallets, fc, requestConfirm, showToast }),
-                    tab === "goals" && e(SinkingFundsView, { funds, setFunds, enrichedFunds: totals.enrichedFunds, txns, setTxns, wallets: displayWallets, setWallets, fc, requestConfirm, showToast }),
-                    tab === "transactions" && e(AllTransactionsView, { txns, setTxns, funds, incomes, dailyExpenses, bills, wallets: displayWallets, fc, requestConfirm }),
-                    tab === "history" && e(HistoryView, { archives, fc }),
-                    tab === "photo-diary" && e(PhotoDiaryView, { photoDiary, setPhotoDiary, dailyExpenses, setDailyExpenses, wallets: displayWallets, setWallets, fc, showToast, requestConfirm }),
-                    tab === "settings" && e(SettingsView, { settings, setSettings, setIncomes, setBills, setDailyExpenses, setFunds, setTxns, setArchives, setBudgets, showToast, totals, bills, budgets, fc }),
-
-e('footer', { 
-                    style: { 
-                        textAlign: "center", padding: "40px 20px", marginTop: "40px", 
-                        borderTop: "1px solid var(--border)",
-                        color: "var(--text-muted)", fontSize: "12px", letterSpacing: "0.05em"
-                    } 
-                }, 
-                    e('div', { style: { fontWeight: 800, color: "var(--text-light)", marginBottom: 6, letterSpacing: "0.14em" } }, "LODOY GOES RANDOM"),
-                    e('div', { style: { fontSize: 10, color: "var(--text-muted)", opacity: 0.3, marginTop: 4 } }, "v2.0"),
-                    e('div', { style: { opacity: 0.5, fontSize: 11 } }, "Private offline finance tracking · No account required.")
-                )
-                ),
-
-                // ── CLOSE MONTH MODAL ────────────────────────────────────────
-
-                // ── TOAST NOTIFICATION ──────────────────────────────────────
-                toast && window.UndoToast
-                    ? e(window.UndoToast, { msg: toast.msg, undoFn: toast.undoFn, duration: toast.duration, onDismiss: () => setToast(null) })
-                    : toast && e('div', { className: "toast" }, toast.msg),
-
-                // ── Confirm Dialog ────────────────────────────────────────────
-                confirmState && e('div', { className: "modal-overlay", onClick: () => setConfirmState(null), style: { zIndex: Z.MODAL } },
-                    e('div', { onClick: ev => ev.stopPropagation(), style: { background: "var(--bg-panel)", borderRadius: 18, padding: "24px 20px", maxWidth: 340, width: "100%", border: "1px solid var(--border)", boxShadow: "0 20px 60px rgba(0,0,0,0.5)" } },
-                        e('div', { style: { fontSize: 15, fontWeight: 600, color: "var(--text-main)", lineHeight: 1.5, textAlign: "center", marginBottom: 20 } }, confirmState.message),
-                        e('div', { style: { display: "flex", gap: 10 } },
-                            e(Btn, { v: "ghost", style: { flex: 1 }, onClick: () => setConfirmState(null) }, "Cancel"),
-                            e(Btn, { v: "danger", style: { flex: 1 }, onClick: () => { const cb = confirmState.onConfirm; setConfirmState(null); cb(); } }, "Confirm")
-                        )
-                    )
-                ),
-
-                // ── OFFLINE BANNER ─────────────────────────────────────────────
-                isOffline && e('div', {
-                    style: {
-                        position: "fixed", top: 0, left: 0, right: 0,
-                        background: "rgba(245,158,11,0.15)", borderBottom: "1px solid rgba(245,158,11,0.3)",
-                        color: "#F59E0B", fontSize: 12, fontWeight: 600,
-                        textAlign: "center", padding: "6px 16px", zIndex: 9500,
-                        backdropFilter: "blur(8px)"
-                    },
-                    role: "status", "aria-live": "polite"
-                }, "📡 You're offline — all features work normally. Data is saved locally."),
-
-                // ── INSTALL BANNER ─────────────────────────────────────────────
-                showInstallBanner && deferredInstallPrompt && e('div', {
-                    style: {
-                        position: "fixed", bottom: 140, left: "50%", transform: "translateX(-50%)",
-                        background: "var(--bg-panel)", border: "1px solid var(--accent-border)",
-                        borderRadius: 14, padding: "12px 16px", zIndex: 9100,
-                        display: "flex", alignItems: "center", gap: 12,
-                        boxShadow: "0 8px 24px rgba(0,0,0,0.4)", maxWidth: "90vw"
-                    }
-                },
-                    e('div', { style: { display: "flex", alignItems: "center", gap: 10 } },
-                        e('img', { src: "logosinkpeso.png", alt: "", style: { width: 32, height: 32, borderRadius: 8 } }),
-                        e('div', null,
-                            e('div', { style: { fontSize: 13, fontWeight: 700, color: "var(--text-main)" } }, "Install SINKPESO"),
-                            e('div', { style: { fontSize: 11, color: "var(--text-muted)" } }, "Full-screen app on your home screen")
-                        )
-                    ),
-                    e('button', {
-                        onClick: () => { deferredInstallPrompt.prompt(); deferredInstallPrompt.userChoice.then(() => { setShowInstallBanner(false); setDeferredInstallPrompt(null); }); },
-                        style: {
-                            background: "#00E676", color: "#020810", border: "none",
-                            borderRadius: 8, padding: "8px 16px", fontSize: 12, fontWeight: 700,
-                            cursor: "pointer", fontFamily: "inherit", flexShrink: 0
-                        }
-                    }, "Install"),
-                    e('button', {
-                        onClick: () => setShowInstallBanner(false),
-                        style: {
-                            background: "transparent", border: "none", color: "var(--text-muted)",
-                            fontSize: 16, cursor: "pointer", padding: "4px 8px", lineHeight: 1
-                        },
-                        "aria-label": "Dismiss install prompt"
-                    }, "×")
-                ),
-
-                // ── iOS INSTALL GUIDE BANNER ───────────────────────────────
-                !isStandalone && isIOS && !showInstallBanner && !dismissedIOSBanner && e('div', {
-                    style: {
-                        position: "fixed", bottom: 140, left: "50%", transform: "translateX(-50%)",
-                        background: "var(--bg-panel)", border: "1px solid var(--accent-border)",
-                        borderRadius: 14, padding: "12px 16px", zIndex: 9100,
-                        display: "flex", alignItems: "center", gap: 12,
-                        boxShadow: "0 8px 24px rgba(0,0,0,0.4)", maxWidth: "90vw"
-                    }
-                },
-                    e('div', { style: { display: "flex", alignItems: "center", gap: 10 } },
-                        e('img', { src: "logosinkpeso.png", alt: "", style: { width: 32, height: 32, borderRadius: 8 } }),
-                        e('div', null,
-                            e('div', { style: { fontSize: 13, fontWeight: 700, color: "var(--text-main)" } }, "Install SINKPESO"),
-                            e('div', { style: { fontSize: 11, color: "var(--text-muted)" } }, "Tap Safari's Share button → Add to Home Screen")
-                        )
-                    ),
-                    e('button', {
-                        onClick: () => setShowIOSGuide(true),
-                        style: {
-                            background: "#00E676", color: "#020810", border: "none",
-                            borderRadius: 8, padding: "8px 16px", fontSize: 12, fontWeight: 700,
-                            cursor: "pointer", fontFamily: "inherit", flexShrink: 0
-                        }
-                    }, "How?"),
-                    e('button', {
-                        onClick: () => setDismissedIOSBanner(true),
-                        style: {
-                            background: "transparent", border: "none", color: "var(--text-muted)",
-                            fontSize: 16, cursor: "pointer", padding: "4px 8px", lineHeight: 1
-                        },
-                        "aria-label": "Dismiss install guide"
-                    }, "×")
-                ),
-
-                // ── iOS INSTALL GUIDE MODAL ───────────────────────────────
-                showIOSGuide && e('div', { className: "modal-overlay", onClick: () => setShowIOSGuide(false) },
-                    e('div', { className: "modal-container", style: { maxWidth: 380 }, onClick: ev => ev.stopPropagation() },
-                        e('div', { style: { textAlign: "center", marginBottom: 20 } },
-                            e('img', { src: "logosinkpeso.png", alt: "SINKPESO", style: { width: 64, height: 64, borderRadius: 16, marginBottom: 12 } }),
-                            e('h3', { style: { fontSize: 18, fontWeight: 800, color: "var(--text-main)", marginBottom: 4 } }, "Install SINKPESO"),
-                            e('p', { style: { fontSize: 13, color: "var(--text-muted)" } }, "Get the full app experience on your home screen")
-                        ),
-                        // Step-by-step instructions
-                        e('div', { style: { display: "flex", flexDirection: "column", gap: 12, marginBottom: 20 } },
-                            [
-                                ["1", "Tap the Share button", "The square with an arrow ↑ at the bottom of Safari"],
-                                ["2", "Scroll down", "Find \"Add to Home Screen\" in the share menu"],
-                                ["3", "Tap \"Add\"", "SINKPESO will appear on your home screen like a real app"],
-                            ].map(([num, title, sub]) =>
-                                e('div', { key: num, style: { display: "flex", alignItems: "flex-start", gap: 12, padding: "12px", background: "var(--hover-bg)", borderRadius: 10 } },
-                                    e('div', { style: { width: 28, height: 28, borderRadius: "50%", background: "#00E676", color: "#020810", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, fontWeight: 800, flexShrink: 0 } }, num),
-                                    e('div', null,
-                                        e('div', { style: { fontSize: 14, fontWeight: 700, color: "var(--text-main)" } }, title),
-                                        e('div', { style: { fontSize: 12, color: "var(--text-muted)", marginTop: 2 } }, sub)
-                                    )
-                                )
-                            )
-                        ),
-                        e(Btn, { v: "accent", style: { width: "100%" }, onClick: () => setShowIOSGuide(false) }, "Got it!")
-                    )
-                ),
-
-                // ── FLOATING QUICK ADD BUTTON ───────────────────────────────
-                e('button', { className: "fab", title: "Quick Add Expense", "aria-label": "Quick Add Expense", onClick: () => setShowQuickAdd(true) }, e(Icon, { name: "plus", size: 26, color: "#030712" })),
-
-                // ── MOBILE BOTTOM NAV ───────────────────────────────────────
-                e('div', { role: "navigation", "aria-label": "Bottom navigation", className: "bottom-nav" },
-                    [
-                        { id: "dashboard",   icon: "home",    label: "Home" },
-                        { id: "daily",       icon: "wallet",  label: "Expenses" },
-                        { id: "photo-diary", icon: "camera",  label: "Diary" },
-                        { id: "goals",       icon: "landmark",label: "Savings" },
-                        { id: "more",        icon: "more",    label: "More" }
-                    ].map(t => e('button', {
-                        key: t.id,
-                        className: "bnav-btn" + (tab === t.id || (t.id === "more" && ["wallets","limits","transactions","history","settings","budget"].includes(tab)) ? " active" : ""),
-                        onClick: () => t.id === "more" ? setShowMoreSheet(true) : setTab(t.id)
-                    },
-                        e(Icon, { name: t.icon, size: 22 }),
-                        e('span', null, t.label)
-                    ))
-                ),
-
-                // ── MORE BOTTOM SHEET ───────────────────────────────────────
-                showMoreSheet && e('div', { className: "sheet-overlay", onClick: () => setShowMoreSheet(false) },
-                    e('div', { className: "sheet-panel" + (sheetDragY > 0 ? " swiping" : "") + (sheetDragY > 120 ? " dismiss" : ""), onClick: ev => ev.stopPropagation(), style: sheetDragY > 0 && sheetDragY <= 120 ? { transform: 'translateY(' + sheetDragY + 'px)' } : undefined, onTouchStart: (ev) => { sheetSwipeRef.current = { startY: ev.touches[0].clientY, currentY: 0, swiping: false }; }, onTouchMove: (ev) => { const dy = ev.touches[0].clientY - sheetSwipeRef.current.startY; if (dy > 10) { sheetSwipeRef.current.swiping = true; setSheetDragY(Math.max(0, dy)); } }, onTouchEnd: () => { if (sheetDragY > 120) { setShowMoreSheet(false); } setSheetDragY(0); sheetSwipeRef.current = { startY: 0, currentY: 0, swiping: false }; } },
-                        e('div', { className: "sheet-handle" }),
-                        [
-                            { id: "budget",       icon: "receipt",      label: "Bills & Income",    sub: "Track bills, income, recurring" },
-                            { id: "wallets",      icon: "creditcard",   label: "Wallets",            sub: "Cash, GCash, bank accounts" },
-                            { id: "limits",       icon: "grid",         label: "Budget Limits",      sub: "Set spending caps per category" },
-                            { id: "transactions", icon: "list",         label: "Transaction Log",    sub: "All expenses, income, bills & vaults" },
-                            { id: "history",      icon: "history",      label: "Month History",      sub: "Archived monthly snapshots" },
-                            { id: "settings",     icon: "settings",     label: "Settings",           sub: "Preferences, PIN, backup" },
-                        ].map(t => {
-                            const isActive = tab === t.id;
-                            return e('div', { key: t.id, className: "sheet-row", style: isActive ? { background: "var(--hover-bg)" } : undefined, onClick: () => { setTab(t.id); setShowMoreSheet(false); } },
-                                e('span', { className: "sheet-row-icon" }, e(Icon, { name: t.icon, size: 22, color: isActive ? "#00E676" : "var(--text-light)" })),
-                                e('div', null,
-                                    e('div', { className: "sheet-row-label", style: isActive ? { color: "#00E676", fontWeight: 700 } : undefined }, t.label),
-                                    e('div', { className: "sheet-row-sub" }, t.sub)
-                                )
-                            );
-                        }),
-                        e('div', { className: "sheet-row", style: { color: "#A855F7" }, onClick: () => { setShowMoreSheet(false); setShowCloseModal(true); } },
-                            e('span', { className: "sheet-row-icon" }, e(Icon, { name: "archive", size: 22, color: "#A855F7" })),
-                            e('div', null,
-                                e('div', { className: "sheet-row-label", style: { color: "#A855F7" } }, "Archive & Start New Month"),
-                                e('div', { className: "sheet-row-sub" }, "Save snapshot, reset monthly data")
-                            )
-                        )
-                    )
-                ),
-
-                // ── QUICK ADD EXPENSE MODAL ─────────────────────────────────
-                showQuickAdd && e(QuickAddModal, { 
-                    wallets: displayWallets, setWallets, fc,
-                    onSave: (item) => { 
-                        setDailyExpenses(prev => [item, ...prev]); 
-                        setShowQuickAdd(false); 
-                        showToast("✓ Expense logged!"); 
-                    }, 
-                    onClose: () => setShowQuickAdd(false) 
-                }),
-
-                showCloseModal && e('div', { className: "modal-overlay", onClick: () => setShowCloseModal(false) },
-                    e('div', { className: "modal-container", style: { maxWidth: 440 }, onClick: ev => ev.stopPropagation() },
-
-                        // Header
-                        e('div', { style: { display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 20 } },
-                            e('div', null,
-                                e('h3', { style: { fontSize: 18, fontWeight: 800, color: "var(--text-main)" } }, "Close This Month"),
-                                e('div', { style: { fontSize: 13, color: "var(--text-muted)", marginTop: 4 } },
-                                    new Date().toLocaleDateString("en-PH", { month: "long", year: "numeric" })
-                                )
-                            ),
-                            e('button', { onClick: () => setShowCloseModal(false), style: S.closeBtn }, e(Icon, { name: "x", size: 16 }))
-                        ),
-
-                        // Preserved section
-                        e('div', { style: { background: "rgba(0,230,118,0.05)", border: "1px solid rgba(0,230,118,0.15)", borderRadius: 12, padding: "14px 16px", marginBottom: 10 } },
-                            e('div', { style: { fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#00E676", marginBottom: 10 } }, "✓ Preserved"),
-                            [
-                                ["creditcard", "Wallet balances — real money, always carried forward"],
-                                ["landmark",   "Savings Vaults & vault balances"],
-                                ["grid",       "Budget limits"],
-                                ["settings",   "Settings, PIN & preferences"],
-                                ["history",    "All previous month archives"],
-                            ].map(([icon, text], i) =>
-                                e('div', { key: i, style: { display: "flex", alignItems: "center", gap: 10, marginBottom: 6 } },
-                                    e(Icon, { name: icon, size: 13, color: "#00E676" }),
-                                    e('span', { style: { fontSize: 13, color: "var(--text-light)" } }, text)
-                                )
-                            )
-                        ),
-
-                        // Reset section
-                        e('div', { style: { background: "rgba(168,85,247,0.06)", border: "1px solid rgba(168,85,247,0.18)", borderRadius: 12, padding: "14px 16px", marginBottom: 24 } },
-                            e('div', { style: { fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#A855F7", marginBottom: 10 } }, "↺ Reset for New Month"),
-                            [
-                                ["inbox",       "Income entries (snapshot saved to History)"],
-                                ["wallet",      "Daily expenses (snapshot saved to History)"],
-                                ["arrowupdown", "Bill status — reset to unpaid, dates advance"],
-                            ].map(([icon, text], i) =>
-                                e('div', { key: i, style: { display: "flex", alignItems: "center", gap: 10, marginBottom: 6 } },
-                                    e(Icon, { name: icon, size: 13, color: "#A855F7" }),
-                                    e('span', { style: { fontSize: 13, color: "var(--text-light)" } }, text)
-                                )
-                            )
-                        ),
-
-                        // Action buttons
-                        e('div', { style: { display: "flex", gap: 10 } },
-                            e(Btn, { v: "ghost", style: { flex: 1 }, onClick: () => setShowCloseModal(false) }, "Cancel"),
-                            e(Btn, { v: "primary", style: { flex: 1, background: "#A855F7" }, onClick: handleCloseMonth }, "Archive & Start Fresh")
-                        )
-                    )
-                )
-            );
-        }
-
-        // SettingsView loaded from SettingsView.js (window.SettingsView)
-        const SettingGroup = window.SettingGroup;
-        const SettingsView = window.SettingsView || React.memo(function SettingsView_FALLBACK() {
-            return e('div', null, 'SettingsView.js not loaded');
-        });
-
-        // All view components loaded from external files:
-        // - SettingsView.js → window.SettingsView
-        // - PhotoDiaryView.js → window.PhotoDiaryView
-        // - DashboardOverview.js → window.DashboardOverview
-        // - InsightStrip.js → window.InsightStrip
-        // - EmptyState.js → window.EmptyState
-        // - SettingGroup.js → window.SettingGroup
-
-        // BudgetLimitsView loaded from BudgetLimitsView.js
-        const BudgetLimitsView = window.BudgetLimitsView || React.memo(function BudgetLimitsView_FALLBACK() { return e('div', null, 'BudgetLimitsView.js not loaded'); });
-
-        // BudgetBillsView loaded from BudgetBillsView.js (includes PayBillModal)
-        const PayBillModal = window.PayBillModal || function() { return null; };
-        const BudgetBillsView = window.BudgetBillsView || React.memo(function BudgetBillsView_FALLBACK() { return e('div', null, 'BudgetBillsView.js not loaded'); });
-
-        // DailyExpensesView loaded from DailyExpensesView.js (includes InsufficientBalanceModal)
-        const DailyExpensesView = window.DailyExpensesView || React.memo(function DailyExpensesView_FALLBACK() { return e('div', null, 'DailyExpensesView.js not loaded'); });
-
-        // SinkingFundsView loaded from SinkingFundsView.js
-        const SinkingFundsView = window.SinkingFundsView || React.memo(function SinkingFundsView_FALLBACK() { return e('div', null, 'SinkingFundsView.js not loaded'); });
-        // Orphaned inline SinkingFundsView code removed — external file provides the component.
-
-        // AllTransactionsView loaded from AllTransactionsView.js
-        const AllTransactionsView = window.AllTransactionsView || React.memo(function AllTransactionsView_FALLBACK() { return e('div', null, 'AllTransactionsView.js not loaded'); });
-
-        // HistoryView loaded from HistoryView.js
-        const HistoryView = window.HistoryView || React.memo(function HistoryView_FALLBACK() { return e('div', null, 'HistoryView.js not loaded'); });
-
-        // RecentActivitySection loaded from RecentActivitySection.js
-        const RecentActivitySection = window.RecentActivitySection || function() { return null; };
-
-        // All view components now loaded from external files.
-        const container = document.getElementById('root');
-        const root = ReactDOM.createRoot(container);
-        root.render(e(ErrorBoundary, null, e(App)));
-    </script>
-    <script>
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('./service-worker.js');
-        }
-    </script>
+    <!-- ═══ NAVBAR ═══ -->
+    <nav class="nav">
+        <div class="nav-inner">
+            <a href="/" class="nav-brand">
+                <img src="logosinkpeso.png" alt="SINKPESO">
+                <span class="nav-brand-text">SINKPESO</span>
+            </a>
+            <div class="nav-links">
+                <a href="#features">Features</a>
+                <a href="#how">How It Works</a>
+                <a href="#compare">Compare</a>
+                <a href="#privacy">Privacy</a>
+                <a href="app.html" class="btn btn-primary">Launch App</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ═══ SECTION 1 — HERO ═══ -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <div class="eyebrow">Private. Offline. Yours.</div>
+                <h1>Every Peso Has<br>a <em>Purpose.</em></h1>
+                <p class="hero-sub">
+                    Track expenses, manage wallets, build savings goals, and remember the moments behind every purchase.
+                </p>
+                <div class="hero-actions">
+                    <a href="app.html" class="btn btn-primary">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+                        Launch App
+                    </a>
+                    <a href="#showcase" class="btn btn-secondary">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        Watch Demo
+                    </a>
+                </div>
+            </div>
+            <div class="hero-mockup">
+                <div class="mockup-float">
+                    <div class="mockup-browser">
+                        <div class="mockup-bar">
+                            <span class="mockup-dot"></span><span class="mockup-dot"></span><span class="mockup-dot"></span>
+                            <span class="mockup-url">SINKPESO — Dashboard</span>
+                            <span style="width:50px"></span>
+                        </div>
+                        <div class="mockup-content">
+                            <div class="bento-card">
+                                <div class="bento-label">Available</div>
+                                <div class="bento-value green">&#8369;24,350</div>
+                                <div class="bento-sub">This month</div>
+                            </div>
+                            <div class="bento-card">
+                                <div class="bento-label">Spent</div>
+                                <div class="bento-value" style="color:var(--red)">&#8369;8,120</div>
+                                <div class="bento-sub">33% of income</div>
+                            </div>
+                            <div class="bento-card">
+                                <div class="bento-label">Savings</div>
+                                <div class="bento-value purple">&#8369;15,000</div>
+                                <div class="bento-sub">3 vaults</div>
+                            </div>
+                            <div class="bento-card">
+                                <div class="bento-label">Bills Paid</div>
+                                <div class="bento-value blue">4/6</div>
+                                <div class="bento-sub">2 upcoming</div>
+                            </div>
+                            <div class="bento-card span-2">
+                                <div class="bento-label">Weekly Spending</div>
+                                <div class="bento-chart">
+                                    <div class="bento-bar" style="height:35%"></div>
+                                    <div class="bento-bar" style="height:60%"></div>
+                                    <div class="bento-bar" style="height:25%"></div>
+                                    <div class="bento-bar" style="height:75%"></div>
+                                    <div class="bento-bar" style="height:45%"></div>
+                                    <div class="bento-bar" style="height:55%"></div>
+                                    <div class="bento-bar" style="height:70%"></div>
+                                </div>
+                            </div>
+                            <div class="bento-card span-2">
+                                <div class="bento-label">Recent</div>
+                                <div class="bento-tx">
+                                    <div class="bento-tx-left">
+                                        <div class="bento-tx-icon" style="background:var(--accent-dim)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 18V6"/></svg></div>
+                                        <div><div class="bento-tx-name">Jollibee</div><div class="bento-tx-cat">Food</div></div>
+                                    </div>
+                                    <div class="bento-tx-amount neg">-&#8369;285</div>
+                                </div>
+                                <div class="bento-tx">
+                                    <div class="bento-tx-left">
+                                        <div class="bento-tx-icon" style="background:var(--purple-dim)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6v6"/><path d="M15 6v6"/><path d="M2 12h19.6"/><path d="M18 18h3s.5-1.7.8-2.8c.1-.4.2-.8.2-1.2 0-.4-.1-.8-.2-1.2l-1.4-5C20.1 6.8 19.1 6 18 6H4a2 2 0 0 0-2 2v10h3"/><circle cx="7" cy="18" r="2"/><path d="M9 18h5"/><circle cx="16" cy="18" r="2"/></svg></div>
+                                        <div><div class="bento-tx-name">Grab</div><div class="bento-tx-cat">Transport</div></div>
+                                    </div>
+                                    <div class="bento-tx-amount neg">-&#8369;150</div>
+                                </div>
+                                <div class="bento-tx">
+                                    <div class="bento-tx-left">
+                                        <div class="bento-tx-icon" style="background:var(--amber-dim)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 18V6"/></svg></div>
+                                        <div><div class="bento-tx-name">Salary</div><div class="bento-tx-cat">Income</div></div>
+                                    </div>
+                                    <div class="bento-tx-amount pos">+&#8369;32,000</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══ SECTION 2 — TRUST BAR ═══ -->
+    <section class="trust">
+        <div class="container">
+            <div class="trust-header reveal">
+                <p>Built for real-life budgeting.</p>
+            </div>
+            <div class="trust-cards">
+                <div class="trust-card reveal reveal-d1">
+                    <div class="tc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1l22 22"/><path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"/><path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"/><path d="M10.71 5.05A16 16 0 0 1 22.56 9"/><path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg></div>
+                    <h3>Offline First</h3>
+                    <p>Works without internet</p>
+                </div>
+                <div class="trust-card reveal reveal-d1">
+                    <div class="tc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/></svg></div>
+                    <h3>Private by Design</h3>
+                    <p>Zero data collection</p>
+                </div>
+                <div class="trust-card reveal reveal-d2">
+                    <div class="tc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg></div>
+                    <h3>Multi Wallet</h3>
+                    <p>Cash, GCash, banks</p>
+                </div>
+                <div class="trust-card reveal reveal-d2">
+                    <div class="tc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg></div>
+                    <h3>Photo Diary</h3>
+                    <p>Remember every spend</p>
+                </div>
+                <div class="trust-card reveal reveal-d3">
+                    <div class="tc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="22" x2="21" y2="22"/><line x1="6" y1="18" x2="6" y2="11"/><line x1="10" y1="18" x2="10" y2="11"/><line x1="14" y1="18" x2="14" y2="11"/><line x1="18" y1="18" x2="18" y2="11"/><polygon points="12 2 20 7 4 7"/></svg></div>
+                    <h3>Savings Vaults</h3>
+                    <p>Goal-based saving</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══ SECTION 3 — THE PROBLEM ═══ -->
+    <section class="problem">
+        <div class="container">
+            <div class="section-header reveal">
+                <div class="eyebrow">The Problem</div>
+                <h2 class="section-title">Most People Track Spending.<br>Few Understand It.</h2>
+                <p class="section-sub center">Most finance apps tell you how much you spent. Very few help you understand why.</p>
+            </div>
+            <div class="problem-grid">
+                <div class="problem-card vs-traditional reveal">
+                    <div class="pc-badge">Traditional Tracker</div>
+                    <h3>Numbers Without Context</h3>
+                    <ul class="problem-list">
+                        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg> Shows transaction amounts only</li>
+                        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg> No memory of why you spent</li>
+                        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg> Data locked in the cloud</li>
+                        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg> Requires constant internet</li>
+                        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg> No awareness of spending patterns</li>
+                    </ul>
+                </div>
+                <div class="problem-card vs-sinkpeso reveal">
+                    <div class="pc-badge">SINKPESO</div>
+                    <h3>Meaning Behind Every Peso</h3>
+                    <ul class="problem-list">
+                        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Attach photos to expenses</li>
+                        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Remember the moment behind the spend</li>
+                        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> 100% local data ownership</li>
+                        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Full offline functionality</li>
+                        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Financial memory tracking</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══ SECTION 4 — PHOTO DIARY SHOWCASE ═══ -->
+    <section class="showcase" id="diary-showcase">
+        <div class="container">
+            <div class="showcase-grid">
+                <div class="showcase-text reveal">
+                    <div class="eyebrow">The Differentiator</div>
+                    <h2 class="section-title">Remember More<br>Than Numbers.</h2>
+                    <div style="margin-top:24px">
+                        <p class="quote-line">A coffee is never just <em>&#8369;180.</em></p>
+                        <p class="quote-line">It's a <strong>meeting.</strong></p>
+                        <p class="quote-line">A <strong>conversation.</strong></p>
+                        <p class="quote-line">A <strong>habit.</strong></p>
+                        <p class="quote-line">A <strong>memory.</strong></p>
+                        <p class="quote-line" style="margin-top:20px">Attach photos to expenses and build a timeline of where your money went and <em>what it meant.</em></p>
+                    </div>
+                </div>
+                <div class="showcase-visual reveal">
+                    <div class="showcase-phone">
+                        <div class="showcase-phone-bar">
+                            <img src="logosinkpeso.png" alt="">
+                            <span>Photo Diary</span>
+                        </div>
+                        <div class="diary-entry">
+                            <div class="diary-photo coffee">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 8h1a4 4 0 1 1 0 8h-1"/><path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z"/><line x1="6" y1="2" x2="6" y2="4"/><line x1="10" y1="2" x2="10" y2="4"/><line x1="14" y1="2" x2="14" y2="4"/></svg>
+                            </div>
+                            <div class="diary-row">
+                                <div class="diary-left">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 18V6"/></svg>
+                                    <div><div class="diary-name">Coffee with team</div><div class="diary-time">Today, 3:45 PM</div></div>
+                                </div>
+                                <div class="diary-amount">-&#8369;180</div>
+                            </div>
+                        </div>
+                        <div class="diary-entry">
+                            <div class="diary-photo grocery">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 17.5v-11"/></svg>
+                            </div>
+                            <div class="diary-row">
+                                <div class="diary-left">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 18V6"/></svg>
+                                    <div><div class="diary-name">Weekly groceries</div><div class="diary-time">Today, 11:20 AM</div></div>
+                                </div>
+                                <div class="diary-amount">-&#8369;1,250</div>
+                            </div>
+                        </div>
+                        <div class="diary-entry">
+                            <div class="diary-photo transport">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6v6"/><path d="M15 6v6"/><path d="M2 12h19.6"/><path d="M18 18h3s.5-1.7.8-2.8c.1-.4.2-.8.2-1.2 0-.4-.1-.8-.2-1.2l-1.4-5C20.1 6.8 19.1 6 18 6H4a2 2 0 0 0-2 2v10h3"/><circle cx="7" cy="18" r="2"/><path d="M9 18h5"/><circle cx="16" cy="18" r="2"/></svg>
+                            </div>
+                            <div class="diary-row">
+                                <div class="diary-left">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 18V6"/></svg>
+                                    <div><div class="diary-name">Commute to office</div><div class="diary-time">Today, 8:30 AM</div></div>
+                                </div>
+                                <div class="diary-amount">-&#8369;150</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══ SECTION 5 — FEATURE BENTO ═══ -->
+    <section class="features" id="features">
+        <div class="container">
+            <div class="section-header reveal">
+                <div class="eyebrow">Features</div>
+                <h2 class="section-title">Everything you need.<br>Nothing you don't.</h2>
+                <p class="section-sub center">A complete budgeting system designed for everyday life.</p>
+            </div>
+            <div class="features-grid">
+                <div class="feat-card featured reveal">
+                    <div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg></div>
+                    <h3>Photo Diary</h3>
+                    <p>Remember the moments behind every expense. Snap receipts, capture meals, document the "why" behind every peso spent. Build a visual timeline of your financial life.</p>
+                </div>
+                <div class="feat-card reveal">
+                    <div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg></div>
+                    <h3>Wallet Tracking</h3>
+                    <p>Track cash, e-wallets, and bank accounts separately. Know exactly where your money lives.</p>
+                </div>
+                <div class="feat-card reveal">
+                    <div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/></svg></div>
+                    <h3>Bills Manager</h3>
+                    <p>Stay ahead of due dates and recurring expenses. Never miss a payment again.</p>
+                </div>
+                <div class="feat-card featured reveal">
+                    <div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="22" x2="21" y2="22"/><line x1="6" y1="18" x2="6" y2="11"/><line x1="10" y1="18" x2="10" y2="11"/><line x1="14" y1="18" x2="14" y2="11"/><line x1="18" y1="18" x2="18" y2="11"/><polygon points="12 2 20 7 4 7"/></svg></div>
+                    <h3>Savings Vaults</h3>
+                    <p>Create dedicated funds for future goals. Emergency fund, travel, gadgets. Track progress visually and stay motivated with every peso you save.</p>
+                </div>
+                <div class="feat-card reveal">
+                    <div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg></div>
+                    <h3>Transaction Timeline</h3>
+                    <p>Searchable and organized spending history. Filter by category, wallet, or date.</p>
+                </div>
+                <div class="feat-card reveal">
+                    <div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1l22 22"/><path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"/><path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"/><path d="M10.71 5.05A16 16 0 0 1 22.56 9"/><path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg></div>
+                    <h3>Offline First</h3>
+                    <p>Works even when internet does not. All features available anytime, anywhere.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══ SECTION 6 — HOW IT WORKS ═══ -->
+    <section class="how" id="how">
+        <div class="container">
+            <div class="section-header reveal">
+                <div class="eyebrow">How It Works</div>
+                <h2 class="section-title">Start in four simple steps</h2>
+                <p class="section-sub center">No registration. No tutorial. Just open and start building better money habits.</p>
+            </div>
+            <div class="steps">
+                <div class="step reveal reveal-d1">
+                    <div class="step-num">1</div>
+                    <h3>Add Income</h3>
+                    <p>Log your salary, freelance pay, or any money coming in.</p>
+                </div>
+                <div class="step reveal reveal-d1">
+                    <div class="step-num">2</div>
+                    <h3>Track Spending</h3>
+                    <p>Log every expense as it happens. Takes 5 seconds.</p>
+                </div>
+                <div class="step reveal reveal-d2">
+                    <div class="step-num">3</div>
+                    <h3>Capture Moments</h3>
+                    <p>Attach photos to expenses. Remember the why.</p>
+                </div>
+                <div class="step reveal reveal-d3">
+                    <div class="step-num">4</div>
+                    <h3>Reach Goals</h3>
+                    <p>Build savings. Understand habits. Grow financially.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══ SECTION 7 — APP SHOWCASE ═══ -->
+    <section class="app-showcase" id="showcase">
+        <div class="container">
+            <div class="section-header reveal">
+                <div class="eyebrow">App Preview</div>
+                <h2 class="section-title">See SINKPESO in action</h2>
+                <p class="section-sub center">A clean, focused interface designed to help you stay on top of your money.</p>
+            </div>
+            <div class="showcase-tabs">
+                <button class="showcase-tab active" data-panel="dashboard">Dashboard</button>
+                <button class="showcase-tab" data-panel="expenses">Expenses</button>
+                <button class="showcase-tab" data-panel="bills">Bills</button>
+                <button class="showcase-tab" data-panel="savings">Savings</button>
+                <button class="showcase-tab" data-panel="diary">Photo Diary</button>
+            </div>
+            <div class="showcase-display reveal">
+                <div class="showcase-frame">
+                    <div class="showcase-header">
+                        <span class="mockup-dot"></span><span class="mockup-dot"></span><span class="mockup-dot"></span>
+                        <span class="showcase-header-text" id="showcase-title">SINKPESO — Dashboard</span>
+                        <span style="width:42px"></span>
+                    </div>
+                    <div class="showcase-body">
+                        <!-- Dashboard Panel -->
+                        <div class="showcase-panel active" id="panel-dashboard">
+                            <div class="ss-grid cols-3">
+                                <div class="ss-card">
+                                    <div class="bento-label">Available</div>
+                                    <div class="bento-value green" style="font-size:24px">&#8369;24,350</div>
+                                </div>
+                                <div class="ss-card">
+                                    <div class="bento-label">Spent</div>
+                                    <div class="bento-value" style="color:var(--red);font-size:24px">&#8369;8,120</div>
+                                </div>
+                                <div class="ss-card">
+                                    <div class="bento-label">Savings</div>
+                                    <div class="bento-value purple" style="font-size:24px">&#8369;15,000</div>
+                                </div>
+                                <div class="ss-card span-2">
+                                    <div class="bento-label">Daily Spending</div>
+                                    <div class="bento-chart">
+                                        <div class="bento-bar" style="height:40%"></div>
+                                        <div class="bento-bar" style="height:65%"></div>
+                                        <div class="bento-bar" style="height:30%"></div>
+                                        <div class="bento-bar" style="height:80%"></div>
+                                        <div class="bento-bar" style="height:45%"></div>
+                                        <div class="bento-bar" style="height:55%"></div>
+                                        <div class="bento-bar" style="height:70%"></div>
+                                    </div>
+                                </div>
+                                <div class="ss-card">
+                                    <div class="bento-label">Bills</div>
+                                    <div class="bento-value blue" style="font-size:24px">4/6</div>
+                                    <div class="bento-sub">paid this month</div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Expenses Panel -->
+                        <div class="showcase-panel" id="panel-expenses">
+                            <div style="width:100%">
+                                <div class="ss-row">
+                                    <div class="ss-row-left">
+                                        <div class="ss-row-icon" style="background:var(--accent-dim);color:var(--accent)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 18V6"/></svg></div>
+                                        <div><div class="ss-row-name">Jollibee</div><div class="ss-row-cat">Food · Today</div></div>
+                                    </div>
+                                    <div class="ss-row-amt" style="color:var(--red)">-&#8369;285</div>
+                                </div>
+                                <div class="ss-row">
+                                    <div class="ss-row-left">
+                                        <div class="ss-row-icon" style="background:var(--purple-dim);color:var(--purple)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6v6"/><path d="M15 6v6"/><path d="M2 12h19.6"/><path d="M18 18h3s.5-1.7.8-2.8c.1-.4.2-.8.2-1.2 0-.4-.1-.8-.2-1.2l-1.4-5C20.1 6.8 19.1 6 18 6H4a2 2 0 0 0-2 2v10h3"/><circle cx="7" cy="18" r="2"/><path d="M9 18h5"/><circle cx="16" cy="18" r="2"/></svg></div>
+                                        <div><div class="ss-row-name">Grab to Makati</div><div class="ss-row-cat">Transport · Today</div></div>
+                                    </div>
+                                    <div class="ss-row-amt" style="color:var(--red)">-&#8369;150</div>
+                                </div>
+                                <div class="ss-row">
+                                    <div class="ss-row-left">
+                                        <div class="ss-row-icon" style="background:var(--amber-dim);color:var(--amber)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg></div>
+                                        <div><div class="ss-row-name">SM Supermarket</div><div class="ss-row-cat">Groceries · Yesterday</div></div>
+                                    </div>
+                                    <div class="ss-row-amt" style="color:var(--red)">-&#8369;1,250</div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Bills Panel -->
+                        <div class="showcase-panel" id="panel-bills">
+                            <div style="width:100%">
+                                <div class="ss-bill">
+                                    <div class="ss-row-left">
+                                        <span style="font-size:16px;color:var(--text-muted)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg></span>
+                                        <div><div class="ss-row-name">Meralco</div><div class="ss-row-cat">Due Jun 15</div></div>
+                                    </div>
+                                    <span class="ss-bill-badge paid">Paid &#8369;2,800</span>
+                                </div>
+                                <div class="ss-bill">
+                                    <div class="ss-row-left">
+                                        <span style="font-size:16px;color:var(--text-muted)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1l22 22"/><path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"/><path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"/><path d="M10.71 5.05A16 16 0 0 1 22.56 9"/><path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg></span>
+                                        <div><div class="ss-row-name">PLDT</div><div class="ss-row-cat">Due Jun 10</div></div>
+                                    </div>
+                                    <span class="ss-bill-badge paid">Paid &#8369;1,699</span>
+                                </div>
+                                <div class="ss-bill">
+                                    <div class="ss-row-left">
+                                        <span style="font-size:16px;color:var(--text-muted)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></span>
+                                        <div><div class="ss-row-name">Rent</div><div class="ss-row-cat">Due Jun 5</div></div>
+                                    </div>
+                                    <span class="ss-bill-badge paid">Paid &#8369;8,000</span>
+                                </div>
+                                <div class="ss-bill">
+                                    <div class="ss-row-left">
+                                        <span style="font-size:16px;color:var(--text-muted)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/></svg></span>
+                                        <div><div class="ss-row-name">Globe Postpaid</div><div class="ss-row-cat">Due Jun 20</div></div>
+                                    </div>
+                                    <span class="ss-bill-badge due">&#8369;1,499</span>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Savings Panel -->
+                        <div class="showcase-panel" id="panel-savings">
+                            <div class="ss-grid cols-2">
+                                <div class="ss-vault-card">
+                                    <div class="ss-vault-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/></svg></div>
+                                    <div class="ss-vault-name">Emergency Fund</div>
+                                    <div class="ss-vault-amount">&#8369;15,000</div>
+                                    <div class="ss-vault-bar"><div class="ss-vault-fill" style="width:75%"></div></div>
+                                </div>
+                                <div class="ss-vault-card">
+                                    <div class="ss-vault-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></svg></div>
+                                    <div class="ss-vault-name">Japan Trip</div>
+                                    <div class="ss-vault-amount" style="color:var(--blue)">&#8369;8,000</div>
+                                    <div class="ss-vault-bar"><div class="ss-vault-fill" style="width:40%;background:var(--blue)"></div></div>
+                                </div>
+                                <div class="ss-vault-card">
+                                    <div class="ss-vault-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg></div>
+                                    <div class="ss-vault-name">New Laptop</div>
+                                    <div class="ss-vault-amount" style="color:var(--purple)">&#8369;12,500</div>
+                                    <div class="ss-vault-bar"><div class="ss-vault-fill" style="width:25%;background:var(--purple)"></div></div>
+                                </div>
+                                <div class="ss-vault-card">
+                                    <div class="ss-vault-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></div>
+                                    <div class="ss-vault-name">Certification</div>
+                                    <div class="ss-vault-amount" style="color:var(--amber)">&#8369;3,200</div>
+                                    <div class="ss-vault-bar"><div class="ss-vault-fill" style="width:32%;background:var(--amber)"></div></div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Photo Diary Panel -->
+                        <div class="showcase-panel" id="panel-diary">
+                            <div class="ss-diary-grid">
+                                <div class="ss-diary-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg><span class="ss-diary-label">Groceries</span><span class="ss-diary-amount">&#8369;1,250</span></div>
+                                <div class="ss-diary-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 18V6"/></svg><span class="ss-diary-label">Jollibee</span><span class="ss-diary-amount">&#8369;285</span></div>
+                                <div class="ss-diary-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg><span class="ss-diary-label">Electric Bill</span><span class="ss-diary-amount">&#8369;2,800</span></div>
+                                <div class="ss-diary-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/></svg><span class="ss-diary-label">Load</span><span class="ss-diary-amount">&#8369;150</span></div>
+                                <div class="ss-diary-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 8h1a4 4 0 1 1 0 8h-1"/><path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z"/><line x1="6" y1="2" x2="6" y2="4"/><line x1="10" y1="2" x2="10" y2="4"/><line x1="14" y1="2" x2="14" y2="4"/></svg><span class="ss-diary-label">Coffee</span><span class="ss-diary-amount">&#8369;220</span></div>
+                                <div class="ss-diary-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6v6"/><path d="M15 6v6"/><path d="M2 12h19.6"/><path d="M18 18h3s.5-1.7.8-2.8c.1-.4.2-.8.2-1.2 0-.4-.1-.8-.2-1.2l-1.4-5C20.1 6.8 19.1 6 18 6H4a2 2 0 0 0-2 2v10h3"/><circle cx="7" cy="18" r="2"/><path d="M9 18h5"/><circle cx="16" cy="18" r="2"/></svg><span class="ss-diary-label">Commute</span><span class="ss-diary-amount">&#8369;150</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══ SECTION 8 — PRIVACY ═══ -->
+    <section class="privacy" id="privacy">
+        <div class="container">
+            <div class="section-header reveal">
+                <div class="eyebrow">Privacy First</div>
+                <h2 class="section-title">Private. Offline. Yours.</h2>
+                <p class="section-sub center">Most finance apps rely on the cloud. SINKPESO is different. Your financial records remain on your device.</p>
+            </div>
+            <div class="privacy-cards">
+                <div class="priv-card reveal reveal-d1">
+                    <div class="priv-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/></svg></div>
+                    <h3>Private by Design</h3>
+                    <p>Your data belongs to you. Zero analytics, zero tracking.</p>
+                </div>
+                <div class="priv-card reveal reveal-d1">
+                    <div class="priv-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1l22 22"/><path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"/><path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"/><path d="M10.71 5.05A16 16 0 0 1 22.56 9"/><path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg></div>
+                    <h3>Offline First</h3>
+                    <p>Works without internet. All features, always available.</p>
+                </div>
+                <div class="priv-card reveal reveal-d2">
+                    <div class="priv-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
+                    <h3>Local Ownership</h3>
+                    <p>No forced cloud dependency. Data stays on your device.</p>
+                </div>
+                <div class="priv-card reveal reveal-d2">
+                    <div class="priv-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></svg></div>
+                    <h3>Fast and Reliable</h3>
+                    <p>Instant access to your finances. No loading, no lag.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══ SECTION 9 — WHY SINKPESO ═══ -->
+    <section class="comparison" id="compare">
+        <div class="container">
+            <div class="section-header reveal">
+                <div class="eyebrow">Why SINKPESO</div>
+                <h2 class="section-title">How SINKPESO compares</h2>
+                <p class="section-sub center">A different approach to tracking money.</p>
+            </div>
+            <div class="reveal">
+                <table class="comp-table">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th class="hl">SINKPESO</th>
+                            <th>Traditional Apps</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Offline Support</td><td class="hl"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Full offline</td><td style="opacity:0.4">Requires internet</td></tr>
+                        <tr><td>Photo Diary</td><td class="hl"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Built-in</td><td style="opacity:0.4">Not available</td></tr>
+                        <tr><td>Multi Wallet Tracking</td><td class="hl"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Unlimited</td><td><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Limited</td></tr>
+                        <tr><td>Savings Vaults</td><td class="hl"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Visual vaults</td><td style="opacity:0.4">Manual only</td></tr>
+                        <tr><td>Privacy First</td><td class="hl"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Zero collection</td><td style="opacity:0.4">Cloud-synced</td></tr>
+                        <tr><td>Fast Setup</td><td class="hl"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> 30 seconds</td><td style="opacity:0.4">Account required</td></tr>
+                        <tr><td>Local Data Ownership</td><td class="hl"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> 100% local</td><td style="opacity:0.4">Server-dependent</td></tr>
+                        <tr><td>Financial Memory</td><td class="hl"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Photo + context</td><td style="opacity:0.4">Numbers only</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══ SECTION 10 — TESTIMONIALS ═══ -->
+    <section class="testimonials">
+        <div class="container">
+            <div class="section-header reveal">
+                <div class="eyebrow">What Users Say</div>
+                <h2 class="section-title">Real people, real clarity</h2>
+            </div>
+            <div class="test-grid">
+                <div class="test-card reveal reveal-d1">
+                    <div class="test-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+                    <p class="test-quote">"I finally know where my money goes every month. The Photo Diary feature is a game-changer — I can literally see my spending history with photos attached."</p>
+                    <div class="test-author">
+                        <div class="test-avatar" style="background:var(--accent-dim);color:var(--accent)">M</div>
+                        <div><div class="test-name">Maria C.</div><div class="test-role">Freelance Designer</div></div>
+                    </div>
+                </div>
+                <div class="test-card reveal reveal-d2">
+                    <div class="test-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+                    <p class="test-quote">"The savings vaults keep me disciplined. I set up separate goals for my emergency fund and upcoming trip, and watching the progress bars fill up is so satisfying."</p>
+                    <div class="test-author">
+                        <div class="test-avatar" style="background:var(--blue-dim);color:var(--blue)">J</div>
+                        <div><div class="test-name">Joshua R.</div><div class="test-role">Software Engineer</div></div>
+                    </div>
+                </div>
+                <div class="test-card reveal reveal-d3">
+                    <div class="test-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+                    <p class="test-quote">"I used to forget bill payments all the time. Now I track everything — Meralco, PLDT, rent — and the offline feature means I can log expenses even without signal."</p>
+                    <div class="test-author">
+                        <div class="test-avatar" style="background:var(--purple-dim);color:var(--purple)">A</div>
+                        <div><div class="test-name">Ana S.</div><div class="test-role">College Student</div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══ SECTION 11 — FINAL CTA ═══ -->
+    <section class="final-cta">
+        <div class="container">
+            <div class="final-cta-content reveal">
+                <h2>Start Taking Control<br>of <em>Every Peso.</em></h2>
+                <p>Build better money habits with a budgeting system designed for real life.</p>
+                <div class="hero-actions">
+                    <a href="app.html" class="btn btn-primary">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+                        Launch App
+                    </a>
+                    <a href="app.html" class="btn btn-ghost">Get Started <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══ SECTION 12 — FOOTER ═══ -->
+    <footer>
+        <div class="container">
+            <div class="footer-inner">
+                <div>
+                    <div class="footer-brand">
+                        <img src="logosinkpeso.png" alt="">
+                        <span>SINKPESO</span>
+                    </div>
+                    <div class="footer-tagline">Private. Offline. Yours.</div>
+                </div>
+                <div class="footer-links">
+                    <a href="#features">Features</a>
+                    <a href="privacy.html">Privacy</a>
+                    <a href="https://github.com/sinkpeso/sinkpeso.github.io" target="_blank" rel="noopener">GitHub</a>
+                    <a href="app.html">Launch App</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="app.js"></script>
 </body>
 </html>

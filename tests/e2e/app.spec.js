@@ -7,7 +7,7 @@ const { test, expect } = require('@playwright/test');
 
 // Helper: skip onboarding by setting localStorage
 async function skipOnboarding(page) {
-    await page.goto('/');
+    await page.goto('/app.html');
     await page.waitForTimeout(500);
     await page.evaluate(() => {
         localStorage.setItem('sp_onboarding_seen', '1');
@@ -19,14 +19,22 @@ async function skipOnboarding(page) {
 
 test.describe('SINKPESO E2E', () => {
 
-    test('loads the dashboard', async ({ page }) => {
+    test('landing page loads', async ({ page }) => {
         await page.goto('/');
+        // Landing page should show the SINKPESO heading
+        await expect(page.locator('text=SINKPESO')).toBeVisible({ timeout: 10000 });
+        // Should have a CTA linking to the app
+        await expect(page.locator('a[href="app.html"]')).toBeVisible({ timeout: 5000 });
+    });
+
+    test('loads the dashboard', async ({ page }) => {
+        await page.goto('/app.html');
         // Should see the SINKPESO logo or title
         await expect(page.locator('text=SINKPESO')).toBeVisible({ timeout: 10000 });
     });
 
     test('shows onboarding for first-time users', async ({ page }) => {
-        await page.goto('/');
+        await page.goto('/app.html');
         // Onboarding should show "Welcome to SINKPESO"
         const welcome = page.locator('text=Welcome to SINKPESO');
         // May or may not show depending on localStorage state — check for either state
@@ -74,7 +82,7 @@ test.describe('SINKPESO E2E', () => {
 
     test('PIN screen blocks access when PIN is set', async ({ page }) => {
         // Set a PIN hash in localStorage
-        await page.goto('/');
+        await page.goto('/app.html');
         await page.waitForTimeout(500);
         await page.evaluate(() => {
             localStorage.setItem('sp_settings', JSON.stringify({
@@ -153,7 +161,7 @@ test.describe('SINKPESO E2E', () => {
     });
 
     test('app has correct title and meta tags', async ({ page }) => {
-        await page.goto('/');
+        await page.goto('/app.html');
         await expect(page).toHaveTitle('SINKPESO');
         // Check theme color meta tag
         const themeColor = page.locator('meta[name="theme-color"]');
