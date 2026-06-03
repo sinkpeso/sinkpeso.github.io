@@ -238,10 +238,33 @@
 
         function DotMenu({ itemId, openMenu, setOpenMenu, onEdit, onDelete }) {
             const isOpen = openMenu === itemId;
+            const btnRef = useRef(null);
+            const [dropdownPos, setDropdownPos] = useState(null);
+
+            useEffect(() => {
+                if (isOpen && btnRef.current) {
+                    const rect = btnRef.current.getBoundingClientRect();
+                    // Position dropdown: prefer below button, flip above if near bottom
+                    const spaceBelow = window.innerHeight - rect.bottom;
+                    const dropdownHeight = 100; // approximate height of 2 menu items
+                    const top = spaceBelow < dropdownHeight + 16
+                        ? rect.top - dropdownHeight - 4
+                        : rect.bottom + 4;
+                    setDropdownPos({
+                        position: "fixed",
+                        top: top,
+                        right: window.innerWidth - rect.right,
+                        zIndex: Z.MENU_DROPDOWN,
+                    });
+                } else {
+                    setDropdownPos(null);
+                }
+            }, [isOpen]);
+
             return e('div', { style: { position: "relative", flexShrink: 0 } },
                 isOpen && e('div', { style: { position: "fixed", inset: 0, zIndex: Z.MENU_BACKDROP }, onClick: (ev) => { ev.stopPropagation(); setOpenMenu(null); } }),
-                e('button', { className: "dot-menu-btn", onClick: (ev) => { ev.stopPropagation(); setOpenMenu(isOpen ? null : itemId); } }, '⋮'),
-                isOpen && e('div', { className: "dot-menu-dropdown" },
+                e('button', { ref: btnRef, className: "dot-menu-btn", onClick: (ev) => { ev.stopPropagation(); setOpenMenu(isOpen ? null : itemId); } }, '⋮'),
+                isOpen && dropdownPos && e('div', { className: "dot-menu-dropdown", style: dropdownPos },
                     e('button', { className: "dot-menu-item", onClick: (ev) => { ev.stopPropagation(); setOpenMenu(null); onEdit(); } },
                         e('span', { style: { display:"flex", alignItems:"center", gap:8 } }, e(Icon, { name:"edit", size:14 }), "Edit")),
                     e('button', { className: "dot-menu-item", style: { color: "#EF4444" }, onClick: (ev) => { ev.stopPropagation(); setOpenMenu(null); onDelete(); } },
