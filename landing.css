@@ -790,14 +790,18 @@ footer {
     .showcase-grid { grid-template-columns: 1fr; gap: 40px; }
     .showcase-visual { order: -1; }
     .problem-grid { grid-template-columns: 1fr; }
+    .comp-table { font-size: 12px; }
+    .comp-table thead th, .comp-table tbody td { padding: 10px 8px; }
 }
 @media (max-width: 768px) {
     :root { --section: 80px; }
+    body { overflow-x: hidden; }
     .nav-links a:not(.btn-primary) { display: none; }
     .hero { padding: 120px 0 0; }
     .hero-actions { flex-direction: column; align-items: center; }
     .btn { width: 100%; max-width: 300px; }
-    .mockup-content { grid-template-columns: 1fr 1fr; }
+    .hero-mockup { padding: 0 12px; overflow: hidden; }
+    .mockup-content { grid-template-columns: 1fr 1fr; padding: 12px; gap: 8px; }
     .bento-card.span-2 { grid-column: span 2; }
     .features-grid { grid-template-columns: 1fr; }
     .feat-card.featured { grid-column: span 1; }
@@ -807,13 +811,34 @@ footer {
     .ss-card.span-2 { grid-column: span 2; }
     .ss-diary-grid { grid-template-columns: repeat(2, 1fr); }
     .footer-inner { flex-direction: column; gap: 16px; text-align: center; }
+    .showcase-phone { width: 260px; }
+    .showcase-grid { padding: 0 12px; }
+    .comparison { overflow-x: auto; }
+    .comp-table { min-width: 580px; font-size: 12px; }
+    .comp-table thead th, .comp-table tbody td { padding: 10px 8px; font-size: 12px; }
+    .problem-card { padding: 24px; }
+    .feat-card { padding: 24px; }
+    .section-title { font-size: clamp(24px, 5vw, 36px); }
+    .test-card { padding: 20px; }
 }
 @media (max-width: 480px) {
-    .mockup-content { grid-template-columns: 1fr; padding: 14px; gap: 10px; }
+    .hero h1 { font-size: 32px; }
+    .hero-sub { font-size: 15px; }
+    .hero-mockup { padding: 0 8px; }
+    .mockup-content { grid-template-columns: 1fr; padding: 10px; gap: 8px; }
     .bento-card.span-2 { grid-column: span 1; }
+    .bento-card { padding: 14px; }
+    .bento-value { font-size: 22px; }
     .trust-cards { grid-template-columns: 1fr; }
+    .trust-card { padding: 20px 16px; }
     .steps { grid-template-columns: 1fr; }
     .ss-grid.cols-3 { grid-template-columns: 1fr; }
     .ss-card.span-2 { grid-column: span 1; }
     .ss-grid.cols-2 { grid-template-columns: 1fr; }
+    .showcase-phone { width: 240px; padding: 12px; }
+    .diary-entry { padding: 10px; }
+    .section-header { margin-bottom: 40px; }
+    .problem-list li { font-size: 13px; }
+    .quote-line { font-size: 15px !important; }
+    .container { padding: 0 16px; }
 }
