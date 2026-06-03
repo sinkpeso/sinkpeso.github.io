@@ -40,6 +40,7 @@
     <script src="RecentActivitySection.js"></script>
     <script src="OnboardingScreen.js"></script>
     <script src="UndoToast.js"></script>
+    <script src="HelpTooltip.js"></script>
 
         <link rel="apple-touch-icon" href="logosinkpeso.png">
     <link rel="icon" href="logosinkpeso.png" type="image/png">
@@ -590,6 +591,29 @@
             const [showOnboarding, setShowOnboarding] = useState(() => {
                 try { return window.shouldShowOnboarding && window.shouldShowOnboarding(); } catch(e) { return false; }
             });
+            const [isOffline, setIsOffline] = useState(!navigator.onLine);
+            const [deferredInstallPrompt, setDeferredInstallPrompt] = useState(null);
+            const [showInstallBanner, setShowInstallBanner] = useState(false);
+
+            // Offline/online detection
+            useEffect(() => {
+                const goOffline = () => setIsOffline(true);
+                const goOnline = () => setIsOffline(false);
+                window.addEventListener("offline", goOffline);
+                window.addEventListener("online", goOnline);
+                return () => { window.removeEventListener("offline", goOffline); window.removeEventListener("online", goOnline); };
+            }, []);
+
+            // Install prompt capture
+            useEffect(() => {
+                const handler = (ev) => {
+                    ev.preventDefault();
+                    setDeferredInstallPrompt(ev);
+                    setShowInstallBanner(true);
+                };
+                window.addEventListener("beforeinstallprompt", handler);
+                return () => window.removeEventListener("beforeinstallprompt", handler);
+            }, []);
 
             useEffect(() => { window.scrollTo(0, 0); }, [tab]);
 
@@ -976,6 +1000,53 @@ e('footer', {
                             e(Btn, { v: "danger", style: { flex: 1 }, onClick: () => { const cb = confirmState.onConfirm; setConfirmState(null); cb(); } }, "Confirm")
                         )
                     )
+                ),
+
+                // ── OFFLINE BANNER ─────────────────────────────────────────────
+                isOffline && e('div', {
+                    style: {
+                        position: "fixed", top: 0, left: 0, right: 0,
+                        background: "rgba(245,158,11,0.15)", borderBottom: "1px solid rgba(245,158,11,0.3)",
+                        color: "#F59E0B", fontSize: 12, fontWeight: 600,
+                        textAlign: "center", padding: "6px 16px", zIndex: 9500,
+                        backdropFilter: "blur(8px)"
+                    },
+                    role: "status", "aria-live": "polite"
+                }, "📡 You're offline — all features work normally. Data is saved locally."),
+
+                // ── INSTALL BANNER ─────────────────────────────────────────────
+                showInstallBanner && deferredInstallPrompt && e('div', {
+                    style: {
+                        position: "fixed", bottom: 140, left: "50%", transform: "translateX(-50%)",
+                        background: "var(--bg-panel)", border: "1px solid var(--accent-border)",
+                        borderRadius: 14, padding: "12px 16px", zIndex: 9100,
+                        display: "flex", alignItems: "center", gap: 12,
+                        boxShadow: "0 8px 24px rgba(0,0,0,0.4)", maxWidth: "90vw"
+                    }
+                },
+                    e('div', { style: { display: "flex", alignItems: "center", gap: 10 } },
+                        e('img', { src: "logosinkpeso.png", alt: "", style: { width: 32, height: 32, borderRadius: 8 } }),
+                        e('div', null,
+                            e('div', { style: { fontSize: 13, fontWeight: 700, color: "var(--text-main)" } }, "Install SINKPESO"),
+                            e('div', { style: { fontSize: 11, color: "var(--text-muted)" } }, "Full-screen app on your home screen")
+                        )
+                    ),
+                    e('button', {
+                        onClick: () => { deferredInstallPrompt.prompt(); deferredInstallPrompt.userChoice.then(() => { setShowInstallBanner(false); setDeferredInstallPrompt(null); }); },
+                        style: {
+                            background: "#00E676", color: "#020810", border: "none",
+                            borderRadius: 8, padding: "8px 16px", fontSize: 12, fontWeight: 700,
+                            cursor: "pointer", fontFamily: "inherit", flexShrink: 0
+                        }
+                    }, "Install"),
+                    e('button', {
+                        onClick: () => setShowInstallBanner(false),
+                        style: {
+                            background: "transparent", border: "none", color: "var(--text-muted)",
+                            fontSize: 16, cursor: "pointer", padding: "4px 8px", lineHeight: 1
+                        },
+                        "aria-label": "Dismiss install prompt"
+                    }, "×")
                 ),
 
                 // ── FLOATING QUICK ADD BUTTON ───────────────────────────────

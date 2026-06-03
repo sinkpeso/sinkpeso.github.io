@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Policy — SINKPESO</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="icon" href="logosinkpeso.png" type="image/png">
+    <style>
+        :root {
+            --bg-body: #020810;
+            --bg-panel: #0A0E1A;
+            --text-main: #F1F5F9;
+            --text-muted: #64748B;
+            --text-light: #94A3B8;
+            --border: rgba(255,255,255,0.08);
+            --accent: #00E676;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'DM Sans', -apple-system, sans-serif;
+            background: var(--bg-body);
+            color: var(--text-main);
+            line-height: 1.7;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 640px;
+            margin: 0 auto;
+            padding: 40px 20px 80px;
+        }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--accent);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 32px;
+            transition: opacity 0.15s;
+        }
+        .back-link:hover { opacity: 0.8; }
+        h1 {
+            font-size: 28px;
+            font-weight: 800;
+            margin-bottom: 8px;
+            letter-spacing: -0.02em;
+        }
+        .updated {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 32px;
+        }
+        h2 {
+            font-size: 18px;
+            font-weight: 700;
+            margin-top: 32px;
+            margin-bottom: 12px;
+            color: var(--accent);
+        }
+        p, li {
+            font-size: 14px;
+            color: var(--text-light);
+            margin-bottom: 12px;
+        }
+        ul {
+            padding-left: 20px;
+            margin-bottom: 16px;
+        }
+        li { margin-bottom: 8px; }
+        strong { color: var(--text-main); }
+        .highlight-box {
+            background: rgba(0,230,118,0.06);
+            border: 1px solid rgba(0,230,118,0.15);
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin: 20px 0;
+            font-size: 14px;
+            color: var(--text-light);
+            line-height: 1.7;
+        }
+        .highlight-box strong { color: var(--accent); }
+        [data-theme="light"] {
+            --bg-body: #F5F7FA;
+            --bg-panel: #FFFFFF;
+            --text-main: #0F172A;
+            --text-muted: #64748B;
+            --text-light: #475569;
+            --border: rgba(0,0,0,0.1);
+            --accent: #00A854;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-link">← Back to SINKPESO</a>
+
+        <h1>Privacy Policy</h1>
+        <p class="updated">Last updated: June 3, 2026</p>
+
+        <div class="highlight-box">
+            <strong>SINKPESO does not collect, transmit, or share any of your personal data.</strong> All data stays on your device. There are no servers, no accounts, and no analytics.
+        </div>
+
+        <h2>1. Data We Do NOT Collect</h2>
+        <p>SINKPESO is a fully offline application. We do not collect:</p>
+        <ul>
+            <li>Personal identification information (name, email, phone)</li>
+            <li>Financial account numbers or credentials</li>
+            <li>Location data</li>
+            <li>Usage analytics or tracking data</li>
+            <li>Cookies or advertising identifiers</li>
+            <li>Any data sent to external servers</li>
+        </ul>
+
+        <h2>2. Data Storage</h2>
+        <p>All data is stored locally on your device using:</p>
+        <ul>
+            <li><strong>localStorage</strong> — settings, expenses, incomes, bills, budgets, wallets, and vaults</li>
+            <li><strong>IndexedDB</strong> — photo diary images and month archives (larger data)</li>
+        </ul>
+        <p>This data never leaves your device. It is not encrypted at rest by the app (your browser's built-in storage security applies). If you set a PIN, it is stored as a SHA-256 hash.</p>
+
+        <h2>3. Third-Party Services</h2>
+        <p>SINKPESO loads the following resources from CDNs for the user interface:</p>
+        <ul>
+            <li><strong>React</strong> (unpkg.com) — JavaScript framework for the UI</li>
+            <li><strong>Google Fonts</strong> (fonts.googleapis.com) — DM Sans and DM Mono typefaces</li>
+        </ul>
+        <p>These are static file requests. No user data is sent to these services beyond standard HTTP request metadata (IP address, browser user-agent), which is controlled by your browser and network, not by SINKPESO.</p>
+
+        <h2>4. Data Export & Backup</h2>
+        <p>SINKPESO provides JSON and CSV export features. These exports are generated entirely on your device and saved to your local downloads folder. No data is uploaded anywhere during export.</p>
+        <p>Encrypted backups (Premium feature) use AES-256-GCM with a password you choose. The encryption happens entirely in your browser using the Web Crypto API.</p>
+
+        <h2>5. License Keys</h2>
+        <p>If you activate a Premium license, the key is stored in localStorage on your device. License validation happens entirely offline using HMAC-based cryptography. No license key is transmitted to any server.</p>
+
+        <h2>6. Service Worker</h2>
+        <p>SINKPESO uses a service worker to cache app files for offline use. The service worker only caches static assets (HTML, CSS, JS, fonts). It does not collect or transmit any data.</p>
+
+        <h2>7. Your Rights</h2>
+        <p>Since all data is stored locally on your device:</p>
+        <ul>
+            <li><strong>Access:</strong> You can view all your data within the app at any time</li>
+            <li><strong>Export:</strong> Use Settings → Export Backup to download all data as JSON</li>
+            <li><strong>Delete:</strong> Use Settings → Factory Reset to permanently erase all data, or clear your browser's site data</li>
+            <li><strong>Portability:</strong> Export your data as JSON or CSV at any time</li>
+        </ul>
+
+        <h2>8. Children's Privacy</h2>
+        <p>SINKPESO does not collect any data from any user, including children under 13. All data is stored locally on the user's device.</p>
+
+        <h2>9. Changes to This Policy</h2>
+        <p>If this privacy policy changes, the updated version will be published at this URL with a new "Last updated" date. Material changes will be noted in the app's update notes.</p>
+
+        <h2>10. Contact</h2>
+        <p>For questions about this privacy policy, open an issue on our <a href="https://github.com/sinkpeso/sinkpeso.github.io" style="color: var(--accent);">GitHub repository</a>.</p>
+    </div>
+</body>
+</html>

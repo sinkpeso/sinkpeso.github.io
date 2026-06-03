@@ -349,7 +349,8 @@
                             ),
                             e('div', { style: { display:"flex", justifyContent:"space-between", fontSize:13 } },
                                 e('span', { style: { color:"var(--text-muted)" } }, "Account"), e('span', { style: { fontWeight:600, color:"#00E676" } }, "None required")
-                            )
+                            ),
+                            e('a', { href: "privacy.html", target: "_blank", rel: "noopener", style: { fontSize:13, color:"var(--accent)", textDecoration:"none", fontWeight:600, marginTop:4 } }, "Privacy Policy →")
                         )
                     )
                 )
