@@ -931,6 +931,30 @@ footer {
     font-weight: 500;
 }
 
+/* ── OSS BADGE ── */
+.oss-badge-row {
+    display: flex; align-items: center; justify-content: center;
+    flex-wrap: wrap; gap: 12px;
+    margin-top: 16px;
+    font-size: 13px; color: var(--text-muted);
+}
+.oss-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 6px 12px;
+    border: 1px solid var(--accent-border);
+    border-radius: 20px;
+    color: var(--accent);
+    font-weight: 600;
+    transition: all 0.2s;
+}
+.oss-badge:hover {
+    border-color: var(--accent);
+    background: var(--accent-dim);
+}
+.oss-badge svg { flex-shrink: 0; }
+.oss-separator { color: var(--text-muted); }
+.oss-stat { color: var(--text-muted); }
+
 /* ── DATA FAQ ── */
 .data-faq {
     display: grid;
