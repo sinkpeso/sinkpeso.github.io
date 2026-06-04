@@ -118,6 +118,11 @@
         .flow-container {
             max-width: 560px;
             margin: 0 auto;
+            padding-left: 16px;
+            padding-right: 16px;
+            overflow: hidden;
+            box-sizing: border-box;
+            width: 100%;
         }
 
         /* Step indicators */
@@ -264,6 +269,9 @@
             border-radius: var(--r-xl);
             padding: 32px;
             margin-bottom: 24px;
+            overflow: hidden;
+            box-sizing: border-box;
+            max-width: 100%;
         }
         .pay-detail-header {
             display: flex;
@@ -319,6 +327,8 @@
             align-items: center;
             padding: 14px 0;
             border-bottom: 1px solid var(--border);
+            min-width: 0;
+            gap: 12px;
         }
         .pay-info-row:last-child {
             border-bottom: none;
@@ -334,6 +344,10 @@
             color: var(--text);
             font-family: 'DM Mono', 'SF Mono', monospace;
             letter-spacing: 0.02em;
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
         .copy-inline {
             display: inline-flex;
@@ -343,6 +357,9 @@
             padding: 4px 8px;
             border-radius: 6px;
             transition: background 0.15s;
+            min-width: 0;
+            flex-shrink: 1;
+            overflow: hidden;
         }
         .copy-inline:hover {
             background: rgba(255,255,255,0.06);
@@ -377,12 +394,28 @@
             border-radius: var(--r-xl);
             padding: 24px;
             margin-bottom: 24px;
+            overflow: hidden;
+            box-sizing: border-box;
+            max-width: 100%;
         }
         .pay-summary-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 8px 0;
+            min-width: 0;
+            gap: 12px;
+        }
+        .pay-summary-row .pay-info-label {
+            flex-shrink: 0;
+            white-space: nowrap;
+        }
+        .pay-summary-row .pay-info-value {
+            text-align: right;
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
         .pay-summary-total {
             border-top: 1px solid var(--border);
