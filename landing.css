@@ -806,51 +806,6 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
     text-align: center;
 }
 
-/* ── PRICING STRIP ── */
-.pricing-strip {
-    padding: 0;
-    background: var(--accent-dim);
-    border-top: 1px solid var(--accent-border);
-    border-bottom: 1px solid var(--accent-border);
-}
-.pricing-strip-inner {
-    display: flex;
-    align-items: center;
-    gap: 32px;
-    padding: 40px 0;
-}
-.pricing-badge {
-    font-size: 56px;
-    font-weight: 900;
-    color: var(--accent);
-    letter-spacing: -0.03em;
-    line-height: 1;
-    flex-shrink: 0;
-}
-.pricing-text {
-    flex: 1;
-}
-.pricing-text h3 {
-    font-size: 22px;
-    font-weight: 800;
-    margin-bottom: 8px;
-    letter-spacing: -0.02em;
-}
-.pricing-text p {
-    font-size: 15px;
-    color: var(--text-secondary);
-    line-height: 1.65;
-    max-width: 520px;
-}
-@media (max-width: 768px) {
-    .pricing-strip-inner {
-        flex-direction: column;
-        text-align: center;
-        gap: 20px;
-    }
-    .pricing-text p { max-width: 100%; }
-}
-
 /* ── SECTION 11: TESTIMONIALS ── */
 .testimonials { padding: var(--section) 0; }
 .test-grid {
