@@ -77,12 +77,9 @@
             const inc = incomes.find(i => i.id === id);
             if (!inc) return;
             window.actions.deleteIncome({ id, incomes, setIncomes, wallets, setWallets });
+            // FIX #5: undo uses functional updates; no-op processFinancialTransaction removed
             showToast("Income deleted", () => {
                 setIncomes(prev => [...prev, inc]);
-                window.finance.processFinancialTransaction({
-                    type: "income", walletId: inc.walletId,
-                    amountCents: inc.amountCents, wallets, setWallets
-                });
             }, 5000);
         };
 
@@ -91,21 +88,40 @@
             if (!editBillForm.name || !editBillForm.amount || !editBillForm.dueDate) return;
             const newAmt = tc(editBillForm.amount);
             if (newAmt <= 0) { showToast("Amount must be greater than zero."); return; }
-            setBills(bills.map(b => b.id === editBill.id ? { ...b, name: editBillForm.name.trim(), amountCents: newAmt, dueDate: editBillForm.dueDate, recurring: editBillForm.recurring, category: editBillForm.category } : b));
-            setTxns(txns.map(t => t.type === "bill_payment" && t.billId === editBill.id ? { ...t, amountCents: newAmt } : t));
+            // FIX #2+#4: Use functional updates for robustness. Wallet balance auto-adjusts via derived model.
+            setBills(prev => prev.map(b => b.id === editBill.id ? { ...b, name: editBillForm.name.trim(), amountCents: newAmt, dueDate: editBillForm.dueDate, recurring: editBillForm.recurring, category: editBillForm.category } : b));
+            setTxns(prev => prev.map(t => t.type === "bill_payment" && t.billId === editBill.id ? { ...t, amountCents: newAmt } : t));
             setEditBill(null); showToast("✓ Bill updated!");
         };
         const markBillUnpaid = (bill) => {
             requestConfirm("Mark this bill as unpaid?", () => {
-                setBills(bills.map(x => x.id === bill.id ? { ...x, isPaid: false, paidTxnId: null, paidWalletId: null } : x));
-                setTxns(txns.filter(t => !(t.type === "bill_payment" && t.billId === bill.id)));
+                // FIX #2+#5: Functional updates — wallet balance auto-derives from record changes
+                setBills(prev => prev.map(x => x.id === bill.id ? { ...x, isPaid: false, paidTxnId: null, paidWalletId: null } : x));
+                setTxns(prev => prev.filter(t => !(t.type === "bill_payment" && t.billId === bill.id)));
             });
         };
         const deleteBill = (id) => {
             requestConfirm("Delete this bill? Related payment records will also be removed.", () => {
-                setBills(bills.filter(b => b.id !== id));
-                setTxns(txns.filter(t => !(t.type === "bill_payment" && t.billId === id)));
+                // FIX #5: Functional updates for robustness
+                setBills(prev => prev.filter(b => b.id !== id));
+                setTxns(prev => prev.filter(t => !(t.type === "bill_payment" && t.billId === id)));
             });
+        };
+
+        // FIX #9: Extracted income row render function
+        const renderIncomeRow = (i, key) => {
+            const srcWallet = (wallets||[]).find(w => w.id === i.walletId);
+            return e('div', { key: key || i.id, className: "stream-row" },
+                e('div', null,
+                    e('div', { style: { fontWeight: 600 } }, i.name),
+                    e('div', { style: { display:"flex", alignItems:"center", gap:6, marginTop:2 } },
+                        e('div', { style: { fontSize: 11, color: "var(--text-muted)" } }, i.date),
+                        srcWallet && e('div', { style: { display:"flex", alignItems:"center", gap:4, fontSize:10, fontWeight:700, color: srcWallet.color||"#00E676", background:"rgba(0,0,0,0.15)", padding:"2px 7px", borderRadius:6 } },
+                            e('div', { style:{ width:6, height:6, borderRadius:"50%", background: srcWallet.color||"#00E676" } }), srcWallet.name)
+                    )
+                ),
+                e('div', { style: S.row10 }, e('div', { style: { color: "#00E676", fontWeight: 700 } }, `+${fc(i.amountCents)}`), e(DotMenu, { itemId: i.id, openMenu: openMenuInc, setOpenMenu: setOpenMenuInc, onEdit: () => openEditIncome(i), onDelete: () => deleteIncome(i.id) }))
+            );
         };
 
         return e('div', null,
@@ -136,35 +152,9 @@
                             items: incomes,
                             itemHeight: 56,
                             overscan: 5,
-                            renderItem: (i) => {
-                                const srcWallet = (wallets||[]).find(w => w.id === i.walletId);
-                                return e('div', { className: "stream-row" },
-                                    e('div', null,
-                                        e('div', { style: { fontWeight: 600 } }, i.name),
-                                        e('div', { style: { display:"flex", alignItems:"center", gap:6, marginTop:2 } },
-                                            e('div', { style: { fontSize: 11, color: "var(--text-muted)" } }, i.date),
-                                            srcWallet && e('div', { style: { display:"flex", alignItems:"center", gap:4, fontSize:10, fontWeight:700, color: srcWallet.color||"#00E676", background:"rgba(0,0,0,0.15)", padding:"2px 7px", borderRadius:6 } },
-                                                e('div', { style:{ width:6, height:6, borderRadius:"50%", background: srcWallet.color||"#00E676" } }), srcWallet.name)
-                                        )
-                                    ),
-                                    e('div', { style: S.row10 }, e('div', { style: { color: "#00E676", fontWeight: 700 } }, `+${fc(i.amountCents)}`), e(DotMenu, { itemId: i.id, openMenu: openMenuInc, setOpenMenu: setOpenMenuInc, onEdit: () => openEditIncome(i), onDelete: () => deleteIncome(i.id) }))
-                                );
-                            }
+                            renderItem: renderIncomeRow
                         })
-                        : incomes.map(i => {
-                            const srcWallet = (wallets||[]).find(w => w.id === i.walletId);
-                            return e('div', { key: i.id, className: "stream-row" },
-                                e('div', null,
-                                    e('div', { style: { fontWeight: 600 } }, i.name),
-                                    e('div', { style: { display:"flex", alignItems:"center", gap:6, marginTop:2 } },
-                                        e('div', { style: { fontSize: 11, color: "var(--text-muted)" } }, i.date),
-                                        srcWallet && e('div', { style: { display:"flex", alignItems:"center", gap:4, fontSize:10, fontWeight:700, color: srcWallet.color||"#00E676", background:"rgba(0,0,0,0.15)", padding:"2px 7px", borderRadius:6 } },
-                                            e('div', { style:{ width:6, height:6, borderRadius:"50%", background: srcWallet.color||"#00E676" } }), srcWallet.name)
-                                    )
-                                ),
-                                e('div', { style: S.row10 }, e('div', { style: { color: "#00E676", fontWeight: 700 } }, `+${fc(i.amountCents)}`), e(DotMenu, { itemId: i.id, openMenu: openMenuInc, setOpenMenu: setOpenMenuInc, onEdit: () => openEditIncome(i), onDelete: () => deleteIncome(i.id) }))
-                            );
-                        })
+                        : incomes.map(i => renderIncomeRow(i, i.id))
                 ),
                 e('div', { className: "premium-panel" },
                     e(SLabel, { style: { marginBottom: 16 } }, "Add Due Bill"),

@@ -28,6 +28,7 @@
     <script src="photodb.js"></script>
     <script src="archivedb.js"></script>
     <script src="constants.js"></script>
+    <script src="CoreComponents.js"></script>
     <script src="PhotoDiaryView.js"></script>
     <script src="SettingsView.js"></script>
     <script src="WalletsView.js"></script>
@@ -42,7 +43,6 @@
     <script src="UndoToast.js"></script>
     <script src="HelpTooltip.js"></script>
     <script src="crashreport.js"></script>
-    <script src="CoreComponents.js"></script>
 
         <link rel="apple-touch-icon" href="logosinkpeso.png">
     <link rel="icon" href="logosinkpeso.png" type="image/png">
@@ -150,7 +150,7 @@
 
             useEffect(() => { window.scrollTo(0, 0); }, [tab]);
 
-            const saved = window.persistence.loadState();
+            const [saved] = useState(() => window.persistence.loadState());
             const defaultSettings = { currency: 'PHP', secondaryCurrency: '', theme: 'dark', pin: '' };
             const [settings, setSettings] = useState(() => ({ ...defaultSettings, ...saved.settings }));
             const [isUnlocked, setIsUnlocked] = useState(!settings.pin);

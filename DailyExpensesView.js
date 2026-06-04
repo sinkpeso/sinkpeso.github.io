@@ -93,17 +93,12 @@
         const deleteExp = (id) => {
             const exp = dailyExpenses.find(x => x.id === id);
             if (!exp) return;
-            // Delete immediately
+            // Delete immediately — uses functional update to avoid stale closure
             window.actions.deleteExpense({ id, dailyExpenses, setDailyExpenses, wallets, setWallets });
             setPhotoDiary(prev => prev.filter(x => x.expenseId !== id));
-            // Show undo toast — restore if clicked within 5s
+            // FIX #5: undo uses functional updates + no-op processFinancialTransaction removed
             showToast("Expense deleted", () => {
                 setDailyExpenses(prev => [exp, ...prev]);
-                // Restore wallet deduction
-                window.finance.processFinancialTransaction({
-                    type: "expense", walletId: exp.walletId,
-                    amountCents: exp.amountCents, wallets, setWallets
-                });
             }, 5000);
         };
 
@@ -120,6 +115,29 @@
             commitAddExpense(rec);
             setName(""); setAmount(""); setRecurring("none");
             showToast("✓ Expense logged!");
+        };
+
+        // FIX #9: Extracted render function — used by both VirtualList and .map() branches
+        const renderExpenseRow = (exp, key) => {
+            const liveWallet = (wallets || []).find(w => w.id === exp.walletId);
+            const expWallet = liveWallet ? liveWallet.name : (exp.walletNameSnapshot || null);
+            return e('div', { key: key || exp.id, className: "stream-row" },
+                e('div', null,
+                    e('div', { style: { display: "flex", alignItems: "center", gap: 8 } },
+                        e('span', { style: { fontWeight: 600, color: "var(--text-main)" } }, exp.name),
+                        exp.recurring && exp.recurring !== "none" && e('span', { style: { fontSize: 10, fontWeight: 700, padding: "2px 7px", borderRadius: 5, background: "rgba(99,102,241,0.15)", color: "#818CF8" } }, exp.recurring === "weekly" ? "Weekly" : "Monthly")
+                    ),
+                    e('div', { style: { fontSize: 11, color: "var(--text-muted)", marginTop: 2 } }, `${exp.date} • ${exp.category}`),
+                    // FIX #8: Always render wallet tag div for consistent row height
+                    e('div', { style: { fontSize: 11, color: "var(--text-light)", marginTop: 3, display: "flex", alignItems: "center", gap: 4, minHeight: 16 } },
+                        expWallet ? e('span', null, e('span', { style: { color: "var(--text-muted)", fontWeight: 500 } }, "Wallet: "), e('span', { style: { fontWeight: 700 } }, expWallet)) : null
+                    )
+                ),
+                e('div', { style: S.row10 },
+                    e('div', { style: { fontWeight: 700, color: "#EF4444" } }, `-${fc(exp.amountCents)}`),
+                    e(DotMenu, { itemId: exp.id, openMenu, setOpenMenu, onEdit: () => openEditExp(exp), onDelete: () => deleteExp(exp.id) })
+                )
+            );
         };
 
         return e('div', null,
@@ -158,50 +176,10 @@
                             items: dailyExpenses,
                             itemHeight: 72,
                             overscan: 5,
-                            renderItem: (exp) => {
-                                const liveWallet = (wallets || []).find(w => w.id === exp.walletId);
-                                const expWallet = liveWallet ? liveWallet.name : (exp.walletNameSnapshot || null);
-                                return e('div', { className: "stream-row" },
-                                    e('div', null,
-                                        e('div', { style: { display: "flex", alignItems: "center", gap: 8 } },
-                                            e('span', { style: { fontWeight: 600, color: "var(--text-main)" } }, exp.name),
-                                            exp.recurring && exp.recurring !== "none" && e('span', { style: { fontSize: 10, fontWeight: 700, padding: "2px 7px", borderRadius: 5, background: "rgba(99,102,241,0.15)", color: "#818CF8" } }, exp.recurring === "weekly" ? "Weekly" : "Monthly")
-                                        ),
-                                        e('div', { style: { fontSize: 11, color: "var(--text-muted)", marginTop: 2 } }, `${exp.date} • ${exp.category}`),
-                                        expWallet && e('div', { style: { fontSize: 11, color: "var(--text-light)", marginTop: 3, display: "flex", alignItems: "center", gap: 4 } },
-                                            e('span', { style: { color: "var(--text-muted)", fontWeight: 500 } }, "Wallet: "),
-                                            e('span', { style: { fontWeight: 700 } }, expWallet)
-                                        )
-                                    ),
-                                    e('div', { style: S.row10 },
-                                        e('div', { style: { fontWeight: 700, color: "#EF4444" } }, `-${fc(exp.amountCents)}`),
-                                        e(DotMenu, { itemId: exp.id, openMenu, setOpenMenu, onEdit: () => openEditExp(exp), onDelete: () => deleteExp(exp.id) })
-                                    )
-                                );
-                            }
+                            renderItem: renderExpenseRow
                         })
                     )
-                    : dailyExpenses.map(exp => {
-                        const liveWallet = (wallets || []).find(w => w.id === exp.walletId);
-                        const expWallet = liveWallet ? liveWallet.name : (exp.walletNameSnapshot || null);
-                        return e('div', { key: exp.id, className: "stream-row" },
-                            e('div', null,
-                                e('div', { style: { display: "flex", alignItems: "center", gap: 8 } },
-                                    e('span', { style: { fontWeight: 600, color: "var(--text-main)" } }, exp.name),
-                                    exp.recurring && exp.recurring !== "none" && e('span', { style: { fontSize: 10, fontWeight: 700, padding: "2px 7px", borderRadius: 5, background: "rgba(99,102,241,0.15)", color: "#818CF8" } }, exp.recurring === "weekly" ? "Weekly" : "Monthly")
-                                ),
-                                e('div', { style: { fontSize: 11, color: "var(--text-muted)", marginTop: 2 } }, `${exp.date} • ${exp.category}`),
-                                expWallet && e('div', { style: { fontSize: 11, color: "var(--text-light)", marginTop: 3, display: "flex", alignItems: "center", gap: 4 } },
-                                    e('span', { style: { color: "var(--text-muted)", fontWeight: 500 } }, "Wallet: "),
-                                    e('span', { style: { fontWeight: 700 } }, expWallet)
-                                )
-                            ),
-                            e('div', { style: S.row10 },
-                                e('div', { style: { fontWeight: 700, color: "#EF4444" } }, `-${fc(exp.amountCents)}`),
-                                e(DotMenu, { itemId: exp.id, openMenu, setOpenMenu, onEdit: () => openEditExp(exp), onDelete: () => deleteExp(exp.id) })
-                            )
-                        );
-                    })
+                    : dailyExpenses.map(exp => renderExpenseRow(exp, exp.id))
             ),
             editExp && e('div', { className: "modal-overlay" }, e('div', { className: "modal-container" }, e('h3', { style: { marginBottom: 20 } }, "Edit Expense"), e(Field, { label: "Description" }, e(Inp, { value: editForm.name, onChange: ev => setEditForm({ ...editForm, name: ev.target.value }) })), e(Field, { label: "Amount" }, e(Inp, { type: "number", value: editForm.amount, onChange: ev => setEditForm({ ...editForm, amount: ev.target.value }) })), e(Field, { label: "Category" }, e(Sel, { value: editForm.category, onChange: ev => setEditForm({ ...editForm, category: ev.target.value }) }, CATEGORIES.map(c => e('option', { key: c, value: c }, c)))), wallets && wallets.length > 0 && e(Field, { label: "Wallet" }, e(WalletPicker, { wallets, value: editForm.walletId, onChange: v => setEditForm({ ...editForm, walletId: v }) })), e('div', { style: S.formFooter }, e(Btn, { v: "ghost", style: { flex: 1 }, onClick: () => setEditExp(null) }, "Cancel"), e(Btn, { v: "accent", style: { flex: 1 }, onClick: () => saveEditExp(false) }, "Save"))))
         );

@@ -64,6 +64,8 @@
 
         // walleticons.js is guaranteed loaded by the time this function runs
         const { WalletIcon } = window.walleticons;
+        // FIX #7: Wire RecentActivitySection — resolved lazily from window
+        const RecentActivitySection = window.RecentActivitySection;
 
         // Recent photo diary entries (latest 6 for the strip)
         const recentPhotos = useMemo(() =>
@@ -366,11 +368,14 @@
                             ),
                             lim && e('div', { style: { fontSize: 10, color: 'var(--text-muted)',
                                 marginBottom: 4 } }, `of ${fc(lim)}`),
-                            e(ThinBar, { pct: lim ? pct : 0, color: col })
+                    e(ThinBar, { pct: lim ? pct : 0, color: col })
                         )
                     )
                 )
-            )
+            ),
+
+            // FIX #7: Recent Activity feed — shows latest transactions
+            RecentActivitySection && e(RecentActivitySection, { incomes, dailyExpenses, bills, txns, funds, wallets, archives, fc, onNavigate })
         );
     }
 

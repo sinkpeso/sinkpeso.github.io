@@ -75,7 +75,7 @@
                 )
             ),
 
-            e('div', { className: "bento-txn-list", style: { maxHeight: 520, overflow: "hidden" } },
+            e('div', { className: "bento-txn-list", style: { maxHeight: 520, overflow: "auto" } },
                 e(VirtualList, {
                     items: filtered, itemHeight: 64, overscan: 5,
                     emptyContent: e('div', { style: { padding: "36px 24px", textAlign: "center" } },
@@ -91,7 +91,7 @@
                                 e('div', { className: "txn-text" },
                                     e('div', { className: "txn-title" }, item.title),
                                     e('div', { className: "txn-sub" }, item.subtitle),
-                                    item.walletName && e('div', { className: "txn-wallet-tag" }, e('span', { style: { color: "var(--text-muted)" } }, "Wallet: "), e('span', { style: { fontWeight: 700, color: "var(--text-light)" } }, item.walletName))
+                                    e('div', { className: "txn-wallet-tag" }, item.walletName ? e('span', null, e('span', { style: { color: "var(--text-muted)" } }, "Wallet: "), e('span', { style: { fontWeight: 700, color: "var(--text-light)" } }, item.walletName)) : null)
                                 )
                             ),
                             e('div', { className: "txn-right" },
