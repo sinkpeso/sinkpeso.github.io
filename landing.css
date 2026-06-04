@@ -107,7 +107,7 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
     transition: all 0.2s ease;
     white-space: nowrap;
 }
-.btn-primary { background: var(--accent); color: #050a14; }
+.btn-primary { background: var(--accent); color: #0A0F16; font-weight: 700; }
 .btn-primary:hover {
     background: #34eba0;
     box-shadow: 0 0 0 4px var(--accent-glow), 0 8px 24px rgba(34,229,122,0.18);
@@ -933,8 +933,9 @@ footer {
     .test-grid { grid-template-columns: 1fr; }
     .steps { grid-template-columns: repeat(2, 1fr); }
     .steps::before { display: none; }
-    .showcase-grid { grid-template-columns: 1fr; gap: 40px; }
-    .showcase-visual { order: -1; }
+    .showcase-grid { display: flex; flex-direction: column; gap: 40px; padding: 0 16px; }
+    .showcase-visual { order: -1; width: 100%; }
+    .showcase-text { width: 100%; padding: 0; }
     .problem-grid { grid-template-columns: 1fr; }
     .comp-table { font-size: 12px; }
     .comp-table thead th, .comp-table tbody td { padding: 10px 8px; }
