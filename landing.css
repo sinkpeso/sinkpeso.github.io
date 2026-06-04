@@ -157,7 +157,7 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
     transition: all 0.15s;
 }
 .nav-links a:hover { color: var(--text); background: rgba(255,255,255,0.04); }
-.nav-links .btn-primary { margin-left: 8px; padding: 8px 18px; font-size: 13px; }
+.nav-links .btn-primary { margin-left: 8px; padding: 8px 18px; font-size: 13px; color: #0A0F16; font-weight: 700; }
 
 /* ── SECTION 1: HERO ── */
 .hero {
@@ -934,8 +934,8 @@ footer {
     .steps { grid-template-columns: repeat(2, 1fr); }
     .steps::before { display: none; }
     .showcase-grid { display: flex; flex-direction: column; gap: 40px; padding: 0 16px; }
-    .showcase-visual { order: -1; width: 100%; }
-    .showcase-text { width: 100%; padding: 0; }
+    .showcase-visual { order: 2; width: 100%; }
+    .showcase-text { order: 1; width: 100%; padding: 0; }
     .problem-grid { grid-template-columns: 1fr; }
     .comp-table { font-size: 12px; }
     .comp-table thead th, .comp-table tbody td { padding: 10px 8px; }
@@ -961,7 +961,7 @@ footer {
     .ss-diary-grid { grid-template-columns: repeat(2, 1fr); }
     .footer-inner { flex-direction: column; gap: 16px; text-align: center; }
     .showcase-phone { width: 260px; }
-    .showcase-grid { padding: 0 12px; }
+    .showcase-grid { padding: 0 16px; }
     .comparison { overflow-x: auto; }
     .comp-table { min-width: 580px; font-size: 12px; }
     .comp-table thead th, .comp-table tbody td { padding: 10px 8px; font-size: 12px; }
