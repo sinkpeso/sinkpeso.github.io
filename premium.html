@@ -389,9 +389,9 @@
             border-radius: var(--r-xl);
             padding: 24px;
             margin-bottom: 24px;
-            overflow: hidden;
             box-sizing: border-box;
             max-width: 100%;
+            overflow: hidden;
         }
         .pay-summary-row {
             display: flex;
@@ -404,10 +404,13 @@
         .pay-summary-row .pay-info-label {
             flex-shrink: 0;
             white-space: nowrap;
+            min-width: 0;
         }
         .pay-summary-row .pay-info-value {
-            margin-left: auto;
-            white-space: nowrap;
+            text-align: right;
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
         .pay-summary-total {
             border-top: 1px solid var(--border);
@@ -643,7 +646,15 @@
                 justify-content: center;
             }
             .pay-summary {
-                padding: 20px 16px;
+                padding: 16px;
+                overflow: hidden;
+                word-break: break-word;
+            }
+            .pay-summary-row .pay-info-value {
+                font-size: 13px;
+            }
+            .pay-summary-total .pay-info-value {
+                font-size: 18px;
             }
             .pay-methods {
                 gap: 10px;
