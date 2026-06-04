@@ -322,7 +322,8 @@
     <script>
         // ── Constants (mirrored from license.js) ──────────────────────────
         const STORAGE_KEY = 'sp_license_history';
-        const SECRET = "SP2024FINTECH";
+        const _a = ["SP", "20", "24", "FIN", "TECH"];
+        const SECRET = _a.join("");
         const VALID_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 
         // ── Simple hash function (verbatim from license.js) ───────────────

@@ -16,8 +16,13 @@
 (function () {
     "use strict";
 
-    // Secret key for HMAC validation (not visible to users, used for key generation)
-    var SECRET = "SP2024FINTECH";
+    // Secret key for HMAC validation — split to avoid casual string inspection in DevTools.
+    // NOTE: This is client-side obfuscation only. It raises the bar for casual bypasses
+    // but is NOT cryptographically secure. Advanced users can still extract the secret
+    // via debugging tools. A future server-side validation endpoint would be the
+    // definitive solution.
+    var _a = ["SP", "20", "24", "FIN", "TECH"];
+    var SECRET = _a.join("");
 
     // License storage key
     var LS_KEY = "sp_license";
@@ -227,5 +232,27 @@
         getStoredLicense: getStoredLicense,
         generateKey: generateKey
     };
+
+    // ── TAMPER DETECTION ───────────────────────────────────────────────────
+    // Protects isPremium from being trivially overwritten via DevTools.
+    // NOTE: This is a best-effort client-side defense. Determined attackers can
+    // still bypass it by modifying the script before it runs, overriding
+    // Object.defineProperty, or patching localStorage. For true security,
+    // a server-side validation endpoint is required.
+    (function tamperCheck() {
+        if (window.license &&
+            typeof window.license.isPremium === 'function') {
+            var _orig = window.license.isPremium.toString();
+            Object.defineProperty(window.license, 'isPremium', {
+                get: function() {
+                    return function() {
+                        var key = getStoredLicense();
+                        return validateKey(key);
+                    };
+                },
+                configurable: false
+            });
+        }
+    })();
 
 })();
