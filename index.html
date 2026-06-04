@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>SINKPESO — Private. Offline. Yours.</title>
     <meta name="description" content="Track expenses, manage wallets, build savings goals, and remember the moments behind every purchase. The privacy-first finance app that works offline.">
     <meta name="theme-color" content="#050a14">
@@ -19,10 +19,10 @@
 <body>
 
     <!-- ═══ NAVBAR ═══ -->
-    <nav class="nav">
+    <nav class="nav" role="navigation" aria-label="Main navigation">
         <div class="nav-inner">
             <a href="/" class="nav-brand">
-                <img src="logosinkpeso.png" alt="SINKPESO">
+                <img src="logosinkpeso.png" alt="Sinkpeso Logo">
                 <span class="nav-brand-text">SINKPESO</span>
             </a>
             <div class="nav-links">
@@ -36,7 +36,7 @@
     </nav>
 
     <!-- ═══ SECTION 1 — HERO ═══ -->
-    <section class="hero">
+    <section class="hero" aria-label="Hero">
         <div class="container">
             <div class="hero-content">
                 <div class="eyebrow">Private. Offline. Yours.</div>
@@ -54,6 +54,7 @@
                         Watch Demo
                     </a>
                 </div>
+                <p class="hero-pwa-note">Works right in your browser. No app store download required.</p>
             </div>
             <div class="hero-mockup">
                 <div class="mockup-float">
@@ -64,27 +65,27 @@
                             <span style="width:50px"></span>
                         </div>
                         <div class="mockup-content">
-                            <div class="bento-card">
+                            <article class="bento-card">
                                 <div class="bento-label">Available</div>
                                 <div class="bento-value green">&#8369;24,350</div>
                                 <div class="bento-sub">This month</div>
-                            </div>
-                            <div class="bento-card">
+                            </article>
+                            <article class="bento-card">
                                 <div class="bento-label">Spent</div>
                                 <div class="bento-value" style="color:var(--red)">&#8369;8,120</div>
                                 <div class="bento-sub">33% of income</div>
-                            </div>
-                            <div class="bento-card">
+                            </article>
+                            <article class="bento-card">
                                 <div class="bento-label">Savings</div>
                                 <div class="bento-value purple">&#8369;15,000</div>
                                 <div class="bento-sub">3 vaults</div>
-                            </div>
-                            <div class="bento-card">
+                            </article>
+                            <article class="bento-card">
                                 <div class="bento-label">Bills Paid</div>
                                 <div class="bento-value blue">4/6</div>
                                 <div class="bento-sub">2 upcoming</div>
-                            </div>
-                            <div class="bento-card span-2">
+                            </article>
+                            <article class="bento-card span-2">
                                 <div class="bento-label">Weekly Spending</div>
                                 <div class="bento-chart">
                                     <div class="bento-bar" style="height:35%"></div>
@@ -95,8 +96,8 @@
                                     <div class="bento-bar" style="height:55%"></div>
                                     <div class="bento-bar" style="height:70%"></div>
                                 </div>
-                            </div>
-                            <div class="bento-card span-2">
+                            </article>
+                            <article class="bento-card span-2">
                                 <div class="bento-label">Recent</div>
                                 <div class="bento-tx">
                                     <div class="bento-tx-left">
@@ -119,7 +120,7 @@
                                     </div>
                                     <div class="bento-tx-amount pos">+&#8369;32,000</div>
                                 </div>
-                            </div>
+                            </article>
                         </div>
                     </div>
                 </div>
@@ -128,43 +129,43 @@
     </section>
 
     <!-- ═══ SECTION 2 — TRUST BAR ═══ -->
-    <section class="trust">
+    <section class="trust" aria-label="Trust pillars">
         <div class="container">
             <div class="trust-header reveal">
                 <p>Built for real-life budgeting.</p>
             </div>
             <div class="trust-cards">
-                <div class="trust-card reveal reveal-d1">
-                    <div class="tc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1l22 22"/><path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"/><path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"/><path d="M10.71 5.05A16 16 0 0 1 22.56 9"/><path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg></div>
+                <article class="trust-card reveal reveal-d1">
+                    <div class="tc-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1l22 22"/><path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"/><path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"/><path d="M10.71 5.05A16 16 0 0 1 22.56 9"/><path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg></div>
                     <h3>Offline First</h3>
                     <p>Works without internet</p>
-                </div>
-                <div class="trust-card reveal reveal-d1">
-                    <div class="tc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/></svg></div>
+                </article>
+                <article class="trust-card reveal reveal-d1">
+                    <div class="tc-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/></svg></div>
                     <h3>Private by Design</h3>
                     <p>Zero data collection</p>
-                </div>
-                <div class="trust-card reveal reveal-d2">
-                    <div class="tc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg></div>
+                </article>
+                <article class="trust-card reveal reveal-d2">
+                    <div class="tc-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg></div>
                     <h3>Multi Wallet</h3>
                     <p>Cash, GCash, banks</p>
-                </div>
-                <div class="trust-card reveal reveal-d2">
-                    <div class="tc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg></div>
+                </article>
+                <article class="trust-card reveal reveal-d2">
+                    <div class="tc-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg></div>
                     <h3>Photo Diary</h3>
                     <p>Remember every spend</p>
-                </div>
-                <div class="trust-card reveal reveal-d3">
-                    <div class="tc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="22" x2="21" y2="22"/><line x1="6" y1="18" x2="6" y2="11"/><line x1="10" y1="18" x2="10" y2="11"/><line x1="14" y1="18" x2="14" y2="11"/><line x1="18" y1="18" x2="18" y2="11"/><polygon points="12 2 20 7 4 7"/></svg></div>
+                </article>
+                <article class="trust-card reveal reveal-d3">
+                    <div class="tc-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="22" x2="21" y2="22"/><line x1="6" y1="18" x2="6" y2="11"/><line x1="10" y1="18" x2="10" y2="11"/><line x1="14" y1="18" x2="14" y2="11"/><line x1="18" y1="18" x2="18" y2="11"/><polygon points="12 2 20 7 4 7"/></svg></div>
                     <h3>Savings Vaults</h3>
                     <p>Goal-based saving</p>
-                </div>
+                </article>
             </div>
         </div>
     </section>
 
     <!-- ═══ SECTION 3 — THE PROBLEM ═══ -->
-    <section class="problem">
+    <section class="problem" aria-label="The Problem">
         <div class="container">
             <div class="section-header reveal">
                 <div class="eyebrow">The Problem</div>
@@ -172,7 +173,7 @@
                 <p class="section-sub center">Most finance apps tell you how much you spent. Very few help you understand why.</p>
             </div>
             <div class="problem-grid">
-                <div class="problem-card vs-traditional reveal">
+                <article class="problem-card vs-traditional reveal">
                     <div class="pc-badge">Traditional Tracker</div>
                     <h3>Numbers Without Context</h3>
                     <ul class="problem-list">
@@ -182,8 +183,8 @@
                         <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg> Requires constant internet</li>
                         <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg> No awareness of spending patterns</li>
                     </ul>
-                </div>
-                <div class="problem-card vs-sinkpeso reveal">
+                </article>
+                <article class="problem-card vs-sinkpeso reveal">
                     <div class="pc-badge">SINKPESO</div>
                     <h3>Meaning Behind Every Peso</h3>
                     <ul class="problem-list">
@@ -193,13 +194,13 @@
                         <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Full offline functionality</li>
                         <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Financial memory tracking</li>
                     </ul>
-                </div>
+                </article>
             </div>
         </div>
     </section>
 
     <!-- ═══ SECTION 4 — PHOTO DIARY SHOWCASE ═══ -->
-    <section class="showcase" id="diary-showcase">
+    <section class="showcase" id="diary-showcase" aria-label="Photo Diary Showcase">
         <div class="container">
             <div class="showcase-grid">
                 <div class="showcase-text reveal">
@@ -217,11 +218,11 @@
                 <div class="showcase-visual reveal">
                     <div class="showcase-phone">
                         <div class="showcase-phone-bar">
-                            <img src="logosinkpeso.png" alt="">
+                            <img src="logosinkpeso.png" alt="Sinkpeso Logo">
                             <span>Photo Diary</span>
                         </div>
-                        <div class="diary-entry">
-                            <div class="diary-photo coffee">
+                        <article class="diary-entry">
+                            <div class="diary-photo coffee" aria-hidden="true">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 8h1a4 4 0 1 1 0 8h-1"/><path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z"/><line x1="6" y1="2" x2="6" y2="4"/><line x1="10" y1="2" x2="10" y2="4"/><line x1="14" y1="2" x2="14" y2="4"/></svg>
                             </div>
                             <div class="diary-row">
@@ -231,9 +232,9 @@
                                 </div>
                                 <div class="diary-amount">-&#8369;180</div>
                             </div>
-                        </div>
-                        <div class="diary-entry">
-                            <div class="diary-photo grocery">
+                        </article>
+                        <article class="diary-entry">
+                            <div class="diary-photo grocery" aria-hidden="true">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 17.5v-11"/></svg>
                             </div>
                             <div class="diary-row">
@@ -243,9 +244,9 @@
                                 </div>
                                 <div class="diary-amount">-&#8369;1,250</div>
                             </div>
-                        </div>
-                        <div class="diary-entry">
-                            <div class="diary-photo transport">
+                        </article>
+                        <article class="diary-entry">
+                            <div class="diary-photo transport" aria-hidden="true">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6v6"/><path d="M15 6v6"/><path d="M2 12h19.6"/><path d="M18 18h3s.5-1.7.8-2.8c.1-.4.2-.8.2-1.2 0-.4-.1-.8-.2-1.2l-1.4-5C20.1 6.8 19.1 6 18 6H4a2 2 0 0 0-2 2v10h3"/><circle cx="7" cy="18" r="2"/><path d="M9 18h5"/><circle cx="16" cy="18" r="2"/></svg>
                             </div>
                             <div class="diary-row">
@@ -255,7 +256,7 @@
                                 </div>
                                 <div class="diary-amount">-&#8369;150</div>
                             </div>
-                        </div>
+                        </article>
                     </div>
                 </div>
             </div>
@@ -263,7 +264,7 @@
     </section>
 
     <!-- ═══ SECTION 5 — FEATURE BENTO ═══ -->
-    <section class="features" id="features">
+    <section class="features" id="features" aria-label="Features">
         <div class="container">
             <div class="section-header reveal">
                 <div class="eyebrow">Features</div>
@@ -271,42 +272,42 @@
                 <p class="section-sub center">A complete budgeting system designed for everyday life.</p>
             </div>
             <div class="features-grid">
-                <div class="feat-card featured reveal">
-                    <div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg></div>
+                <article class="feat-card featured reveal">
+                    <div class="feat-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg></div>
                     <h3>Photo Diary</h3>
                     <p>Remember the moments behind every expense. Snap receipts, capture meals, document the "why" behind every peso spent. Build a visual timeline of your financial life.</p>
-                </div>
-                <div class="feat-card reveal">
-                    <div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg></div>
+                </article>
+                <article class="feat-card reveal">
+                    <div class="feat-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg></div>
                     <h3>Wallet Tracking</h3>
                     <p>Track cash, e-wallets, and bank accounts separately. Know exactly where your money lives.</p>
-                </div>
-                <div class="feat-card reveal">
-                    <div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/></svg></div>
+                </article>
+                <article class="feat-card reveal">
+                    <div class="feat-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/></svg></div>
                     <h3>Bills Manager</h3>
                     <p>Stay ahead of due dates and recurring expenses. Never miss a payment again.</p>
-                </div>
-                <div class="feat-card featured reveal">
-                    <div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="22" x2="21" y2="22"/><line x1="6" y1="18" x2="6" y2="11"/><line x1="10" y1="18" x2="10" y2="11"/><line x1="14" y1="18" x2="14" y2="11"/><line x1="18" y1="18" x2="18" y2="11"/><polygon points="12 2 20 7 4 7"/></svg></div>
+                </article>
+                <article class="feat-card featured reveal">
+                    <div class="feat-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="22" x2="21" y2="22"/><line x1="6" y1="18" x2="6" y2="11"/><line x1="10" y1="18" x2="10" y2="11"/><line x1="14" y1="18" x2="14" y2="11"/><line x1="18" y1="18" x2="18" y2="11"/><polygon points="12 2 20 7 4 7"/></svg></div>
                     <h3>Savings Vaults</h3>
                     <p>Create dedicated funds for future goals. Emergency fund, travel, gadgets. Track progress visually and stay motivated with every peso you save.</p>
-                </div>
-                <div class="feat-card reveal">
-                    <div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg></div>
+                </article>
+                <article class="feat-card reveal">
+                    <div class="feat-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg></div>
                     <h3>Transaction Timeline</h3>
                     <p>Searchable and organized spending history. Filter by category, wallet, or date.</p>
-                </div>
-                <div class="feat-card reveal">
-                    <div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1l22 22"/><path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"/><path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"/><path d="M10.71 5.05A16 16 0 0 1 22.56 9"/><path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg></div>
+                </article>
+                <article class="feat-card reveal">
+                    <div class="feat-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1l22 22"/><path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"/><path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"/><path d="M10.71 5.05A16 16 0 0 1 22.56 9"/><path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg></div>
                     <h3>Offline First</h3>
                     <p>Works even when internet does not. All features available anytime, anywhere.</p>
-                </div>
+                </article>
             </div>
         </div>
     </section>
 
     <!-- ═══ SECTION 6 — HOW IT WORKS ═══ -->
-    <section class="how" id="how">
+    <section class="how" id="how" aria-label="How It Works">
         <div class="container">
             <div class="section-header reveal">
                 <div class="eyebrow">How It Works</div>
@@ -314,44 +315,44 @@
                 <p class="section-sub center">No registration. No tutorial. Just open and start building better money habits.</p>
             </div>
             <div class="steps">
-                <div class="step reveal reveal-d1">
+                <article class="step reveal reveal-d1">
                     <div class="step-num">1</div>
                     <h3>Add Income</h3>
                     <p>Log your salary, freelance pay, or any money coming in.</p>
-                </div>
-                <div class="step reveal reveal-d1">
+                </article>
+                <article class="step reveal reveal-d1">
                     <div class="step-num">2</div>
                     <h3>Track Spending</h3>
                     <p>Log every expense as it happens. Takes 5 seconds.</p>
-                </div>
-                <div class="step reveal reveal-d2">
+                </article>
+                <article class="step reveal reveal-d2">
                     <div class="step-num">3</div>
                     <h3>Capture Moments</h3>
                     <p>Attach photos to expenses. Remember the why.</p>
-                </div>
-                <div class="step reveal reveal-d3">
+                </article>
+                <article class="step reveal reveal-d3">
                     <div class="step-num">4</div>
                     <h3>Reach Goals</h3>
                     <p>Build savings. Understand habits. Grow financially.</p>
-                </div>
+                </article>
             </div>
         </div>
     </section>
 
     <!-- ═══ SECTION 7 — APP SHOWCASE ═══ -->
-    <section class="app-showcase" id="showcase">
+    <section class="app-showcase" id="showcase" aria-label="App Preview">
         <div class="container">
             <div class="section-header reveal">
                 <div class="eyebrow">App Preview</div>
                 <h2 class="section-title">See SINKPESO in action</h2>
                 <p class="section-sub center">A clean, focused interface designed to help you stay on top of your money.</p>
             </div>
-            <div class="showcase-tabs">
-                <button class="showcase-tab active" data-panel="dashboard">Dashboard</button>
-                <button class="showcase-tab" data-panel="expenses">Expenses</button>
-                <button class="showcase-tab" data-panel="bills">Bills</button>
-                <button class="showcase-tab" data-panel="savings">Savings</button>
-                <button class="showcase-tab" data-panel="diary">Photo Diary</button>
+            <div class="showcase-tabs" role="tablist" aria-label="App preview tabs">
+                <button class="showcase-tab active" data-panel="dashboard" role="tab" aria-selected="true" aria-controls="panel-dashboard" id="tab-dashboard">Dashboard</button>
+                <button class="showcase-tab" data-panel="expenses" role="tab" aria-selected="false" aria-controls="panel-expenses" id="tab-expenses" tabindex="-1">Expenses</button>
+                <button class="showcase-tab" data-panel="bills" role="tab" aria-selected="false" aria-controls="panel-bills" id="tab-bills" tabindex="-1">Bills</button>
+                <button class="showcase-tab" data-panel="savings" role="tab" aria-selected="false" aria-controls="panel-savings" id="tab-savings" tabindex="-1">Savings</button>
+                <button class="showcase-tab" data-panel="diary" role="tab" aria-selected="false" aria-controls="panel-diary" id="tab-diary" tabindex="-1">Photo Diary</button>
             </div>
             <div class="showcase-display reveal">
                 <div class="showcase-frame">
@@ -362,21 +363,21 @@
                     </div>
                     <div class="showcase-body">
                         <!-- Dashboard Panel -->
-                        <div class="showcase-panel active" id="panel-dashboard">
+                        <div class="showcase-panel active" id="panel-dashboard" role="tabpanel" aria-labelledby="tab-dashboard">
                             <div class="ss-grid cols-3">
-                                <div class="ss-card">
+                                <article class="ss-card">
                                     <div class="bento-label">Available</div>
                                     <div class="bento-value green" style="font-size:24px">&#8369;24,350</div>
-                                </div>
-                                <div class="ss-card">
+                                </article>
+                                <article class="ss-card">
                                     <div class="bento-label">Spent</div>
                                     <div class="bento-value" style="color:var(--red);font-size:24px">&#8369;8,120</div>
-                                </div>
-                                <div class="ss-card">
+                                </article>
+                                <article class="ss-card">
                                     <div class="bento-label">Savings</div>
                                     <div class="bento-value purple" style="font-size:24px">&#8369;15,000</div>
-                                </div>
-                                <div class="ss-card span-2">
+                                </article>
+                                <article class="ss-card span-2">
                                     <div class="bento-label">Daily Spending</div>
                                     <div class="bento-chart">
                                         <div class="bento-bar" style="height:40%"></div>
@@ -387,16 +388,16 @@
                                         <div class="bento-bar" style="height:55%"></div>
                                         <div class="bento-bar" style="height:70%"></div>
                                     </div>
-                                </div>
-                                <div class="ss-card">
+                                </article>
+                                <article class="ss-card">
                                     <div class="bento-label">Bills</div>
                                     <div class="bento-value blue" style="font-size:24px">4/6</div>
                                     <div class="bento-sub">paid this month</div>
-                                </div>
+                                </article>
                             </div>
                         </div>
                         <!-- Expenses Panel -->
-                        <div class="showcase-panel" id="panel-expenses">
+                        <div class="showcase-panel" id="panel-expenses" role="tabpanel" aria-labelledby="tab-expenses" aria-hidden="true">
                             <div style="width:100%">
                                 <div class="ss-row">
                                     <div class="ss-row-left">
@@ -422,7 +423,7 @@
                             </div>
                         </div>
                         <!-- Bills Panel -->
-                        <div class="showcase-panel" id="panel-bills">
+                        <div class="showcase-panel" id="panel-bills" role="tabpanel" aria-labelledby="tab-bills" aria-hidden="true">
                             <div style="width:100%">
                                 <div class="ss-bill">
                                     <div class="ss-row-left">
@@ -455,36 +456,36 @@
                             </div>
                         </div>
                         <!-- Savings Panel -->
-                        <div class="showcase-panel" id="panel-savings">
+                        <div class="showcase-panel" id="panel-savings" role="tabpanel" aria-labelledby="tab-savings" aria-hidden="true">
                             <div class="ss-grid cols-2">
-                                <div class="ss-vault-card">
-                                    <div class="ss-vault-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/></svg></div>
+                                <article class="ss-vault-card">
+                                    <div class="ss-vault-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/></svg></div>
                                     <div class="ss-vault-name">Emergency Fund</div>
                                     <div class="ss-vault-amount">&#8369;15,000</div>
                                     <div class="ss-vault-bar"><div class="ss-vault-fill" style="width:75%"></div></div>
-                                </div>
-                                <div class="ss-vault-card">
-                                    <div class="ss-vault-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></svg></div>
+                                </article>
+                                <article class="ss-vault-card">
+                                    <div class="ss-vault-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></svg></div>
                                     <div class="ss-vault-name">Japan Trip</div>
                                     <div class="ss-vault-amount" style="color:var(--blue)">&#8369;8,000</div>
                                     <div class="ss-vault-bar"><div class="ss-vault-fill" style="width:40%;background:var(--blue)"></div></div>
-                                </div>
-                                <div class="ss-vault-card">
-                                    <div class="ss-vault-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg></div>
+                                </article>
+                                <article class="ss-vault-card">
+                                    <div class="ss-vault-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg></div>
                                     <div class="ss-vault-name">New Laptop</div>
                                     <div class="ss-vault-amount" style="color:var(--purple)">&#8369;12,500</div>
                                     <div class="ss-vault-bar"><div class="ss-vault-fill" style="width:25%;background:var(--purple)"></div></div>
-                                </div>
-                                <div class="ss-vault-card">
-                                    <div class="ss-vault-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></div>
+                                </article>
+                                <article class="ss-vault-card">
+                                    <div class="ss-vault-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></div>
                                     <div class="ss-vault-name">Certification</div>
                                     <div class="ss-vault-amount" style="color:var(--amber)">&#8369;3,200</div>
                                     <div class="ss-vault-bar"><div class="ss-vault-fill" style="width:32%;background:var(--amber)"></div></div>
-                                </div>
+                                </article>
                             </div>
                         </div>
                         <!-- Photo Diary Panel -->
-                        <div class="showcase-panel" id="panel-diary">
+                        <div class="showcase-panel" id="panel-diary" role="tabpanel" aria-labelledby="tab-diary" aria-hidden="true">
                             <div class="ss-diary-grid">
                                 <div class="ss-diary-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg><span class="ss-diary-label">Groceries</span><span class="ss-diary-amount">&#8369;1,250</span></div>
                                 <div class="ss-diary-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 18V6"/></svg><span class="ss-diary-label">Jollibee</span><span class="ss-diary-amount">&#8369;285</span></div>
@@ -501,7 +502,7 @@
     </section>
 
     <!-- ═══ SECTION 8 — PRIVACY ═══ -->
-    <section class="privacy" id="privacy">
+    <section class="privacy" id="privacy" aria-label="Privacy">
         <div class="container">
             <div class="section-header reveal">
                 <div class="eyebrow">Privacy First</div>
@@ -509,45 +510,45 @@
                 <p class="section-sub center">Most finance apps rely on the cloud. SINKPESO is different. Your financial records remain on your device.</p>
             </div>
             <div class="privacy-cards">
-                <div class="priv-card reveal reveal-d1">
-                    <div class="priv-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/></svg></div>
+                <article class="priv-card reveal reveal-d1">
+                    <div class="priv-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/></svg></div>
                     <h3>Private by Design</h3>
                     <p>Your data belongs to you. Zero analytics, zero tracking.</p>
-                </div>
-                <div class="priv-card reveal reveal-d1">
-                    <div class="priv-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1l22 22"/><path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"/><path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"/><path d="M10.71 5.05A16 16 0 0 1 22.56 9"/><path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg></div>
+                </article>
+                <article class="priv-card reveal reveal-d1">
+                    <div class="priv-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1l22 22"/><path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"/><path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"/><path d="M10.71 5.05A16 16 0 0 1 22.56 9"/><path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg></div>
                     <h3>Offline First</h3>
                     <p>Works without internet. All features, always available.</p>
-                </div>
-                <div class="priv-card reveal reveal-d2">
-                    <div class="priv-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
+                </article>
+                <article class="priv-card reveal reveal-d2">
+                    <div class="priv-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
                     <h3>Local Ownership</h3>
                     <p>No forced cloud dependency. Data stays on your device.</p>
-                </div>
-                <div class="priv-card reveal reveal-d2">
-                    <div class="priv-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></svg></div>
+                </article>
+                <article class="priv-card reveal reveal-d2">
+                    <div class="priv-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></svg></div>
                     <h3>Fast and Reliable</h3>
                     <p>Instant access to your finances. No loading, no lag.</p>
-                </div>
+                </article>
             </div>
         </div>
     </section>
 
     <!-- ═══ SECTION 9 — WHY SINKPESO ═══ -->
-    <section class="comparison" id="compare">
+    <section class="comparison" id="compare" aria-label="Comparison">
         <div class="container">
             <div class="section-header reveal">
                 <div class="eyebrow">Why SINKPESO</div>
                 <h2 class="section-title">How SINKPESO compares</h2>
                 <p class="section-sub center">A different approach to tracking money.</p>
             </div>
-            <div class="reveal">
+            <div class="reveal" style="overflow-x:auto">
                 <table class="comp-table">
                     <thead>
                         <tr>
-                            <th></th>
-                            <th class="hl">SINKPESO</th>
-                            <th>Traditional Apps</th>
+                            <th scope="col"></th>
+                            <th scope="col" class="hl">SINKPESO</th>
+                            <th scope="col">Traditional Apps</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -566,47 +567,47 @@
     </section>
 
     <!-- ═══ SECTION 10 — TESTIMONIALS ═══ -->
-    <section class="testimonials">
+    <section class="testimonials" aria-label="Testimonials">
         <div class="container">
             <div class="section-header reveal">
                 <div class="eyebrow">What Users Say</div>
                 <h2 class="section-title">Real people, real clarity</h2>
             </div>
             <div class="test-grid">
-                <div class="test-card reveal reveal-d1">
-                    <div class="test-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
-                    <p class="test-quote">"I finally know where my money goes every month. The Photo Diary feature is a game-changer — I can literally see my spending history with photos attached."</p>
+                <article class="test-card reveal reveal-d1">
+                    <div class="test-stars" aria-label="5 out of 5 stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+                    <p class="test-quote">"The photo diary feature completely changed how I look at my spending habits. Highly recommended!"</p>
                     <div class="test-author">
-                        <div class="test-avatar" style="background:var(--accent-dim);color:var(--accent)">M</div>
-                        <div><div class="test-name">Maria C.</div><div class="test-role">Freelance Designer</div></div>
+                        <div class="test-avatar" style="background:var(--accent-dim);color:var(--accent)">C</div>
+                        <div><div class="test-name">Carlo M.</div><div class="test-role">English</div></div>
                     </div>
-                </div>
-                <div class="test-card reveal reveal-d2">
-                    <div class="test-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
-                    <p class="test-quote">"The savings vaults keep me disciplined. I set up separate goals for my emergency fund and upcoming trip, and watching the progress bars fill up is so satisfying."</p>
+                </article>
+                <article class="test-card reveal reveal-d2">
+                    <div class="test-stars" aria-label="5 out of 5 stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+                    <p class="test-quote">"Sobrang ganda ng SINKPESO! Wala nang hassle kahit walang internet kapag nagta-track ng expenses."</p>
                     <div class="test-author">
-                        <div class="test-avatar" style="background:var(--blue-dim);color:var(--blue)">J</div>
-                        <div><div class="test-name">Joshua R.</div><div class="test-role">Software Engineer</div></div>
+                        <div class="test-avatar" style="background:var(--blue-dim);color:var(--blue)">M</div>
+                        <div><div class="test-name">Mark D.</div><div class="test-role">Tagalog</div></div>
                     </div>
-                </div>
-                <div class="test-card reveal reveal-d3">
-                    <div class="test-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
-                    <p class="test-quote">"I used to forget bill payments all the time. Now I track everything — Meralco, PLDT, rent — and the offline feature means I can log expenses even without signal."</p>
+                </article>
+                <article class="test-card reveal reveal-d3">
+                    <div class="test-stars" aria-label="5 out of 5 stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+                    <p class="test-quote">"Nindot kaayo gamiton. Mas dali na nako makita asa paingon akong sweldo kada bulan labi na if tingbits na."</p>
                     <div class="test-author">
-                        <div class="test-avatar" style="background:var(--purple-dim);color:var(--purple)">A</div>
-                        <div><div class="test-name">Ana S.</div><div class="test-role">College Student</div></div>
+                        <div class="test-avatar" style="background:var(--purple-dim);color:var(--purple)">J</div>
+                        <div><div class="test-name">Jessa T.</div><div class="test-role">Bisaya</div></div>
                     </div>
-                </div>
+                </article>
             </div>
         </div>
     </section>
 
     <!-- ═══ SECTION 11 — FINAL CTA ═══ -->
-    <section class="final-cta">
+    <section class="final-cta" aria-label="Call to action">
         <div class="container">
             <div class="final-cta-content reveal">
                 <h2>Start Taking Control<br>of <em>Every Peso.</em></h2>
-                <p>Build better money habits with a budgeting system designed for real life.</p>
+                <p>Build better money habits with a budgeting system designed for real life. No sign-up. No cloud. Just open and go.</p>
                 <div class="hero-actions">
                     <a href="app.html" class="btn btn-primary">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
@@ -614,26 +615,36 @@
                     </a>
                     <a href="app.html" class="btn btn-ghost">Get Started <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></a>
                 </div>
+                <p class="hero-pwa-note">Works right in your browser. No app store download required.</p>
             </div>
         </div>
     </section>
 
     <!-- ═══ SECTION 12 — FOOTER ═══ -->
-    <footer>
+    <footer role="contentinfo">
         <div class="container">
             <div class="footer-inner">
                 <div>
                     <div class="footer-brand">
-                        <img src="logosinkpeso.png" alt="">
+                        <img src="logosinkpeso.png" alt="Sinkpeso Logo">
                         <span>SINKPESO</span>
                     </div>
                     <div class="footer-tagline">Private. Offline. Yours.</div>
                 </div>
                 <div class="footer-links">
                     <a href="#features">Features</a>
-                    <a href="privacy.html">Privacy</a>
+                    <a href="privacy.html">Privacy Policy</a>
+                    <a href="#compare">Terms of Service</a>
                     <a href="https://github.com/sinkpeso/sinkpeso.github.io" target="_blank" rel="noopener">GitHub</a>
                     <a href="app.html">Launch App</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p class="footer-copy">&copy; 2026 SINKPESO. Zero data collection. Your data stays on your device.</p>
+                <div class="footer-social" aria-label="Social links">
+                    <a href="https://github.com/sinkpeso/sinkpeso.github.io" target="_blank" rel="noopener" aria-label="SINKPESO on GitHub">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg>
+                    </a>
                 </div>
             </div>
         </div>

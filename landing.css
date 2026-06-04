@@ -764,6 +764,35 @@ footer {
     color: var(--text-muted); transition: color 0.15s;
 }
 .footer-links a:hover { color: var(--text-secondary); }
+.footer-bottom {
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.footer-copy {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+.footer-social {
+    display: flex;
+    gap: 12px;
+}
+.footer-social a {
+    color: var(--text-muted);
+    transition: color 0.15s;
+    display: flex;
+    align-items: center;
+}
+.footer-social a:hover { color: var(--text-secondary); }
+.hero-pwa-note {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-top: 14px;
+    font-weight: 500;
+}
 
 /* ── ANIMATIONS ── */
 .reveal {
@@ -841,4 +870,7 @@ footer {
     .problem-list li { font-size: 13px; }
     .quote-line { font-size: 15px !important; }
     .container { padding: 0 16px; }
+    .footer-bottom { flex-direction: column; gap: 12px; text-align: center; }
+    .footer-inner { flex-direction: column; gap: 16px; text-align: center; }
+    .footer-links { flex-wrap: wrap; justify-content: center; gap: 12px; }
 }

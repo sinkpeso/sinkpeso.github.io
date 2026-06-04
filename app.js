@@ -64,7 +64,7 @@
         }, { passive: true });
     }
 
-    // ── Screenshot Tabs ──
+    // ── Screenshot Tabs with ARIA ──
     function initTabs() {
         const tabs = document.querySelectorAll('.showcase-tab');
         const panels = document.querySelectorAll('.showcase-panel');
@@ -76,17 +76,66 @@
             savings: 'SINKPESO — Savings Vaults',
             diary: 'SINKPESO — Photo Diary'
         };
-        tabs.forEach(tab => {
-            tab.addEventListener('click', () => {
-                const panel = tab.dataset.panel;
-                tabs.forEach(t => t.classList.remove('active'));
-                tab.classList.add('active');
-                panels.forEach(p => p.classList.remove('active'));
-                const target = document.getElementById('panel-' + panel);
-                if (target) target.classList.add('active');
-                if (titleEl) titleEl.textContent = titles[panel] || 'SINKPESO';
+
+        function activateTab(tab) {
+            const panel = tab.dataset.panel;
+
+            // Update tab states
+            tabs.forEach(t => {
+                t.classList.remove('active');
+                t.setAttribute('aria-selected', 'false');
+                t.setAttribute('tabindex', '-1');
             });
+            tab.classList.add('active');
+            tab.setAttribute('aria-selected', 'true');
+            tab.removeAttribute('tabindex');
+            tab.focus();
+
+            // Update panel states
+            panels.forEach(p => {
+                p.classList.remove('active');
+                p.setAttribute('aria-hidden', 'true');
+            });
+            const target = document.getElementById('panel-' + panel);
+            if (target) {
+                target.classList.add('active');
+                target.setAttribute('aria-hidden', 'false');
+            }
+
+            if (titleEl) titleEl.textContent = titles[panel] || 'SINKPESO';
+        }
+
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => activateTab(tab));
         });
+
+        // Keyboard navigation (arrow keys)
+        const tablist = document.querySelector('[role="tablist"]');
+        if (tablist) {
+            tablist.addEventListener('keydown', (e) => {
+                const tabArray = Array.from(tabs);
+                const currentIndex = tabArray.indexOf(document.activeElement);
+                let newIndex;
+
+                if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    newIndex = (currentIndex + 1) % tabArray.length;
+                } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    newIndex = (currentIndex - 1 + tabArray.length) % tabArray.length;
+                } else if (e.key === 'Home') {
+                    e.preventDefault();
+                    newIndex = 0;
+                } else if (e.key === 'End') {
+                    e.preventDefault();
+                    newIndex = tabArray.length - 1;
+                } else {
+                    return;
+                }
+
+                activateTab(tabArray[newIndex]);
+            });
+        }
     }
 
     // ── Init ──
