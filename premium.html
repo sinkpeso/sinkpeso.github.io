@@ -295,17 +295,20 @@
 
         /* QR placeholder */
         .qr-box {
-            width: 180px; height: 180px;
+            width: 140px; height: 140px;
+            max-width: calc(100% - 16px);
             background: #fff;
             border-radius: var(--r-lg);
             margin: 0 auto 20px;
             display: flex; align-items: center; justify-content: center;
             position: relative;
             overflow: hidden;
+            flex-shrink: 0;
         }
         .qr-box img {
             width: 100%; height: 100%;
             object-fit: contain;
+            display: block;
         }
         .qr-placeholder {
             color: #ccc;
@@ -672,7 +675,7 @@
                 width: 38px; height: 38px;
             }
             .qr-box {
-                width: 160px; height: 160px;
+                width: 130px; height: 130px;
             }
             .pay-info-row {
                 padding: 12px 0;
