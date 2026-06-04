@@ -120,7 +120,6 @@
             margin: 0 auto;
             padding-left: 16px;
             padding-right: 16px;
-            overflow: hidden;
             box-sizing: border-box;
             width: 100%;
         }
@@ -344,10 +343,6 @@
             color: var(--text);
             font-family: 'DM Mono', 'SF Mono', monospace;
             letter-spacing: 0.02em;
-            min-width: 0;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
         }
         .copy-inline {
             display: inline-flex;
@@ -411,10 +406,7 @@
             white-space: nowrap;
         }
         .pay-summary-row .pay-info-value {
-            text-align: right;
-            min-width: 0;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            margin-left: auto;
             white-space: nowrap;
         }
         .pay-summary-total {
@@ -691,10 +683,6 @@
         @media (max-width: 480px) {
             .premium-hero {
                 padding: 110px 0 40px;
-            }
-            .flow-container {
-                max-width: 100%;
-                padding: 0 4px;
             }
             .pay-detail {
                 padding: 20px 14px;
