@@ -387,9 +387,10 @@
             background: var(--bg-card);
             border: 1px solid var(--accent-border);
             border-radius: var(--r-xl);
-            padding: 24px;
+            padding: 20px 20px;
             margin-bottom: 24px;
             box-sizing: border-box;
+            width: 100%;
             max-width: 100%;
             overflow: hidden;
         }
@@ -397,28 +398,32 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 8px 0;
-            min-width: 0;
-            gap: 12px;
+            width: 100%;
+            padding: 10px 0;
+            box-sizing: border-box;
         }
-        .pay-summary-row .pay-info-label {
+        .pay-summary-label {
+            font-size: 13px;
+            color: var(--text-muted);
+            font-weight: 500;
             flex-shrink: 0;
-            white-space: nowrap;
-            min-width: 0;
         }
-        .pay-summary-row .pay-info-value {
+        .pay-summary-value {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text);
             text-align: right;
-            min-width: 0;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            flex-shrink: 0;
         }
-        .pay-summary-total {
+        .pay-summary-divider {
+            border: none;
             border-top: 1px solid var(--border);
-            margin-top: 8px;
-            padding-top: 16px;
+            margin: 0;
+            padding: 0;
         }
-        .pay-summary-total .pay-info-value {
-            font-size: 22px;
+        .pay-summary-total .pay-summary-value {
+            font-size: 20px;
+            font-weight: 800;
             color: var(--accent);
         }
 
@@ -798,12 +803,13 @@
             <div class="flow-panel active" id="panel1">
                 <div class="pay-summary">
                     <div class="pay-summary-row">
-                        <span class="pay-info-label">Plan</span>
-                        <span class="pay-info-value" id="summaryPlan">Lifetime</span>
+                        <span class="pay-summary-label">Plan</span>
+                        <span class="pay-summary-value" id="summaryPlan">Lifetime</span>
                     </div>
+                    <hr class="pay-summary-divider">
                     <div class="pay-summary-row pay-summary-total">
-                        <span class="pay-info-label">Total</span>
-                        <span class="pay-info-value" id="summaryPrice">&#8369;299</span>
+                        <span class="pay-summary-label">Total</span>
+                        <span class="pay-summary-value" id="summaryPrice">&#8369;299</span>
                     </div>
                 </div>
 
