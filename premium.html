@@ -12,8 +12,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="landing.css">
     <style>
+        /* ── Premium Hero ─────────────────────────────────── */
         .premium-hero {
-            padding: 140px 0 80px;
+            padding: 140px 0 60px;
             text-align: center;
             position: relative;
             overflow: hidden;
@@ -28,53 +29,410 @@
             pointer-events: none;
         }
 
-        /* Steps flow */
-        .steps-flow {
+        /* ── Plan Selection ───────────────────────────────── */
+        .plan-select {
+            padding: 0 0 40px;
+        }
+        .plan-grid {
             display: grid;
-            grid-template-columns: repeat(5, 1fr);
+            grid-template-columns: repeat(3, 1fr);
             gap: 20px;
-            margin-top: 64px;
-            position: relative;
+            max-width: 720px;
+            margin: 0 auto;
         }
-        .steps-flow::before {
-            content: '';
-            position: absolute;
-            top: 28px;
-            left: 10%; right: 10%;
-            height: 2px;
-            background: var(--border-hover);
-            z-index: 0;
-        }
-        .steps-flow .step {
-            text-align: center;
-            position: relative;
-            z-index: 1;
-        }
-        .steps-flow .step-num {
-            width: 56px; height: 56px;
-            border-radius: 50%;
+        .plan-option {
             background: var(--bg-card);
-            border: 2px solid var(--accent);
-            color: var(--accent);
-            font-size: 20px; font-weight: 800;
-            display: flex; align-items: center; justify-content: center;
-            margin: 0 auto 20px;
+            border: 2px solid var(--border);
+            border-radius: var(--r-xl);
+            padding: 32px 24px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            position: relative;
+            user-select: none;
         }
-        .steps-flow .step h3 { font-size: 15px; font-weight: 700; margin-bottom: 8px; }
-        .steps-flow .step p { font-size: 13px; color: var(--text-muted); line-height: 1.55; max-width: 200px; margin: 0 auto; }
-        .steps-flow .step .step-detail {
+        .plan-option:hover {
+            border-color: var(--border-hover);
+            transform: translateY(-2px);
+        }
+        .plan-option.selected {
+            border-color: var(--accent);
+            box-shadow: 0 0 40px rgba(34,229,122,0.08);
+        }
+        .plan-option.selected::after {
+            content: '✓';
+            position: absolute;
+            top: 12px; right: 14px;
+            width: 24px; height: 24px;
+            background: var(--accent);
+            color: var(--bg);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 13px; font-weight: 800;
+        }
+        .plan-option .plan-tag {
+            position: absolute;
+            top: -12px; left: 50%;
+            transform: translateX(-50%);
+            background: var(--accent);
+            color: var(--bg);
             font-size: 11px;
-            color: var(--accent);
+            font-weight: 800;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            padding: 4px 14px;
+            border-radius: 20px;
+            white-space: nowrap;
+        }
+        .plan-option .plan-name {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+        }
+        .plan-option .plan-price {
+            font-size: 36px;
+            font-weight: 900;
+            color: var(--text);
+            letter-spacing: -0.03em;
+            line-height: 1;
+        }
+        .plan-option .plan-price small {
+            font-size: 14px;
             font-weight: 600;
-            margin-top: 6px;
+            color: var(--text-muted);
+        }
+        .plan-option .plan-desc {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 8px;
+        }
+        .plan-option.popular {
+            border-color: rgba(34,229,122,0.25);
         }
 
-        /* Activate card */
-        .activate-section {
-            padding: 80px 0 var(--section);
+        /* ── Payment Flow Steps ───────────────────────────── */
+        .flow-section {
+            padding: 40px 0 80px;
         }
+        .flow-container {
+            max-width: 560px;
+            margin: 0 auto;
+        }
+
+        /* Step indicators */
+        .step-indicators {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0;
+            margin-bottom: 48px;
+        }
+        .step-dot {
+            width: 36px; height: 36px;
+            border-radius: 50%;
+            background: var(--bg-card);
+            border: 2px solid var(--border);
+            color: var(--text-muted);
+            font-size: 14px; font-weight: 800;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.3s ease;
+            position: relative;
+            z-index: 2;
+            flex-shrink: 0;
+        }
+        .step-dot.active {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: var(--bg);
+        }
+        .step-dot.done {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: var(--bg);
+        }
+        .step-line {
+            width: 48px; height: 2px;
+            background: var(--border);
+            transition: background 0.3s ease;
+            flex-shrink: 0;
+        }
+        .step-line.done {
+            background: var(--accent);
+        }
+        .step-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: -36px;
+            margin-bottom: 40px;
+            padding: 0 6px;
+        }
+        .step-label {
+            font-size: 11px;
+            color: var(--text-muted);
+            font-weight: 600;
+            text-align: center;
+            width: 80px;
+            transition: color 0.3s;
+        }
+        .step-label.active {
+            color: var(--accent);
+        }
+
+        /* Flow panels */
+        .flow-panel {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+        .flow-panel.active {
+            display: block;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Payment method cards */
+        .pay-methods {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+        .pay-method {
+            background: var(--bg-card);
+            border: 2px solid var(--border);
+            border-radius: var(--r-lg);
+            padding: 20px 24px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            user-select: none;
+        }
+        .pay-method:hover {
+            border-color: var(--border-hover);
+        }
+        .pay-method.selected {
+            border-color: var(--accent);
+            background: rgba(34,229,122,0.03);
+        }
+        .pay-method-icon {
+            width: 44px; height: 44px;
+            border-radius: var(--r-md);
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+            font-size: 20px; font-weight: 800;
+        }
+        .pay-method-info {
+            flex: 1;
+        }
+        .pay-method-name {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 2px;
+        }
+        .pay-method-desc {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+        .pay-method-radio {
+            width: 20px; height: 20px;
+            border-radius: 50%;
+            border: 2px solid var(--border-hover);
+            flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.2s;
+        }
+        .pay-method.selected .pay-method-radio {
+            border-color: var(--accent);
+            background: var(--accent);
+        }
+        .pay-method.selected .pay-method-radio::after {
+            content: '';
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            background: var(--bg);
+        }
+
+        /* Payment detail card */
+        .pay-detail {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--r-xl);
+            padding: 32px;
+            margin-bottom: 24px;
+        }
+        .pay-detail-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .pay-detail-icon {
+            width: 40px; height: 40px;
+            border-radius: var(--r-md);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 18px; font-weight: 800;
+        }
+        .pay-detail-title {
+            font-size: 16px;
+            font-weight: 700;
+        }
+        .pay-detail-sub {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        /* QR placeholder */
+        .qr-box {
+            width: 180px; height: 180px;
+            background: #fff;
+            border-radius: var(--r-lg);
+            margin: 0 auto 20px;
+            display: flex; align-items: center; justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .qr-box img {
+            width: 100%; height: 100%;
+            object-fit: contain;
+        }
+        .qr-placeholder {
+            color: #ccc;
+            text-align: center;
+            font-size: 12px;
+            padding: 16px;
+        }
+        .qr-placeholder svg {
+            display: block;
+            margin: 0 auto 8px;
+            opacity: 0.3;
+        }
+
+        /* Payment info rows */
+        .pay-info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 0;
+            border-bottom: 1px solid var(--border);
+        }
+        .pay-info-row:last-child {
+            border-bottom: none;
+        }
+        .pay-info-label {
+            font-size: 13px;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+        .pay-info-value {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text);
+            font-family: 'DM Mono', 'SF Mono', monospace;
+            letter-spacing: 0.02em;
+        }
+        .copy-inline {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 6px;
+            transition: background 0.15s;
+        }
+        .copy-inline:hover {
+            background: rgba(255,255,255,0.06);
+        }
+        .copy-inline svg {
+            opacity: 0.4;
+            transition: opacity 0.15s;
+        }
+        .copy-inline:hover svg {
+            opacity: 0.7;
+        }
+
+        /* Reminder box */
+        .pay-reminder {
+            background: rgba(245,158,11,0.06);
+            border: 1px solid rgba(245,158,11,0.15);
+            border-radius: var(--r-lg);
+            padding: 16px 20px;
+            margin-bottom: 24px;
+            font-size: 13px;
+            color: var(--amber);
+            line-height: 1.7;
+        }
+        .pay-reminder strong {
+            color: #FBBF24;
+        }
+
+        /* Summary card */
+        .pay-summary {
+            background: var(--bg-card);
+            border: 1px solid var(--accent-border);
+            border-radius: var(--r-xl);
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+        .pay-summary-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+        }
+        .pay-summary-total {
+            border-top: 1px solid var(--border);
+            margin-top: 8px;
+            padding-top: 16px;
+        }
+        .pay-summary-total .pay-info-value {
+            font-size: 22px;
+            color: var(--accent);
+        }
+
+        /* Success panel */
+        .success-icon {
+            width: 72px; height: 72px;
+            border-radius: 50%;
+            background: var(--accent-dim);
+            border: 3px solid var(--accent);
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 24px;
+        }
+        .success-icon svg {
+            color: var(--accent);
+        }
+        .success-title {
+            font-size: 24px;
+            font-weight: 800;
+            text-align: center;
+            margin-bottom: 8px;
+        }
+        .success-sub {
+            font-size: 14px;
+            color: var(--text-secondary);
+            text-align: center;
+            line-height: 1.7;
+            margin-bottom: 32px;
+        }
+
+        /* Flow actions */
+        .flow-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+        .flow-actions .btn {
+            flex: 1;
+        }
+
+        /* Activate card (reused) */
         .activate-card {
-            max-width: 480px;
+            max-width: 560px;
             margin: 0 auto;
             background: var(--bg-card);
             border: 1px solid var(--accent-border);
@@ -84,7 +442,7 @@
             box-shadow: 0 0 80px rgba(34,229,122,0.04);
         }
         .activate-card h2 {
-            font-size: 24px;
+            font-size: 22px;
             font-weight: 800;
             margin-bottom: 8px;
             letter-spacing: -0.02em;
@@ -143,19 +501,108 @@
         .activate-msg p { margin-bottom: 12px; }
         .activate-msg .btn { margin-top: 4px; }
 
-        @media (max-width: 900px) {
-            .steps-flow {
-                grid-template-columns: 1fr 1fr;
-                max-width: 440px;
-                margin-left: auto;
-                margin-right: auto;
-            }
-            .steps-flow::before { display: none; }
+        /* Divider */
+        .flow-divider {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin: 48px 0;
         }
-        @media (max-width: 480px) {
-            .steps-flow { grid-template-columns: 1fr; }
-            .activate-input-group { flex-direction: column; }
-            .activate-card { padding: 28px 20px; }
+        .flow-divider::before,
+        .flow-divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+        .flow-divider span {
+            font-size: 12px;
+            color: var(--text-muted);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        /* ── FAQ ────────────────────────────────────────────── */
+        .faq-section {
+            padding: 0 0 var(--section);
+        }
+        .faq-grid {
+            max-width: 600px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .faq-item {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--r-lg);
+            overflow: hidden;
+        }
+        .faq-q {
+            padding: 18px 24px;
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text);
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.15s;
+            user-select: none;
+        }
+        .faq-q:hover {
+            background: rgba(255,255,255,0.02);
+        }
+        .faq-q svg {
+            color: var(--text-muted);
+            transition: transform 0.2s;
+            flex-shrink: 0;
+            margin-left: 12px;
+        }
+        .faq-item.open .faq-q svg {
+            transform: rotate(180deg);
+        }
+        .faq-a {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease, padding 0.3s ease;
+        }
+        .faq-item.open .faq-a {
+            max-height: 300px;
+        }
+        .faq-a-inner {
+            padding: 0 24px 18px;
+            font-size: 13px;
+            color: var(--text-secondary);
+            line-height: 1.7;
+        }
+
+        /* ── Responsive ────────────────────────────────────── */
+        @media (max-width: 700px) {
+            .plan-grid {
+                grid-template-columns: 1fr;
+                max-width: 360px;
+            }
+            .plan-option .plan-price {
+                font-size: 30px;
+            }
+            .step-labels {
+                display: none;
+            }
+            .activate-input-group {
+                flex-direction: column;
+            }
+            .activate-card {
+                padding: 28px 20px;
+            }
+            .pay-detail {
+                padding: 24px 20px;
+            }
+            .flow-actions {
+                flex-direction: column;
+            }
         }
     </style>
 </head>
@@ -171,69 +618,383 @@
             <div class="nav-links">
                 <a href="index.html#features">Features</a>
                 <a href="index.html#pricing">Pricing</a>
-                <a href="premium.html">Premium</a>
+                <a href="premium.html" style="color:var(--accent)">Premium</a>
                 <a href="app.html" class="btn btn-primary">Launch App</a>
             </div>
         </div>
     </nav>
 
-    <!-- ═══ SECTION A — HOW TO GET PREMIUM ═══ -->
-    <section class="premium-hero" aria-label="How to Get Premium">
+    <!-- ═══ HERO ═══ -->
+    <section class="premium-hero" aria-label="Get Premium">
         <div class="container">
             <div class="section-header reveal">
                 <div class="eyebrow">Upgrade</div>
-                <h2 class="section-title">How to Get Premium</h2>
-                <p class="section-sub center">Five simple steps to unlock all features.</p>
+                <h2 class="section-title">Unlock Full Power</h2>
+                <p class="section-sub center">Unlimited wallets, encrypted backups, PDF reports, and more. One-time or recurring — your choice.</p>
             </div>
-            <div class="steps-flow">
-                <article class="step reveal reveal-d1">
-                    <div class="step-num">1</div>
-                    <h3>Choose a Plan</h3>
-                    <p>Pick the plan that works for you.</p>
-                    <div class="step-detail">₱299 lifetime · ₱149/yr · ₱49/mo</div>
+        </div>
+    </section>
+
+    <!-- ═══ STEP 1 — CHOOSE YOUR PLAN ═══ -->
+    <section class="plan-select" aria-label="Choose your plan">
+        <div class="container">
+            <div class="plan-grid">
+                <article class="plan-option reveal" data-plan="monthly" data-price="49" data-name="Monthly" onclick="selectPlan(this)">
+                    <div class="plan-name">Monthly</div>
+                    <div class="plan-price">&#8369;49<small>/mo</small></div>
+                    <div class="plan-desc">Try premium features</div>
                 </article>
-                <article class="step reveal reveal-d1">
-                    <div class="step-num">2</div>
-                    <h3>Send Payment</h3>
-                    <p>GCash payment with note "SINKPESO Premium".</p>
-                    <div class="step-detail">GCash: [number placeholder]</div>
+                <article class="plan-option popular reveal" data-plan="annual" data-price="149" data-name="Annual" onclick="selectPlan(this)">
+                    <div class="plan-tag">Save 74%</div>
+                    <div class="plan-name">Annual</div>
+                    <div class="plan-price">&#8369;149<small>/yr</small></div>
+                    <div class="plan-desc">Best yearly value</div>
                 </article>
-                <article class="step reveal reveal-d2">
-                    <div class="step-num">3</div>
-                    <h3>Email Proof</h3>
-                    <p>Send proof of payment to get verified.</p>
-                    <div class="step-detail">[email placeholder]</div>
-                </article>
-                <article class="step reveal reveal-d2">
-                    <div class="step-num">4</div>
-                    <h3>Get Your Key</h3>
-                    <p>Receive your license key within 24 hours.</p>
-                    <div class="step-detail">Via email</div>
-                </article>
-                <article class="step reveal reveal-d3">
-                    <div class="step-num">5</div>
-                    <h3>Activate</h3>
-                    <p>Open SINKPESO → Settings → Enter Key → Done!</p>
-                    <div class="step-detail">Or use the form below</div>
+                <article class="plan-option selected reveal" data-plan="lifetime" data-price="299" data-name="Lifetime" onclick="selectPlan(this)">
+                    <div class="plan-tag">Best Value</div>
+                    <div class="plan-name">Lifetime</div>
+                    <div class="plan-price">&#8369;299<small>once</small></div>
+                    <div class="plan-desc">Pay once, own forever</div>
                 </article>
             </div>
         </div>
     </section>
 
-    <!-- ═══ SECTION B — ACTIVATE YOUR LICENSE ═══ -->
-    <section class="activate-section" aria-label="Activate License">
-        <div class="container">
-            <div class="activate-card reveal">
-                <h2>Activate Your License</h2>
-                <p class="activate-sub">Enter the license key you received via email.</p>
-                <div class="activate-input-group">
-                    <input type="text" class="activate-input" id="licenseKeyInput" placeholder="SINKPESO-XXXX-XXXX-XXXX" spellcheck="false" autocomplete="off">
-                    <button class="btn btn-primary" id="activateBtn" onclick="handleActivate()">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                        Activate License
+    <!-- ═══ PAYMENT FLOW ═══ -->
+    <section class="flow-section" aria-label="Payment flow">
+        <div class="flow-container">
+
+            <!-- Step indicators -->
+            <div class="step-indicators" id="stepIndicators">
+                <div class="step-dot active" data-step="1">1</div>
+                <div class="step-line" data-line="1"></div>
+                <div class="step-dot" data-step="2">2</div>
+                <div class="step-line" data-line="2"></div>
+                <div class="step-dot" data-step="3">3</div>
+            </div>
+            <div class="step-labels">
+                <div class="step-label active" data-step="1">Pay</div>
+                <div class="step-label" data-step="2">Confirm</div>
+                <div class="step-label" data-step="3">Activate</div>
+            </div>
+
+            <!-- ─── PANEL 1: Choose Payment Method ─── -->
+            <div class="flow-panel active" id="panel1">
+                <div class="pay-summary">
+                    <div class="pay-summary-row">
+                        <span class="pay-info-label">Plan</span>
+                        <span class="pay-info-value" id="summaryPlan">Lifetime</span>
+                    </div>
+                    <div class="pay-summary-row pay-summary-total">
+                        <span class="pay-info-label">Total</span>
+                        <span class="pay-info-value" id="summaryPrice">&#8369;299</span>
+                    </div>
+                </div>
+
+                <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px;font-weight:600;">Select payment method</p>
+
+                <div class="pay-methods">
+                    <div class="pay-method selected" data-method="gcash" onclick="selectMethod(this)">
+                        <div class="pay-method-icon" style="background:rgba(0,163,255,0.1);color:#00A3FF">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+                        </div>
+                        <div class="pay-method-info">
+                            <div class="pay-method-name">GCash</div>
+                            <div class="pay-method-desc">Instant transfer via GCash app</div>
+                        </div>
+                        <div class="pay-method-radio"></div>
+                    </div>
+                    <div class="pay-method" data-method="maribank" onclick="selectMethod(this)">
+                        <div class="pay-method-icon" style="background:rgba(0,210,128,0.1);color:#00D280">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M3 10h18"/><path d="M5 6l7-3 7 3"/><path d="M4 10v11"/><path d="M20 10v11"/><path d="M8 14v3"/><path d="M12 14v3"/><path d="M16 14v3"/></svg>
+                        </div>
+                        <div class="pay-method-info">
+                            <div class="pay-method-name">Maribank</div>
+                            <div class="pay-method-desc">SeaBank / Maribank transfer</div>
+                        </div>
+                        <div class="pay-method-radio"></div>
+                    </div>
+                    <div class="pay-method" data-method="hellomoney" onclick="selectMethod(this)">
+                        <div class="pay-method-icon" style="background:rgba(251,146,60,0.1);color:#FB923C">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2.5"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/></svg>
+                        </div>
+                        <div class="pay-method-info">
+                            <div class="pay-method-name">Hello Money (AUB)</div>
+                            <div class="pay-method-desc">Asia United Bank transfer</div>
+                        </div>
+                        <div class="pay-method-radio"></div>
+                    </div>
+                    <div class="pay-method" data-method="pnb" onclick="selectMethod(this)">
+                        <div class="pay-method-icon" style="background:rgba(139,92,246,0.1);color:#8B5CF6">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M3 10h18"/><path d="M5 6l7-3 7 3"/><path d="M4 10v11"/><path d="M20 10v11"/><path d="M8 14v3"/><path d="M12 14v3"/><path d="M16 14v3"/></svg>
+                        </div>
+                        <div class="pay-method-info">
+                            <div class="pay-method-name">PNB</div>
+                            <div class="pay-method-desc">Philippine National Bank transfer</div>
+                        </div>
+                        <div class="pay-method-radio"></div>
+                    </div>
+                </div>
+
+                <div class="flow-actions">
+                    <button class="btn btn-primary" onclick="goToStep(2)">
+                        Continue
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
                     </button>
                 </div>
-                <div class="activate-msg" id="activateMsg"></div>
+            </div>
+
+            <!-- ─── PANEL 2: Send Payment ─── -->
+            <div class="flow-panel" id="panel2">
+
+                <!-- GCash details -->
+                <div class="pay-detail" id="detailGcash">
+                    <div class="pay-detail-header">
+                        <div class="pay-detail-icon" style="background:rgba(0,163,255,0.1);color:#00A3FF">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+                        </div>
+                        <div>
+                            <div class="pay-detail-title">Send via GCash</div>
+                            <div class="pay-detail-sub">Transfer to the GCash number below</div>
+                        </div>
+                    </div>
+                    <div class="qr-box">
+                        <!-- TODO: Replace with actual GCash QR image -->
+                        <div class="qr-placeholder">
+                            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M14 14h3v3"/><path d="M20 14v7h-7"/><path d="M14 20h3"/></svg>
+                            <div>GCash QR Code</div>
+                            <div style="font-size:10px;color:#999;margin-top:4px">Replace with your QR</div>
+                        </div>
+                    </div>
+                    <div class="pay-info-row">
+                        <span class="pay-info-label">GCash Number</span>
+                        <span class="copy-inline" onclick="copyText('09536805795', this)">
+                            <span class="pay-info-value">0953-680-5795</span>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+                        </span>
+                    </div>
+                    <div class="pay-info-row">
+                        <span class="pay-info-label">Account Name</span>
+                        <span class="pay-info-value">KRISTIAN BAILO</span>
+                    </div>
+                    <div class="pay-info-row">
+                        <span class="pay-info-label">Amount</span>
+                        <span class="copy-inline" onclick="copyText('299', this)">
+                            <span class="pay-info-value" id="gcashAmount" style="color:var(--accent)">&#8369;299</span>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Maribank details (hidden by default) -->
+                <div class="pay-detail" id="detailMaribank" style="display:none">
+                    <div class="pay-detail-header">
+                        <div class="pay-detail-icon" style="background:rgba(0,210,128,0.1);color:#00D280">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M3 10h18"/><path d="M5 6l7-3 7 3"/><path d="M4 10v11"/><path d="M20 10v11"/><path d="M8 14v3"/><path d="M12 14v3"/><path d="M16 14v3"/></svg>
+                        </div>
+                        <div>
+                            <div class="pay-detail-title">Send via Maribank</div>
+                            <div class="pay-detail-sub">Transfer to the account below</div>
+                        </div>
+                    </div>
+                    <div class="pay-info-row">
+                        <span class="pay-info-label">Account Name</span>
+                        <span class="pay-info-value">KRISTIAN BAILO</span>
+                    </div>
+                    <div class="pay-info-row">
+                        <span class="pay-info-label">Account Number</span>
+                        <span class="copy-inline" onclick="copyText('12704283776', this)">
+                            <span class="pay-info-value">1270-4283-776</span>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+                        </span>
+                    </div>
+                    <div class="pay-info-row">
+                        <span class="pay-info-label">Amount</span>
+                        <span class="copy-inline" onclick="copyText('299', this)">
+                            <span class="pay-info-value" id="maribankAmount" style="color:var(--accent)">&#8369;299</span>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Hello Money / AUB details (hidden by default) -->
+                <div class="pay-detail" id="detailHellomoney" style="display:none">
+                    <div class="pay-detail-header">
+                        <div class="pay-detail-icon" style="background:rgba(251,146,60,0.1);color:#FB923C">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2.5"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/></svg>
+                        </div>
+                        <div>
+                            <div class="pay-detail-title">Send via Hello Money (AUB)</div>
+                            <div class="pay-detail-sub">Asia United Bank transfer</div>
+                        </div>
+                    </div>
+                    <div class="pay-info-row">
+                        <span class="pay-info-label">Account Name</span>
+                        <span class="pay-info-value">KRISTIAN BAILO</span>
+                    </div>
+                    <div class="pay-info-row">
+                        <span class="pay-info-label">Account Number</span>
+                        <span class="copy-inline" onclick="copyText('934101681745', this)">
+                            <span class="pay-info-value">9341-0168-1745</span>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+                        </span>
+                    </div>
+                    <div class="pay-info-row">
+                        <span class="pay-info-label">Amount</span>
+                        <span class="copy-inline" onclick="copyText('299', this)">
+                            <span class="pay-info-value" id="hellomoneyAmount" style="color:var(--accent)">&#8369;299</span>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- PNB details (hidden by default) -->
+                <div class="pay-detail" id="detailPnb" style="display:none">
+                    <div class="pay-detail-header">
+                        <div class="pay-detail-icon" style="background:rgba(139,92,246,0.1);color:#8B5CF6">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M3 10h18"/><path d="M5 6l7-3 7 3"/><path d="M4 10v11"/><path d="M20 10v11"/><path d="M8 14v3"/><path d="M12 14v3"/><path d="M16 14v3"/></svg>
+                        </div>
+                        <div>
+                            <div class="pay-detail-title">Send via PNB</div>
+                            <div class="pay-detail-sub">Philippine National Bank transfer</div>
+                        </div>
+                    </div>
+                    <div class="pay-info-row">
+                        <span class="pay-info-label">Account Name</span>
+                        <span class="pay-info-value">KRISTIAN BAILO</span>
+                    </div>
+                    <div class="pay-info-row">
+                        <span class="pay-info-label">Account Number</span>
+                        <span class="copy-inline" onclick="copyText('410810264673', this)">
+                            <span class="pay-info-value">4108-1026-4673</span>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+                        </span>
+                    </div>
+                    <div class="pay-info-row">
+                        <span class="pay-info-label">Amount</span>
+                        <span class="copy-inline" onclick="copyText('299', this)">
+                            <span class="pay-info-value" id="pnbAmount" style="color:var(--accent)">&#8369;299</span>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+                        </span>
+                    </div>
+                </div>
+
+                <div class="pay-reminder">
+                    <strong>⚠️ Important:</strong> Add a note/message: <strong>"SINKPESO Premium"</strong> so we can identify your payment. After sending, tap the button below to email us your proof.
+                </div>
+
+                <div class="flow-actions">
+                    <button class="btn btn-secondary" onclick="goToStep(1)">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
+                        Back
+                    </button>
+                    <a class="btn btn-primary" id="emailProofBtn" href="#" target="_blank" rel="noopener" onclick="goToStep(3)">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                        Email Proof of Payment
+                    </a>
+                </div>
+            </div>
+
+            <!-- ─── PANEL 3: Activate License ─── -->
+            <div class="flow-panel" id="panel3">
+                <div class="success-icon">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                </div>
+                <h3 class="success-title">Almost There!</h3>
+                <p class="success-sub">
+                    We'll verify your payment and send your license key via email within <strong>24 hours</strong> (usually much faster).<br>
+                    Once you receive it, paste it below to activate.
+                </p>
+
+                <div class="activate-card">
+                    <h2>Activate Your License</h2>
+                    <p class="activate-sub">Enter the license key you received via email.</p>
+                    <div class="activate-input-group">
+                        <input type="text" class="activate-input" id="licenseKeyInput" placeholder="SINKPESO-XXXX-XXXX-XXXX" spellcheck="false" autocomplete="off">
+                        <button class="btn btn-primary" id="activateBtn" onclick="handleActivate()">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                            Activate
+                        </button>
+                    </div>
+                    <div class="activate-msg" id="activateMsg"></div>
+                </div>
+
+                <div class="flow-actions" style="margin-top:16px">
+                    <button class="btn btn-secondary" onclick="goToStep(2)">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
+                        Back to Payment
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══ DIVIDER ═══ -->
+    <div class="container">
+        <div class="flow-divider"><span>or activate directly</span></div>
+    </div>
+
+    <!-- ═══ STANDALONE ACTIVATE (for users who already have a key) ═══ -->
+    <section class="flow-section" aria-label="Already have a key?" style="padding-top:0">
+        <div class="flow-container">
+            <div class="activate-card reveal">
+                <h2>Already Have a Key?</h2>
+                <p class="activate-sub">Paste your license key below to activate Premium instantly.</p>
+                <div class="activate-input-group">
+                    <input type="text" class="activate-input" id="licenseKeyInput2" placeholder="SINKPESO-XXXX-XXXX-XXXX" spellcheck="false" autocomplete="off">
+                    <button class="btn btn-primary" onclick="handleActivate2()">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                        Activate
+                    </button>
+                </div>
+                <div class="activate-msg" id="activateMsg2"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══ FAQ ═══ -->
+    <section class="faq-section" aria-label="FAQ">
+        <div class="container">
+            <div class="section-header reveal">
+                <div class="eyebrow">FAQ</div>
+                <h2 class="section-title">Common Questions</h2>
+            </div>
+            <div class="faq-grid">
+                <article class="faq-item reveal">
+                    <div class="faq-q" onclick="toggleFaq(this)">
+                        How long until I get my license key?
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                    </div>
+                    <div class="faq-a"><div class="faq-a-inner">We typically send your license key within 1–24 hours after payment verification. Most keys are delivered within 1 hour during business hours (9 AM – 9 PM PHT).</div></div>
+                </article>
+                <article class="faq-item reveal">
+                    <div class="faq-q" onclick="toggleFaq(this)">
+                        What payment methods do you accept?
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                    </div>
+                    <div class="faq-a"><div class="faq-a-inner">We accept GCash, Maya (PayMaya), and bank transfers (BDO, BPI, and other InstaPay-supported banks). Just send the payment and email us the screenshot or reference number.</div></div>
+                </article>
+                <article class="faq-item reveal">
+                    <div class="faq-q" onclick="toggleFaq(this)">
+                        Can I use Premium on multiple devices?
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                    </div>
+                    <div class="faq-a"><div class="faq-a-inner">SINKPESO is single-device by design — your data never leaves your device. You can re-enter your license key on a new device if you switch phones or browsers. Each license can be activated on multiple devices you own.</div></div>
+                </article>
+                <article class="faq-item reveal">
+                    <div class="faq-q" onclick="toggleFaq(this)">
+                        What if I lose my license key?
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                    </div>
+                    <div class="faq-a"><div class="faq-a-inner">No worries! Email us at sinkpeso@gmail.com with your payment details and we'll resend your key. Keep your key saved somewhere safe for future reference.</div></div>
+                </article>
+                <article class="faq-item reveal">
+                    <div class="faq-q" onclick="toggleFaq(this)">
+                        Is there a refund policy?
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                    </div>
+                    <div class="faq-a"><div class="faq-a-inner">We offer a 7-day satisfaction guarantee. If SINKPESO Premium doesn't meet your expectations, email us within 7 days of purchase for a full refund. No questions asked.</div></div>
+                </article>
             </div>
         </div>
     </section>
@@ -251,8 +1012,10 @@
                 </div>
                 <div class="footer-links">
                     <a href="index.html#features">Features</a>
-                    <a href="privacy.html">Privacy Policy</a>
                     <a href="index.html#pricing">Pricing</a>
+                    <a href="premium.html">Get Premium</a>
+                    <a href="privacy.html">Privacy Policy</a>
+                    <a href="terms.html">Terms of Service</a>
                     <a href="https://github.com/sinkpeso/sinkpeso.github.io" target="_blank" rel="noopener">GitHub</a>
                     <a href="app.html">Launch App</a>
                 </div>
@@ -270,25 +1033,142 @@
 
     <script src="license.js"></script>
     <script>
-        // Reveal animations (same as index.html)
-        (function() {
-            var els = document.querySelectorAll('.reveal');
-            var observer = new IntersectionObserver(function(entries) {
-                entries.forEach(function(entry) {
-                    if (entry.isIntersecting) {
-                        entry.target.classList.add('visible');
-                    }
-                });
-            }, { threshold: 0.1 });
-            els.forEach(function(el) { observer.observe(el); });
-        })();
+    (function() {
+        "use strict";
 
-        function handleActivate() {
+        // ── State ──────────────────────────────────────────────
+        var selectedPlan = 'lifetime';
+        var selectedMethod = 'gcash';
+        var currentStep = 1;
+
+        // Plan data
+        var PLANS = {
+            monthly:  { price: 49,  label: 'Monthly',  amount: '&#8369;49'  },
+            annual:   { price: 149, label: 'Annual',   amount: '&#8369;149' },
+            lifetime: { price: 299, label: 'Lifetime', amount: '&#8369;299' }
+        };
+
+        // Payment details config
+        var PAY_CONFIG = {
+            gcashNumber: '0953-680-5795',
+            gcashName: 'KRISTIAN BAILO',
+            email: 'kristian.pajudzki@gmail.com'
+        };
+
+        // ── Plan Selection ─────────────────────────────────────
+        window.selectPlan = function(el) {
+            document.querySelectorAll('.plan-option').forEach(function(p) {
+                p.classList.remove('selected');
+            });
+            el.classList.add('selected');
+            selectedPlan = el.getAttribute('data-plan');
+            updateAmounts();
+        };
+
+        function updateAmounts() {
+            var plan = PLANS[selectedPlan];
+            document.getElementById('summaryPlan').textContent = plan.label;
+            document.getElementById('summaryPrice').innerHTML = plan.amount;
+            // Update all amount displays
+            ['gcashAmount', 'maribankAmount', 'hellomoneyAmount', 'pnbAmount'].forEach(function(id) {
+                var el = document.getElementById(id);
+                if (el) el.innerHTML = plan.amount;
+            });
+            updateEmailLink();
+        }
+
+        // ── Payment Method Selection ───────────────────────────
+        var DETAIL_IDS = {
+            gcash: 'detailGcash',
+            maribank: 'detailMaribank',
+            hellomoney: 'detailHellomoney',
+            pnb: 'detailPnb'
+        };
+        window.selectMethod = function(el) {
+            document.querySelectorAll('.pay-method').forEach(function(m) {
+                m.classList.remove('selected');
+            });
+            el.classList.add('selected');
+            selectedMethod = el.getAttribute('data-method');
+
+            // Show/hide payment details
+            Object.keys(DETAIL_IDS).forEach(function(key) {
+                var detailEl = document.getElementById(DETAIL_IDS[key]);
+                if (detailEl) detailEl.style.display = key === selectedMethod ? '' : 'none';
+            });
+        };
+
+        // ── Step Navigation ────────────────────────────────────
+        window.goToStep = function(step) {
+            currentStep = step;
+
+            // Update panels
+            for (var i = 1; i <= 3; i++) {
+                var panel = document.getElementById('panel' + i);
+                if (panel) {
+                    panel.classList.toggle('active', i === step);
+                }
+            }
+
+            // Update step indicators
+            document.querySelectorAll('.step-dot').forEach(function(dot) {
+                var s = parseInt(dot.getAttribute('data-step'));
+                dot.classList.remove('active', 'done');
+                if (s === step) dot.classList.add('active');
+                else if (s < step) dot.classList.add('done');
+            });
+
+            document.querySelectorAll('.step-line').forEach(function(line) {
+                var l = parseInt(line.getAttribute('data-line'));
+                line.classList.toggle('done', l < step);
+            });
+
+            document.querySelectorAll('.step-label').forEach(function(label) {
+                var s = parseInt(label.getAttribute('data-step'));
+                label.classList.toggle('active', s === step);
+            });
+
+            // Scroll to top of flow
+            document.querySelector('.flow-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        };
+
+        // ── Email Proof Link ───────────────────────────────────
+        function updateEmailLink() {
+            var plan = PLANS[selectedPlan];
+            var methodNames = { gcash: 'GCash', maribank: 'Maribank', hellomoney: 'Hello Money (AUB)', pnb: 'PNB' };
+            var subject = 'SINKPESO Premium - ' + plan.label + ' (₱' + plan.price + ')';
+            var body = 'Hi SINKPESO,\n\n' +
+                'I just sent my payment for SINKPESO Premium.\n\n' +
+                'Plan: ' + plan.label + ' (₱' + plan.price + ')\n' +
+                'Payment Method: ' + methodNames[selectedMethod] + '\n' +
+                'Reference/Transaction #: [Please paste your reference number here]\n\n' +
+                'I\'ve attached a screenshot of my payment proof.\n\n' +
+                'Thank you!';
+
+            var href = 'mailto:' + PAY_CONFIG.email +
+                '?subject=' + encodeURIComponent(subject) +
+                '&body=' + encodeURIComponent(body);
+
+            var btn = document.getElementById('emailProofBtn');
+            if (btn) btn.setAttribute('href', href);
+        }
+
+        // ── Copy to clipboard ──────────────────────────────────
+        window.copyText = function(text, el) {
+            navigator.clipboard.writeText(text).then(function() {
+                var orig = el.innerHTML;
+                // Brief visual feedback
+                el.style.opacity = '0.5';
+                setTimeout(function() { el.style.opacity = ''; }, 300);
+            });
+        };
+
+        // ── License Activation (step 3 panel) ──────────────────
+        window.handleActivate = function() {
             var input = document.getElementById('licenseKeyInput');
             var msg = document.getElementById('activateMsg');
             var key = input.value.trim();
 
-            // Clear previous state
             msg.className = 'activate-msg';
             msg.innerHTML = '';
 
@@ -311,26 +1191,91 @@
                 msg.className = 'activate-msg error';
                 msg.innerHTML = '<p>&#10007; ' + result.message + '</p>';
             }
-        }
+        };
 
-        // Allow Enter key to activate
-        document.getElementById('licenseKeyInput').addEventListener('keydown', function(e) {
-            if (e.key === 'Enter') {
-                handleActivate();
+        // ── License Activation (standalone section) ─────────────
+        window.handleActivate2 = function() {
+            var input = document.getElementById('licenseKeyInput2');
+            var msg = document.getElementById('activateMsg2');
+            var key = input.value.trim();
+
+            msg.className = 'activate-msg';
+            msg.innerHTML = '';
+
+            if (!key) {
+                msg.className = 'activate-msg error';
+                msg.innerHTML = '<p>Please enter a license key.</p>';
+                return;
+            }
+
+            var result = window.license.activate(key);
+
+            if (result.ok) {
+                msg.className = 'activate-msg success';
+                msg.innerHTML =
+                    '<p>&#10003; ' + result.message + '</p>' +
+                    '<p>Premium is now active! Reload the app to unlock all features.</p>' +
+                    '<a href="app.html" class="btn btn-primary" style="margin-top:8px">Open SINKPESO</a>';
+                input.value = '';
+            } else {
+                msg.className = 'activate-msg error';
+                msg.innerHTML = '<p>&#10007; ' + result.message + '</p>';
+            }
+        };
+
+        // ── FAQ Toggle ─────────────────────────────────────────
+        window.toggleFaq = function(el) {
+            var item = el.parentElement;
+            item.classList.toggle('open');
+        };
+
+        // ── Enter key support ──────────────────────────────────
+        ['licenseKeyInput', 'licenseKeyInput2'].forEach(function(id) {
+            var el = document.getElementById(id);
+            if (el) {
+                el.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter') {
+                        if (id === 'licenseKeyInput') handleActivate();
+                        else handleActivate2();
+                    }
+                });
             }
         });
 
-        // Pre-fill if there's already a stored license
+        // ── Pre-fill existing license ──────────────────────────
         (function() {
             var stored = window.license.getStoredLicense();
             if (stored) {
-                var input = document.getElementById('licenseKeyInput');
-                input.value = stored;
-                var msg = document.getElementById('activateMsg');
-                msg.className = 'activate-msg success';
-                msg.innerHTML = '<p>&#10003; Premium license is already active on this device.</p>';
+                ['licenseKeyInput', 'licenseKeyInput2'].forEach(function(id) {
+                    var input = document.getElementById(id);
+                    if (input) input.value = stored;
+                });
+                ['activateMsg', 'activateMsg2'].forEach(function(id) {
+                    var msg = document.getElementById(id);
+                    if (msg) {
+                        msg.className = 'activate-msg success';
+                        msg.innerHTML = '<p>&#10003; Premium license is already active on this device.</p>';
+                    }
+                });
             }
         })();
+
+        // ── Reveal animations ──────────────────────────────────
+        (function() {
+            var els = document.querySelectorAll('.reveal');
+            var observer = new IntersectionObserver(function(entries) {
+                entries.forEach(function(entry) {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    }
+                });
+            }, { threshold: 0.1 });
+            els.forEach(function(el) { observer.observe(el); });
+        })();
+
+        // Initialize
+        updateAmounts();
+    })();
     </script>
 </body>
 </html>
