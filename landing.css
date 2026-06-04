@@ -158,6 +158,15 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 }
 .nav-links a:hover { color: var(--text); background: rgba(255,255,255,0.04); }
 .nav-links .btn-primary { margin-left: 8px; padding: 8px 18px; font-size: 13px; color: #0A0F16; font-weight: 700; }
+.nav-github {
+    color: var(--text-secondary);
+    display: inline-flex;
+    align-items: center;
+    padding: 6px;
+    border-radius: var(--r-sm);
+    transition: color 0.2s ease;
+}
+.nav-github:hover { color: var(--text); }
 
 /* ── SECTION 1: HERO ── */
 .hero {
@@ -1011,6 +1020,9 @@ footer {
     .comp-table thead th, .comp-table tbody td { padding: 10px 8px; }
     .pricing-grid { grid-template-columns: 1fr; max-width: 440px; }
     .data-faq { grid-template-columns: 1fr; }
+}
+@media (max-width: 640px) {
+    .nav-github { display: none; }
 }
 @media (max-width: 768px) {
     :root { --section: 80px; }
