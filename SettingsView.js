@@ -342,28 +342,110 @@
                     ),
 
                     e(SettingGroup, { title: "Premium License", icon: "shield" },
-                        e('p', { style: { fontSize:13, color:"var(--text-muted)", marginBottom:16, lineHeight:1.5 } },
-                            window.license.isPremium()
-                                ? "Premium active. All features unlocked."
-                                : "Enter a license key to unlock premium features."
+                        // ── PREMIUM ACTIVE STATE ──
+                        window.license.isPremium() && e('div', null,
+                            // Green badge
+                            e('div', { style: {
+                                display: "inline-flex", alignItems: "center", gap: 8,
+                                background: "rgba(0,230,118,0.1)", border: "1px solid rgba(0,230,118,0.25)",
+                                borderRadius: 8, padding: "8px 14px", marginBottom: 16
+                            } },
+                                e(Icon, { name: "shield", size: 14, color: "#00E676" }),
+                                e('span', { style: { fontSize: 13, fontWeight: 700, color: "#00E676" } }, "Premium Active")
+                            ),
+                            // Masked license key
+                            (() => {
+                                var stored = window.license.getStoredLicense() || "";
+                                var masked = stored;
+                                if (stored.length >= 14) {
+                                    // SINKPESO-ABCD-XXXX-XXXX → SINKPESO-ABCD-••••-••••
+                                    masked = stored.slice(0, 14) + "••••-" + stored.slice(19).replace(/[A-Z0-9]/g, "•");
+                                }
+                                return e('div', { style: { fontSize: 13, color: "var(--text-muted)", marginBottom: 16, fontFamily: "'DM Mono', monospace", letterSpacing: "0.03em" } },
+                                    masked
+                                );
+                            })(),
+                            // Unlocked features
+                            e('div', { style: { display: "flex", flexDirection: "column", gap: 8, marginBottom: 16 } },
+                                ["Unlimited wallets & vaults", "Encrypted backups", "Recurring expenses", "PDF reports", "Multi-currency display"].map(function(f) {
+                                    return e('div', { key: f, style: { display: "flex", alignItems: "center", gap: 8, fontSize: 13 } },
+                                        e(Icon, { name: "shield", size: 14, color: "#00E676" }),
+                                        e('span', { style: { color: "var(--text-main)" } }, f)
+                                    );
+                                })
+                            ),
+                            // Remove License link
+                            e('button', {
+                                onClick: function() {
+                                    if (confirm("Remove your license? Premium features will be locked.")) {
+                                        window.license.deactivate();
+                                        showToast("License removed. Reloading...");
+                                        setTimeout(function() { window.location.reload(); }, 800);
+                                    }
+                                },
+                                style: {
+                                    background: "none", border: "none", color: "var(--text-muted)",
+                                    fontSize: 12, cursor: "pointer", textDecoration: "underline",
+                                    padding: 0, fontFamily: "inherit"
+                                }
+                            }, "Remove License")
                         ),
-                        window.license.isPremium()
-                            ? e('div', null,
-                                e('div', { style: { display:"flex", flexDirection:"column", gap:8, marginBottom:16 } },
-                                    ["Unlimited wallets & vaults", "Encrypted backups", "Recurring expenses", "PDF reports", "Multi-currency display"].map(f =>
-                                        e('div', { key: f, style: { display:"flex", alignItems:"center", gap:8, fontSize:13 } },
-                                            e(Icon, { name:"shield", size:14, color:"#00E676" }),
-                                            e('span', { style: { color:"var(--text-main)" } }, f)
-                                        )
-                                    )
-                                ),
-                                e(Btn, { v:"ghost", style: { width:"100%" }, onClick: () => {
-                                    window.license.deactivate();
-                                    showToast("License removed. Reload to apply.");
-                                    setTimeout(() => window.location.reload(), 1000);
-                                } }, "Remove License")
+
+                        // ── FREE PLAN STATE ──
+                        !window.license.isPremium() && e('div', null,
+                            // Free plan banner
+                            e('div', { style: {
+                                display: "flex", alignItems: "center", gap: 10,
+                                background: "rgba(245,158,11,0.08)", border: "1px solid rgba(245,158,11,0.2)",
+                                borderRadius: 10, padding: "12px 14px", marginBottom: 16
+                            } },
+                                e(Icon, { name: "lock", size: 14, color: "#F59E0B" }),
+                                e('span', { style: { fontSize: 13, fontWeight: 700, color: "#F59E0B" } }, "You're on the Free Plan")
+                            ),
+                            // Locked features list
+                            e('div', { style: { display: "flex", flexDirection: "column", gap: 6, marginBottom: 20 } },
+                                (() => {
+                                    var saved = window.persistence.loadState();
+                                    var walletCount = (saved.wallets || []).length;
+                                    var vaultCount = (saved.funds || []).length;
+                                    var limits = window.license.getLimits();
+                                    return [
+                                        { name: "Unlimited Wallets", locked: limits.wallets !== Infinity, detail: "you have " + walletCount + "/" + limits.wallets },
+                                        { name: "Unlimited Vaults", locked: limits.vaults !== Infinity, detail: "you have " + vaultCount + "/" + limits.vaults },
+                                        { name: "Encrypted Backups", locked: !limits.encryptedBackup, detail: null },
+                                        { name: "Recurring Expenses", locked: !limits.recurring, detail: null },
+                                        { name: "PDF Reports", locked: !limits.pdfExport, detail: null },
+                                    ].map(function(f) {
+                                        return e('div', { key: f.name, style: { display: "flex", alignItems: "center", gap: 10, fontSize: 13, color: "var(--text-muted)" } },
+                                            e(Icon, { name: "lock", size: 13, color: f.locked ? "var(--text-muted)" : "#00E676" }),
+                                            e('span', null,
+                                                f.name,
+                                                f.detail && f.locked ? e('span', { style: { opacity: 0.6 } }, " (" + f.detail + ")") : null
+                                            )
+                                        );
+                                    });
+                                })()
+                            ),
+                            // Upgrade CTA
+                            e('a', {
+                                href: "premium.html",
+                                style: {
+                                    display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                                    width: "100%", padding: "12px 16px", marginBottom: 16,
+                                    background: "#00E676", color: "#020810",
+                                    borderRadius: 10, fontSize: 14, fontWeight: 700,
+                                    textDecoration: "none", textAlign: "center",
+                                    transition: "all 0.15s"
+                                }
+                            },
+                                "Upgrade to Premium →"
+                            ),
+                            // Divider
+                            e('div', { style: { borderTop: "1px solid var(--border)", paddingTop: 16, marginTop: 2 } },
+                                e(SLabel, { style: { marginBottom: 10 } }, "Already have a key?"),
+                                e(LicenseInput, { showToast })
                             )
-                            : e(LicenseInput, { showToast })
+                        )
                     ),
 
                     e(SettingGroup, { title: "Storage Usage", icon: "inbox" },
