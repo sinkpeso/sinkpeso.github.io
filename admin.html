@@ -320,8 +320,40 @@
     </div>
 
     <script>
+        // ── Constants (mirrored from license.js) ──────────────────────────
         const STORAGE_KEY = 'sp_license_history';
+        const SECRET = "SP2024FINTECH";
+        const VALID_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 
+        // ── Simple hash function (verbatim from license.js) ───────────────
+        function simpleHash(str) {
+            var hash = 0;
+            for (var i = 0; i < str.length; i++) {
+                var char = str.charCodeAt(i);
+                hash = ((hash << 5) - hash) + char;
+                hash = hash & hash;
+            }
+            return Math.abs(hash).toString(36);
+        }
+
+        // ── Checksum validation (mirrors validateKey in license.js) ───────
+        // Computes hmacHash = simpleHash(SECRET + code), sums HMAC chars
+        // into hmacSum, sums code chars into charSum, returns true if
+        // (charSum + hmacSum) % 13 === 0
+        function isValidChecksum(code) {
+            var hmacHash = simpleHash(SECRET + code);
+            var hmacSum = 0;
+            for (var j = 0; j < hmacHash.length; j++) {
+                hmacSum += hmacHash.charCodeAt(j);
+            }
+            var charSum = 0;
+            for (var k = 0; k < code.length; k++) {
+                charSum += code.charCodeAt(k);
+            }
+            return (charSum + hmacSum) % 13 === 0;
+        }
+
+        // ── History helpers ────────────────────────────────────────────────
         function getHistory() {
             try {
                 return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
@@ -334,17 +366,26 @@
             localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
         }
 
+        // ── Key generation (brute-forces the 12th char) ───────────────────
         function generateKey() {
-            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
             let code = '';
 
-            // Generate 12 valid characters
+            // Keep generating prefixes until we find one where a valid 12th char exists
             do {
-                code = '';
-                for (let i = 0; i < 12; i++) {
-                    code += chars[Math.floor(Math.random() * chars.length)];
+                let prefix = '';
+                for (let i = 0; i < 11; i++) {
+                    prefix += VALID_CHARS[Math.floor(Math.random() * VALID_CHARS.length)];
                 }
-            } while (!isValidChecksum(code));
+
+                // Brute-force the 12th character so the full code passes isValidChecksum
+                for (let c = 0; c < VALID_CHARS.length; c++) {
+                    const candidate = prefix + VALID_CHARS[c];
+                    if (isValidChecksum(candidate)) {
+                        code = candidate;
+                        break;
+                    }
+                }
+            } while (code === '');
 
             const key = `SINKPESO-${code.slice(0, 4)}-${code.slice(4, 8)}-${code.slice(8, 12)}`;
 
@@ -371,14 +412,6 @@
             // Clear inputs
             document.getElementById('customerName').value = '';
             document.getElementById('customerEmail').value = '';
-        }
-
-        function isValidChecksum(code) {
-            let sum = 0;
-            for (let i = 0; i < code.length; i++) {
-                sum += code.charCodeAt(i);
-            }
-            return sum % 7 === 0;
         }
 
         function copyKey() {
