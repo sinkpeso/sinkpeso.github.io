@@ -580,10 +580,12 @@
         }
 
         /* ── Responsive ────────────────────────────────────── */
-        @media (max-width: 700px) {
+        @media (max-width: 768px) {
             .plan-grid {
                 grid-template-columns: 1fr;
                 max-width: 360px;
+                margin-left: auto;
+                margin-right: auto;
             }
             .plan-option .plan-price {
                 font-size: 30px;
@@ -593,15 +595,97 @@
             }
             .activate-input-group {
                 flex-direction: column;
+                align-items: stretch;
+            }
+            .activate-input-group .btn {
+                width: 100%;
+                max-width: none;
             }
             .activate-card {
                 padding: 28px 20px;
+                text-align: center;
             }
             .pay-detail {
-                padding: 24px 20px;
+                padding: 24px 16px;
             }
             .flow-actions {
                 flex-direction: column;
+                align-items: stretch;
+            }
+            .flow-actions .btn {
+                width: 100%;
+                max-width: none;
+                justify-content: center;
+            }
+            .pay-summary {
+                padding: 20px 16px;
+            }
+            .pay-methods {
+                gap: 10px;
+            }
+            .pay-method {
+                padding: 16px;
+                gap: 12px;
+            }
+            .pay-method-icon {
+                width: 38px; height: 38px;
+            }
+            .qr-box {
+                width: 160px; height: 160px;
+            }
+            .pay-info-row {
+                padding: 12px 0;
+                gap: 8px;
+            }
+            .pay-info-label {
+                font-size: 12px;
+                flex-shrink: 0;
+            }
+            .pay-info-value {
+                font-size: 13px;
+            }
+            .copy-inline {
+                padding: 2px 4px;
+            }
+            .pay-reminder {
+                padding: 14px 16px;
+                font-size: 12px;
+            }
+            .section-header {
+                padding: 0 8px;
+            }
+        }
+        @media (max-width: 480px) {
+            .premium-hero {
+                padding: 110px 0 40px;
+            }
+            .flow-container {
+                max-width: 100%;
+                padding: 0 4px;
+            }
+            .pay-detail {
+                padding: 20px 14px;
+            }
+            .pay-detail-header {
+                gap: 10px;
+                margin-bottom: 16px;
+            }
+            .pay-detail-icon {
+                width: 36px; height: 36px;
+            }
+            .pay-detail-title {
+                font-size: 14px;
+            }
+            .pay-info-row {
+                flex-wrap: wrap;
+                gap: 4px;
+            }
+            .pay-info-label {
+                width: 100%;
+                margin-bottom: 2px;
+            }
+            .copy-inline {
+                margin-left: auto;
             }
         }
     </style>
