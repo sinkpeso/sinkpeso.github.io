@@ -20,11 +20,12 @@
         const [openMenu, setOpenMenu] = React.useState(null);
         const [editVault, setEditVault] = React.useState(null);
         const [editVaultForm, setEditVaultForm] = React.useState({ iconId: "landmark", name: "", goal: "", start: "0" });
+        const [showUpgrade, setShowUpgrade] = React.useState(false);
 
         const handleCreateVault = () => {
             if (!form.name || !form.goal) return;
             const vaultLimit = window.license ? window.license.canAddItem("vaults", funds.length) : (funds.length < 2);
-            if (!vaultLimit) { showToast("Free limit reached (2 vaults). Upgrade to Premium for unlimited."); return; }
+            if (!vaultLimit) { setShowUpgrade(true); return; }
             setFunds([...funds, { id: uid(), iconId: form.iconId, name: form.name.trim(), goalCents: tc(form.goal), startCents: tc(form.start || "0") }]);
             setForm({ iconId: "landmark", name: "", goal: "", start: "0" }); setModal(false);
         };
@@ -61,7 +62,7 @@
                     return atLimit && !window.license?.isPremium()
                         ? e('div', { style: { display:"flex", alignItems:"center", gap:8 } },
                             e('div', { style: { fontSize:11, fontWeight:700, color:"var(--text-muted)", padding:"8px 12px", background:"var(--hover-bg)", borderRadius:8, border:"1px solid var(--border)" } }, "2/2 vaults (Free limit)"),
-                            e(Btn, { v:"ghost", style:{ fontSize:12, padding:"8px 14px" }, onClick: () => showToast("Upgrade to Premium for unlimited vaults.") }, "Upgrade")
+                            e(Btn, { v:"ghost", style:{ fontSize:12, padding:"8px 14px" }, onClick: () => setShowUpgrade(true) }, "Upgrade")
                           )
                         : e(Btn, { v: "accent", onClick: () => setModal(true) }, "+ Create New Vault");
                 })()
@@ -116,7 +117,12 @@
                     e(Btn, { v: "ghost", style: { flex: 1 }, onClick: () => { setActionModal(null); setActionWalletId(CASH_WALLET_ID); } }, "Back"),
                     e(Btn, { v: actionModal.type === 'deposit' ? 'primary' : 'danger', style: { flex: 1 }, onClick: handleLogVaultTxn }, `Commit ${actionModal.type}`)
                 )
-            ))
+            )),
+
+            showUpgrade && window.UpgradePromptModal && e(window.UpgradePromptModal, {
+                message: "You've reached the free limit of 2 vaults. Upgrade to Premium for unlimited vaults.",
+                onClose: () => setShowUpgrade(false)
+            })
         );
     }
 

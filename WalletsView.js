@@ -18,6 +18,7 @@
         const [editWallet, setEditWallet] = React.useState(null);
         const [editForm, setEditForm] = React.useState({ name: "", color: WALLET_COLORS[0] });
         const [openMenu, setOpenMenu] = React.useState(null);
+        const [showUpgrade, setShowUpgrade] = React.useState(false);
 
         const walletFlow = (wId) => {
             const inc  = (incomes || []).filter(i => i.walletId === wId).reduce((s, i) => s + i.amountCents, 0);
@@ -30,8 +31,8 @@
             if (!form.name) return;
             const canAdd = window.license ? window.license.canAddItem("wallets", rawWallets.length) : (rawWallets.length < 3);
             if (!canAdd) {
-                showToast("Free limit reached (3 wallets). Upgrade to Premium for unlimited.");
                 setModal(false);
+                setShowUpgrade(true);
                 return;
             }
             setWallets([...rawWallets, { id: uid(), name: form.name.trim(), openingBalanceCents: tc(form.balanceCents || "0"), color: form.color }]);
@@ -71,7 +72,7 @@
                     return atLimit && !window.license?.isPremium()
                         ? e('div', { style: { display:"flex", alignItems:"center", gap:8 } },
                             e('div', { style: { fontSize:11, fontWeight:700, color:"var(--text-muted)", padding:"8px 12px", background:"var(--hover-bg)", borderRadius:8, border:"1px solid var(--border)" } }, "3/3 wallets (Free limit)"),
-                            e(Btn, { v:"ghost", style:{ fontSize:12, padding:"8px 14px" }, onClick: () => showToast("Upgrade to Premium for unlimited wallets.") }, "Upgrade")
+                            e(Btn, { v:"ghost", style:{ fontSize:12, padding:"8px 14px" }, onClick: () => setShowUpgrade(true) }, "Upgrade")
                           )
                         : e(Btn, { v:"accent", onClick: () => setModal(true) }, "+ Add Wallet");
                 })()
@@ -136,7 +137,12 @@
                         e(Btn, { v:"primary", style:{flex:1}, onClick:saveEdit }, "Save")
                     )
                 )
-            )
+            ),
+
+            showUpgrade && window.UpgradePromptModal && e(window.UpgradePromptModal, {
+                message: "You've reached the free limit of 3 wallets. Upgrade to Premium for unlimited wallets.",
+                onClose: () => setShowUpgrade(false)
+            })
         );
     }
 

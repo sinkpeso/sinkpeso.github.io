@@ -225,6 +225,72 @@
         );
     }
 
+    // ── UPGRADE PROMPT MODAL ─────────────────────────────────────────────
+    function UpgradePromptModal({ message, onClose }) {
+        const Icon = window.Icon;
+        React.useEffect(() => {
+            var handler = function(ev) { if (ev.key === "Escape") onClose(); };
+            window.addEventListener("keydown", handler);
+            return function() { window.removeEventListener("keydown", handler); };
+        }, [onClose]);
+
+        return e('div', {
+            className: "modal-overlay",
+            onClick: onClose,
+            style: { zIndex: 9999 }
+        },
+            e('div', {
+                onClick: function(ev) { ev.stopPropagation(); },
+                style: {
+                    background: "var(--bg-panel)", borderRadius: 18,
+                    padding: "28px 24px", maxWidth: 360, width: "100%",
+                    border: "1px solid var(--border)",
+                    boxShadow: "0 20px 60px rgba(0,0,0,0.5)",
+                    textAlign: "center"
+                }
+            },
+                // Feature badge
+                e('div', { style: {
+                    display: "inline-flex", alignItems: "center", gap: 8,
+                    background: "rgba(0,230,118,0.1)", border: "1px solid rgba(0,230,118,0.25)",
+                    borderRadius: 8, padding: "6px 14px", marginBottom: 16
+                } },
+                    e(Icon, { name: "shield", size: 14, color: "#00E676" }),
+                    e('span', { style: { fontSize: 12, fontWeight: 700, color: "#00E676", textTransform: "uppercase", letterSpacing: "0.06em" } }, "Premium Feature")
+                ),
+                // Message
+                e('div', { style: {
+                    fontSize: 15, fontWeight: 600, color: "var(--text-main)",
+                    lineHeight: 1.5, marginBottom: 24
+                } }, message),
+                // Buttons
+                e('div', { style: { display: "flex", flexDirection: "column", gap: 8 } },
+                    e('a', {
+                        href: "premium.html",
+                        style: {
+                            display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                            padding: "12px 20px",
+                            background: "#00E676", color: "#020810",
+                            borderRadius: 10, fontSize: 14, fontWeight: 700,
+                            textDecoration: "none", textAlign: "center",
+                            transition: "all 0.15s"
+                        }
+                    }, "Upgrade — ₱299 lifetime"),
+                    e('button', {
+                        onClick: onClose,
+                        style: {
+                            padding: "10px 20px",
+                            background: "transparent", border: "1px solid var(--border)",
+                            borderRadius: 10, fontSize: 13, fontWeight: 600,
+                            color: "var(--text-muted)", cursor: "pointer",
+                            fontFamily: "inherit", transition: "all 0.15s"
+                        }
+                    }, "Not now")
+                )
+            )
+        );
+    }
+
     // ── QUICK ADD MODAL ────────────────────────────────────────────────────
     function QuickAddModal({ onSave, onClose, wallets, setWallets, fc }) {
         const Icon = window.Icon;
@@ -385,6 +451,7 @@
     window.WalletPicker = WalletPicker;
     window.IncomeSourcePicker = IncomeSourcePicker;
     window.LicenseInput = LicenseInput;
+    window.UpgradePromptModal = UpgradePromptModal;
     window.QuickAddModal = QuickAddModal;
     window.PinScreen = PinScreen;
     window.ErrorBoundary = ErrorBoundary;

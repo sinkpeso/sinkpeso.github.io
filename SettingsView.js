@@ -103,6 +103,7 @@
     function SettingsView({ settings, setSettings, setIncomes, setBills, setDailyExpenses, setFunds, setTxns, setArchives, setBudgets, showToast, totals, bills, budgets, fc }) {
         const safeSettings = settings || {};
         const [pinInput, setPinInput] = React.useState(safeSettings?.pin || '');
+        const [upgradeMsg, setUpgradeMsg] = React.useState(null);
 
         const handleExport = async () => {
             const keys = window.persistence.getAllRawKeys();
@@ -131,7 +132,8 @@
             const password = prompt("Set a password to encrypt backup (leave blank for unencrypted):");
             let blob;
             if (password && !window.license.canUseFeature("encryptedBackup")) {
-                showToast("Encrypted backups require Premium. Exporting unencrypted.");
+                setUpgradeMsg("This is a Premium feature. Unlock encrypted backups with a one-time payment of ₱299.");
+                return;
             }
             if (password && window.license.canUseFeature("encryptedBackup")) {
                 const enc = new TextEncoder();
@@ -474,7 +476,11 @@
                         )
                     )
                 )
-            )
+            ),
+            upgradeMsg && window.UpgradePromptModal && e(window.UpgradePromptModal, {
+                message: upgradeMsg,
+                onClose: function() { setUpgradeMsg(null); }
+            })
         );
     }
 
