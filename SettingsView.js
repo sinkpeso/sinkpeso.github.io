@@ -425,7 +425,7 @@ setUpgradeMsg("This is a Premium feature. Unlock encrypted backups with a one-ti
                                     // SINKPESO-ABCD-XXXX-XXXX → SINKPESO-ABCD-••••-••••
                                     masked = stored.slice(0, 14) + "••••-" + stored.slice(19).replace(/[A-Z0-9]/g, "•");
                                 }
-                                return e('div', { style: { fontSize: 13, color: "var(--text-muted)", marginBottom: 16, fontFamily: "'DM Mono', monospace", letterSpacing: "0.03em" } },
+                                return e('div', { style: { fontSize: 13, color: "var(--text-muted)", marginBottom: 16, fontFamily: "'SF Mono', 'Menlo', 'Consolas', monospace", letterSpacing: "0.03em" } },
                                     masked
                                 );
                             })(),

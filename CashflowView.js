@@ -244,17 +244,17 @@
 
                     // Y-axis labels
                     yLabels.map((yt, i) =>
-                        e('text', { key: "yl" + i, x: PAD_L - 8, y: yt.y + 4, textAnchor: "end", fontSize: 9, fill: "var(--text-muted)", fontFamily: "'DM Mono', monospace" }, fmtY(yt.val))
+                        e('text', { key: "yl" + i, x: PAD_L - 8, y: yt.y + 4, textAnchor: "end", fontSize: 9, fill: "var(--text-muted)", fontFamily: "'SF Mono', 'Menlo', 'Consolas', monospace" }, fmtY(yt.val))
                     ),
 
                     // X-axis labels
                     xLabels.map((xl, i) =>
-                        e('text', { key: "xl" + i, x: xl.x, y: H - 8, textAnchor: "middle", fontSize: 9, fill: "var(--text-muted)", fontFamily: "'DM Mono', monospace" }, xl.label)
+                        e('text', { key: "xl" + i, x: xl.x, y: H - 8, textAnchor: "middle", fontSize: 9, fill: "var(--text-muted)", fontFamily: "'SF Mono', 'Menlo', 'Consolas', monospace" }, xl.label)
                     ),
 
                     // Y=0 label
                     zeroY > PAD_T && zeroY < PAD_T + chartH &&
-                        e('text', { x: PAD_L - 8, y: zeroY + 4, textAnchor: "end", fontSize: 9, fill: "var(--text-muted)", fontWeight: 700, fontFamily: "'DM Mono', monospace" }, "0")
+                        e('text', { x: PAD_L - 8, y: zeroY + 4, textAnchor: "end", fontSize: 9, fill: "var(--text-muted)", fontWeight: 700, fontFamily: "'SF Mono', 'Menlo', 'Consolas', monospace" }, "0")
                 )
             ),
 

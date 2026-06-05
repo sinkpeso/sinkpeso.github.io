@@ -108,7 +108,7 @@ body.modal-open {
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { 
-    font-family: 'DM Sans', -apple-system, sans-serif; 
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
     background-color: var(--bg-body); 
     background: radial-gradient(ellipse at 50% -10%, var(--gradient-start) 0%, var(--gradient-end) 65%);
     color: var(--text-main); 
@@ -262,7 +262,7 @@ input[type="datetime-local"] {
 }
 
 .pin-screen { position: fixed; inset: 0; background: var(--bg-body); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: var(--sp-6); }
-.pin-input { font-family: 'DM Mono', monospace; font-size: 28px; letter-spacing: 14px; text-align: center; background: var(--bg-input); color: var(--text-main); border: 1px solid var(--border-input); padding: var(--sp-4); border-radius: var(--r-lg); outline: none; width: 240px; }
+.pin-input { font-family: 'SF Mono', 'Menlo', 'Consolas', monospace; font-size: 28px; letter-spacing: 14px; text-align: center; background: var(--bg-input); color: var(--text-main); border: 1px solid var(--border-input); padding: var(--sp-4); border-radius: var(--r-lg); outline: none; width: 240px; }
 
 /* ── INTERACTIVE HOVER STATES ── */
 .pin-unlock-btn:hover { background: rgba(0,230,118,0.08) !important; border-color: #00E676 !important; }
@@ -313,7 +313,7 @@ input[type="datetime-local"] {
 .sheet-row-sub { font-size: var(--t-sm); color: var(--text-muted); margin-top: 2px; }
 
 /* ── QUICK ADD FORM ── */
-.quick-add-amount { font-family: 'DM Mono', monospace; font-size: 34px; font-weight: 500; text-align: center; background: transparent; color: var(--text-main); border: none; border-bottom: 2px solid var(--border-input); padding: var(--sp-2) var(--sp-4); width: 100%; outline: none; margin-bottom: var(--sp-2); }
+.quick-add-amount { font-family: 'SF Mono', 'Menlo', 'Consolas', monospace; font-size: 34px; font-weight: 500; text-align: center; background: transparent; color: var(--text-main); border: none; border-bottom: 2px solid var(--border-input); padding: var(--sp-2) var(--sp-4); width: 100%; outline: none; margin-bottom: var(--sp-2); }
 .quick-add-amount:focus { border-bottom-color: var(--accent); }
 .cat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--sp-2); margin: var(--sp-4) 0; }
 .cat-btn { padding: 10px 6px; border: 1px solid var(--border); border-radius: var(--r-sm); background: var(--bg-input); color: var(--text-light); font-size: var(--t-sm); font-weight: 600; cursor: pointer; transition: all 0.15s; text-align: center; }

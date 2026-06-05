@@ -208,7 +208,7 @@
                     value: key,
                     onChange: ev => { setKey(ev.target.value); setError(""); },
                     onKeyDown: ev => ev.key === "Enter" && handleActivate(),
-                    style: { marginBottom: 0, fontFamily: "'DM Mono', monospace", letterSpacing: "0.05em" }
+                    style: { marginBottom: 0, fontFamily: "'SF Mono', 'Menlo', 'Consolas', monospace", letterSpacing: "0.05em" }
                 })
             ),
             error && e('div', { style: { color: "#EF4444", fontSize: 12, marginBottom: 12, fontWeight: 600 } }, error),

@@ -650,7 +650,7 @@ cash: {
             e('span', {
                 style: {
                     fontSize, fontWeight: 700, color,
-                    fontFamily: "DM Sans, -apple-system, sans-serif",
+                    fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
                     lineHeight: 1, letterSpacing: "-0.01em",
                     userSelect: "none", opacity: 0.9,
                 }
