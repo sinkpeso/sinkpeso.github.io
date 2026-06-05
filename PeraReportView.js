@@ -13,7 +13,7 @@
 (function () {
     "use strict";
     const e = React.createElement;
-    const { PageTitle, Btn, ExportPDFBtn } = window.components;
+    const { PageTitle, Btn } = window.components;
     const CATEGORIES = window.SINKPESO_CONSTANTS.CATEGORIES;
 
     // ── helpers ──────────────────────────────────────────────────────────
@@ -125,11 +125,6 @@
                 e('div', { style: { fontSize: 28, fontWeight: 800, color: personality.color, marginBottom: 8 } }, personality.label),
                 e('div', { style: { fontSize: 13, color: "var(--text-muted)", maxWidth: 320, margin: "0 auto", lineHeight: 1.5 } }, personality.sub)
             ),
-
-        // Export PDF button (premium)
-        e('div', { style: { marginBottom: 20, display: "flex", justifyContent: "flex-end" } },
-            e(ExportPDFBtn)
-        ),
 
         // Stat grid
         e('div', { style: { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 12, marginBottom: 24 } },

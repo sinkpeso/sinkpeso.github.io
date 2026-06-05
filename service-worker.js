@@ -1,4 +1,4 @@
-const CACHE_NAME = 'sinkpeso-v12';
+const CACHE_NAME = 'sinkpeso-v13';
 const ASSETS = [
   './index.html',
   './app.html',
@@ -40,6 +40,9 @@ const ASSETS = [
   './PeraReportView.js',
   './DailyReminder.js',
   './CoreComponents.js',
+  './jspdf.umd.min.js',
+  './jspdf.plugin.autotable.min.js',
+  './ReportGenerator.js',
   './react.production.min.js',
   './react-dom.production.min.js',
   './fonts/fonts.css',

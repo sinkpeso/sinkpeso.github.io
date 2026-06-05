@@ -44,6 +44,9 @@
     <script src="PeraReportView.js"></script>
     <script src="CashflowView.js"></script>
     <script src="DailyReminder.js"></script>
+    <script src="jspdf.umd.min.js"></script>
+    <script src="jspdf.plugin.autotable.min.js"></script>
+    <script src="ReportGenerator.js"></script>
 
         <link rel="apple-touch-icon" href="logosinkpeso.png">
     <link rel="icon" href="logosinkpeso.png" type="image/png">
@@ -477,8 +480,26 @@
 
                             // PDF Export button (premium only, visible on all tabs)
                             window.license && window.license.canUseFeature('pdfExport') && e('button', {
-                                onClick: window.generatePrintableReport,
-                                title: "Export PDF",
+                                onClick: function() {
+                                    if (window.generateFullReport) {
+                                        window.generateFullReport({
+                                            fc: fc,
+                                            totals: totals,
+                                            dailyExpenses: dailyExpenses,
+                                            incomes: incomes,
+                                            bills: bills,
+                                            funds: funds,
+                                            txns: txns,
+                                            wallets: displayWallets,
+                                            debts: debts,
+                                            archives: archives,
+                                            budgets: budgets
+                                        });
+                                    } else if (window.generatePrintableReport) {
+                                        window.generatePrintableReport();
+                                    }
+                                },
+                                title: "Export Full Report as PDF",
                                 style: { ...S.iconBtn, color: "var(--text-muted)" }
                             }, e('svg', { width: 16, height: 16, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round" },
                                 e('path', { d: "M6 9V2h12v7" }),
