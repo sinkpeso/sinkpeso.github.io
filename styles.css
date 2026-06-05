@@ -1176,28 +1176,46 @@ body.modal-open { overflow: hidden; position: fixed; width: 100%; }
 
 /* ── PRINT / PDF EXPORT ───────────────────────────────────────────────── */
 @media print {
-    /* Hide all app chrome (header, nav, footer, FAB) when printing */
+    /* Hide ALL app chrome — only the active tab panel prints */
     body.print-report > #root > div > div:not([role="tabpanel"]) { display: none !important; }
-    body.print-report .bottom-nav { display: none !important; }
-    body.print-report .fab { display: none !important; }
-    body.print-report header, body.print-report nav { display: none !important; }
+    body.print-report .bottom-nav,
+    body.print-report .fab,
+    body.print-report header,
+    body.print-report nav { display: none !important; }
 
-    /* Only show the tab panel content */
-    body.print-report [role="tabpanel"] { padding: 0 !important; margin: 0 !important; max-width: 100% !important; }
-
-    /* Force light background for print readability */
+    /* Reset body and tab panel for clean white print */
     body.print-report {
-        background: #fff !important; color: #111 !important;
+        background: #fff !important;
+        color: #1a1a1a !important;
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
     }
     body.print-report [role="tabpanel"] {
-        background: #fff !important; color: #111 !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        max-width: 100% !important;
+        background: #fff !important;
     }
-    body.print-report [style*="var(--text-main)"] { color: #111 !important; }
-    body.print-report [style*="var(--text-muted)"] { color: #555 !important; }
 
-    /* Hide all buttons when printing (export button, filters, etc.) */
+    /* Force readable text colors on ALL descendants */
+    body.print-report [role="tabpanel"],
+    body.print-report [role="tabpanel"] *,
+    body.print-report [role="tabpanel"] *::before,
+    body.print-report [role="tabpanel"] *::after {
+        color: #1a1a1a !important;
+        text-shadow: none !important;
+        border-color: #ddd !important;
+    }
+    /* Preserve color-coding for amounts (green = income, red = expense) */
+    body.print-report [role="tabpanel"] .txn-amount,
+    body.print-report [role="tabpanel"] [style*="color: #00E676"],
+    body.print-report [role="tabpanel"] [style*="color:#00E676"],
+    body.print-report [role="tabpanel"] [style*="color: rgb(0, 230, 118)"] { color: #16a34a !important; }
+    body.print-report [role="tabpanel"] [style*="color: #EF4444"],
+    body.print-report [role="tabpanel"] [style*="color:#EF4444"],
+    body.print-report [role="tabpanel"] [style*="color: rgb(239, 68, 68)"] { color: #dc2626 !important; }
+
+    /* Hide interactive elements */
     body.print-report button { display: none !important; }
     body.print-report select { display: none !important; }
     body.print-report input { display: none !important; }
@@ -1207,23 +1225,29 @@ body.modal-open { overflow: hidden; position: fixed; width: 100%; }
     body.print-report .bento-filter-row { display: none !important; }
     body.print-report .filter-row { display: none !important; }
 
-    /* Remove shadows and borders for cleaner print */
-    body.print-report [style*="box-shadow"] { box-shadow: none !important; }
-
     /* Ensure bento cells are visible and not clipped */
     body.print-report .bn-cell { break-inside: avoid; page-break-inside: avoid; }
     body.print-report .bn-wrap { gap: 8px !important; }
 
-    /* Transaction list: show all rows, no max-height */
+    /* Transaction list: show ALL rows, remove scroll */
     body.print-report .bento-txn-list { max-height: none !important; overflow: visible !important; }
 
-    /* Make sure SVGs print with color */
+    /* SVGs print with color */
     body.print-report svg { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 
-    /* Light mode overrides for bento cells */
+    /* Light overrides for bento cells */
     body.print-report .bn-cell {
-        background: #fff !important; border-color: #ddd !important;
+        background: #fff !important; border: 1px solid #e0e0e0 !important;
     }
     body.print-report .bn-balance { background: #fff !important; }
     body.print-report .bn-orb { display: none !important; }
+
+    /* Branded print header */
+    .print-branded-header { display: block !important; }
+
+    /* Print-friendly page setup */
+    @page {
+        margin: 1cm;
+        size: A4 portrait;
+    }
 }

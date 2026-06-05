@@ -127,9 +127,29 @@
         if (!window.license || !window.license.canUseFeature('pdfExport')) return null;
         return e('button', {
             onClick: function() {
+                // Inject a branded print header into the active tab panel
+                var panel = document.querySelector('[role="tabpanel"]');
+                var header = null;
+                if (panel) {
+                    header = document.createElement('div');
+                    header.className = 'print-branded-header';
+                    var now = new Date();
+                    var dateStr = now.toLocaleDateString('en-PH', { month: 'long', day: 'numeric', year: 'numeric' });
+                    var timeStr = now.toLocaleTimeString('en-PH', { hour: '2-digit', minute: '2-digit' });
+                    header.innerHTML = '<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">' +
+                        '<span style="font-size:20px;font-weight:900;color:#00E676;letter-spacing:0.04em">SINKPESO</span>' +
+                        '<span style="font-size:11px;color:#888;font-weight:600">by Lodoy Goes Random</span>' +
+                        '</div>' +
+                        '<div style="font-size:10px;color:#999;border-bottom:1px solid #ddd;padding-bottom:8px">' +
+                        'Generated on ' + dateStr + ' at ' + timeStr + ' · Private · Offline · Yours</div>';
+                    panel.insertBefore(header, panel.firstChild);
+                }
                 document.body.classList.add(printClass);
                 window.print();
-                setTimeout(function() { document.body.classList.remove(printClass); }, 500);
+                setTimeout(function() {
+                    document.body.classList.remove(printClass);
+                    if (header && header.parentNode) header.parentNode.removeChild(header);
+                }, 600);
             },
             style: {
                 display: "inline-flex", alignItems: "center", gap: 6,
