@@ -144,12 +144,17 @@
                         'Generated on ' + dateStr + ' at ' + timeStr + ' · Private · Offline · Yours</div>';
                     panel.insertBefore(header, panel.firstChild);
                 }
+                var prevTheme = document.documentElement.getAttribute('data-theme');
+                document.documentElement.setAttribute('data-theme', 'light');
                 document.body.classList.add(printClass);
-                window.print();
                 setTimeout(function() {
-                    document.body.classList.remove(printClass);
-                    if (header && header.parentNode) header.parentNode.removeChild(header);
-                }, 600);
+                    window.print();
+                    setTimeout(function() {
+                        document.documentElement.setAttribute('data-theme', prevTheme || 'dark');
+                        document.body.classList.remove(printClass);
+                        if (header && header.parentNode) header.parentNode.removeChild(header);
+                    }, 600);
+                }, 100);
             },
             style: {
                 display: "inline-flex", alignItems: "center", gap: 6,
