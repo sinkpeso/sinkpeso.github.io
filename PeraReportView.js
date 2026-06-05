@@ -126,8 +126,28 @@
                 e('div', { style: { fontSize: 13, color: "var(--text-muted)", maxWidth: 320, margin: "0 auto", lineHeight: 1.5 } }, personality.sub)
             ),
 
-            // Stat grid
-            e('div', { style: { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 12, marginBottom: 24 } },
+        // Export PDF button (premium)
+        window.license && window.license.canUseFeature('pdfExport') && e('div', { style: { marginBottom: 20, display: "flex", justifyContent: "flex-end" } },
+            e(Btn, {
+                v: "ghost",
+                onClick: function() {
+                    document.body.classList.add('print-pera-report');
+                    window.print();
+                    setTimeout(function() { document.body.classList.remove('print-pera-report'); }, 500);
+                },
+                style: { fontSize: 13, display: "inline-flex", alignItems: "center", gap: 6 }
+            },
+                e('svg', { width: 14, height: 14, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round" },
+                    e('path', { d: "M6 9V2h12v7" }),
+                    e('path', { d: "M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2" }),
+                    e('rect', { x: 6, y: 14, width: 12, height: 8 })
+                ),
+                "Export PDF"
+            )
+        ),
+
+        // Stat grid
+        e('div', { style: { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 12, marginBottom: 24 } },
                 stats.map((s, i) =>
                     e('div', { key: i, style: { ...S.statCard, borderTop: "3px solid " + s.color } },
                         e('div', { style: { fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 6 } }, s.label),
