@@ -924,10 +924,15 @@ a:active { opacity: 0.8; }
 
 /* Push VirtualList rows inward from bento edges */
 .bento-txn-list > div:only-child {
-    padding: 0 16px;
+    padding: 0 20px;
 }
 .bento-txn-list > div > div > div {
     padding: 0;
+}
+
+/* Breathing space for values inside bento stream rows */
+.bento-txn-list .stream-row {
+    padding-right: 8px;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
