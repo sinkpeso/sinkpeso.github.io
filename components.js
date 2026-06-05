@@ -111,36 +111,81 @@
         var timeStr = now.toLocaleTimeString('en-PH', { hour: '2-digit', minute: '2-digit' });
         var filename = 'SINKPESO_Report_' + now.toISOString().slice(0, 10) + '.html';
 
-        // Clone the panel content
+        // Walk the live DOM and use getComputedStyle to resolve ALL colors
+        // then write them as inline styles on a clone
         var clone = panel.cloneNode(true);
 
-        // Strip non-content elements from clone (buttons, navs, filters)
-        clone.querySelectorAll('button, nav, [role="navigation"], .bento-filter, .bento-filter-row, .filter-row').forEach(function(el) {
+        // Map: live element index → clone element (parallel tree walk)
+        var liveEls = [];
+        var cloneEls = [];
+        function walkTrees(live, cloned) {
+            if (live.nodeType !== 1) return;
+            liveEls.push(live);
+            cloneEls.push(cloned);
+            var lch = live.children, cch = cloned.children;
+            for (var i = 0; i < lch.length; i++) {
+                if (i < cch.length) walkTrees(lch[i], cch[i]);
+            }
+        }
+        walkTrees(panel, clone);
+
+        // Resolve computed styles and force inline
+        for (var i = 0; i < liveEls.length; i++) {
+            var computed = window.getComputedStyle(liveEls[i]);
+            var cs = cloneEls[i].style;
+
+            // Resolve all color properties to actual values (no CSS vars)
+            cs.color = computed.color;
+            cs.backgroundColor = computed.backgroundColor;
+            cs.borderColor = computed.borderColor;
+            cs.borderTopColor = computed.borderTopColor;
+            cs.borderBottomColor = computed.borderBottomColor;
+            cs.borderLeftColor = computed.borderLeftColor;
+            cs.borderRightColor = computed.borderRightColor;
+
+            // Fix dark backgrounds → white
+            var bg = computed.backgroundColor;
+            if (bg && bg !== 'rgba(0, 0, 0, 0)' && bg !== 'transparent') {
+                // Parse rgb/rgba
+                var m = bg.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+                if (m) {
+                    var r = parseInt(m[1]), g = parseInt(m[2]), b = parseInt(m[3]);
+                    // If very dark (luminance < 40), switch to white
+                    if (r + g + b < 120) {
+                        cs.backgroundColor = '#ffffff';
+                    }
+                }
+            }
+
+            // Fix light text → dark
+            var tc = computed.color;
+            if (tc) {
+                var tm = tc.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+                if (tm) {
+                    var tr = parseInt(tm[1]), tg = parseInt(tm[2]), tb = parseInt(tm[3]);
+                    // If very light (luminance > 180), switch to dark text
+                    if (tr + tg + tb > 540) {
+                        cs.color = '#1a1a1a';
+                    }
+                }
+            }
+
+            // Strip text-shadow (neon glow doesn't print well)
+            cs.textShadow = 'none';
+            // Strip box-shadow
+            cs.boxShadow = 'none';
+            // Strip backdrop-filter
+            cs.backdropFilter = 'none';
+            // Remove radial/linear gradients on backgrounds (keep solid colors)
+            if (cs.backgroundImage && cs.backgroundImage !== 'none') {
+                cs.backgroundImage = 'none';
+            }
+        }
+
+        // Strip non-content elements from clone
+        clone.querySelectorAll('button, nav, [role="navigation"], .bento-filter, .bento-filter-row, .filter-row, .bn-orb, .fab').forEach(function(el) {
             el.remove();
         });
-
-        // Force inline light-theme styles on all elements in the clone
-        var darkBgColors = ['#0b0b14', '#0f0f1c', '#020810', '#0a0e1a', '#0d0d1a', '#080810'];
-        var lightTextColors = ['#f1f5f9', '#ffffff', '#94a3b8', '#94a3B8'];
-        function fixNode(el) {
-            if (el.nodeType !== 1) return;
-            var s = el.style;
-            // Fix backgrounds
-            var bg = (s.backgroundColor || '').toLowerCase();
-            for (var i = 0; i < darkBgColors.length; i++) {
-                if (bg.indexOf(darkBgColors[i]) >= 0) { s.backgroundColor = '#ffffff'; break; }
-            }
-            // Remove text shadow
-            s.textShadow = 'none';
-            // Fix text colors
-            var c = (s.color || '').toLowerCase();
-            for (var j = 0; j < lightTextColors.length; j++) {
-                if (c.indexOf(lightTextColors[j]) >= 0) { s.color = '#1a1a1a'; break; }
-            }
-            // Recurse
-            for (var k = 0; k < el.children.length; k++) fixNode(el.children[k]);
-        }
-        fixNode(clone);
 
         // Build standalone HTML document
         var html = '<!DOCTYPE html>\n<html lang="en">\n<head>\n' +
@@ -149,10 +194,9 @@
             '<title>SINKPESO Report — ' + dateStr + '</title>\n' +
             '<style>\n' +
             '  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #fff; color: #1a1a1a; margin: 0; padding: 24px; max-width: 800px; margin-left: auto; margin-right: auto; }\n' +
-            '  * { text-shadow: none !important; box-shadow: none !important; }\n' +
-            '  .bn-cell, .premium-panel, .bento-txn-list { background: #fff !important; border: 1px solid #e0e0e0 !important; }\n' +
-            '  .bn-balance, .bn-ring, .bn-wallet, .bn-expenses, .bn-bills, .bn-categories, .bn-unpaid { background: #fff !important; }\n' +
-            '  .bn-orb { display: none !important; }\n' +
+            '  * { box-sizing: border-box; }\n' +
+            '  .premium-panel, .bento-txn-list, .bento-filter { background: #fff !important; }\n' +
+            '  svg { -webkit-print-color-adjust: exact; print-color-adjust: exact; }\n' +
             '  @media print { body { padding: 0; } @page { margin: 1.5cm; size: A4 portrait; } }\n' +
             '</style>\n</head>\n<body>\n' +
             '<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;padding-bottom:10px;border-bottom:2px solid #00E676">' +
