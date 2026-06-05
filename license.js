@@ -34,7 +34,11 @@
         encryptedBackup: false,
         recurring: false,
         pdfExport: false,
-        multiCurrency: false
+        multiCurrency: false,
+        peraReport: false,
+        cashflowForecast: false,
+        photoDiary: 10,
+        archiveHistory: 2
     };
 
     // Valid character alphabet (no I, O, 0, 1 for clarity)
@@ -176,7 +180,11 @@
                 encryptedBackup: true,
                 recurring: true,
                 pdfExport: true,
-                multiCurrency: true
+                multiCurrency: true,
+                peraReport: true,
+                cashflowForecast: true,
+                photoDiary: Infinity,
+                archiveHistory: Infinity
             };
         }
         return FREE_LIMITS;
