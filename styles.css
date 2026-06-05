@@ -1238,8 +1238,20 @@ body.modal-open { overflow: hidden; position: fixed; width: 100%; }
     /* SVGs print with color */
     body.print-report svg { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 
+    /* Override hardcoded dark backgrounds on bento cells */
+    body.print-report .bn-cell { background: #fff !important; border-color: #e0e0e0 !important; }
+    body.print-report .bn-balance { background: #fff !important; }
+    body.print-report .bn-ring { background: #fff !important; }
+    body.print-report .bn-wallet { background: #fafafa !important; }
+    body.print-report .bn-expenses { background: #fafafa !important; }
+    body.print-report .bn-bills { background: #fafafa !important; }
+    body.print-report .bn-categories { background: #fafafa !important; }
+    body.print-report .bn-unpaid { background: #fff !important; }
     /* Hide ambient glow orb */
     body.print-report .bn-orb { display: none !important; }
+    /* Override inline dark gradients on balance card */
+    body.print-report .balance-gradient-card { background: #fff !important; border-color: #ddd !important; }
+    body.print-report .balance-gradient-card::before { display: none !important; }
 
     /* Branded print header */
     .print-branded-header { display: block !important; }
