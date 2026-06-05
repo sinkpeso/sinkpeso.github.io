@@ -232,7 +232,7 @@
             const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8" });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a'); a.href = url; a.download = `sinkpeso_export_${todayStr()}.csv`; a.click();
-            showToast("✓ CSV exported!");
+            showToast(" CSV exported!");
         };
 
         const SettingGroup = window.SettingGroup;
@@ -313,11 +313,11 @@
                             if (pinInput) {
                                 window.hashPin(pinInput).then(function (hashed) {
                                     setSettings({...settings, pin: hashed});
-                                    showToast("✓ PIN saved.");
+                                    showToast(" PIN saved.");
                                 });
                             } else {
                                 setSettings({...settings, pin: ""});
-                                showToast("✓ PIN removed.");
+                                showToast(" PIN removed.");
                             }
                         } }, pinInput ? "Save PIN" : "Remove PIN")
                     )

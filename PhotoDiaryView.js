@@ -111,7 +111,7 @@
             setPhotoDiary(prev => [entry, ...prev]);
             window.finance.processFinancialTransaction({ type: "expense", walletId: form.walletId, amountCents: amtCents, wallets, setWallets });
             resetForm();
-            showToast("✓ Photo expense saved!");
+            showToast(" Photo expense saved!");
         };
 
         const handleDelete = (entry) => {

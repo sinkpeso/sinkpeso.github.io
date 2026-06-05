@@ -194,7 +194,7 @@
             if (!key.trim()) { setError("Please enter a license key."); return; }
             var result = window.license.activate(key);
             if (result.ok) {
-                showToast("✓ Premium activated!");
+                showToast(" Premium activated!");
                 setTimeout(() => window.location.reload(), 1000);
             } else {
                 setError(result.message);

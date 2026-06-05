@@ -39,7 +39,7 @@
                         if (existing) setBudgets(budgets.map(b => b.id === existing.id ? { ...b, limitCents: tc(limitAmt) } : b));
                         else setBudgets([...budgets, { id: uid(), category, limitCents: tc(limitAmt) }]);
                         setLimitAmt("");
-                        showToast("✓ Budget limit saved!");
+                        showToast(" Budget limit saved!");
                     } }, "Save Limit")
                 )
             ),

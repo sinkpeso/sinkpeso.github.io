@@ -117,7 +117,7 @@
             // ── PHOTO DIARY STRIP (when entries exist) ─────────────────────
             recentPhotos.length > 0 && e('div', { className: 'pd-strip-section' },
                 e('div', { style: { display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:10 } },
-                    e('div', { style:{ fontSize:11, fontWeight:700, letterSpacing:'0.08em', textTransform:'uppercase', color:'var(--text-muted)' } }, '📷 Recent Moments'),
+                    e('div', { style:{ fontSize:11, fontWeight:700, letterSpacing:'0.08em', textTransform:'uppercase', color:'var(--text-muted)' } }, ' Recent Moments'),
                     onNavigate && e('button', { onClick:() => onNavigate('photo-diary'), style:{ background:'transparent', border:'none', color:'var(--text-muted)', fontSize:11, fontWeight:600, cursor:'pointer', padding:0, letterSpacing:'0.02em' } }, 'View all →')
                 ),
                 e('div', { className: 'pd-strip' },

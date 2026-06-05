@@ -386,7 +386,7 @@
                     return { ...b, isPaid: false, paidTxnId: null, paidWalletId: null, dueDate: nextDue };
                 }));
                 setShowCloseModal(false);
-                showToast("✓ Month archived. Fresh start!");
+                showToast("Month archived. Fresh start!");
             };
 
             return e('div', null,
@@ -545,7 +545,7 @@ e('footer', {
                         backdropFilter: "blur(8px)"
                     },
                     role: "status", "aria-live": "polite"
-                }, "📡 You're offline — all features work normally. Data is saved locally."),
+                }, e('span', { style: { display: "inline-flex", alignItems: "center", gap: 8 } }, e('svg', { width: 16, height: 16, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round" }, e('path', { d: "M5 12.55a11 11 0 0114.08 0" }), e('path', { d: "M1.42 9a16 16 0 0121.16 0" }), e('path', { d: "M8.53 16.11a6 6 0 016.95 0" }), e('circle', { cx: "12", cy: "20", r: "1" })), 'You\'re offline — all features work normally. Data is saved locally.')),
 
                 // ── INSTALL BANNER ─────────────────────────────────────────────
                 showInstallBanner && deferredInstallPrompt && e('div', {
@@ -703,7 +703,7 @@ e('footer', {
                     onSave: (item) => { 
                         setDailyExpenses(prev => [item, ...prev]); 
                         setShowQuickAdd(false); 
-                        showToast("✓ Expense logged!"); 
+                        showToast("Expense logged!");
                     }, 
                     onClose: () => setShowQuickAdd(false) 
                 }),
@@ -724,7 +724,7 @@ e('footer', {
 
                         // Preserved section
                         e('div', { style: { background: "rgba(0,230,118,0.05)", border: "1px solid rgba(0,230,118,0.15)", borderRadius: 12, padding: "14px 16px", marginBottom: 10 } },
-                            e('div', { style: { fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#00E676", marginBottom: 10 } }, "✓ Preserved"),
+                            e('div', { style: { fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#00E676", marginBottom: 10, display: "flex", alignItems: "center", gap: 6 } }, e('svg', { width: 14, height: 14, viewBox: "0 0 24 24", fill: "none", stroke: "#00E676", strokeWidth: 2.5, strokeLinecap: "round", strokeLinejoin: "round" }, e('path', { d: "M22 11.08V12a10 10 0 11-5.93-9.14" }), e('path', { d: "M22 4L12 14.01l-3-3" })), "Preserved"),
                             [
                                 ["creditcard", "Wallet balances — real money, always carried forward"],
                                 ["landmark",   "Savings Vaults & vault balances"],

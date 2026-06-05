@@ -12,6 +12,9 @@
     "use strict";
     const e = React.createElement;
 
+    // Check-circle SVG path (Lucide)
+    var CHECK_CIRCLE_PATH = "M22 11.08V12a10 10 0 11-5.93-9.14 M22 4L12 14.01l-3-3";
+
     function UndoToast({ msg, undoFn, duration = 5000, onDismiss }) {
         const [timeLeft, setTimeLeft] = React.useState(duration);
         const dismissed = React.useRef(false);
@@ -41,10 +44,13 @@
 
         return e('div', {
             className: "toast",
-            style: { display: "flex", alignItems: "center", gap: 12, padding: "12px 16px" },
+            style: { display: "flex", alignItems: "center", gap: 10, padding: "12px 16px" },
             role: "alert",
             "aria-live": "polite"
         },
+            e('svg', { width: 16, height: 16, viewBox: "0 0 24 24", fill: "none", stroke: "#00E676", strokeWidth: 2.5, strokeLinecap: "round", strokeLinejoin: "round", style: { flexShrink: 0 } },
+                CHECK_CIRCLE_PATH.split(" M").map(function(seg, i) { return e('path', { key: i, d: (i === 0 ? "" : "M") + seg }); })
+            ),
             e('span', { style: { flex: 1, fontSize: 13, fontWeight: 600, color: "var(--text-main)" } }, msg),
             undoFn && e('button', {
                 onClick: handleUndo,

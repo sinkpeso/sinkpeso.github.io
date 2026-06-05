@@ -56,7 +56,7 @@ const optimal = sel.computeTotals({ incomes: [{ amountCents: 100000 }], bills: [
 assert.strictEqual(optimal.healthStatus.label, 'Optimal', 'health=Optimal');
 
 const deficit = sel.computeTotals({ incomes: [{ amountCents: 1000 }], bills: [{ amountCents: 5000, isPaid: true }], funds: [], txns: [], dailyExpenses: [] });
-assert.strictEqual(deficit.healthStatus.label, '⚠️ Deficit', 'health=Deficit');
+assert.strictEqual(deficit.healthStatus.label, ' Deficit', 'health=Deficit');
 
 // ── getWalletTotal ──
 assert.strictEqual(sel.getWalletTotal([{ balanceCents: 1000 }, { balanceCents: 2000 }]), 3000, 'wallet total');

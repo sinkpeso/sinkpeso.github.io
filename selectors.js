@@ -58,7 +58,7 @@
         const closeBillExists  = bills.some(b => !b.isPaid && getDaysRemaining(b.dueDate) <= 3);
         const spendRatio       = safeDiv(totalDailySpent, totalIncome);
 
-        if      (netAvailable < 0)                   healthStatus = { label: "⚠️ Deficit",        color: "#FF1744", bg: "rgba(255,23,68,0.09)"  };
+        if      (netAvailable < 0)                   healthStatus = { label: " Deficit",        color: "#FF1744", bg: "rgba(255,23,68,0.09)"  };
         else if (closeBillExists || unpaidBills > 0) healthStatus = { label: "Overhead Warning",  color: "#FF1744", bg: "rgba(255,23,68,0.09)"  };
         else if (spendRatio > 0.40)                  healthStatus = { label: "Caution",            color: "#FFD600", bg: "rgba(255,214,0,0.09)" };
 

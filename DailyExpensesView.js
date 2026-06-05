@@ -82,7 +82,7 @@
                 : ex
             ));
             setEditExp(null); setPendingExpense(null); setPendingEditData(null);
-            showToast("✓ Expense updated!");
+            showToast(" Expense updated!");
         };
         const commitForceEdit = () => {
             const { old, newAmt, newWalletId, editId } = pendingEditData;
@@ -114,7 +114,7 @@
             }
             commitAddExpense(rec);
             setName(""); setAmount(""); setRecurring("none");
-            showToast("✓ Expense logged!");
+            showToast(" Expense logged!");
         };
 
         // FIX #9: Extracted render function — used by both VirtualList and .map() branches

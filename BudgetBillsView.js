@@ -71,7 +71,7 @@
             if (!editIncForm.name || !editIncForm.amount) return;
             const oldRecord = incomes.find(i => i.id === editIncome.id);
             window.actions.editIncome({ incId: editIncome.id, editForm: editIncForm, oldRecord, wallets, incomes, setIncomes, setWallets });
-            setEditIncome(null); showToast("✓ Income updated!");
+            setEditIncome(null); showToast("Income updated!");
         };
         const deleteIncome = (id) => {
             const inc = incomes.find(i => i.id === id);
@@ -91,7 +91,7 @@
             // FIX #2+#4: Use functional updates for robustness. Wallet balance auto-adjusts via derived model.
             setBills(prev => prev.map(b => b.id === editBill.id ? { ...b, name: editBillForm.name.trim(), amountCents: newAmt, dueDate: editBillForm.dueDate, recurring: editBillForm.recurring, category: editBillForm.category } : b));
             setTxns(prev => prev.map(t => t.type === "bill_payment" && t.billId === editBill.id ? { ...t, amountCents: newAmt } : t));
-            setEditBill(null); showToast("✓ Bill updated!");
+            setEditBill(null); showToast("Bill updated!");
         };
         const markBillUnpaid = (bill) => {
             requestConfirm("Mark this bill as unpaid?", () => {
@@ -142,7 +142,7 @@
                             const rec = { id: uid(), name: incName.trim(), amountCents: tc(incAmt), date: todayStr(), walletId: incWalletId || null, walletNameSnapshot: incW ? incW.name : null };
                             window.actions.addIncome({ rec, wallets, setIncomes, setWallets });
                             setIncName(""); setIncAmt(""); setIncWalletId(CASH_WALLET_ID);
-                            showToast("✓ Income added!");
+                            showToast("Income added!");
                         } }, "Add Income")
                     ),
                     e(SLabel, { style: { marginBottom: 12 } }, "Income History List"),
@@ -168,7 +168,7 @@
                             e(Sel, { value: billRecurring, style: {flex: 1}, onChange: ev => setBillRecurring(ev.target.value) }, e('option', { value: "none" }, "One-Time"), e('option', { value: "monthly" }, "Monthly"), e('option', { value: "weekly" }, "Weekly")),
                             e(Sel, { value: billCat, style: {flex: 1}, onChange: ev => setBillCat(ev.target.value) }, CATEGORIES.map(c => e('option', {key: c, value: c}, c)))
                         ),
-                        e(Btn, { v: "accent", onClick: () => { if(!billName || !billAmt || !billDate) return; if(tc(billAmt) <= 0) { showToast("Amount must be greater than zero."); return; } setBills([...bills, { id: uid(), name: billName, amountCents: tc(billAmt), dueDate: billDate, isPaid: false, recurring: billRecurring, category: billCat }]); setBillName(""); setBillAmt(""); setBillDate(""); setBillRecurring("none"); showToast("✓ Bill saved!"); } }, "Save Bill Item")
+                        e(Btn, { v: "accent", onClick: () => { if(!billName || !billAmt || !billDate) return; if(tc(billAmt) <= 0) { showToast("Amount must be greater than zero."); return; } setBills([...bills, { id: uid(), name: billName, amountCents: tc(billAmt), dueDate: billDate, isPaid: false, recurring: billRecurring, category: billCat }]); setBillName(""); setBillAmt(""); setBillDate(""); setBillRecurring("none"); showToast(" Bill saved!"); } }, "Save Bill Item")
                     ),
                     e(SLabel, { style: { marginBottom: 12 } }, "Bill List Check"),
                     bills.length === 0 ? e('div', { style: { color: "var(--text-muted)", fontSize: 13, padding: "10px 0" } }, e("div", { className: "empty-state" }, e("div", { className: "empty-state-icon" }, e(Icon, { name: "receipt", size: 28, color: "var(--text-muted)" })), e("div", { className: "empty-state-title" }, "No bills yet"), e("div", { className: "empty-state-sub" }, "Track rent, utilities, subscriptions."))) :
