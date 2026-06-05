@@ -25,9 +25,15 @@
     }
 
     // ── PROGRESS BAR ──────────────────────────────────────────────────────────
-    function PBar({ pct, color = "#00E676" }) {
+    function PBar({ pct, color = "#00E676", label }) {
         const v = Math.min(1, Math.max(0, pct));
+        const pctVal = Math.round(v * 100);
         return e('div', {
+            role: "progressbar",
+            "aria-valuenow": pctVal,
+            "aria-valuemin": 0,
+            "aria-valuemax": 100,
+            "aria-label": label || "Progress: " + pctVal + "%",
             style: {
                 height: 6, background: "var(--border-input)",
                 borderRadius: 999, overflow: "hidden", marginTop: 8, marginBottom: 2
@@ -38,10 +44,12 @@
     }
 
     // ── FORM FIELD WRAPPER ────────────────────────────────────────────────────
-    function Field({ label, children }) {
+    var _fieldIdCounter = 0;
+    function Field({ label, children, htmlFor }) {
+        const id = htmlFor || ("sp-field-" + (++_fieldIdCounter));
         return e('div', { style: { marginBottom: 20 } },
-            e('div', { style: { fontSize: 12, fontWeight: 600, color: "var(--text-light)", marginBottom: 8, letterSpacing: "0.03em" } }, label),
-            children
+            e('label', { htmlFor: id, style: { fontSize: 12, fontWeight: 600, color: "var(--text-light)", marginBottom: 8, letterSpacing: "0.03em", display: "block" } }, label),
+            React.cloneElement(children, { id })
         );
     }
 
@@ -78,7 +86,8 @@
     }
 
     // ── BUTTON ────────────────────────────────────────────────────────────────
-    function Btn({ children, v = "primary", style = {}, ...p }) {
+    function Btn({ children, v = "primary", style = {}, type: typeProp, ...p }) {
+        const type = typeProp || "button";
         const vs = {
             primary: { background: "#1D4ED8", color: "#FFFFFF" },
             accent:  { background: "#00E676", color: "#020810" },
@@ -86,7 +95,7 @@
             danger:  { background: "rgba(239, 68, 68, 0.09)", color: "#EF4444", border: "1px solid rgba(239,68,68,0.18)" }
         };
         return e('button', {
-            ...p,
+            type, ...p,
             style: {
                 ...vs[v],
                 borderRadius: 10, padding: "12px 20px", fontSize: 16,

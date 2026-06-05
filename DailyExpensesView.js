@@ -13,7 +13,7 @@
 
     function InsufficientBalanceModal({ wallet, expenseAmount, fc, onCancel, onForce }) {
         return e('div', { className: "modal-overlay", onClick: onCancel, style: { zIndex: 1100 } },
-            e('div', { className: "modal-container", style: { maxWidth: 360 }, onClick: ev => ev.stopPropagation() },
+            e('div', { role: "dialog", "aria-modal": "true", "aria-label": "Insufficient Balance", className: "modal-container", style: { maxWidth: 360 }, onClick: ev => ev.stopPropagation() },
                 e('div', { style: { ...S.modalHeader, marginBottom: 16 } },
                     e('div', { style: { fontSize: 17, fontWeight: 800, color: "#EF4444" } }, "Insufficient Balance"),
                     e('button', { onClick: onCancel, style: S.closeBtn }, e(Icon, { name: "x", size: 16 }))

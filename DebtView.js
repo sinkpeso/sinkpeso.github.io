@@ -40,7 +40,7 @@
         };
 
         return e('div', { className: "modal-overlay", onClick: onClose },
-            e('div', { className: "modal-container", style: { maxWidth: 420 }, onClick: ev => ev.stopPropagation() },
+            e('div', { role: "dialog", "aria-modal": "true", "aria-label": isEdit ? "Edit Debt" : "Add New Debt", className: "modal-container", style: { maxWidth: 420 }, onClick: ev => ev.stopPropagation() },
                 e('div', { style: { ...S.modalHeader, marginBottom: 20 } },
                     e('div', { style: S.modalTitle }, isEdit ? "Edit Debt" : "Add New Debt"),
                     e('button', { onClick: onClose, style: S.closeBtn }, e(Icon, { name: "x", size: 16 }))
