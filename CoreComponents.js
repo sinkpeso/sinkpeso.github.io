@@ -215,7 +215,7 @@
             e(Btn, { v: "accent", style: { width: "100%" }, onClick: handleActivate }, "Activate Premium"),
             e('div', { style: { marginTop: 16, paddingTop: 16, borderTop: "1px solid var(--border)" } },
                 e('div', { style: { fontSize: 12, fontWeight: 700, color: "var(--text-muted)", marginBottom: 10, letterSpacing: "0.05em" } }, "PREMIUM INCLUDES"),
-                ["Unlimited wallets & vaults", "Encrypted backups", "Recurring expenses", "PDF reports", "Multi-currency display"].map(f =>
+                ["Unlimited wallets & vaults", "Unlimited photo diary", "Pera Report", "Cashflow Forecast", "Unlimited month history", "Encrypted backups", "Recurring expenses & PDF reports", "Multi-currency display"].map(f =>
                     e('div', { key: f, style: { display: "flex", alignItems: "center", gap: 8, fontSize: 12, color: "var(--text-muted)", marginBottom: 6 } },
                         e(Icon, { name: "shield", size: 12, color: "var(--text-muted)" }),
                         f
