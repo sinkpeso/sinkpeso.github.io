@@ -6,7 +6,7 @@
 (function () {
     "use strict";
     const e = React.createElement;
-    const { SLabel, ExportPDFBtn } = window.components;
+    const { SLabel } = window.components;
 
     function HistoryView({ archives, fc }) {
         const [selected, setSelected] = React.useState(null);
@@ -31,7 +31,6 @@
                 e('div', null, e('h2', { style: { fontSize: 22, fontWeight: 800 } }, 'Month History'), e('div', { style: { fontSize: 14, color: "var(--text-muted)", marginTop: 4 } }, 'Archived snapshots and trend lines.')),
                 e('div', { style: { display: "flex", alignItems: "center", gap: 12 } },
                     e('div', { style: { fontSize: 13, color: "var(--text-muted)", fontWeight: 600 } }, `${archives.length} archives`),
-                    e(ExportPDFBtn)
                 )
             ),
 

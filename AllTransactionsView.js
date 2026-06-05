@@ -8,7 +8,7 @@
     "use strict";
     const e = React.createElement;
     const { tc } = window.utils;
-    const { Field, Inp, Sel, Btn, SLabel, ExportPDFBtn } = window.components;
+    const { Field, Inp, Sel, Btn, SLabel } = window.components;
 
     function AllTransactionsView({ txns, setTxns, funds, incomes, dailyExpenses, bills, wallets, fc, requestConfirm }) {
         const [search, setSearch] = React.useState("");
@@ -50,7 +50,6 @@
                     e('h2', { style: { fontSize: 22, fontWeight: 800, marginBottom: 4 } }, 'Transaction Log'),
                     e('div', { style: { fontSize: 14, color: "var(--text-muted)", marginBottom: 20 } }, 'Full history — expenses, income, bills, and vault actions.')
                 ),
-                e(ExportPDFBtn, { style: { marginBottom: 20 } })
             ),
 
             e('div', { className: "bento-filter", style: { marginBottom: 14 } },

@@ -19,7 +19,7 @@
 (function () {
     const e = React.createElement;
     const { safeDiv, getDaysRemaining } = window.utils;
-    const { ExportPDFBtn } = window.components;
+    const {} = window.components;
     // NOTE: window.walleticons loads AFTER this file, so WalletIcon is
     // resolved lazily inside the function body — not here at IIFE time.
 
