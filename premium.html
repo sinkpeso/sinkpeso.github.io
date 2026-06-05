@@ -33,82 +33,94 @@
         .plan-select {
             padding: 0 0 40px;
         }
-        .plan-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 20px;
-            max-width: 720px;
+        .premium-price-card {
+            max-width: 480px;
             margin: 0 auto;
-        }
-        .plan-option {
             background: var(--bg-card);
-            border: 2px solid var(--border);
+            border: 2px solid rgba(34,229,122,0.2);
             border-radius: var(--r-xl);
-            padding: 32px 24px;
+            padding: 48px 40px;
             text-align: center;
-            cursor: pointer;
-            transition: all 0.25s ease;
             position: relative;
-            user-select: none;
+            box-shadow: 0 0 80px rgba(34,229,122,0.06), 0 0 200px rgba(34,229,122,0.03);
         }
-        .plan-option:hover {
-            border-color: var(--border-hover);
-            transform: translateY(-2px);
-        }
-        .plan-option.selected {
-            border-color: var(--accent);
-            box-shadow: 0 0 40px rgba(34,229,122,0.08);
-        }
-        .plan-option.selected::after {
-            content: '✓';
+        .premium-price-card::before {
+            content: '';
             position: absolute;
-            top: 12px; right: 14px;
-            width: 24px; height: 24px;
-            background: var(--accent);
-            color: var(--bg);
-            border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 13px; font-weight: 800;
+            inset: -1px;
+            border-radius: var(--r-xl);
+            padding: 1px;
+            background: linear-gradient(135deg, rgba(34,229,122,0.3), rgba(34,229,122,0.05), rgba(34,229,122,0.2));
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            pointer-events: none;
         }
-        .plan-option .plan-tag {
-            position: absolute;
-            top: -12px; left: 50%;
-            transform: translateX(-50%);
+        .premium-price-card .plan-tag {
+            display: inline-block;
             background: var(--accent);
             color: var(--bg);
             font-size: 11px;
             font-weight: 800;
-            letter-spacing: 0.06em;
+            letter-spacing: 0.08em;
             text-transform: uppercase;
-            padding: 4px 14px;
+            padding: 5px 16px;
             border-radius: 20px;
-            white-space: nowrap;
+            margin-bottom: 20px;
         }
-        .plan-option .plan-name {
-            font-size: 14px;
-            font-weight: 700;
-            color: var(--text-secondary);
-            margin-bottom: 12px;
-        }
-        .plan-option .plan-price {
-            font-size: 36px;
+        .premium-price-card .plan-price {
+            font-size: 56px;
             font-weight: 900;
             color: var(--text);
-            letter-spacing: -0.03em;
+            letter-spacing: -0.04em;
             line-height: 1;
+            margin-bottom: 4px;
         }
-        .plan-option .plan-price small {
-            font-size: 14px;
+        .premium-price-card .plan-price small {
+            font-size: 16px;
             font-weight: 600;
             color: var(--text-muted);
         }
-        .plan-option .plan-desc {
-            font-size: 12px;
-            color: var(--text-muted);
-            margin-top: 8px;
+        .premium-price-card .plan-period {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 28px;
         }
-        .plan-option.popular {
-            border-color: rgba(34,229,122,0.25);
+        .premium-price-card .plan-perks {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px 20px;
+            margin-bottom: 0;
+        }
+        .premium-price-card .plan-perk {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+        .premium-price-card .plan-perk svg {
+            color: var(--accent);
+            flex-shrink: 0;
+        }
+        @media (max-width: 768px) {
+            .premium-price-card {
+                padding: 36px 24px;
+            }
+            .premium-price-card .plan-price {
+                font-size: 44px;
+            }
+            .premium-price-card .plan-perks {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+        @media (max-width: 480px) {
+            .premium-price-card .plan-price {
+                font-size: 40px;
+            }
         }
 
         /* ── Payment Flow Steps ───────────────────────────── */
@@ -764,32 +776,24 @@
             <div class="section-header reveal">
                 <div class="eyebrow">Upgrade</div>
                 <h2 class="section-title">Unlock Full Power</h2>
-                <p class="section-sub center">Unlimited wallets, encrypted backups, PDF reports, and more. One-time or recurring — your choice.</p>
+                <p class="section-sub center">Unlimited wallets, encrypted backups, PDF reports, and more. Pay once, own forever.</p>
             </div>
         </div>
     </section>
 
-    <!-- ═══ STEP 1 — CHOOSE YOUR PLAN ═══ -->
-    <section class="plan-select" aria-label="Choose your plan">
+    <!-- ═══ PREMIUM PRICE ═══ -->
+    <section class="plan-select" aria-label="Premium pricing">
         <div class="container">
-            <div class="plan-grid">
-                <article class="plan-option reveal" data-plan="monthly" data-price="49" data-name="Monthly" onclick="selectPlan(this)">
-                    <div class="plan-name">Monthly</div>
-                    <div class="plan-price">&#8369;49<small>/mo</small></div>
-                    <div class="plan-desc">Try premium features</div>
-                </article>
-                <article class="plan-option popular reveal" data-plan="annual" data-price="149" data-name="Annual" onclick="selectPlan(this)">
-                    <div class="plan-tag">Save 74%</div>
-                    <div class="plan-name">Annual</div>
-                    <div class="plan-price">&#8369;149<small>/yr</small></div>
-                    <div class="plan-desc">Best yearly value</div>
-                </article>
-                <article class="plan-option selected reveal" data-plan="lifetime" data-price="299" data-name="Lifetime" onclick="selectPlan(this)">
-                    <div class="plan-tag">Best Value</div>
-                    <div class="plan-name">Lifetime</div>
-                    <div class="plan-price">&#8369;299<small>once</small></div>
-                    <div class="plan-desc">Pay once, own forever</div>
-                </article>
+            <div class="premium-price-card reveal">
+                <div class="plan-tag">Premium</div>
+                <div class="plan-price">&#8369;250<small> one-time</small></div>
+                <div class="plan-period">Pay once · Own forever · No subscriptions</div>
+                <div class="plan-perks">
+                    <span class="plan-perk"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Unlimited wallets</span>
+                    <span class="plan-perk"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Encrypted backups</span>
+                    <span class="plan-perk"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> PDF reports</span>
+                    <span class="plan-perk"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Lifetime updates</span>
+                </div>
             </div>
         </div>
     </section>
@@ -817,12 +821,12 @@
                 <div class="pay-summary">
                     <div class="pay-summary-row">
                         <span class="pay-summary-label">Plan</span>
-                        <span class="pay-summary-value" id="summaryPlan">Lifetime</span>
+                        <span class="pay-summary-value" id="summaryPlan">Premium</span>
                     </div>
                     <hr class="pay-summary-divider">
                     <div class="pay-summary-row pay-summary-total">
                         <span class="pay-summary-label">Total</span>
-                        <span class="pay-summary-value" id="summaryPrice">&#8369;299</span>
+                        <span class="pay-summary-value" id="summaryPrice">&#8369;250</span>
                     </div>
                 </div>
 
@@ -909,8 +913,8 @@
                     </div>
                     <div class="pay-info-row">
                         <span class="pay-info-label">Amount</span>
-                        <span class="copy-inline" onclick="copyText('299', this)">
-                            <span class="pay-info-value" id="gcashAmount" style="color:var(--accent)">&#8369;299</span>
+                        <span class="copy-inline" onclick="copyText('250', this)">
+                            <span class="pay-info-value" id="gcashAmount" style="color:var(--accent)">&#8369;250</span>
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
                         </span>
                     </div>
@@ -940,8 +944,8 @@
                     </div>
                     <div class="pay-info-row">
                         <span class="pay-info-label">Amount</span>
-                        <span class="copy-inline" onclick="copyText('299', this)">
-                            <span class="pay-info-value" id="maribankAmount" style="color:var(--accent)">&#8369;299</span>
+                        <span class="copy-inline" onclick="copyText('250', this)">
+                            <span class="pay-info-value" id="maribankAmount" style="color:var(--accent)">&#8369;250</span>
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
                         </span>
                     </div>
@@ -971,8 +975,8 @@
                     </div>
                     <div class="pay-info-row">
                         <span class="pay-info-label">Amount</span>
-                        <span class="copy-inline" onclick="copyText('299', this)">
-                            <span class="pay-info-value" id="hellomoneyAmount" style="color:var(--accent)">&#8369;299</span>
+                        <span class="copy-inline" onclick="copyText('250', this)">
+                            <span class="pay-info-value" id="hellomoneyAmount" style="color:var(--accent)">&#8369;250</span>
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
                         </span>
                     </div>
@@ -1002,8 +1006,8 @@
                     </div>
                     <div class="pay-info-row">
                         <span class="pay-info-label">Amount</span>
-                        <span class="copy-inline" onclick="copyText('299', this)">
-                            <span class="pay-info-value" id="pnbAmount" style="color:var(--accent)">&#8369;299</span>
+                        <span class="copy-inline" onclick="copyText('250', this)">
+                            <span class="pay-info-value" id="pnbAmount" style="color:var(--accent)">&#8369;250</span>
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
                         </span>
                     </div>
@@ -1173,9 +1177,7 @@
 
         // Plan data
         var PLANS = {
-            monthly:  { price: 49,  label: 'Monthly',  amount: '&#8369;49'  },
-            annual:   { price: 149, label: 'Annual',   amount: '&#8369;149' },
-            lifetime: { price: 299, label: 'Lifetime', amount: '&#8369;299' }
+            lifetime: { price: 250, label: 'Premium', amount: '&#8369;250' }
         };
 
         // Payment details config

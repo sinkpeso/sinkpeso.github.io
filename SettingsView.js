@@ -132,7 +132,7 @@
             const password = prompt("Set a password to encrypt backup (leave blank for unencrypted):");
             let blob;
             if (password && !window.license.canUseFeature("encryptedBackup")) {
-                setUpgradeMsg("This is a Premium feature. Unlock encrypted backups with a one-time payment of ₱299.");
+setUpgradeMsg("This is a Premium feature. Unlock encrypted backups with a one-time payment of ₱250.");
                 return;
             }
             if (password && window.license.canUseFeature("encryptedBackup")) {

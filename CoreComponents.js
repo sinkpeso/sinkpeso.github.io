@@ -275,7 +275,7 @@
                             textDecoration: "none", textAlign: "center",
                             transition: "all 0.15s"
                         }
-                    }, "Upgrade — ₱299 lifetime"),
+                    }, "Upgrade — ₱250"),
                     e('button', {
                         onClick: onClose,
                         style: {
