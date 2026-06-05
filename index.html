@@ -470,6 +470,322 @@
                         <span class="showcase-header-text" id="showcase-title">SINKPESO — Dashboard</span>
                         <span style="width:42px"></span>
                     </div>
+                    <div class="showcase-body">                
+                        <!-- Utang Panel -->
+                        <div class="showcase-panel" id="panel-utang" role="tabpanel" aria-labelledby="tab-utang" aria-hidden="true">
+                            <div style="width:100%">
+                                <div class="ss-grid cols-2" style="margin-bottom:16px">
+                                    <article class="ss-card">
+                                        <div class="bento-label">Utang Ko</div>
+                                        <div class="bento-value" style="color:var(--red);font-size:20px">&#8369;5,000</div>
+                                        <div class="bento-sub">2 debts</div>
+                                    </article>
+                                    <article class="ss-card">
+                                        <div class="bento-label">Utang Sa Akin</div>
+                                        <div class="bento-value green" style="font-size:20px">&#8369;3,200</div>
+                                        <div class="bento-sub">1 debt</div>
+                                    </article>
+                                </div>
+                                <div class="ss-row">
+                                    <div class="ss-row-left">
+                                        <div class="ss-row-icon" style="background:rgba(239,68,68,0.1);color:#EF4444"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg></div>
+                                        <div><div class="ss-row-name">Juan</div><div class="ss-row-cat">Utang Ko · Pending</div></div>
+                                    </div>
+                                    <div class="ss-row-amt" style="color:var(--red)">-&#8369;3,000</div>
+                                </div>
+                                <div class="ss-row">
+                                    <div class="ss-row-left">
+                                        <div class="ss-row-icon" style="background:rgba(0,230,118,0.1);color:#00E676"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg></div>
+                                        <div><div class="ss-row-name">Maria</div><div class="ss-row-cat">Utang Sa Akin · Partial</div></div>
+                                    </div>
+                                    <div class="ss-row-amt" style="color:var(--green)">+&#8369;3,200</div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Cashflow Panel -->
+                        <div class="showcase-panel" id="panel-cashflow" role="tabpanel" aria-labelledby="tab-cashflow" aria-hidden="true">
+                            <div style="width:100%">
+                                <div class="ss-grid cols-3" style="margin-bottom:16px">
+                                    <article class="ss-card">
+                                        <div class="bento-label">Current</div>
+                                        <div class="bento-value green" style="font-size:20px">&#8369;24,350</div>
+                                    </article>
+                                    <article class="ss-card">
+                                        <div class="bento-label">Avg Daily</div>
+                                        <div class="bento-value" style="color:var(--amber);font-size:20px">&#8369;270</div>
+                                    </article>
+                                    <article class="ss-card">
+                                        <div class="bento-label">Projected 30d</div>
+                                        <div class="bento-value green" style="font-size:20px">&#8369;16,250</div>
+                                    </article>
+                                </div>
+                                <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:20px;text-align:center">
+                                    <svg viewBox="0 0 300 100" style="width:100%;max-width:300px">
+                                        <defs>
+                                            <linearGradient id="cf-grad" x1="0" y1="0" x2="0" y2="1">
+                                                <stop offset="0%" stop-color="#00E676" stop-opacity="0.3"/>
+                                                <stop offset="100%" stop-color="#00E676" stop-opacity="0.02"/>
+                                            </linearGradient>
+                                        </defs>
+                                        <polygon points="10,20 50,25 90,30 130,35 170,40 210,50 250,55 290,60 290,95 10,95" fill="url(#cf-grad)"/>
+                                        <polyline points="10,20 50,25 90,30 130,35 170,40 210,50 250,55 290,60" fill="none" stroke="#00E676" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <circle cx="10" cy="20" r="3" fill="#00E676"/>
+                                        <circle cx="290" cy="60" r="3" fill="#00E676"/>
+                                        <line x1="10" y1="70" x2="290" y2="70" stroke="rgba(255,255,255,0.15)" stroke-width="0.5" stroke-dasharray="4 4"/>
+                                    </svg>
+                                    <div style="font-size:11px;color:var(--text-muted);margin-top:8px">30-day balance projection</div>
+                                </div>
+                            </div>
+                        </div>
+</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══ SECTION 5 — FEATURE BENTO ═══ -->
+    <section class="features" id="features" aria-label="Features">
+        <div class="container">
+            <div class="section-header reveal">
+                <div class="eyebrow">Features</div>
+                <h2 class="section-title">Nine tools. One app. All yours.</h2>
+                <p class="section-sub center">A complete budgeting system designed for everyday life.</p>
+            </div>
+            <div class="features-grid">
+                <article class="feat-card featured reveal">
+                    <div class="feat-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg></div>
+                    <h3>Photo Diary</h3>
+                    <p>Remember the moments behind every expense. Snap receipts, capture meals, document the "why" behind every peso spent. Build a visual timeline of your financial life.</p>
+                </article>
+                <article class="feat-card reveal">
+                    <div class="feat-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg></div>
+                    <h3>Wallet Tracking</h3>
+                    <p>Separate your BDO savings, GCash, and daily cash into individual wallets. Always know exactly which pocket has what — without opening four apps.</p>
+                </article>
+                <article class="feat-card reveal">
+                    <div class="feat-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/></svg></div>
+                    <h3>Bills Manager</h3>
+                    <p>Meralco. PLDT. Rent. Globe postpaid. Log them once, mark them paid when done. No reminders from your landlord required.</p>
+                </article>
+                <article class="feat-card featured reveal">
+                    <div class="feat-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="22" x2="21" y2="22"/><line x1="6" y1="18" x2="6" y2="11"/><line x1="10" y1="18" x2="10" y2="11"/><line x1="14" y1="18" x2="14" y2="11"/><line x1="18" y1="18" x2="18" y2="11"/><polygon points="12 2 20 7 4 7"/></svg></div>
+                    <h3>Savings Vaults</h3>
+                    <p>Create dedicated funds for future goals. Emergency fund, travel, gadgets. Track progress visually and stay motivated with every peso you save.</p>
+                </article>
+                <article class="feat-card reveal">
+                    <div class="feat-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg></div>
+                    <h3>Transaction Timeline</h3>
+                    <p>Scroll back to any day and see exactly what you spent, where, and from which wallet. Filter by Food, Transport, Bills, or any custom category.</p>
+                </article>
+                <article class="feat-card reveal">
+                    <div class="feat-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1l22 22"/><path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"/><path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"/><path d="M10.71 5.05A16 16 0 0 1 22.56 9"/><path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg></div>
+                    <h3>Offline First</h3>
+                    <p>Logging your jeepney fare in a dead zone? Your groceries at the wet market? No signal needed. Every feature works, always — because nothing relies on a server.</p>
+                </article>
+                <article class="feat-card reveal">
+                    <div class="feat-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg></div>
+                    <h3>Utang Tracker</h3>
+                    <p>Track money you owe and money owed to you. Record payments, see repayment progress, and never forget an informal debt again. Built for Filipino utang culture.</p>
+                </article>
+                <article class="feat-card featured reveal">
+                    <div class="feat-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></svg></div>
+                    <h3>Quick Entry Templates</h3>
+                    <p>One-tap shortcuts for everyday expenses. Jeepney, sari-sari store, Grab — log your most common spends in seconds. Fully customizable in Settings.</p>
+                </article>
+                <article class="feat-card reveal">
+                    <div class="feat-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 6l-9.5 9.5-5-5L1 18"/><path d="M17 6h6v6"/></svg></div>
+                    <h3>Cashflow Forecast</h3>
+                    <p>See your projected balance for the next 30 days based on your spending patterns and upcoming bills. Avoid surprises before they happen.</p>
+                </article>
+                <article class="feat-card reveal">
+                    <div class="feat-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg></div>
+                    <h3>Pera Report</h3>
+                    <p>Your monthly money story. See your spending personality, top categories, biggest expense, and savings rate — all beautifully presented.</p>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══ SECTION 6 — HOW IT WORKS ═══ -->
+    <section class="how" id="how" aria-label="How It Works">
+        <div class="container">
+            <div class="section-header reveal">
+                <div class="eyebrow">How It Works</div>
+                <h2 class="section-title">Start in four simple steps</h2>
+                <p class="section-sub center">No registration. No tutorial. Just open and start building better money habits.</p>
+            </div>
+            <div class="steps">
+                <article class="step reveal reveal-d1">
+                    <div class="step-num">1</div>
+                    <h3>Add Income</h3>
+                    <p>Log your salary, freelance pay, or any money coming in.</p>
+                </article>
+                <article class="step reveal reveal-d1">
+                    <div class="step-num">2</div>
+                    <h3>Track Spending</h3>
+                    <p>Log every expense as it happens. Takes 5 seconds.</p>
+                </article>
+                <article class="step reveal reveal-d2">
+                    <div class="step-num">3</div>
+                    <h3>Capture Moments</h3>
+                    <p>Attach photos to expenses. Remember the why.</p>
+                </article>
+                <article class="step reveal reveal-d3">
+                    <div class="step-num">4</div>
+                    <h3>Reach Goals</h3>
+                    <p>Build savings. Understand habits. Grow financially.</p>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══ SECTION 7 — APP SHOWCASE ═══ -->
+    <section class="app-showcase" id="showcase" aria-label="App Preview">
+        <div class="container">
+            <div class="section-header reveal">
+                <div class="eyebrow">App Preview</div>
+                <h2 class="section-title">See SINKPESO in action</h2>
+                <p class="section-sub center">A clean, focused interface designed to help you stay on top of your money.</p>
+            </div>
+            <div class="showcase-tabs" role="tablist" aria-label="App preview tabs">
+                <button class="showcase-tab active" data-panel="dashboard" role="tab" aria-selected="true" aria-controls="panel-dashboard" id="tab-dashboard">Dashboard</button>
+                <button class="showcase-tab" data-panel="expenses" role="tab" aria-selected="false" aria-controls="panel-expenses" id="tab-expenses" tabindex="-1">Expenses</button>
+                <button class="showcase-tab" data-panel="bills" role="tab" aria-selected="false" aria-controls="panel-bills" id="tab-bills" tabindex="-1">Bills</button>
+                <button class="showcase-tab" data-panel="savings" role="tab" aria-selected="false" aria-controls="panel-savings" id="tab-savings" tabindex="-1">Savings</button>
+                <button class="showcase-tab" data-panel="diary" role="tab" aria-selected="false" aria-controls="panel-diary" id="tab-diary" tabindex="-1">Photo Diary</button>
+                <button class="showcase-tab" data-panel="utang" role="tab" aria-selected="false" aria-controls="panel-utang" id="tab-utang" tabindex="-1">Utang</button>
+                <button class="showcase-tab" data-panel="cashflow" role="tab" aria-selected="false" aria-controls="panel-cashflow" id="tab-cashflow" tabindex="-1">Forecast</button>
+            </div>
+            <div class="showcase-display reveal">
+                <div class="showcase-frame">
+                    <div class="showcase-header">
+                        <span class="mockup-dot"></span><span class="mockup-dot"></span><span class="mockup-dot"></span>
+                        <span class="showcase-header-text" id="showcase-title">SINKPESO — Dashboard</span>
+                        <span style="width:42px"></span>
+                    </div>
+                    <div class="showcase-body">
+                        <!-- Utang Panel -->
+                        <div class="showcase-panel" id="panel-utang" role="tabpanel" aria-labelledby="tab-utang" aria-hidden="true">
+                            <div style="width:100%">
+                                <div class="ss-grid cols-2" style="margin-bottom:16px">
+                                    <article class="ss-card">
+                                        <div class="bento-label">Utang Ko</div>
+                                        <div class="bento-value" style="color:var(--red);font-size:20px">&#8369;5,000</div>
+                                        <div class="bento-sub">2 debts</div>
+                                    </article>
+                                    <article class="ss-card">
+                                        <div class="bento-label">Utang Sa Akin</div>
+                                        <div class="bento-value green" style="font-size:20px">&#8369;3,200</div>
+                                        <div class="bento-sub">1 debt</div>
+                                    </article>
+                                </div>
+                                <div class="ss-row">
+                                    <div class="ss-row-left">
+                                        <div class="ss-row-icon" style="background:rgba(239,68,68,0.1);color:#EF4444"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg></div>
+                                        <div><div class="ss-row-name">Juan</div><div class="ss-row-cat">Utang Ko · Pending</div></div>
+                                    </div>
+                                    <div class="ss-row-amt" style="color:var(--red)">-&#8369;3,000</div>
+                                </div>
+                                <div class="ss-row">
+                                    <div class="ss-row-left">
+                                        <div class="ss-row-icon" style="background:rgba(0,230,118,0.1);color:#00E676"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg></div>
+                                        <div><div class="ss-row-name">Maria</div><div class="ss-row-cat">Utang Sa Akin · Partial</div></div>
+                                    </div>
+                                    <div class="ss-row-amt" style="color:var(--green)">+&#8369;3,200</div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Cashflow Panel -->
+                        <div class="showcase-panel" id="panel-cashflow" role="tabpanel" aria-labelledby="tab-cashflow" aria-hidden="true">
+                            <div style="width:100%">
+                                <div class="ss-grid cols-3" style="margin-bottom:16px">
+                                    <article class="ss-card">
+                                        <div class="bento-label">Current</div>
+                                        <div class="bento-value green" style="font-size:20px">&#8369;24,350</div>
+                                    </article>
+                                    <article class="ss-card">
+                                        <div class="bento-label">Avg Daily</div>
+                                        <div class="bento-value" style="color:var(--amber);font-size:20px">&#8369;270</div>
+                                    </article>
+                                    <article class="ss-card">
+                                        <div class="bento-label">Projected 30d</div>
+                                        <div class="bento-value green" style="font-size:20px">&#8369;16,250</div>
+                                    </article>
+                                </div>
+                                <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:20px;text-align:center">
+                                    <svg viewBox="0 0 300 100" style="width:100%;max-width:300px">
+                                        <defs>
+                                            <linearGradient id="cf-grad" x1="0" y1="0" x2="0" y2="1">
+                                                <stop offset="0%" stop-color="#00E676" stop-opacity="0.3"/>
+                                                <stop offset="100%" stop-color="#00E676" stop-opacity="0.02"/>
+                                            </linearGradient>
+                                        </defs>
+                                        <polygon points="10,20 50,25 90,30 130,35 170,40 210,50 250,55 290,60 290,95 10,95" fill="url(#cf-grad)"/>
+                                        <polyline points="10,20 50,25 90,30 130,35 170,40 210,50 250,55 290,60" fill="none" stroke="#00E676" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <circle cx="10" cy="20" r="3" fill="#00E676"/>
+                                        <circle cx="290" cy="60" r="3" fill="#00E676"/>
+                                        <line x1="10" y1="70" x2="290" y2="70" stroke="rgba(255,255,255,0.15)" stroke-width="0.5" stroke-dasharray="4 4"/>
+                                    </svg>
+                                    <div style="font-size:11px;color:var(--text-muted);margin-top:8px">30-day balance projection</div>
+                                </div>
+                            </div>
+                        </div>
+                    <!-- ═══ SECTION 6 — HOW IT WORKS ═══ -->
+    <section class="how" id="how" aria-label="How It Works">
+        <div class="container">
+            <div class="section-header reveal">
+                <div class="eyebrow">How It Works</div>
+                <h2 class="section-title">Start in four simple steps</h2>
+                <p class="section-sub center">No registration. No tutorial. Just open and start building better money habits.</p>
+            </div>
+            <div class="steps">
+                <article class="step reveal reveal-d1">
+                    <div class="step-num">1</div>
+                    <h3>Add Income</h3>
+                    <p>Log your salary, freelance pay, or any money coming in.</p>
+                </article>
+                <article class="step reveal reveal-d1">
+                    <div class="step-num">2</div>
+                    <h3>Track Spending</h3>
+                    <p>Log every expense as it happens. Takes 5 seconds.</p>
+                </article>
+                <article class="step reveal reveal-d2">
+                    <div class="step-num">3</div>
+                    <h3>Capture Moments</h3>
+                    <p>Attach photos to expenses. Remember the why.</p>
+                </article>
+                <article class="step reveal reveal-d3">
+                    <div class="step-num">4</div>
+                    <h3>Reach Goals</h3>
+                    <p>Build savings. Understand habits. Grow financially.</p>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══ SECTION 7 — APP SHOWCASE ═══ -->
+    <section class="app-showcase" id="showcase" aria-label="App Preview">
+        <div class="container">
+            <div class="section-header reveal">
+                <div class="eyebrow">App Preview</div>
+                <h2 class="section-title">See SINKPESO in action</h2>
+                <p class="section-sub center">A clean, focused interface designed to help you stay on top of your money.</p>
+            </div>
+            <div class="showcase-tabs" role="tablist" aria-label="App preview tabs">
+                <button class="showcase-tab active" data-panel="dashboard" role="tab" aria-selected="true" aria-controls="panel-dashboard" id="tab-dashboard">Dashboard</button>
+                <button class="showcase-tab" data-panel="expenses" role="tab" aria-selected="false" aria-controls="panel-expenses" id="tab-expenses" tabindex="-1">Expenses</button>
+                <button class="showcase-tab" data-panel="bills" role="tab" aria-selected="false" aria-controls="panel-bills" id="tab-bills" tabindex="-1">Bills</button>
+                <button class="showcase-tab" data-panel="savings" role="tab" aria-selected="false" aria-controls="panel-savings" id="tab-savings" tabindex="-1">Savings</button>
+                <button class="showcase-tab" data-panel="diary" role="tab" aria-selected="false" aria-controls="panel-diary" id="tab-diary" tabindex="-1">Photo Diary</button>
+                <button class="showcase-tab" data-panel="utang" role="tab" aria-selected="false" aria-controls="panel-utang" id="tab-utang" tabindex="-1">Utang</button>
+                <button class="showcase-tab" data-panel="cashflow" role="tab" aria-selected="false" aria-controls="panel-cashflow" id="tab-cashflow" tabindex="-1">Forecast</button>
+            </div>
+            <div class="showcase-display reveal">
+                <div class="showcase-frame">
+                    <div class="showcase-header">
+                        <span class="mockup-dot"></span><span class="mockup-dot"></span><span class="mockup-dot"></span>
+                        <span class="showcase-header-text" id="showcase-title">SINKPESO — Dashboard</span>
+                        <span style="width:42px"></span>
+                    </div>
                     <div class="showcase-body">
                         <!-- Dashboard Panel -->
                         <div class="showcase-panel active" id="panel-dashboard" role="tabpanel" aria-labelledby="tab-dashboard">
