@@ -26,7 +26,7 @@
             if (!form.name || !form.goal) return;
             const vaultLimit = window.license ? window.license.canAddItem("vaults", funds.length) : (funds.length < 2);
             if (!vaultLimit) { setShowUpgrade(true); return; }
-            setFunds([...funds, { id: uid(), iconId: form.iconId, name: form.name.trim(), goalCents: tc(form.goal), startCents: tc(form.start || "0") }]);
+            setFunds(prev => [...prev, { id: uid(), iconId: form.iconId, name: form.name.trim(), goalCents: tc(form.goal), startCents: tc(form.start || "0") }]);
             setForm({ iconId: "landmark", name: "", goal: "", start: "0" }); setModal(false);
         };
 
@@ -43,13 +43,13 @@
                 if (!result.ok) { showToast(result.error); return; }
             }
             const vaultW = wallets.find(w => w.id === actionWalletId);
-            setTxns([{ id: uid(), fundId: actionModal.fund.id, walletId: actionWalletId || null, walletNameSnapshot: vaultW ? vaultW.name : null, type: actionModal.type, amountCents: amtCents, date: todayStr() }, ...txns]);
+            setTxns(prev => [{ id: uid(), fundId: actionModal.fund.id, walletId: actionWalletId || null, walletNameSnapshot: vaultW ? vaultW.name : null, type: actionModal.type, amountCents: amtCents, date: todayStr() }, ...prev]);
             setActionAmt(""); setActionModal(null); setActionWalletId(CASH_WALLET_ID);
         };
 
         const openEditVault = (fund) => { setEditVault(fund); setEditVaultForm({ iconId: window.resolveVaultIcon(fund.iconId || fund.emoji), name: fund.name, goal: String((fund.goalCents / 100).toFixed(2)), start: String(((fund.startCents || 0) / 100).toFixed(2)) }); };
-        const saveEditVault = () => { if (!editVaultForm.name || !editVaultForm.goal) return; setFunds(funds.map(f => f.id === editVault.id ? { ...f, iconId: editVaultForm.iconId, name: editVaultForm.name.trim(), goalCents: tc(editVaultForm.goal), startCents: tc(editVaultForm.start || "0") } : f)); setEditVault(null); };
-        const deleteVault = (id) => { requestConfirm("Delete this vault? All linked transactions will also be removed.", () => { setFunds(funds.filter(f => f.id !== id)); setTxns(txns.filter(t => t.fundId !== id)); }); };
+        const saveEditVault = () => { if (!editVaultForm.name || !editVaultForm.goal) return; setFunds(prev => prev.map(f => f.id === editVault.id ? { ...f, iconId: editVaultForm.iconId, name: editVaultForm.name.trim(), goalCents: tc(editVaultForm.goal), startCents: tc(editVaultForm.start || "0") } : f)); setEditVault(null); };
+        const deleteVault = (id) => { requestConfirm("Delete this vault? All linked transactions will also be removed.", () => { setFunds(prev => prev.filter(f => f.id !== id)); setTxns(prev => prev.filter(t => t.fundId !== id)); }); };
 
         return e('div', null,
             e('div', { style: S.pageHeader },

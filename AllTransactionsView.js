@@ -41,8 +41,8 @@
 
         const getVaultName = (fundId) => { const f = (funds||[]).find(x => x.id === fundId); return f ? f.name : "Unknown Vault"; };
         const openEditTxn = (t) => { setEditTxn(t); setEditTxnForm({ type: t.type, amount: String((t.amountCents / 100).toFixed(2)), date: t.date }); };
-        const saveEditTxn = () => { if (!editTxnForm.amount || !editTxnForm.date) return; setTxns(txns.map(t => t.id === editTxn.id ? { ...t, type: editTxnForm.type, amountCents: tc(editTxnForm.amount), date: editTxnForm.date } : t)); setEditTxn(null); };
-        const deleteTxn = (id) => { requestConfirm("Delete this transaction?", () => setTxns(txns.filter(t => t.id !== id))); };
+        const saveEditTxn = () => { if (!editTxnForm.amount || !editTxnForm.date) return; setTxns(prev => prev.map(t => t.id === editTxn.id ? { ...t, type: editTxnForm.type, amountCents: tc(editTxnForm.amount), date: editTxnForm.date } : t)); setEditTxn(null); };
+        const deleteTxn = (id) => { requestConfirm("Delete this transaction?", () => setTxns(prev => prev.filter(t => t.id !== id))); };
 
         return e('div', null,
             e('h2', { style: { fontSize: 22, fontWeight: 800, marginBottom: 4 } }, 'Transaction Log'),

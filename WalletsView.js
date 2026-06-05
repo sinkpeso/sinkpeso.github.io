@@ -35,7 +35,7 @@
                 setShowUpgrade(true);
                 return;
             }
-            setWallets([...rawWallets, { id: uid(), name: form.name.trim(), openingBalanceCents: tc(form.balanceCents || "0"), color: form.color }]);
+            setWallets(prev => [...prev, { id: uid(), name: form.name.trim(), openingBalanceCents: tc(form.balanceCents || "0"), color: form.color }]);
             setForm({ name: "", balanceCents: "", color: WALLET_COLORS[0] });
             setModal(false);
         };
@@ -43,7 +43,7 @@
         const openEdit = (w) => { setEditWallet(w); setEditForm({ name: w.name, color: w.color || WALLET_COLORS[0] }); };
         const saveEdit = () => {
             if (!editForm.name) return;
-            setWallets(rawWallets.map(w => w.id === editWallet.id ? { ...w, name: editForm.name.trim(), color: editForm.color } : w));
+            setWallets(prev => prev.map(w => w.id === editWallet.id ? { ...w, name: editForm.name.trim(), color: editForm.color } : w));
             setEditWallet(null);
         };
 
@@ -53,7 +53,7 @@
                 showToast("This wallet still has a balance. Move or spend it first.");
                 return;
             }
-            requestConfirm("Delete this wallet?", () => setWallets(rawWallets.filter(w => w.id !== id)));
+            requestConfirm("Delete this wallet?", () => setWallets(prev => prev.filter(w => w.id !== id)));
         };
 
         const ColorPicker = ({ value, onChange }) => e('div', { style: { display:"flex", gap:8, flexWrap:"wrap", marginTop:4 } },

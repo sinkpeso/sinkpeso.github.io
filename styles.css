@@ -260,6 +260,15 @@ input[type="datetime-local"] {
 .cat-btn { padding: 10px 6px; border: 1px solid var(--border); border-radius: var(--r-sm); background: var(--bg-input); color: var(--text-light); font-size: var(--t-sm); font-weight: 600; cursor: pointer; transition: all 0.15s; text-align: center; }
 .cat-btn.selected { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
 
+/* ── REDUCED MOTION ── */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
 /* ── SAFE SPEND CHIP ── */
 .safe-chip { display: inline-flex; align-items: center; gap: var(--sp-2); background: var(--accent-dim); border: 1px solid var(--accent-border); color: var(--accent); padding: 5px 12px; border-radius: var(--sp-2); font-size: var(--t-base); font-weight: 600; margin-top: var(--sp-4); }
 
@@ -408,7 +417,7 @@ input[type="datetime-local"] {
 }
 
 /* ── GLOBAL ACTIVE STATES ── */
-button:active { transform: scale(0.97); transition: transform 0.1s; }
+.nav-btn:active, .bnav-btn:active, .fab:active, .cat-btn:active, .dot-menu-btn:active, .dot-menu-item:active, .sheet-row:active { transform: scale(0.97); transition: transform 0.1s; }
 a:active { opacity: 0.8; }
 
 /* ── TABULAR NUMS FOR MONEY ── */
@@ -499,6 +508,7 @@ a:active { opacity: 0.8; }
 
 /* ── Balance hero specifics ──────────────────────────────────────────────── */
 .bn-balance { background: linear-gradient(145deg, #0D0D1A 0%, #080810 100%); }
+[data-theme="light"] .bn-balance { background: linear-gradient(145deg, #FFFFFF 0%, #F0F4F8 100%); }
 
 /* ambient green orb */
 .bn-orb {
@@ -913,7 +923,7 @@ a:active { opacity: 0.8; }
 }
 
 /* Push VirtualList rows inward from bento edges */
-.bento-txn-list > div {
+.bento-txn-list > div:only-child {
     padding: 0 16px;
 }
 .bento-txn-list > div > div > div {
