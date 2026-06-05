@@ -30,6 +30,27 @@
 
     // ── MAIN COMPONENT ──────────────────────────────────────────────────
     function PeraReportView({ totals, dailyExpenses, incomes, bills, funds, wallets, fc }) {
+        // Premium gate
+        const [showUpgrade, setShowUpgrade] = React.useState(false);
+        if (!window.license || !window.license.canUseFeature('peraReport')) {
+            const Icon = window.Icon;
+            const Btn = window.components.Btn;
+            return React.createElement('div', null,
+                e(PageTitle, { sub: "Your monthly money story." }, "Pera Report"),
+                showUpgrade && window.UpgradePromptModal
+                    ? e(window.UpgradePromptModal, {
+                        message: "Pera Report gives you a visual monthly financial summary with spending personality, top categories, and savings insights. Upgrade to Premium to unlock.",
+                        onClose: () => setShowUpgrade(false)
+                    })
+                    : e('div', { style: { textAlign: "center", padding: "60px 20px" } },
+                        e('div', { style: { fontSize: 48, marginBottom: 16, opacity: 0.3 } }, e(Icon, { name: "chart", size: 48, color: "var(--text-muted)" })),
+                        e('div', { style: { fontSize: 16, fontWeight: 700, color: "var(--text-main)", marginBottom: 8 } }, "Pera Report"),
+                        e('div', { style: { fontSize: 13, color: "var(--text-muted)", marginBottom: 20, maxWidth: 320, margin: "0 auto 20px", lineHeight: 1.6 } }, "Your monthly money story — spending personality, top categories, biggest expense, and savings rate. A Premium feature."),
+                        e(Btn, { v: "accent", onClick: () => setShowUpgrade(true) }, "Unlock Pera Report — ₱250")
+                    )
+            );
+        }
+
         const today = new Date();
         const monthName = today.toLocaleDateString("en-PH", { month: "long", year: "numeric" });
 

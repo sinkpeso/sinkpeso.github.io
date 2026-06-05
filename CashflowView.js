@@ -32,6 +32,26 @@
 
     // ── MAIN COMPONENT ──────────────────────────────────────────────────
     function CashflowView({ totals, bills, incomes, dailyExpenses, wallets, fc }) {
+        // Premium gate
+        const [showUpgrade, setShowUpgrade] = React.useState(false);
+        if (!window.license || !window.license.canUseFeature('cashflowForecast')) {
+            const Icon = window.Icon;
+            return e('div', null,
+                e(PageTitle, { sub: "30-day balance projection." }, "Cashflow Forecast"),
+                showUpgrade && window.UpgradePromptModal
+                    ? e(window.UpgradePromptModal, {
+                        message: "Cashflow Forecast projects your balance for the next 30 days based on spending patterns and upcoming bills. Upgrade to Premium to unlock.",
+                        onClose: () => setShowUpgrade(false)
+                    })
+                    : e('div', { style: { textAlign: "center", padding: "60px 20px" } },
+                        e('div', { style: { fontSize: 48, marginBottom: 16, opacity: 0.3 } }, e(Icon, { name: "trendingup", size: 48, color: "var(--text-muted)" })),
+                        e('div', { style: { fontSize: 16, fontWeight: 700, color: "var(--text-main)", marginBottom: 8 } }, "Cashflow Forecast"),
+                        e('div', { style: { fontSize: 13, color: "var(--text-muted)", marginBottom: 20, maxWidth: 320, margin: "0 auto 20px", lineHeight: 1.6 } }, "See your projected balance for the next 30 days based on your spending patterns and upcoming bills. A Premium feature."),
+                        e(Btn, { v: "accent", onClick: () => setShowUpgrade(true) }, "Unlock Cashflow Forecast — ₱250")
+                    )
+            );
+        }
+
         const today = new Date();
         const todayStr = today.toISOString().slice(0, 10);
 

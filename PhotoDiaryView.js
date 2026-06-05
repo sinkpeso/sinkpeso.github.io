@@ -93,7 +93,18 @@
             finally { setCompressing(false); }
         };
 
+        const [showUpgrade, setShowUpgrade] = React.useState(false);
+
+        // Count this month's photo diary entries for free tier limit
+        const thisMonth = todayStr().slice(0, 7); // "YYYY-MM"
+        const monthlyPhotoCount = (photoDiary || []).filter(p => p.date && p.date.startsWith(thisMonth)).length;
+        const canAddPhoto = !window.license || window.license.canAddItem('photoDiary', monthlyPhotoCount);
+
         const handleSave = () => {
+            if (!canAddPhoto) {
+                setShowUpgrade(true);
+                return;
+            }
             if (!preview) { showToast("Take a photo or picture first"); return; }
 
             const amtCents = tc(form.amountRaw || "0");
@@ -204,6 +215,18 @@
                         )
                     )
                 )
+            ),
+
+            // UPGRADE PROMPT
+            showUpgrade && window.UpgradePromptModal && e(window.UpgradePromptModal, {
+                message: "Free users can add up to 10 photo diary entries per month. You've reached your limit. Upgrade to Premium for unlimited photos.",
+                onClose: () => setShowUpgrade(false)
+            }),
+
+            // REMAINING COUNT
+            !canAddPhoto && !showAdd && e('div', { style: { textAlign: "center", padding: "12px 16px", background: "rgba(245,158,11,0.08)", border: "1px solid rgba(245,158,11,0.2)", borderRadius: 10, marginBottom: 16, fontSize: 12, color: "#F59E0B", fontWeight: 600 } },
+                "Monthly photo limit reached (10/10). ",
+                e('button', { onClick: () => setShowUpgrade(true), style: { background: "none", border: "none", color: "#00E676", cursor: "pointer", textDecoration: "underline", fontSize: 12, fontWeight: 700, fontFamily: "inherit" } }, "Upgrade to Premium")
             ),
 
             // ADD MODAL

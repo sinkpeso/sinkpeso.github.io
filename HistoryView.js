@@ -11,12 +11,19 @@
     function HistoryView({ archives, fc }) {
         const [selected, setSelected] = React.useState(null);
         const [detailTab, setDetailTab] = React.useState("income");
+        const [showUpgrade, setShowUpgrade] = React.useState(false);
         const fmt = (iso) => new Date(iso).toLocaleDateString("en-PH", { month: "short", day: "numeric", year: "numeric" });
         const statBox = (label, value, color) => e('div', { style: S.statCard },
             e('div', { style: S.label }, label),
             e('div', { style: { fontSize: 20, fontWeight: 800, color, marginTop:6 } }, value));
 
-        const chartData = React.useMemo(() => [...archives].reverse().slice(-6), [archives]);
+        // Archive history limit (free: 2 months, premium: unlimited)
+        const isPremium = window.license && window.license.canUseFeature('archiveHistory');
+        const archiveLimit = isPremium ? archives.length : Math.min(archives.length, 2);
+        const limitedArchives = archives.slice(0, archiveLimit);
+        const hiddenCount = archives.length - archiveLimit;
+
+        const chartData = React.useMemo(() => [...limitedArchives].reverse().slice(-6), [limitedArchives]);
         const maxVal = Math.max(1, ...chartData.flatMap(a => [a.totalIncome, a.totalSpent]));
 
         return e('div', null,
@@ -46,7 +53,7 @@
             ) :
             e('div', { className: "premium-panel" },
                 e(SLabel, { style: { marginBottom: 12 } }, "Archive Ledges"),
-                archives.map(arc => {
+                limitedArchives.map(arc => {
                     const isGreen = arc.remaining >= 0;
                     return e('div', { key: arc.id, className: "stream-row", style: { cursor: "pointer" }, onClick: () => { setSelected(arc); setDetailTab("income"); } },
                         e('div', { style: { display: "flex", flexDirection: "column", gap: 3 } },
@@ -61,7 +68,19 @@
                             e('div', { style: { color: "var(--text-light)", fontSize: 18 } }, "›")
                         )
                     );
-                })
+                }),
+                // Upgrade prompt for hidden archives
+                hiddenCount > 0 && !isPremium && e('div', { style: { textAlign: "center", padding: "16px", borderTop: "1px solid var(--border)", marginTop: 8 } },
+                    showUpgrade && window.UpgradePromptModal
+                        ? e(window.UpgradePromptModal, {
+                            message: "Free users can view the last 2 months of archive history. Upgrade to Premium to unlock unlimited history.",
+                            onClose: () => setShowUpgrade(false)
+                        })
+                        : e('div', null,
+                            e('div', { style: { fontSize: 13, color: "var(--text-muted)", marginBottom: 10 } }, `${hiddenCount} older archive${hiddenCount > 1 ? 's' : ''} hidden — upgrade to view all`),
+                            e('button', { onClick: () => setShowUpgrade(true), style: { background: "transparent", border: "1px solid rgba(0,230,118,0.3)", borderRadius: 8, padding: "8px 16px", fontSize: 12, fontWeight: 600, color: "#00E676", cursor: "pointer", fontFamily: "inherit" } }, "Unlock All History — ₱250")
+                        )
+                )
             ),
 
             selected && e('div', { className: "modal-overlay", onClick: () => setSelected(null) },
