@@ -153,16 +153,6 @@
 
             useEffect(() => { window.scrollTo(0, 0); }, [tab]);
 
-            // ── DAILY REMINDER NOTIFICATION ──
-            useEffect(() => {
-                if (window.DailyReminder && window.DailyReminder.isEnabled()) {
-                    // Send today's summary if not already sent
-                    window.DailyReminder.sendNotification(dailyExpenses, budgets);
-                    // Schedule next notification
-                    window.DailyReminder.scheduleNext(dailyExpenses, budgets);
-                }
-            }, [dailyExpenses, budgets]);
-
             const [saved] = useState(() => window.persistence.loadState());
             const defaultSettings = { currency: 'PHP', secondaryCurrency: '', theme: 'dark', pin: '' };
             const [settings, setSettings] = useState(() => ({ ...defaultSettings, ...saved.settings }));
@@ -180,6 +170,16 @@
             const [photoDiaryLoaded, setPhotoDiaryLoaded] = useState(false);
             const [templates, setTemplates] = useState(saved.templates);
             const [debts, setDebts] = useState(saved.debts);
+
+            // ── DAILY REMINDER NOTIFICATION ──
+            useEffect(() => {
+                if (window.DailyReminder && window.DailyReminder.isEnabled()) {
+                    // Send today's summary if not already sent
+                    window.DailyReminder.sendNotification(dailyExpenses, budgets);
+                    // Schedule next notification
+                    window.DailyReminder.scheduleNext(dailyExpenses, budgets);
+                }
+            }, [dailyExpenses, budgets]);
 
             // Load archives from IndexedDB on mount, with localStorage migration
             useEffect(() => {
