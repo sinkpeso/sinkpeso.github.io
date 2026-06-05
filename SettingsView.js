@@ -431,7 +431,7 @@ setUpgradeMsg("This is a Premium feature. Unlock encrypted backups with a one-ti
                             })(),
                             // Unlocked features
                             e('div', { style: { display: "flex", flexDirection: "column", gap: 8, marginBottom: 16 } },
-                                ["Unlimited wallets & vaults", "Encrypted backups", "Recurring expenses", "PDF reports", "Multi-currency display"].map(function(f) {
+                                ["Unlimited wallets & vaults", "Unlimited photo diary", "Pera Report", "Cashflow Forecast", "Unlimited month history", "Encrypted backups", "Recurring expenses & PDF reports", "Multi-currency display"].map(function(f) {
                                     return e('div', { key: f, style: { display: "flex", alignItems: "center", gap: 8, fontSize: 13 } },
                                         e(Icon, { name: "shield", size: 14, color: "#00E676" }),
                                         e('span', { style: { color: "var(--text-main)" } }, f)
@@ -476,9 +476,14 @@ setUpgradeMsg("This is a Premium feature. Unlock encrypted backups with a one-ti
                                     return [
                                         { name: "Unlimited Wallets", locked: limits.wallets !== Infinity, detail: "you have " + walletCount + "/" + limits.wallets },
                                         { name: "Unlimited Vaults", locked: limits.vaults !== Infinity, detail: "you have " + vaultCount + "/" + limits.vaults },
+                                        { name: "Photo Diary", locked: limits.photoDiary !== Infinity, detail: limits.photoDiary !== Infinity ? limits.photoDiary + "/month" : null },
+                                        { name: "Pera Report", locked: !limits.peraReport, detail: null },
+                                        { name: "Cashflow Forecast", locked: !limits.cashflowForecast, detail: null },
+                                        { name: "Month History", locked: limits.archiveHistory !== Infinity, detail: limits.archiveHistory !== Infinity ? limits.archiveHistory + " months" : null },
                                         { name: "Encrypted Backups", locked: !limits.encryptedBackup, detail: null },
                                         { name: "Recurring Expenses", locked: !limits.recurring, detail: null },
                                         { name: "PDF Reports", locked: !limits.pdfExport, detail: null },
+                                        { name: "Multi-currency", locked: !limits.multiCurrency, detail: null },
                                     ].map(function(f) {
                                         return e('div', { key: f.name, style: { display: "flex", alignItems: "center", gap: 10, fontSize: 13, color: "var(--text-muted)" } },
                                             e(Icon, { name: "lock", size: 13, color: f.locked ? "var(--text-muted)" : "#00E676" }),
