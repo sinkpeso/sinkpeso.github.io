@@ -422,7 +422,8 @@
                 className: "pin-unlock-btn",
             }, isLocked ? "Locked" : "Unlock App"),
             e('div', { style: { position: "absolute", bottom: 32, left: 0, right: 0, textAlign: "center" } },
-                e('div', { style: { fontSize: 11, fontWeight: 800, letterSpacing: "0.18em", color: "var(--text-muted)", textTransform: "uppercase", opacity: 0.5 } }, "LODOY GOES RANDOM")
+                e('div', { style: { fontSize: 12, fontWeight: 600, color: "var(--text-muted)", opacity: 0.6 } }, "SINKPESO by Lodoy Goes Random"),
+                e('div', { style: { fontSize: 11, color: "var(--text-muted)", opacity: 0.4, marginTop: 4 } }, "Private. Offline. Yours.")
             )
         );
     }
