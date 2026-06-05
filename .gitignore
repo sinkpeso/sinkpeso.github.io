@@ -1,3 +1,13 @@
-node_modules/  
-test-results/  
-package-lock.json 
+node_modules/
+test-results/
+package-lock.json
+
+# Dev tools
+serve.js
+playwright.config.js
+
+# Internal docs (not for public)
+AUDIT_REPORT.md
+COMPETITIVE_ANALYSIS_TARSI.md
+social-posts.md
+social-preview.html

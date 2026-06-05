@@ -397,7 +397,7 @@
         // ── Password Gate ────────────────────────────────────────────────
         // SHA-256 hash of the admin password. To change:
         //   node -e "crypto.subtle.digest('SHA-256', new TextEncoder().encode('YOUR_PASSWORD')).then(h => console.log(Array.from(new Uint8Array(h)).map(b=>b.toString(16).padStart(2,'0')).join('')))"
-const ADMIN_PASSWORD_HASH = 'e8b7188b5e2efdce3e890e84621290c24159ae81997a92a92b7ca534989a2f74';
+const ADMIN_PASSWORD_HASH = 'ae27e5840c55b4c21f12222efd4df4221ce946677e3f0cdad64d4b63c4a4d470';
         const AUTH_SESSION_KEY = 'sp_admin_auth';
 
         async function sha256(str) {

@@ -49,10 +49,13 @@ const ASSETS = [
   './fonts/dm-sans-800.woff2',
   './fonts/dm-mono-400.woff2',
   './fonts/dm-mono-500.woff2',
+  './offline.html',
   './service-worker.js',
   './manifest.json',
   './logosinkpeso.png',
-  './privacy.html'
+  './privacy.html',
+  './premium.html',
+  './terms.html'
 ];
 
 // Install: cache all app shell assets
@@ -73,77 +76,63 @@ self.addEventListener('activate', event => {
   self.clients.claim();
 });
 
-// Helper: determine if request is for a same-origin app shell asset
-function isAppShellAsset(url) {
-  if (url.origin !== self.location.origin) return false;
-  const p = url.pathname;
-  // Match known extensions or paths
-  return (
-    p.endsWith('.html') ||
-    p.endsWith('.css') ||
-    p.endsWith('.js') ||
-    p.endsWith('.png') ||
-    p.endsWith('.woff2') ||
-    p.endsWith('.json') ||
-    p.endsWith('.jpg') ||
-    p === '/' ||
-    p === ''
-  );
-}
-
-// Fetch: cache-first for app shell, network-first for CDN
+// Fetch: cache-first with network update for app shell, network-first for CDN
 self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
 
   // Only handle GET requests
   if (event.request.method !== 'GET') return;
 
-  // CDN resources (fonts.googleapis.com, unpkg.com, etc.): network-first with cache fallback
-  if (url.origin !== self.location.origin) {
+  // CDN resources: network-first with cache fallback
+  if (url.hostname === 'unpkg.com' || url.hostname === 'fonts.googleapis.com' || url.hostname === 'fonts.gstatic.com') {
     event.respondWith(
-      caches.match(event.request).then(cached => {
-        const fetchPromise = fetch(event.request).then(response => {
-          if (response && response.ok) {
+      fetch(event.request)
+        .then(response => {
+          if (response.ok) {
             const clone = response.clone();
             caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
           }
           return response;
-        }).catch(() => null);
-        // Return cached version immediately if available, otherwise wait for network
-        return cached || fetchPromise || new Response('', { status: 503, statusText: 'Offline' });
+        })
+        .catch(() => caches.match(event.request))
+    );
+    return;
+  }
+
+  // Same-origin navigation requests (HTML pages): cache-first, update in background
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      caches.match(event.request).then(cached => {
+        const fetchPromise = fetch(event.request)
+          .then(response => {
+            if (response.ok) {
+              const clone = response.clone();
+              caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
+            }
+            return response;
+          })
+          .catch(() => cached || caches.match('./offline.html'));
+        return cached || fetchPromise;
       })
     );
     return;
   }
 
-  // Same-origin: cache-first for all app shell assets (HTML, CSS, JS, fonts, images)
-  if (isAppShellAsset(url)) {
+  // Same-origin app shell (CSS, JS): cache-first, update in background (stale-while-revalidate)
+  const pathname = url.pathname;
+  if (pathname.endsWith('.css') || pathname.endsWith('.js') || pathname.endsWith('.png') || pathname.endsWith('.json')) {
     event.respondWith(
       caches.match(event.request).then(cached => {
-        if (cached) {
-          // Return cached immediately, update cache in background
-          fetch(event.request).then(response => {
-            if (response && response.ok) {
-              caches.open(CACHE_NAME).then(cache => cache.put(event.request, response));
+        const fetchPromise = fetch(event.request)
+          .then(response => {
+            if (response.ok) {
+              const clone = response.clone();
+              caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
             }
-          }).catch(() => {});
-          return cached;
-        }
-        // Not in cache, try network
-        return fetch(event.request).then(response => {
-          if (response && response.ok) {
-            const clone = response.clone();
-            caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
-          }
-          return response;
-        }).catch(() => {
-          // If it's a navigation request, return offline fallback
-          if (event.request.mode === 'navigate' ||
-              (event.request.headers.get('accept') || '').includes('text/html')) {
-            return caches.match('./offline.html');
-          }
-          return new Response('', { status: 503, statusText: 'Offline' });
-        });
+            return response;
+          })
+          .catch(() => cached);
+        return cached || fetchPromise;
       })
     );
     return;
@@ -151,14 +140,14 @@ self.addEventListener('fetch', event => {
 
   // Everything else: network-first with cache fallback
   event.respondWith(
-    fetch(event.request).then(response => {
-      if (response && response.ok) {
-        const clone = response.clone();
-        caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
-      }
-      return response;
-    }).catch(() => caches.match(event.request).then(cached => {
-      return cached || new Response('', { status: 503, statusText: 'Offline' });
-    }))
+    fetch(event.request)
+      .then(response => {
+        if (response.ok) {
+          const clone = response.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
+        }
+        return response;
+      })
+      .catch(() => caches.match(event.request))
   );
 });
