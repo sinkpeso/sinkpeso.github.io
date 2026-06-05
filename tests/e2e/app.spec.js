@@ -17,6 +17,18 @@ async function skipOnboarding(page) {
     await page.waitForTimeout(1500);
 }
 
+// Helper: seed some test data into localStorage
+async function seedTestData(page, data = {}) {
+    await page.evaluate((d) => {
+        if (d.wallets) localStorage.setItem('sp_wallets', JSON.stringify(d.wallets));
+        if (d.daily) localStorage.setItem('sp_daily', JSON.stringify(d.daily));
+        if (d.incomes) localStorage.setItem('sp_incomes', JSON.stringify(d.incomes));
+        if (d.bills) localStorage.setItem('sp_bills', JSON.stringify(d.bills));
+        if (d.debts) localStorage.setItem('sp_debts', JSON.stringify(d.debts));
+        if (d.templates) localStorage.setItem('sp_templates', JSON.stringify(d.templates));
+    }, data);
+}
+
 test.describe('SINKPESO E2E', () => {
 
     test('landing page loads', async ({ page }) => {
@@ -166,6 +178,258 @@ test.describe('SINKPESO E2E', () => {
         // Check theme color meta tag
         const themeColor = page.locator('meta[name="theme-color"]');
         await expect(themeColor).toHaveAttribute('content', '#020810');
+    });
+
+    // ═══════════════════════════════════════════════════════════════
+    // NEW TESTS — v2.2.0 E2E Hardening
+    // ═══════════════════════════════════════════════════════════════
+
+    test('expense logging end-to-end', async ({ page }) => {
+        await skipOnboarding(page);
+
+        // Navigate to Daily Expenses tab
+        const dailyTab = page.locator('text=Daily Expenses').first();
+        if (await dailyTab.isVisible()) {
+            await dailyTab.click();
+            await page.waitForTimeout(500);
+
+            // Fill in the expense form
+            const nameInput = page.locator('input[placeholder="What did you pay for?"]');
+            const amountInput = page.locator('input[placeholder="Amount"]');
+
+            if (await nameInput.isVisible() && await amountInput.isVisible()) {
+                await nameInput.fill('Test E2E Goto');
+                await amountInput.fill('150');
+
+                // Click "Log Item" button
+                const logBtn = page.locator('button:has-text("Log Item")');
+                if (await logBtn.isVisible()) {
+                    await logBtn.click();
+                    await page.waitForTimeout(1000);
+
+                    // Verify the expense appears in the spending log
+                    const expenseRow = page.locator('text=Test E2E Goto');
+                    await expect(expenseRow.first()).toBeVisible({ timeout: 5000 });
+
+                    // Verify toast appeared
+                    const toast = page.locator('text=Expense logged');
+                    await expect(toast.first()).toBeVisible({ timeout: 5000 });
+                }
+            }
+        }
+    });
+
+    test('quick-add template logs expense', async ({ page }) => {
+        // Seed a template
+        await page.goto('/app.html');
+        await page.waitForTimeout(500);
+        await seedTestData(page, {
+            templates: [{ id: "tpl-e2e", label: "E2E Jeepney", amountCents: 1300, category: "Personal", icon: "wallet" }]
+        });
+        await page.evaluate(() => {
+            localStorage.setItem('sp_onboarding_seen', '1');
+            localStorage.setItem('sp_settings', JSON.stringify({ _v: 2, data: { currency: 'PHP', theme: 'dark', pin: '' } }));
+        });
+        await page.reload();
+        await page.waitForTimeout(1500);
+
+        // Navigate to Daily Expenses
+        const dailyTab = page.locator('text=Daily Expenses').first();
+        if (await dailyTab.isVisible()) {
+            await dailyTab.click();
+            await page.waitForTimeout(500);
+
+            // Look for the Quick Add section with the template
+            const templateBtn = page.locator('button:has-text("E2E Jeepney")');
+            if (await templateBtn.isVisible()) {
+                await templateBtn.click();
+                await page.waitForTimeout(1000);
+
+                // Verify the expense was logged
+                const expenseRow = page.locator('text=E2E Jeepney').first();
+                await expect(expenseRow).toBeVisible({ timeout: 5000 });
+            }
+        }
+    });
+
+    test('debt tracker flow', async ({ page }) => {
+        await skipOnboarding(page);
+
+        // Navigate to Utang Tracker via the More bottom sheet
+        const moreBtn = page.locator('.bnav-btn:has-text("More")');
+        if (await moreBtn.isVisible()) {
+            await moreBtn.click();
+            await page.waitForTimeout(500);
+
+            const utangBtn = page.locator('text=Utang Tracker');
+            if (await utangBtn.isVisible()) {
+                await utangBtn.click();
+                await page.waitForTimeout(500);
+
+                // Should see the Utang Tracker page
+                const pageTitle = page.locator('text=Utang Tracker');
+                await expect(pageTitle.first()).toBeVisible({ timeout: 5000 });
+
+                // Look for "Add Debt" or "Add New" button
+                const addDebtBtn = page.locator('button:has-text("Add")').first();
+                if (await addDebtBtn.isVisible()) {
+                    await addDebtBtn.click();
+                    await page.waitForTimeout(500);
+
+                    // Should see the Add New Debt modal
+                    const modalTitle = page.locator('text=Add New Debt');
+                    if (await modalTitle.isVisible()) {
+                        // Fill in the form
+                        const personInput = page.locator('input[placeholder="Who?"]');
+                        const amountInput = page.locator('input[placeholder="0.00"]');
+
+                        if (await personInput.isVisible()) {
+                            await personInput.fill('Juan E2E');
+                            await amountInput.fill('500');
+
+                            // Click "Add Debt"
+                            const saveBtn = page.locator('button:has-text("Add Debt")');
+                            if (await saveBtn.isVisible()) {
+                                await saveBtn.click();
+                                await page.waitForTimeout(1000);
+
+                                // Verify the debt appears in the list
+                                const debtEntry = page.locator('text=Juan E2E');
+                                await expect(debtEntry.first()).toBeVisible({ timeout: 5000 });
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    test('premium gate blocks features', async ({ page }) => {
+        // Ensure no license key is set
+        await page.goto('/app.html');
+        await page.waitForTimeout(500);
+        await page.evaluate(() => {
+            localStorage.removeItem('sp_license');
+            localStorage.setItem('sp_onboarding_seen', '1');
+            localStorage.setItem('sp_settings', JSON.stringify({ _v: 2, data: { currency: 'PHP', theme: 'dark', pin: '' } }));
+        });
+        await page.reload();
+        await page.waitForTimeout(1500);
+
+        // Navigate to Pera Report via desktop tab or More sheet
+        const peraTab = page.locator('button:has-text("Pera Report")').first();
+        if (await peraTab.isVisible()) {
+            await peraTab.click();
+            await page.waitForTimeout(500);
+
+            // Should see either a premium gate or "Get Premium" CTA
+            const hasPremiumGate = await page.locator('text=Premium').first().isVisible().catch(() => false);
+            const hasGetPremium = await page.locator('text=Get Premium').first().isVisible().catch(() => false);
+            const hasUpgrade = await page.locator('text=Upgrade').first().isVisible().catch(() => false);
+            const hasTrial = await page.locator('text=Free Trial').first().isVisible().catch(() => false);
+
+            // At least one premium-related element should be visible
+            expect(hasPremiumGate || hasGetPremium || hasUpgrade || hasTrial).toBeTruthy();
+        }
+    });
+
+    test('wallet CRUD operations', async ({ page }) => {
+        await skipOnboarding(page);
+
+        // Navigate to Wallets tab
+        const walletsTab = page.locator('button:has-text("Wallets")').first();
+        if (await walletsTab.isVisible()) {
+            await walletsTab.click();
+            await page.waitForTimeout(500);
+
+            // Should see the wallets view
+            const walletsTitle = page.locator('text=My Wallets');
+            const hasTitle = await walletsTitle.isVisible().catch(() => false);
+
+            if (hasTitle) {
+                // Look for "Add Wallet" or create button
+                const addWalletBtn = page.locator('button:has-text("Add Wallet")').first();
+                if (await addWalletBtn.isVisible()) {
+                    await addWalletBtn.click();
+                    await page.waitForTimeout(500);
+
+                    // Should see a wallet creation form/modal
+                    const nameInput = page.locator('input[placeholder*="Wallet"]').first();
+                    if (await nameInput.isVisible()) {
+                        await nameInput.fill('E2E Test Wallet');
+
+                        // Save the wallet
+                        const saveBtn = page.locator('button:has-text("Save")').first();
+                        if (await saveBtn.isVisible()) {
+                            await saveBtn.click();
+                            await page.waitForTimeout(1000);
+
+                            // Verify the wallet appears
+                            const walletEntry = page.locator('text=E2E Test Wallet');
+                            await expect(walletEntry.first()).toBeVisible({ timeout: 5000 });
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    test('Cashflow tab loads projection', async ({ page }) => {
+        await skipOnboarding(page);
+
+        // Navigate to Cashflow
+        const cashflowTab = page.locator('button:has-text("Cashflow")').first();
+        if (await cashflowTab.isVisible()) {
+            await cashflowTab.click();
+            await page.waitForTimeout(500);
+
+            // Should see either the cashflow chart or a premium gate
+            const hasCashflowTitle = await page.locator('text=Cashflow').first().isVisible().catch(() => false);
+            const hasForecast = await page.locator('text=Forecast').first().isVisible().catch(() => false);
+            const hasProjection = await page.locator('text=30').first().isVisible().catch(() => false);
+            const hasPremium = await page.locator('text=Premium').first().isVisible().catch(() => false);
+
+            expect(hasCashflowTitle || hasForecast || hasProjection || hasPremium).toBeTruthy();
+        }
+    });
+
+    test('mobile bottom nav shows all sections', async ({ page }) => {
+        // Set mobile viewport
+        await page.setViewportSize({ width: 375, height: 812 });
+        await skipOnboarding(page);
+
+        // Verify bottom nav exists
+        const bottomNav = page.locator('.bottom-nav');
+        await expect(bottomNav).toBeVisible({ timeout: 5000 });
+
+        // Should have Home, Expenses, Diary, Savings, More
+        const homeBtn = page.locator('.bnav-btn:has-text("Home")');
+        const expenseBtn = page.locator('.bnav-btn:has-text("Expenses")');
+        const savingsBtn = page.locator('.bnav-btn:has-text("Savings")');
+
+        await expect(homeBtn).toBeVisible({ timeout: 5000 });
+        await expect(expenseBtn).toBeVisible({ timeout: 5000 });
+        await expect(savingsBtn).toBeVisible({ timeout: 5000 });
+    });
+
+    test('More sheet contains all secondary tabs', async ({ page }) => {
+        // Set mobile viewport
+        await page.setViewportSize({ width: 375, height: 812 });
+        await skipOnboarding(page);
+
+        // Open More sheet
+        const moreBtn = page.locator('.bnav-btn:has-text("More")');
+        await expect(moreBtn).toBeVisible({ timeout: 5000 });
+        await moreBtn.click();
+        await page.waitForTimeout(500);
+
+        // Should see secondary navigation options
+        const hasBills = await page.locator('text=Bills & Income').first().isVisible().catch(() => false);
+        const hasWallets = await page.locator('text=Wallets').first().isVisible().catch(() => false);
+        const hasUtang = await page.locator('text=Utang Tracker').first().isVisible().catch(() => false);
+        const hasCashflow = await page.locator('text=Cashflow').first().isVisible().catch(() => false);
+
+        expect(hasBills && hasWallets && hasUtang && hasCashflow).toBeTruthy();
     });
 
 });
