@@ -479,16 +479,26 @@
                                             'Generated on ' + dateStr + ' at ' + timeStr + ' · Private · Offline · Yours</div>';
                                         panel.insertBefore(header, panel.firstChild);
                                     }
+                                    // Force light theme before print (mobile compatibility)
+                                    var prevTheme = document.documentElement.getAttribute('data-theme');
+                                    document.documentElement.setAttribute('data-theme', 'light');
                                     document.body.classList.add('print-report');
-                                    window.print();
                                     setTimeout(function() {
-                                        document.body.classList.remove('print-report');
-                                        if (header && header.parentNode) header.parentNode.removeChild(header);
-                                    }, 600);
+                                        window.print();
+                                        setTimeout(function() {
+                                            document.documentElement.setAttribute('data-theme', prevTheme || 'dark');
+                                            document.body.classList.remove('print-report');
+                                            if (header && header.parentNode) header.parentNode.removeChild(header);
+                                        }, 600);
+                                    }, 100);
                                 },
                                 title: "Export PDF",
                                 style: { ...S.iconBtn, color: "var(--text-muted)" }
-                            }, e(Icon, { name: "download", size: 16 })),
+                            }, e('svg', { width: 16, height: 16, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round" },
+                                e('path', { d: "M6 9V2h12v7" }),
+                                e('path', { d: "M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2" }),
+                                e('rect', { x: 6, y: 14, width: 12, height: 8 })
+                            )),
 
                             e('button', { 
                                 onClick: () => setTab("settings"), title: "Settings",
@@ -521,6 +531,8 @@
                             { id: "limits",       label: "Limits" },
                             { id: "transactions", label: "Logs" },
                             { id: "history",      label: "History" },
+                            { id: "cashflow",     label: "Cashflow" },
+                            { id: "pera-report",  label: "Pera Report" },
                         ].map(t => e('button', {
                             key: t.id, className: "nav-btn", onClick: () => setTab(t.id),
                             style: { background: "transparent", color: tab === t.id ? "var(--text-light)" : "var(--text-muted)", border: "none", borderBottom: tab === t.id ? "2px solid rgba(148,163,184,0.6)" : "2px solid transparent", padding: "12px 12px", cursor: "pointer", fontSize: 12, fontWeight: tab === t.id ? 600 : 400, whiteSpace: "nowrap", flexShrink: 0, transition: "all 0.18s", opacity: tab === t.id ? 1 : 0.7 }
