@@ -1,11 +1,10 @@
-const CACHE_NAME = 'sinkpeso-v8';
+const CACHE_NAME = 'sinkpeso-v9';
 const ASSETS = [
   './index.html',
   './app.html',
   './styles.css',
   './landing.css',
   './app.js',
-  './styles.css',
   './utils.js',
   './components.js',
   './InsightStrip.js',
@@ -35,6 +34,13 @@ const ASSETS = [
   './UndoToast.js',
   './HelpTooltip.js',
   './crashreport.js',
+  './DebtView.js',
+  './CashflowView.js',
+  './PeraReportView.js',
+  './CoreComponents.js',
+  './react.production.min.js',
+  './react-dom.production.min.js',
+  './offline.html',
   './service-worker.js',
   './manifest.json',
   './logosinkpeso.png',
@@ -59,17 +65,22 @@ self.addEventListener('activate', event => {
   self.clients.claim();
 });
 
-// Fetch: network-first for HTML/CSS/JS, cache-first for static assets
+// Fetch: cache-first with network update for app shell, network-first for CDN
 self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
+
+  // Only handle GET requests
+  if (event.request.method !== 'GET') return;
 
   // CDN resources: network-first with cache fallback
   if (url.hostname === 'unpkg.com' || url.hostname === 'fonts.googleapis.com' || url.hostname === 'fonts.gstatic.com') {
     event.respondWith(
       fetch(event.request)
         .then(response => {
-          const clone = response.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
+          if (response.ok) {
+            const clone = response.clone();
+            caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
+          }
           return response;
         })
         .catch(() => caches.match(event.request))
@@ -77,23 +88,55 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // App HTML/CSS/JS: network-first (always check for updates)
-  const pathname = url.pathname;
-  if (pathname.endsWith('.html') || pathname.endsWith('.css') || pathname.endsWith('.js') || pathname === '/') {
+  // Same-origin navigation requests (HTML pages): cache-first, update in background
+  if (event.request.mode === 'navigate') {
     event.respondWith(
-      fetch(event.request)
-        .then(response => {
-          const clone = response.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
-          return response;
-        })
-        .catch(() => caches.match(event.request))
+      caches.match(event.request).then(cached => {
+        const fetchPromise = fetch(event.request)
+          .then(response => {
+            if (response.ok) {
+              const clone = response.clone();
+              caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
+            }
+            return response;
+          })
+          .catch(() => cached || caches.match('./offline.html'));
+        return cached || fetchPromise;
+      })
     );
     return;
   }
 
-  // Static assets (images, fonts): cache-first
+  // Same-origin app shell (CSS, JS): cache-first, update in background (stale-while-revalidate)
+  const pathname = url.pathname;
+  if (pathname.endsWith('.css') || pathname.endsWith('.js') || pathname.endsWith('.png') || pathname.endsWith('.json')) {
+    event.respondWith(
+      caches.match(event.request).then(cached => {
+        const fetchPromise = fetch(event.request)
+          .then(response => {
+            if (response.ok) {
+              const clone = response.clone();
+              caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
+            }
+            return response;
+          })
+          .catch(() => cached);
+        return cached || fetchPromise;
+      })
+    );
+    return;
+  }
+
+  // Everything else: network-first with cache fallback
   event.respondWith(
-    caches.match(event.request).then(cached => cached || fetch(event.request))
+    fetch(event.request)
+      .then(response => {
+        if (response.ok) {
+          const clone = response.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
+        }
+        return response;
+      })
+      .catch(() => caches.match(event.request))
   );
 });
