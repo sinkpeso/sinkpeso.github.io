@@ -6,14 +6,14 @@
 (function () {
     "use strict";
     const e = React.createElement;
-    const { SLabel } = window.components;
+    const { SLabel, ExportPDFBtn } = window.components;
 
     function HistoryView({ archives, fc }) {
         const [selected, setSelected] = React.useState(null);
         const [detailTab, setDetailTab] = React.useState("income");
         const [showUpgrade, setShowUpgrade] = React.useState(false);
         const fmt = (iso) => new Date(iso).toLocaleDateString("en-PH", { month: "short", day: "numeric", year: "numeric" });
-        const statBox = (label, value, color) => e('div', { style: S.statCard },
+    const statBox = (label, value, color) => e('div', { style: S.statCard },
             e('div', { style: S.label }, label),
             e('div', { style: { fontSize: 20, fontWeight: 800, color, marginTop:6 } }, value));
 
@@ -27,7 +27,13 @@
         const maxVal = Math.max(1, ...chartData.flatMap(a => [a.totalIncome, a.totalSpent]));
 
         return e('div', null,
-            e('div', { style: S.pageHeader }, e('div', null, e('h2', { style: { fontSize: 22, fontWeight: 800 } }, 'Month History'), e('div', { style: { fontSize: 14, color: "var(--text-muted)", marginTop: 4 } }, 'Archived snapshots and trend lines.')), e('div', { style: { fontSize: 13, color: "var(--text-muted)", fontWeight: 600 } }, `${archives.length} archives`)),
+            e('div', { style: { ...S.pageHeader, position: "relative" } },
+                e('div', null, e('h2', { style: { fontSize: 22, fontWeight: 800 } }, 'Month History'), e('div', { style: { fontSize: 14, color: "var(--text-muted)", marginTop: 4 } }, 'Archived snapshots and trend lines.')),
+                e('div', { style: { display: "flex", alignItems: "center", gap: 12 } },
+                    e('div', { style: { fontSize: 13, color: "var(--text-muted)", fontWeight: 600 } }, `${archives.length} archives`),
+                    e(ExportPDFBtn, { printClass: "print-report" })
+                )
+            ),
 
             archives.length > 0 && e('div', { className: "premium-panel" },
                 e(SLabel, { style: { marginBottom: 12 } }, "Spending vs Income Trends (Last 6 Months)"),

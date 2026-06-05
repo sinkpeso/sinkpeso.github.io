@@ -16,7 +16,7 @@
     "use strict";
     const e = React.createElement;
     const { safeDiv, getDaysRemaining } = window.utils;
-    const { PageTitle, Btn } = window.components;
+    const { PageTitle, Btn, ExportPDFBtn } = window.components;
 
     // ── helpers ──────────────────────────────────────────────────────────
     function addDays(dateStr, n) {
@@ -165,6 +165,11 @@
 
         return e('div', null,
             e(PageTitle, { sub: "Projected balance for the next 30 days based on your spending patterns." }, "Cashflow Forecast"),
+
+            // Export PDF button (premium)
+            e('div', { style: { marginBottom: 20, display: "flex", justifyContent: "flex-end" } },
+                e(ExportPDFBtn, { printClass: "print-report" })
+            ),
 
             // Summary cards
             e('div', { style: { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 12, marginBottom: 24 } },

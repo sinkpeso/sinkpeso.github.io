@@ -1176,30 +1176,54 @@ body.modal-open { overflow: hidden; position: fixed; width: 100%; }
 
 /* ── PRINT / PDF EXPORT ───────────────────────────────────────────────── */
 @media print {
-    /* Hide all app chrome when printing Pera Report */
-    body.print-pera-report > #root > div > div:not([role="tabpanel"]) { display: none !important; }
-    body.print-pera-report .bottom-nav { display: none !important; }
-    body.print-pera-report .fab { display: none !important; }
-    body.print-pera-report header, body.print-pera-report nav { display: none !important; }
+    /* Hide all app chrome (header, nav, footer, FAB) when printing */
+    body.print-report > #root > div > div:not([role="tabpanel"]) { display: none !important; }
+    body.print-report .bottom-nav { display: none !important; }
+    body.print-report .fab { display: none !important; }
+    body.print-report header, body.print-report nav { display: none !important; }
 
-    /* Only show the report panel content */
-    body.print-pera-report [role="tabpanel"] { padding: 0 !important; margin: 0 !important; max-width: 100% !important; }
+    /* Only show the tab panel content */
+    body.print-report [role="tabpanel"] { padding: 0 !important; margin: 0 !important; max-width: 100% !important; }
 
     /* Force light background for print readability */
-    body.print-pera-report {
+    body.print-report {
         background: #fff !important; color: #111 !important;
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
     }
-    body.print-pera-report [role="tabpanel"] {
+    body.print-report [role="tabpanel"] {
         background: #fff !important; color: #111 !important;
     }
-    body.print-pera-report [style*="var(--text-main)"] { color: #111 !important; }
-    body.print-pera-report [style*="var(--text-muted)"] { color: #555 !important; }
+    body.print-report [style*="var(--text-main)"] { color: #111 !important; }
+    body.print-report [style*="var(--text-muted)"] { color: #555 !important; }
 
-    /* Hide the export button itself when printing */
-    body.print-pera-report button { display: none !important; }
+    /* Hide all buttons when printing (export button, filters, etc.) */
+    body.print-report button { display: none !important; }
+    body.print-report select { display: none !important; }
+    body.print-report input { display: none !important; }
+
+    /* Hide filter panels */
+    body.print-report .bento-filter { display: none !important; }
+    body.print-report .bento-filter-row { display: none !important; }
+    body.print-report .filter-row { display: none !important; }
 
     /* Remove shadows and borders for cleaner print */
-    body.print-pera-report [style*="box-shadow"] { box-shadow: none !important; }
+    body.print-report [style*="box-shadow"] { box-shadow: none !important; }
+
+    /* Ensure bento cells are visible and not clipped */
+    body.print-report .bn-cell { break-inside: avoid; page-break-inside: avoid; }
+    body.print-report .bn-wrap { gap: 8px !important; }
+
+    /* Transaction list: show all rows, no max-height */
+    body.print-report .bento-txn-list { max-height: none !important; overflow: visible !important; }
+
+    /* Make sure SVGs print with color */
+    body.print-report svg { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+    /* Light mode overrides for bento cells */
+    body.print-report .bn-cell {
+        background: #fff !important; border-color: #ddd !important;
+    }
+    body.print-report .bn-balance { background: #fff !important; }
+    body.print-report .bn-orb { display: none !important; }
 }

@@ -19,6 +19,7 @@
 (function () {
     const e = React.createElement;
     const { safeDiv, getDaysRemaining } = window.utils;
+    const { ExportPDFBtn } = window.components;
     // NOTE: window.walleticons loads AFTER this file, so WalletIcon is
     // resolved lazily inside the function body — not here at IIFE time.
 
@@ -385,7 +386,12 @@
             ),
 
             // FIX #7: Recent Activity feed — shows latest transactions
-            RecentActivitySection && e(RecentActivitySection, { incomes, dailyExpenses, bills, txns, funds, wallets, archives, fc, onNavigate })
+            RecentActivitySection && e(RecentActivitySection, { incomes, dailyExpenses, bills, txns, funds, wallets, archives, fc, onNavigate }),
+
+            // Export PDF button (premium)
+            e('div', { style: { display: "flex", justifyContent: "flex-end", marginTop: 16 } },
+                e(ExportPDFBtn, { printClass: "print-report" })
+            )
         );
     }
 

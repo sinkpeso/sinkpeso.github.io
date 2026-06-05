@@ -120,7 +120,37 @@
         }, children);
     }
 
+    // ── EXPORT PDF BUTTON ─────────────────────────────────────────────────────
+    // Premium-gated button that triggers browser print dialog.
+    // Usage: e(ExportPDFBtn, { printClass: "print-pera-report" })
+    function ExportPDFBtn({ printClass, style = {} }) {
+        if (!window.license || !window.license.canUseFeature('pdfExport')) return null;
+        return e('button', {
+            onClick: function() {
+                document.body.classList.add(printClass);
+                window.print();
+                setTimeout(function() { document.body.classList.remove(printClass); }, 500);
+            },
+            style: {
+                display: "inline-flex", alignItems: "center", gap: 6,
+                background: "transparent", color: "var(--text-main)",
+                border: "1px solid var(--border-input)",
+                borderRadius: 10, padding: "8px 14px",
+                fontSize: 13, fontWeight: 600, cursor: "pointer",
+                fontFamily: "inherit", transition: "all 0.15s",
+                ...style
+            }
+        },
+            e('svg', { width: 14, height: 14, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round" },
+                e('path', { d: "M6 9V2h12v7" }),
+                e('path', { d: "M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2" }),
+                e('rect', { x: 6, y: 14, width: 12, height: 8 })
+            ),
+            "Export PDF"
+        );
+    }
+
     // ── EXPOSE TO window ──────────────────────────────────────────────────────
-    window.components = { SLabel, PageTitle, PBar, Field, Inp, Sel, Btn };
+    window.components = { SLabel, PageTitle, PBar, Field, Inp, Sel, Btn, ExportPDFBtn };
 
 })();

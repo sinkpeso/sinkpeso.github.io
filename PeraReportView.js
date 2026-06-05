@@ -13,7 +13,7 @@
 (function () {
     "use strict";
     const e = React.createElement;
-    const { PageTitle, Btn } = window.components;
+    const { PageTitle, Btn, ExportPDFBtn } = window.components;
     const CATEGORIES = window.SINKPESO_CONSTANTS.CATEGORIES;
 
     // ── helpers ──────────────────────────────────────────────────────────
@@ -127,23 +127,8 @@
             ),
 
         // Export PDF button (premium)
-        window.license && window.license.canUseFeature('pdfExport') && e('div', { style: { marginBottom: 20, display: "flex", justifyContent: "flex-end" } },
-            e(Btn, {
-                v: "ghost",
-                onClick: function() {
-                    document.body.classList.add('print-pera-report');
-                    window.print();
-                    setTimeout(function() { document.body.classList.remove('print-pera-report'); }, 500);
-                },
-                style: { fontSize: 13, display: "inline-flex", alignItems: "center", gap: 6 }
-            },
-                e('svg', { width: 14, height: 14, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round" },
-                    e('path', { d: "M6 9V2h12v7" }),
-                    e('path', { d: "M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2" }),
-                    e('rect', { x: 6, y: 14, width: 12, height: 8 })
-                ),
-                "Export PDF"
-            )
+        e('div', { style: { marginBottom: 20, display: "flex", justifyContent: "flex-end" } },
+            e(ExportPDFBtn, { printClass: "print-report" })
         ),
 
         // Stat grid
