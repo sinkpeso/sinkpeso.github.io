@@ -386,12 +386,7 @@
             ),
 
             // FIX #7: Recent Activity feed — shows latest transactions
-            RecentActivitySection && e(RecentActivitySection, { incomes, dailyExpenses, bills, txns, funds, wallets, archives, fc, onNavigate }),
-
-            // Export PDF button (premium)
-            e('div', { style: { display: "flex", justifyContent: "flex-end", marginTop: 16 } },
-                e(ExportPDFBtn, { printClass: "print-report" })
-            )
+            RecentActivitySection && e(RecentActivitySection, { incomes, dailyExpenses, bills, txns, funds, wallets, archives, fc, onNavigate })
         );
     }
 
