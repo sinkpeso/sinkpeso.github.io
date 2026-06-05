@@ -1,6 +1,7 @@
 // walleticons.js — SINKPESO Philippine bank & e-wallet icon system
-// v4 — bulletproof lookup, no substring scan, suffix-aware normalizer,
-//       explicit alias table, clean SVGs, fully distinct icon shapes.
+// v5 — accurate brand logos, distinct icon shapes, international wallets,
+//       antenna-based Maya, filled Metrobank M, globe-based DBP,
+//       Apple Pay, Google Pay, Revolut support.
 //
 // Public API (window.walleticons):
 //   WalletIcon      — React component   ({ name, color, size, radius })
@@ -182,6 +183,14 @@
         "coins":                            "coins",
         "coinsph":                          "coins",
 
+        // ── INTERNATIONAL E-WALLETS ─────────────────────────────────────
+        "applepay":                         "applepay",
+        "apple":                            "applepay",
+        "googlepay":                        "googlepay",
+        "google":                           "googlepay",
+        "gpay":                             "googlepay",
+        "revolut":                          "revolut",
+
         // Cash (physical wallet)
         "cash":                             "cash",
         "pettycash":                        "cash",
@@ -199,9 +208,9 @@
 // ── GCASH ──────────────────────────────────────────────────────────────────
 // Blue bg, white G-arc + horizontal crossbar (GCash letter-mark)
 gcash: {
-    bg: "#0066CC", type: "ewallet",
+    bg: "#007DFE", type: "ewallet",
     svg: `<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect width="40" height="40" rx="10" fill="#0066CC"/>
+        <rect width="40" height="40" rx="10" fill="#007DFE"/>
         <path d="M28 17.5a9 9 0 1 0 0 5.5" stroke="#ffffff" stroke-width="2.8" stroke-linecap="round" fill="none"/>
         <path d="M22 20h7v4" stroke="#93C5FD" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
     </svg>`
@@ -210,12 +219,15 @@ gcash: {
 // ── MAYA ───────────────────────────────────────────────────────────────────
 // Green bg, clean 4-point M letterform — all paths bounded 9–31 x, 14–27 y
 maya: {
-    bg: "#05B27C", type: "ewallet",
+    bg: "#4DCA5B", type: "ewallet",
     svg: `<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect width="40" height="40" rx="10" fill="#05B27C"/>
-        <path d="M9 27V14l6 8.5 5-8.5 5 8.5 6-8.5v13"
-              stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-        <path d="M9 27h22" stroke="#A7F3D0" stroke-width="1.8" stroke-linecap="round"/>
+        <rect width="40" height="40" rx="10" fill="#4DCA5B"/>
+        <line x1="20" y1="30" x2="20" y2="18" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
+        <circle cx="20" cy="30" r="2" fill="#ffffff"/>
+        <path d="M15 22a7 7 0 0 0 0-8" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+        <path d="M25 22a7 7 0 0 1 0-8" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+        <path d="M12 25a10.5 10.5 0 0 0 0-14" stroke="#ffffff" stroke-width="2" stroke-linecap="round" fill="none"/>
+        <path d="M28 25a10.5 10.5 0 0 1 0-14" stroke="#ffffff" stroke-width="2" stroke-linecap="round" fill="none"/>
     </svg>`
 },
 
@@ -310,9 +322,9 @@ bdo: {
 // ── BPI ────────────────────────────────────────────────────────────────────
 // BPI red bg, classic temple-column motif (canonical BPI visual)
 bpi: {
-    bg: "#C0392B", type: "bank",
+    bg: "#C4282B", type: "bank",
     svg: `<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect width="40" height="40" rx="10" fill="#C0392B"/>
+        <rect width="40" height="40" rx="10" fill="#C4282B"/>
         <path d="M20 10L9 17.5h22L20 10z" fill="#FECACA"/>
         <rect x="11.5" y="17.5" width="3" height="11" rx="1" fill="#ffffff"/>
         <rect x="18.5" y="17.5" width="3" height="11" rx="1" fill="#ffffff"/>
@@ -324,12 +336,11 @@ bpi: {
 // ── METROBANK ──────────────────────────────────────────────────────────────
 // Navy bg, bold M letterform (Metrobank brand M)
 metrobank: {
-    bg: "#1a3a6e", type: "bank",
+    bg: "#1A3A6E", type: "bank",
     svg: `<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect width="40" height="40" rx="10" fill="#1a3a6e"/>
-        <path d="M8 28V14l6 8.5 6-8.5 6 8.5 6-8.5v14"
-              stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-        <path d="M8 28h24" stroke="#93C5FD" stroke-width="1.8" stroke-linecap="round"/>
+        <rect width="40" height="40" rx="10" fill="#1A3A6E"/>
+        <path d="M8 28V14l6 8.5 6-8.5 6 8.5 6-8.5v14" fill="#ffffff"/>
+        <rect x="8" y="28" width="24" height="2" rx="1" fill="#93C5FD"/>
     </svg>`
 },
 
@@ -408,12 +419,10 @@ dbp: {
     bg: "#1D4ED8", type: "bank",
     svg: `<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
         <rect width="40" height="40" rx="10" fill="#1D4ED8"/>
-        <path d="M20 10L9 17h22L20 10z" fill="#BFDBFE"/>
-        <rect x="11"  y="17" width="2.5" height="11" rx="1" fill="#ffffff"/>
-        <rect x="16.5" y="17" width="2.5" height="11" rx="1" fill="#ffffff"/>
-        <rect x="22"  y="17" width="2.5" height="11" rx="1" fill="#ffffff"/>
-        <rect x="27.5" y="17" width="2.5" height="11" rx="1" fill="#ffffff"/>
-        <rect x="9" y="28" width="22" height="2.5" rx="1" fill="#BFDBFE"/>
+        <circle cx="20" cy="20" r="10" stroke="#BFDBFE" stroke-width="2.2" fill="none"/>
+        <ellipse cx="20" cy="20" rx="5" ry="10" stroke="#BFDBFE" stroke-width="1.5" fill="none"/>
+        <line x1="10" y1="20" x2="30" y2="20" stroke="#BFDBFE" stroke-width="1.5"/>
+        <path d="M12 15h16M12 25h16" stroke="#BFDBFE" stroke-width="1.5" stroke-linecap="round"/>
     </svg>`
 },
 
@@ -506,6 +515,39 @@ coins: {
         <rect width="40" height="40" rx="10" fill="#1D4ED8"/>
         <circle cx="16.5" cy="21" r="7" stroke="#ffffff" stroke-width="2.2" fill="none"/>
         <circle cx="23.5" cy="21" r="7" stroke="#BFDBFE" stroke-width="2.2" fill="none"/>
+    </svg>`
+},
+
+// ── APPLE PAY ─────────────────────────────────────────────────────────────
+// Black bg, white apple silhouette
+applepay: {
+    bg: "#000000", type: "ewallet",
+    svg: `<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="40" height="40" rx="10" fill="#000000"/>
+        <path d="M25 17.5c-.3-.1-.5-.2-.8-.2-.3 0-.5.1-.8.2-.1-.4-.4-.7-.8-.9.4-.6.7-1.3.6-2-.7.1-1.4.4-1.9 1-.5.5-.8 1.2-.8 2h-.1c-1.3 0-2.5 1.2-2.5 2.5 0 2.8 2.3 6 4.2 6 .4 0 .6 0 .9-.1.3 0 .6.1.9.1 1.9 0 4.2-3.2 4.2-6 0-1.3-1.2-2.5-2.5-2.5h-.4z" fill="#ffffff"/>
+        <path d="M22 12c.3-.7.1-1.6-.5-2.2" stroke="#ffffff" stroke-width="1.2" stroke-linecap="round" fill="none"/>
+    </svg>`
+},
+
+// ── GOOGLE PAY ────────────────────────────────────────────────────────────
+// White bg, Google G in brand blue
+googlepay: {
+    bg: "#FFFFFF", type: "ewallet",
+    svg: `<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="40" height="40" rx="10" fill="#FFFFFF" stroke="#E5E7EB" stroke-width="1.5"/>
+        <path d="M27 20c0 4-3 7-7 7s-7-3-7-7 3-7 7-7c2.2 0 4 .9 5.2 2.2l-2 1.5C22.5 15.5 21.3 15 20 15c-2.8 0-5 2.2-5 5s2.2 5 5 5 5-2.2 5-5v-1h-5v-2.5h7.5c0 .5.1 1 .1 1.5z" fill="#4285F4"/>
+    </svg>`
+},
+
+// ── REVOLUT ───────────────────────────────────────────────────────────────
+// Blue bg, card with arrow (digital payments)
+revolut: {
+    bg: "#0075EB", type: "ewallet",
+    svg: `<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="40" height="40" rx="10" fill="#0075EB"/>
+        <rect x="10" y="11" width="20" height="18" rx="3" stroke="#ffffff" stroke-width="2.5" fill="none"/>
+        <path d="M14 17h12M14 23h12" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" opacity="0.5"/>
+        <path d="M22 16l3 4-3 4" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
     </svg>`
 },
 
