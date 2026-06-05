@@ -1183,8 +1183,26 @@ body.modal-open { overflow: hidden; position: fixed; width: 100%; }
     body.print-report header,
     body.print-report nav { display: none !important; }
 
-    /* Reset body and tab panel for clean white print */
+    /* ★ Override CSS custom properties so ALL elements using them switch to light theme */
     body.print-report {
+        --bg-body: #ffffff;
+        --bg-panel: #ffffff;
+        --bg-input: #f5f5f5;
+        --text-main: #1a1a1a;
+        --text-muted: #555555;
+        --text-light: #444444;
+        --border: #dddddd;
+        --border-input: #cccccc;
+        --hover-bg: #f0f0f0;
+        --accent: #16a34a;
+        --accent-dim: rgba(22,163,74,0.08);
+        --accent-border: rgba(22,163,74,0.2);
+        --bn-green: #16a34a;
+        --bn-red: #dc2626;
+        --bn-amber: #d97706;
+        --bn-cell: #ffffff;
+        --bn-cell-2: #fafafa;
+        --bn-border: #e0e0e0;
         background: #fff !important;
         color: #1a1a1a !important;
         -webkit-print-color-adjust: exact !important;
@@ -1197,23 +1215,8 @@ body.modal-open { overflow: hidden; position: fixed; width: 100%; }
         background: #fff !important;
     }
 
-    /* Force readable text colors on ALL descendants */
-    body.print-report [role="tabpanel"],
-    body.print-report [role="tabpanel"] *,
-    body.print-report [role="tabpanel"] *::before,
-    body.print-report [role="tabpanel"] *::after {
-        color: #1a1a1a !important;
-        text-shadow: none !important;
-        border-color: #ddd !important;
-    }
-    /* Preserve color-coding for amounts (green = income, red = expense) */
-    body.print-report [role="tabpanel"] .txn-amount,
-    body.print-report [role="tabpanel"] [style*="color: #00E676"],
-    body.print-report [role="tabpanel"] [style*="color:#00E676"],
-    body.print-report [role="tabpanel"] [style*="color: rgb(0, 230, 118)"] { color: #16a34a !important; }
-    body.print-report [role="tabpanel"] [style*="color: #EF4444"],
-    body.print-report [role="tabpanel"] [style*="color:#EF4444"],
-    body.print-report [role="tabpanel"] [style*="color: rgb(239, 68, 68)"] { color: #dc2626 !important; }
+    /* Force text shadow removal on all descendants */
+    body.print-report * { text-shadow: none !important; }
 
     /* Hide interactive elements */
     body.print-report button { display: none !important; }
@@ -1235,11 +1238,7 @@ body.modal-open { overflow: hidden; position: fixed; width: 100%; }
     /* SVGs print with color */
     body.print-report svg { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 
-    /* Light overrides for bento cells */
-    body.print-report .bn-cell {
-        background: #fff !important; border: 1px solid #e0e0e0 !important;
-    }
-    body.print-report .bn-balance { background: #fff !important; }
+    /* Hide ambient glow orb */
     body.print-report .bn-orb { display: none !important; }
 
     /* Branded print header */
