@@ -43,6 +43,9 @@
     <script src="UndoToast.js"></script>
     <script src="HelpTooltip.js"></script>
     <script src="crashreport.js"></script>
+    <script src="DebtView.js"></script>
+    <script src="CashflowView.js"></script>
+    <script src="PeraReportView.js"></script>`n    <script src="CashflowView.js"></script>
 
         <link rel="apple-touch-icon" href="logosinkpeso.png">
     <link rel="icon" href="logosinkpeso.png" type="image/png">
@@ -165,6 +168,8 @@
             const [budgets, setBudgets] = useState(saved.budgets);
             const [photoDiary, setPhotoDiary] = useState([]);
             const [photoDiaryLoaded, setPhotoDiaryLoaded] = useState(false);
+            const [templates, setTemplates] = useState(saved.templates);
+            const [debts, setDebts] = useState(saved.debts);
 
             // Load archives from IndexedDB on mount, with localStorage migration
             useEffect(() => {
@@ -246,6 +251,8 @@
                 return () => clearTimeout(timer);
             }, [photoDiary, photoDiaryLoaded]);
             useEffect(() => { window.persistence.saveKey("wallets", wallets); }, [wallets]);
+            useEffect(() => { window.persistence.saveKey("templates", templates); }, [templates]);
+            useEffect(() => { window.persistence.saveKey("debts", debts); }, [debts]);
 
             // Currency Formatter bound to state
             const fc = useMemo(() => {
@@ -493,16 +500,19 @@
                 ),
                 
                 e('div', { role: "tabpanel", id: "tab-panel-" + tab, className: "page-wrap", style: { maxWidth: 1140, margin: "0 auto", padding: "clamp(16px, 4vw, 32px) clamp(12px, 4vw, 24px) 80px" } },
-                    tab === "dashboard" && e(DashboardOverview, { totals, bills, dailyExpenses, budgets, wallets: displayWallets, fc, fc2, incomes, txns, funds, archives, photoDiary, onNavigate: setTab }),
+                    tab === "dashboard" && e(DashboardOverview, { totals, bills, dailyExpenses, budgets, wallets: displayWallets, fc, fc2, incomes, txns, funds, archives, photoDiary, debts, onNavigate: setTab }),
                     tab === "limits" && e(BudgetLimitsView, { budgets, setBudgets, fc, requestConfirm, showToast }),
                     tab === "wallets" && e(WalletsView, { wallets: displayWallets, rawWallets: wallets, setWallets, incomes, dailyExpenses, txns, fc, requestConfirm, showToast }),
                     tab === "budget" && e(BudgetBillsView, { incomes, setIncomes, bills, setBills, wallets: displayWallets, setWallets, txns, setTxns, fc, requestConfirm, showToast }),
-                    tab === "daily" && e(DailyExpensesView, { dailyExpenses, setDailyExpenses, photoDiary, setPhotoDiary, wallets: displayWallets, setWallets, fc, requestConfirm, showToast }),
+                    tab === "daily" && e(DailyExpensesView, { dailyExpenses, setDailyExpenses, photoDiary, setPhotoDiary, wallets: displayWallets, setWallets, fc, requestConfirm, showToast, templates }),
                     tab === "goals" && e(SinkingFundsView, { funds, setFunds, enrichedFunds: totals.enrichedFunds, txns, setTxns, wallets: displayWallets, setWallets, fc, requestConfirm, showToast }),
                     tab === "transactions" && e(AllTransactionsView, { txns, setTxns, funds, incomes, dailyExpenses, bills, wallets: displayWallets, fc, requestConfirm }),
                     tab === "history" && e(HistoryView, { archives, fc }),
                     tab === "photo-diary" && e(PhotoDiaryView, { photoDiary, setPhotoDiary, dailyExpenses, setDailyExpenses, wallets: displayWallets, setWallets, fc, showToast, requestConfirm }),
-                    tab === "settings" && e(SettingsView, { settings, setSettings, setIncomes, setBills, setDailyExpenses, setFunds, setTxns, setArchives, setBudgets, showToast, totals, bills, budgets, fc }),
+                    tab === "utang" && e(DebtView, { debts, setDebts, fc, requestConfirm, showToast }),
+                    tab === "cashflow" && e(CashflowView, { totals, bills, incomes, dailyExpenses, wallets: displayWallets, fc }),
+                    tab === "pera-report" && e(PeraReportView, { totals, dailyExpenses, incomes, bills, funds, wallets: displayWallets, fc }),
+                    tab === "settings" && e(SettingsView, { settings, setSettings, setIncomes, setBills, setDailyExpenses, setFunds, setTxns, setArchives, setBudgets, showToast, totals, bills, budgets, fc, templates, setTemplates }),
 
 e('footer', { 
                     style: { 
@@ -658,7 +668,7 @@ e('footer', {
                         { id: "more",        icon: "more",    label: "More" }
                     ].map(t => e('button', {
                         key: t.id,
-                        className: "bnav-btn" + (tab === t.id || (t.id === "more" && ["wallets","limits","transactions","history","settings","budget"].includes(tab)) ? " active" : ""),
+                        className: "bnav-btn" + (tab === t.id || (t.id === "more" && ["wallets","limits","transactions","history","settings","budget","utang","cashflow","pera-report"].includes(tab)) ? " active" : ""),
                         onClick: () => t.id === "more" ? setShowMoreSheet(true) : setTab(t.id)
                     },
                         e(Icon, { name: t.icon, size: 22 }),
@@ -676,6 +686,9 @@ e('footer', {
                             { id: "limits",       icon: "grid",         label: "Budget Limits",      sub: "Set spending caps per category" },
                             { id: "transactions", icon: "list",         label: "Transaction Log",    sub: "All expenses, income, bills & vaults" },
                             { id: "history",      icon: "history",      label: "Month History",      sub: "Archived monthly snapshots" },
+                            { id: "utang",        icon: "creditcard",   label: "Utang Tracker",      sub: "Track money owed & owing" },
+                            { id: "cashflow",     icon: "trendingup",   label: "Cashflow Forecast",  sub: "30-day balance projection" },
+                            { id: "pera-report", icon: "chart",         label: "Pera Report",          sub: "Your monthly money story" },
                             { id: "settings",     icon: "settings",     label: "Settings",           sub: "Preferences, PIN, backup" },
                         ].map(t => {
                             const isActive = tab === t.id;

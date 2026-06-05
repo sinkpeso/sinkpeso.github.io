@@ -60,7 +60,7 @@
     // ── main component ──────────────────────────────────────────────────────
     function DashboardOverview({ totals, bills, dailyExpenses, budgets,
                                   wallets, fc, fc2, incomes, txns,
-                                  funds, archives, photoDiary, onNavigate }) {
+                                  funds, archives, photoDiary, debts, onNavigate }) {
 
         // walleticons.js is guaranteed loaded by the time this function runs
         const { WalletIcon } = window.walleticons;
@@ -75,6 +75,16 @@
         const spendPct   = totals.totalIncome > 0
             ? (totals.totalDailySpent + totals.paidBills) / totals.totalIncome : 0;
         const walletTotal = (wallets || []).reduce((s, w) => s + (w.balanceCents || 0), 0);
+
+        // Net Worth: wallets + sinking funds - debts
+        const fundsTotal = (funds || []).reduce((s, f) => s + (f.savedCents || f.targetCents || 0), 0);
+        const debtTotal = (debts || []).reduce((s, d) => {
+            if (d.status === "paid") return s;
+            const paid = (d.payments || []).reduce((ps, p) => ps + p.amountCents, 0);
+            const remaining = Math.max(0, d.amountCents - paid);
+            return d.type === "i_owe" ? s + remaining : s - remaining;
+        }, 0);
+        const netWorth = walletTotal + fundsTotal - debtTotal;
 
         const today      = new Date();
         const daysInMo   = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();

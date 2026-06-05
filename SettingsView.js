@@ -100,7 +100,69 @@
         );
     }
 
-    function SettingsView({ settings, setSettings, setIncomes, setBills, setDailyExpenses, setFunds, setTxns, setArchives, setBudgets, showToast, totals, bills, budgets, fc }) {
+    // ── ADD TEMPLATE FORM ───────────────────────────────────────────────
+    function AddTemplateForm({ CATEGORIES, templates, setTemplates, showToast, fc }) {
+        const [open, setOpen] = React.useState(false);
+        const [label, setLabel] = React.useState("");
+        const [amount, setAmount] = React.useState("");
+        const [category, setCategory] = React.useState("Food");
+
+        const ICON_OPTIONS = [
+            { id: "car", label: "Transport" },
+            { id: "utensils", label: "Food" },
+            { id: "shoppingbag", label: "Shopping" },
+            { id: "smartphone", label: "Gadget" },
+            { id: "receipt", label: "Bills" },
+            { id: "briefcase", label: "Business" },
+            { id: "gift", label: "Gift" },
+            { id: "home2", label: "Home" },
+            { id: "wallet", label: "Wallet" },
+            { id: "coffee", label: "Coffee" },
+        ];
+        const [icon, setIcon] = React.useState("wallet");
+
+        const handleAdd = () => {
+            if (!label.trim()) { showToast("Enter a label."); return; }
+            const amtCents = window.utils.tc(amount);
+            if (amtCents <= 0) { showToast("Enter a valid amount."); return; }
+            const newTpl = { id: "tpl-" + Date.now(), label: label.trim(), amountCents: amtCents, category, icon };
+            setTemplates([...(templates || []), newTpl]);
+            setLabel(""); setAmount(""); setCategory("Food"); setIcon("wallet"); setOpen(false);
+            showToast("Template added!");
+        };
+
+        if (!open) return e(Btn, { v: "ghost", style: { width: "100%", marginTop: 8 }, onClick: () => setOpen(true) }, "+ Add Template");
+
+        return e('div', { style: { marginTop: 12, padding: "12px", background: "var(--hover-bg)", borderRadius: 10, border: "1px solid var(--border)" } },
+            e('div', { style: { display: "flex", gap: 8, marginBottom: 10, flexWrap: "wrap" } },
+                e('div', { style: { flex: "2 1 150px" } }, e(Inp, { value: label, placeholder: "Label (e.g. Jeepney)", onChange: ev => setLabel(ev.target.value) })),
+                e('div', { style: { flex: "1 1 100px" } }, e(Inp, { type: "number", value: amount, placeholder: "Amount", onChange: ev => setAmount(ev.target.value) })),
+                e('div', { style: { flex: "1 1 120px" } }, e(Sel, { value: category, onChange: ev => setCategory(ev.target.value) }, CATEGORIES.map(c => e('option', { key: c, value: c }, c))))
+            ),
+            e('div', { style: { display: "flex", gap: 6, marginBottom: 12, flexWrap: "wrap" } },
+                ICON_OPTIONS.map(opt =>
+                    e('button', {
+                        key: opt.id,
+                        onClick: () => setIcon(opt.id),
+                        style: {
+                            display: "inline-flex", alignItems: "center", justifyContent: "center",
+                            width: 32, height: 32, borderRadius: 8,
+                            background: icon === opt.id ? "var(--bg-panel)" : "transparent",
+                            border: icon === opt.id ? "1px solid #00E676" : "1px solid var(--border)",
+                            cursor: "pointer", transition: "all 0.15s",
+                        },
+                        title: opt.label
+                    }, e(Icon, { name: opt.id, size: 14, color: icon === opt.id ? "#00E676" : "var(--text-muted)" }))
+                )
+            ),
+            e('div', { style: { display: "flex", gap: 8 } },
+                e(Btn, { v: "ghost", style: { flex: 1 }, onClick: () => setOpen(false) }, "Cancel"),
+                e(Btn, { v: "accent", style: { flex: 1 }, onClick: handleAdd }, "Add")
+            )
+        );
+    }
+
+    function SettingsView({ settings, setSettings, setIncomes, setBills, setDailyExpenses, setFunds, setTxns, setArchives, setBudgets, showToast, totals, bills, budgets, fc, templates, setTemplates }) {
         const safeSettings = settings || {};
         const [pinInput, setPinInput] = React.useState(safeSettings?.pin || '');
         const [upgradeMsg, setUpgradeMsg] = React.useState(null);
@@ -450,7 +512,51 @@ setUpgradeMsg("This is a Premium feature. Unlock encrypted backups with a one-ti
                         )
                     ),
 
-                    e(SettingGroup, { title: "Storage Usage", icon: "inbox" },
+            e(SettingGroup, { title: "Quick Entry Templates", icon: "zap" },
+                e('p', { style: { fontSize: 13, color: "var(--text-muted)", marginBottom: 16, lineHeight: 1.5 } },
+                    "One-tap shortcuts for your most common expenses. These appear at the top of the Daily Expenses screen."
+                ),
+                templates && templates.length > 0 && e('div', { style: { display: "flex", flexDirection: "column", gap: 8, marginBottom: 16 } },
+                    templates.map((tpl, idx) =>
+                        e('div', { key: tpl.id, style: { display: "flex", alignItems: "center", gap: 10, padding: "10px 12px", background: "var(--hover-bg)", borderRadius: 10, border: "1px solid var(--border)" } },
+                            e(Icon, { name: tpl.icon || "wallet", size: 16, color: "var(--text-muted)" }),
+                            e('div', { style: { flex: 1, minWidth: 0 } },
+                                e('div', { style: { fontSize: 13, fontWeight: 600, color: "var(--text-main)" } }, tpl.label),
+                                e('div', { style: { fontSize: 11, color: "var(--text-muted)" } }, fc(tpl.amountCents) + " \u00b7 " + tpl.category)
+                            ),
+                            idx > 0 && e('button', {
+                                onClick: () => {
+                                    const next = [...templates];
+                                    [next[idx - 1], next[idx]] = [next[idx], next[idx - 1]];
+                                    setTemplates(next);
+                                },
+                                style: { ...S.iconBtn, width: 28, height: 28 },
+                                title: "Move up"
+                            }, e('svg', { width: 12, height: 12, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round" }, e('path', { d: "M18 15l-6-6-6 6" }))),
+                            idx < templates.length - 1 && e('button', {
+                                onClick: () => {
+                                    const next = [...templates];
+                                    [next[idx], next[idx + 1]] = [next[idx + 1], next[idx]];
+                                    setTemplates(next);
+                                },
+                                style: { ...S.iconBtn, width: 28, height: 28 },
+                                title: "Move down"
+                            }, e('svg', { width: 12, height: 12, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round" }, e('path', { d: "M6 9l6 6 6-6" }))),
+                            e('button', {
+                                onClick: () => {
+                                    setTemplates(templates.filter((_, i) => i !== idx));
+                                    showToast("Template removed.");
+                                },
+                                style: { ...S.iconBtn, width: 28, height: 28, color: "#EF4444" },
+                                title: "Delete"
+                            }, e(Icon, { name: "trash", size: 12, color: "#EF4444" }))
+                        )
+                    )
+                ),
+                e(AddTemplateForm, { CATEGORIES, templates, setTemplates, showToast, fc })
+            ),
+
+            e(SettingGroup, { title: "Storage Usage", icon: "inbox" },
                         e(StorageUsagePanel, { showToast })
                     ),
 

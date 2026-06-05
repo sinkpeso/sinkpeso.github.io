@@ -75,6 +75,8 @@
         budgets  : "sp_budgets",
         wallets    : "sp_wallets",
         photoDiary : "sp_photo_diary",
+        templates  : "sp_templates",
+        debts      : "sp_debts",
     };
 
     // ── DEFAULT VALUES ────────────────────────────────────────────────────────
@@ -90,6 +92,15 @@
         budgets    : [],
         wallets    : [],
         photoDiary : [],
+        templates  : [
+            { id: "tpl-default-1", label: "Jeepney",  amountCents: 1300,  category: "Gas",        icon: "car" },
+            { id: "tpl-default-2", label: "Tricycle",  amountCents: 2000,  category: "Gas",        icon: "car" },
+            { id: "tpl-default-3", label: "Sari-sari", amountCents: 5000,  category: "Food",       icon: "shoppingbag" },
+            { id: "tpl-default-4", label: "Grab",      amountCents: 15000, category: "Gas",        icon: "car" },
+            { id: "tpl-default-5", label: "Merienda",  amountCents: 3000,  category: "Food",       icon: "utensils" },
+            { id: "tpl-default-6", label: "Load",      amountCents: 5000,  category: "Personal",   icon: "smartphone" },
+        ],
+        debts      : [],
     };
 
     // ── INTERNAL: safe JSON read ──────────────────────────────────────────────

@@ -43,7 +43,7 @@
         );
     }
 
-    function DailyExpensesView({ dailyExpenses, setDailyExpenses, photoDiary, setPhotoDiary, wallets, setWallets, fc, requestConfirm, showToast }) {
+    function DailyExpensesView({ dailyExpenses, setDailyExpenses, photoDiary, setPhotoDiary, wallets, setWallets, fc, requestConfirm, showToast, templates }) {
         const [name, setName] = React.useState(""); const [amount, setAmount] = React.useState(""); const [category, setCategory] = React.useState("Food");
         const [recurring, setRecurring] = React.useState("none");
         const [walletId, setWalletId] = React.useState(wallets.length > 0 ? (wallets.find(w => w.id === CASH_WALLET_ID) ? CASH_WALLET_ID : wallets[0].id) : "");
@@ -102,6 +102,34 @@
             }, 5000);
         };
 
+        const [templateBusy, setTemplateBusy] = React.useState(null);
+
+        const handleTemplateTap = (tpl) => {
+            if (templateBusy) return;
+            const amtCents = tpl.amountCents;
+            if (amtCents <= 0) return;
+            const targetWalletId = walletId || (wallets.length > 0 ? wallets[0].id : null);
+            const selW = wallets.find(w => w.id === targetWalletId);
+            const rec = {
+                id: uid(),
+                name: tpl.label,
+                amountCents: amtCents,
+                category: (CATEGORIES || []).includes(tpl.category) ? tpl.category : "Personal",
+                date: todayStr(),
+                walletId: targetWalletId || null,
+                walletNameSnapshot: selW ? selW.name : null,
+                recurring: "none",
+            };
+            if (selW && (selW.balanceCents || 0) < amtCents) {
+                setPendingExpense({ selWallet: selW, amtCents, type: "add", rec });
+                return;
+            }
+            setTemplateBusy(tpl.id);
+            commitAddExpense(rec);
+            showToast(`${tpl.label} logged!`);
+            setTimeout(() => setTemplateBusy(null), 300);
+        };
+
         const handleLogItem = () => {
             if (!name || !amount) return;
             const amtCents = tc(amount);
@@ -147,6 +175,39 @@
                 onCancel: () => { setPendingExpense(null); setPendingEditData(null); },
                 onForce: () => pendingExpense.type === "edit" ? commitForceEdit() : commitAddExpense(pendingExpense.rec)
             }),
+            templates && templates.length > 0 && e('div', { style: { marginBottom: 20 } },
+                e(SLabel, { style: { marginBottom: 10 } }, "Quick Add"),
+                e('div', {
+                    style: {
+                        display: "flex", gap: 8, overflowX: "auto",
+                        paddingBottom: 4, WebkitOverflowScrolling: "touch",
+                        scrollbarWidth: "none", msOverflowStyle: "none",
+                    }
+                },
+                    templates.map(tpl =>
+                        e('button', {
+                            key: tpl.id,
+                            onClick: () => handleTemplateTap(tpl),
+                            disabled: templateBusy === tpl.id,
+                            style: {
+                                display: "inline-flex", alignItems: "center", gap: 7,
+                                padding: "8px 14px", borderRadius: 10,
+                                background: templateBusy === tpl.id ? "rgba(0,230,118,0.15)" : "var(--hover-bg)",
+                                border: "1px solid " + (templateBusy === tpl.id ? "rgba(0,230,118,0.3)" : "var(--border)"),
+                                color: "var(--text-main)", fontSize: 13, fontWeight: 600,
+                                cursor: templateBusy ? "wait" : "pointer",
+                                whiteSpace: "nowrap", flexShrink: 0,
+                                transition: "all 0.15s",
+                                fontFamily: "inherit",
+                            }
+                        },
+                            e(Icon, { name: tpl.icon || "wallet", size: 14, color: "var(--text-muted)" }),
+                            e('span', null, tpl.label),
+                            e('span', { style: { color: "#EF4444", fontSize: 12, fontWeight: 700 } }, "-" + fc(tpl.amountCents))
+                        )
+                    )
+                )
+            ),
             e('div', { className: "premium-panel", style: { marginBottom: 24 } },
                 e(SLabel, { style: { marginBottom: 16 } }, "Log New Daily Spend Item"),
                 e('div', { className: "tf" },
