@@ -1,3 +1,62 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   NATIVE APP RESET — Erase all "web browser" tells
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Kill text selection + long-press callout ghost */
+*, *::before, *::after {
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+}
+
+/* Re-enable selection inside form fields (users must be able to type) */
+input, textarea, select {
+    -webkit-user-select: text;
+    user-select: text;
+}
+
+/* Remove the grey/blue tap highlight flash on every touch */
+* {
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* Kill all browser focus outlines and rings */
+*:focus {
+    outline: none !important;
+    -webkit-tap-highlight-color: transparent;
+}
+*:focus-visible {
+    outline: none !important;
+}
+
+/* Stop rubber-band overscroll bounce on the body.
+   Scrolling only happens inside designated containers. */
+html, body {
+    overscroll-behavior: none;
+}
+
+/* Eliminate 300ms double-tap delay */
+html {
+    touch-action: manipulation;
+}
+
+/* Prevent body scroll jump when modal is open */
+body.modal-open {
+    overflow: hidden;
+    overscroll-behavior: none;
+    position: fixed;
+    width: 100%;
+    top: var(--scroll-y, 0);
+}
+
+/* Disable text selection highlight entirely (safety net) */
+::selection {
+    background: transparent;
+    color: inherit;
+}
+
+/* ── END NATIVE APP RESET ─────────────────────────────────────────────── */
+
 /* THEME VARIABLES */
 :root {
     --bg-body: #020810;
@@ -423,11 +482,10 @@ a:active { opacity: 0.8; }
 /* ── TABULAR NUMS FOR MONEY ── */
 .tabular-nums { font-variant-numeric: tabular-nums; }
 
-/* ── FOCUS VISIBLE ── */
-:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: var(--r-sm); }
+/* ── FOCUS VISIBLE (native app: no visible focus rings) ── */
+/* Keyboard users: add .focus-ring class manually if needed */
 
-/* ── SELECTION ── */
-::selection { background: var(--accent-dim); color: var(--text-main); }
+/* ── SELECTION (handled by native reset above) ── */
 
 /* ═══════════════════════════════════════════════════════════════════════════
    BENTO BOX DASHBOARD
@@ -1145,8 +1203,7 @@ a:active { opacity: 0.8; }
 .chart-bar-group span { font-size: 11px; }
 .stream-row > div:first-child { min-width: 0; overflow: hidden; }
 
-/* ── MODAL SCROLL LOCK ── */
-body.modal-open { overflow: hidden; position: fixed; width: 100%; }
+/* ── MODAL SCROLL LOCK (handled by native reset above) ── */
 
 /* ── MOBILE-FIRST FIXES ── */
 .modal-container button[style*="width:36"] { min-width: 44px !important; min-height: 44px !important; }

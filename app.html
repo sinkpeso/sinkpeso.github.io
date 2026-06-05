@@ -2,7 +2,7 @@
     <html lang="en" dir="ltr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>SINKPESO</title>
     
     <link rel="stylesheet" href="fonts/fonts.css">
@@ -307,8 +307,14 @@
             // ── MODAL SCROLL LOCK ──
             const hasOpenModal = showCloseModal || showQuickAdd || showMoreSheet || confirmState;
             useEffect(() => {
-                if (hasOpenModal) { document.body.classList.add('modal-open'); }
-                else { document.body.classList.remove('modal-open'); }
+                if (hasOpenModal) {
+                    document.documentElement.style.setProperty('--scroll-y', `${window.scrollY}px`);
+                    document.body.classList.add('modal-open');
+                } else {
+                    document.body.classList.remove('modal-open');
+                    const scrollY = document.documentElement.style.getPropertyValue('--scroll-y');
+                    window.scrollTo(0, parseInt(scrollY || '0'));
+                }
                 return () => document.body.classList.remove('modal-open');
             }, [hasOpenModal]);
             const requestConfirm = useCallback((message, onConfirm) => {
