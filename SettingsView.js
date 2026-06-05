@@ -565,6 +565,59 @@ setUpgradeMsg("This is a Premium feature. Unlock encrypted backups with a one-ti
                         e(StorageUsagePanel, { showToast })
                     ),
 
+            // ── DAILY REMINDER ──
+            e(SettingGroup, { title: "Daily Reminder", icon: "calendar" },
+                e('div', { style: { display: "flex", flexDirection: "column", gap: 12 } },
+                    e('p', { style: { fontSize: 13, color: "var(--text-muted)", lineHeight: 1.5 } },
+                        "Get a daily notification summarizing your spending. Helps you stay on track."
+                    ),
+                    window.DailyReminder && window.DailyReminder.isSupported() ? e('div', null,
+                        e('div', { style: { display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 14px", background: "var(--hover-bg)", borderRadius: 10, border: "1px solid var(--border)" } },
+                            e('div', null,
+                                e('div', { style: { fontSize: 13, fontWeight: 600, color: "var(--text-main)" } }, "Enable Daily Summary"),
+                                e('div', { style: { fontSize: 11, color: "var(--text-muted)", marginTop: 2 } }, "Fires at 8:00 PM with your spending recap")
+                            ),
+                            e('button', {
+                                onClick: function() {
+                                    if (window.DailyReminder.isEnabled()) {
+                                        window.DailyReminder.disable();
+                                        showToast("Daily reminder disabled.");
+                                    } else {
+                                        window.DailyReminder.enable([], []).then(function(ok) {
+                                            showToast(ok ? "Daily reminder enabled!" : "Notification permission denied.");
+                                        });
+                                    }
+                                    // Force re-render by toggling a state
+                                    setSettings(function(s) { return Object.assign({}, s, { _notifyToggle: !(s._notifyToggle || false) }); });
+                                },
+                                style: {
+                                    width: 48, height: 26, borderRadius: 13,
+                                    background: window.DailyReminder.isEnabled() ? "#00E676" : "var(--border)",
+                                    border: "none", cursor: "pointer", position: "relative",
+                                    transition: "background 0.2s", flexShrink: 0,
+                                }
+                            },
+                                e('div', {
+                                    style: {
+                                        width: 20, height: 20, borderRadius: "50%",
+                                        background: "#fff", position: "absolute",
+                                        top: 3, left: window.DailyReminder.isEnabled() ? 25 : 3,
+                                        transition: "left 0.2s",
+                                        boxShadow: "0 1px 4px rgba(0,0,0,0.2)",
+                                    }
+                                })
+                            )
+                        ),
+                        window.DailyReminder.getPermissionState() === 'denied' && e('div', { style: { fontSize: 11, color: "#F59E0B", marginTop: 6, display: "flex", alignItems: "center", gap: 4 } },
+                            e(Icon, { name: "shield", size: 11, color: "#F59E0B" }),
+                            "Notifications blocked. Please enable in your browser settings."
+                        )
+                    ) : e('div', { style: { fontSize: 13, color: "var(--text-muted)", padding: "10px 14px", background: "var(--hover-bg)", borderRadius: 10, border: "1px solid var(--border)" } },
+                        "Notifications are not supported in this browser."
+                    )
+                )
+            ),
+
                     e(SettingGroup, { title: "Crash Reports", icon: "target" },
                         e(CrashReportPanel, { showToast })
                     ),

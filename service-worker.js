@@ -38,6 +38,7 @@ const ASSETS = [
   './DebtView.js',
   './CashflowView.js',
   './PeraReportView.js',
+  './DailyReminder.js',
   './CoreComponents.js',
   './react.production.min.js',
   './react-dom.production.min.js',

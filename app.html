@@ -45,6 +45,7 @@
     <script src="CashflowView.js"></script>
     <script src="PeraReportView.js"></script>
     <script src="CashflowView.js"></script>
+    <script src="DailyReminder.js"></script>
 
         <link rel="apple-touch-icon" href="logosinkpeso.png">
     <link rel="icon" href="logosinkpeso.png" type="image/png">
@@ -151,6 +152,16 @@
             }, []);
 
             useEffect(() => { window.scrollTo(0, 0); }, [tab]);
+
+            // ── DAILY REMINDER NOTIFICATION ──
+            useEffect(() => {
+                if (window.DailyReminder && window.DailyReminder.isEnabled()) {
+                    // Send today's summary if not already sent
+                    window.DailyReminder.sendNotification(dailyExpenses, budgets);
+                    // Schedule next notification
+                    window.DailyReminder.scheduleNext(dailyExpenses, budgets);
+                }
+            }, [dailyExpenses, budgets]);
 
             const [saved] = useState(() => window.persistence.loadState());
             const defaultSettings = { currency: 'PHP', secondaryCurrency: '', theme: 'dark', pin: '' };
