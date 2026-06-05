@@ -128,7 +128,7 @@
 
         // Export PDF button (premium)
         e('div', { style: { marginBottom: 20, display: "flex", justifyContent: "flex-end" } },
-            e(ExportPDFBtn, { printClass: "print-report" })
+            e(ExportPDFBtn)
         ),
 
         // Stat grid

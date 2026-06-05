@@ -50,7 +50,7 @@
                     e('h2', { style: { fontSize: 22, fontWeight: 800, marginBottom: 4 } }, 'Transaction Log'),
                     e('div', { style: { fontSize: 14, color: "var(--text-muted)", marginBottom: 20 } }, 'Full history — expenses, income, bills, and vault actions.')
                 ),
-                e(ExportPDFBtn, { printClass: "print-report", style: { marginBottom: 20 } })
+                e(ExportPDFBtn, { style: { marginBottom: 20 } })
             ),
 
             e('div', { className: "bento-filter", style: { marginBottom: 14 } },
