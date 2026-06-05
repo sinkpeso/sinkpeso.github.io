@@ -291,13 +291,61 @@
         );
     }
 
+    // ── NUMERIC KEYPAD ─────────────────────────────────────────────────────
+    function NumericKeypad({ value, onChange, onSubmit }) {
+        const handleKey = useCallback((key) => {
+            if (key === 'backspace') {
+                onChange(value.slice(0, -1));
+            } else if (key === '.') {
+                // Only one decimal point allowed
+                if (!value.includes('.')) {
+                    onChange(value + (value === '' ? '0.' : '.'));
+                }
+            } else {
+                // Limit: max 2 decimal places
+                const dotIdx = value.indexOf('.');
+                if (dotIdx !== -1 && value.length - dotIdx > 2) return;
+                // Max 8 digits before decimal
+                if (dotIdx === -1 && value.length >= 8) return;
+                onChange(value + key);
+            }
+        }, [value, onChange]);
+
+        const display = value === '' ? '0' : value;
+        const keys = [
+            { k: '1', label: '1' }, { k: '2', label: '2' }, { k: '3', label: '3' },
+            { k: '4', label: '4' }, { k: '5', label: '5' }, { k: '6', label: '6' },
+            { k: '7', label: '7' }, { k: '8', label: '8' }, { k: '9', label: '9' },
+            { k: '.', label: '.', cls: 'numpad-key--action' },
+            { k: '0', label: '0' },
+            { k: 'backspace', label: '⌫', cls: 'numpad-key--action' },
+        ];
+
+        return e('div', null,
+            e('div', { className: 'numpad-display' },
+                e('span', { style: { color: value === '' ? 'var(--text-muted)' : 'var(--text-main)', opacity: value === '' ? 0.4 : 1 } }, display),
+                e('span', { className: 'numpad-cursor' })
+            ),
+            e('div', { className: 'numpad-grid' },
+                keys.map(({ k, label, cls }) =>
+                    e('button', {
+                        key: k,
+                        type: 'button',
+                        className: 'numpad-key ' + (cls || ''),
+                        onClick: () => handleKey(k),
+                    }, label)
+                )
+            )
+        );
+    }
+
     // ── QUICK ADD MODAL ────────────────────────────────────────────────────
     function QuickAddModal({ onSave, onClose, wallets, setWallets, fc }) {
         const Icon = window.Icon;
         const S = window.S || {};
         const CASH_WALLET_ID = window.CASH_WALLET_ID || "sp-cash";
         const CATEGORIES = window.CATEGORIES || ["Food","Gas","Bills","Business","Personal","Savings"];
-        const [amount, setAmount] = useState("");
+        const [amount, setAmount] = useState("");  // string like "12.50"
         const [category, setCategory] = useState("Food");
         const [note, setNote] = useState("");
         const [walletId, setWalletId] = useState(wallets.length > 0 ? (wallets.find(w => w.id === CASH_WALLET_ID) ? CASH_WALLET_ID : wallets[0].id) : "");
@@ -331,7 +379,7 @@
                     e('div', { style: { fontSize: 16, fontWeight: 800, color: "var(--text-main)" } }, "Quick Add Expense"),
                     e('button', { onClick: onClose, style: S.closeBtn || {} }, e(Icon, { name: "x", size: 16 }))
                 ),
-                e('input', { className: "quick-add-amount", type: "number", inputMode: "decimal", pattern: "[0-9]*", placeholder: "0.00", autoFocus: true, value: amount, onChange: ev => setAmount(ev.target.value), onKeyDown: ev => ev.key === 'Enter' && handle() }),
+                e(NumericKeypad, { value: amount, onChange: setAmount, onSubmit: handle }),
                 e('div', { className: "cat-grid" },
                     CATEGORIES.map(c => e('button', { key: c, className: "cat-btn" + (category === c ? " selected" : ""), onClick: () => setCategory(c) },
                         e('div', { style: { marginBottom: 3, opacity: 0.8 } }, e(Icon, { name: catIcons[c] || "target", size: 18 })),

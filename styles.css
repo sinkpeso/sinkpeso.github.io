@@ -315,6 +315,77 @@ input[type="datetime-local"] {
 /* ── QUICK ADD FORM ── */
 .quick-add-amount { font-family: 'SF Mono', 'Menlo', 'Consolas', monospace; font-size: 34px; font-weight: 500; text-align: center; background: transparent; color: var(--text-main); border: none; border-bottom: 2px solid var(--border-input); padding: var(--sp-2) var(--sp-4); width: 100%; outline: none; margin-bottom: var(--sp-2); }
 .quick-add-amount:focus { border-bottom-color: var(--accent); }
+
+/* ── CUSTOM NUMERIC KEYPAD ── */
+.numpad-display {
+    font-family: 'SF Mono', 'Menlo', 'Consolas', monospace;
+    font-size: 42px;
+    font-weight: 500;
+    text-align: center;
+    color: var(--text-main);
+    padding: 12px 16px;
+    min-height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    letter-spacing: -0.02em;
+    position: relative;
+}
+.numpad-display .numpad-cursor {
+    display: inline-block;
+    width: 2px;
+    height: 38px;
+    background: var(--accent);
+    margin-left: 2px;
+    animation: blink 1s step-end infinite;
+}
+@keyframes blink { 50% { opacity: 0; } }
+.numpad-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+    padding: 6px 0;
+}
+.numpad-key {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 54px;
+    border-radius: 12px;
+    border: none;
+    background: var(--bg-input);
+    color: var(--text-main);
+    font-size: 22px;
+    font-weight: 500;
+    font-family: 'SF Mono', 'Menlo', 'Consolas', monospace;
+    cursor: pointer;
+    transition: background 0.08s;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    -webkit-user-select: none;
+}
+.numpad-key:active {
+    background: var(--hover-bg);
+    transform: scale(0.96);
+}
+.numpad-key--action {
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 18px;
+}
+.numpad-key--accent {
+    background: var(--accent);
+    color: #020810;
+    font-weight: 700;
+    font-size: 20px;
+}
+.numpad-key--accent:active {
+    opacity: 0.85;
+}
+@media (max-width: 600px) {
+    .numpad-display { font-size: 36px; min-height: 56px; }
+    .numpad-key { height: 50px; font-size: 20px; border-radius: 10px; }
+}
 .cat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--sp-2); margin: var(--sp-4) 0; }
 .cat-btn { padding: 10px 6px; border: 1px solid var(--border); border-radius: var(--r-sm); background: var(--bg-input); color: var(--text-light); font-size: var(--t-sm); font-weight: 600; cursor: pointer; transition: all 0.15s; text-align: center; }
 .cat-btn.selected { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
@@ -476,9 +547,93 @@ input[type="datetime-local"] {
     .modal-overlay { padding: var(--sp-4) var(--sp-4) calc(var(--sp-4) + env(safe-area-inset-bottom, 0px)); }
 }
 
-/* ── GLOBAL ACTIVE STATES ── */
-.nav-btn:active, .bnav-btn:active, .fab:active, .cat-btn:active, .dot-menu-btn:active, .dot-menu-item:active, .sheet-row:active { transform: scale(0.97); transition: transform 0.1s; }
-a:active { opacity: 0.8; }
+/* ═══════════════════════════════════════════════════════════════════════════
+   HIGH-PERFORMANCE MICRO-INTERACTIONS
+   All transitions use transform + opacity only (GPU-composited, 0ms input delay)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Touch feedback: instantaneous scale on press ── */
+.nav-btn:active, .bnav-btn:active, .fab:active, .cat-btn:active,
+.dot-menu-btn:active, .dot-menu-item:active, .sheet-row:active {
+    transform: scale(0.97);
+    transition: transform 80ms cubic-bezier(0.2, 0, 0, 1);
+    -webkit-tap-highlight-color: transparent;
+}
+a:active { opacity: 0.7; transition: opacity 80ms; }
+
+/* ── Modal / Sheet entrance: hardware-accelerated slide-up ── */
+@keyframes nativeSlideUp {
+    from { transform: translateY(32px); opacity: 0; }
+    to   { transform: translateY(0); opacity: 1; }
+}
+@keyframes nativeFadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+@keyframes nativeSlideDown {
+    from { transform: translateY(0); opacity: 1; }
+    to   { transform: translateY(100%); opacity: 0; }
+}
+@keyframes nativeScaleIn {
+    from { transform: scale(0.95); opacity: 0; }
+    to   { transform: scale(1); opacity: 1; }
+}
+
+/* Modal overlay: instant backdrop fade */
+.modal-overlay { animation: nativeFadeIn 0.15s ease-out both; }
+.modal-container { animation: nativeScaleIn 0.2s cubic-bezier(0.2, 0, 0, 1) both; }
+
+/* Bottom sheet: smooth slide from bottom */
+.sheet-overlay { animation: nativeFadeIn 0.12s ease-out both; }
+
+/* ── Button hover/active: GPU-composited only ── */
+.fab {
+    transition: transform 0.15s cubic-bezier(0.2, 0, 0, 1),
+                box-shadow 0.15s cubic-bezier(0.2, 0, 0, 1);
+    will-change: transform;
+}
+.fab:hover { transform: scale(1.05); }
+.fab:active { transform: scale(0.92); transition-duration: 60ms; }
+
+/* ── Nav tab active indicator: smooth slide ── */
+.nav-btn, .bnav-btn {
+    transition: color 0.15s ease, opacity 0.15s ease;
+}
+
+/* ── Stream rows: smooth hover without layout shift ── */
+.stream-row { transition: opacity 0.12s ease; }
+
+/* ── Category mini cards: lift on hover ── */
+.category-mini-card { transition: transform 0.2s cubic-bezier(0.2, 0, 0, 1); }
+.category-mini-card:hover { transform: translateY(-2px); }
+.category-mini-card:active { transform: translateY(0); transition-duration: 80ms; }
+
+/* ── Bento wallet cells: lift on hover ── */
+.bn-wallet {
+    transition: transform 0.2s cubic-bezier(0.2, 0, 0, 1),
+                border-color 0.2s ease;
+}
+.bn-wallet:hover { transform: translateY(-2px); }
+
+/* ── Photo diary cards: scale on press ── */
+.pd-card { transition: transform 0.15s cubic-bezier(0.2, 0, 0, 1); }
+.pd-card:active { transform: scale(0.97); }
+
+/* ── Toast: GPU-accelerated entrance ── */
+.toast {
+    animation: nativeSlideUp 0.22s cubic-bezier(0.2, 0, 0, 1) both;
+    will-change: transform, opacity;
+}
+
+/* ── Dot menu dropdown: scale-in from corner ── */
+.dot-menu-dropdown {
+    animation: nativeScaleIn 0.12s cubic-bezier(0.2, 0, 0, 1) both;
+    transform-origin: top right;
+}
+
+/* ── Prevent flash of unstyled transitions on page load ── */
+.will-change-transform { will-change: transform; }
+.will-change-opacity { will-change: opacity; }
 
 /* ── TABULAR NUMS FOR MONEY ── */
 .tabular-nums { font-variant-numeric: tabular-nums; }
