@@ -74,7 +74,9 @@
             expenses: 'SINKPESO — Daily Expenses',
             bills: 'SINKPESO — Bills & Income',
             savings: 'SINKPESO — Savings Vaults',
-            diary: 'SINKPESO — Photo Diary'
+            diary: 'SINKPESO — Photo Diary',
+            utang: 'SINKPESO — Utang Tracker',
+            cashflow: 'SINKPESO — Cashflow Forecast'
         };
 
         function activateTab(tab) {
