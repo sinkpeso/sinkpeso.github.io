@@ -49,7 +49,7 @@
         const id = htmlFor || ("sp-field-" + (++_fieldIdCounter));
         return e('div', { style: { marginBottom: 20 } },
             e('label', { htmlFor: id, style: { fontSize: 12, fontWeight: 600, color: "var(--text-light)", marginBottom: 8, letterSpacing: "0.03em", display: "block" } }, label),
-            React.cloneElement(children, { id })
+            React.isValidElement(children) ? React.cloneElement(children, { id }) : children
         );
     }
 
