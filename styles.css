@@ -173,9 +173,13 @@ input[type="datetime-local"] {
     background: var(--bg-panel);
     border: 1px solid var(--border);
     border-radius: var(--r-xl);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    box-shadow: var(--shadow-sm);
     padding: var(--sp-6);
     margin-bottom: var(--sp-4);
+    transition: box-shadow 0.2s ease;
+}
+.premium-panel:hover {
+    box-shadow: var(--shadow-md);
 }
 @media (max-width: 600px) {
     .premium-panel { padding: var(--sp-5) var(--sp-4); border-radius: var(--r-lg); }
@@ -190,7 +194,7 @@ input[type="datetime-local"] {
     padding: var(--sp-7);
     position: relative;
     overflow: hidden;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    box-shadow: var(--shadow-md), inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 @media (max-width: 600px) {
     .balance-gradient-card { padding: var(--sp-5) var(--sp-4); border-radius: var(--r-lg); }
@@ -740,6 +744,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
     padding: 22px;
     position: relative;
     overflow: hidden;
+    box-shadow: var(--shadow-sm);
 }
 
 /* Hairline shimmer on top edge — dark mode only */

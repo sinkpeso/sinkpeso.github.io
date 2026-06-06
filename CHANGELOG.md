@@ -2,6 +2,26 @@
 
 All notable changes to SINKPESO are documented here.
 
+## [2.4.0] — 2026-06-06
+
+### Added
+- **Real App Screenshots** — 8 Puppeteer-generated screenshots (Dashboard, Expenses, Bills, Savings, Photo Diary) in both desktop (1280×720) and mobile (390×844) viewports
+- **Screenshot Showcase Carousel** — Landing page App Preview section now shows real screenshots in CSS browser/phone frames instead of hand-coded HTML mockups
+- **Animated Hero Orbs** — Three blurred gradient orbs (green, blue, purple) float behind the hero section with staggered fade-in
+- **Scroll Progress Bar** — Green-to-blue gradient bar fixed below the nav tracks scroll position across the entire landing page
+- **Back-to-Top Button** — Floating arrow button appears after scrolling 500px with accent glow on hover
+- **Enhanced Empty States** — Icon now sits inside a circular accent-tinted background with border; fade-in animation on mount; `illustration` prop for custom SVGs
+- **Shadow Design System** — Four new CSS variables (`--shadow-sm`, `--shadow-md`, `--shadow-lg`, `--shadow-accent`) for consistent depth across all components
+
+### Changed
+- **Glassmorphism Mockup** — Hero browser mockup now has green glow shadow and inset highlight for premium depth
+- **Showcase Tab Crossfade** — Panel switching now crossfades with 0.35s cubic-bezier animation instead of instant swap
+- **Enhanced Reveal Animations** — Elements fade in from 28px (up from 24px) with slightly longer stagger delays
+- **Glass Modals** — Modal overlay uses `blur(16px) saturate(1.2)` for richer glass effect; modal container uses `--shadow-lg` with highlight ring
+- **Panel Shadows** — `.premium-panel`, `.bn-cell`, `.balance-gradient-card` all use the new shadow system for consistent elevation
+- **Star Glow** — Testimonial stars now have subtle amber text-shadow
+- **Screenshot Generation Script** — Expanded from 2 to 8 screenshots with sample data injection via localStorage
+
 ## [2.3.0] — 2026-06-06
 
 ### Added
