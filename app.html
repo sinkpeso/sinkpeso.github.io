@@ -448,8 +448,8 @@
                 showToast("Month archived. Fresh start!");
             };
 
-            return e('div', null,
-                e('div', { style: { background: "var(--bg-panel)", borderBottom: "1px solid var(--border)", position: "sticky", top: 0, zIndex: Z.STICKY_HEADER } },
+            return e('div', null,                                                                                                                                                                                                            
+                e('div', { style: { background: "var(--bg-panel)", borderBottom: "1px solid var(--border)", position: "sticky", top: 0, zIndex: Z.STICKY_HEADER, paddingTop: 'env(safe-area-inset-top)' } },
 
                     // ── ROW 1: Logo + Action Buttons ──────────────────────────
                     e('div', { style: { display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 16px", gap: 8 } },
