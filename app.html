@@ -47,6 +47,8 @@
     <script src="jspdf.umd.min.js"></script>
     <script src="jspdf.plugin.autotable.min.js"></script>
     <script src="ReportGenerator.js"></script>
+    <script src="CSVExporter.js"></script>
+    <script src="GlobalSearchView.js"></script>
 
         <link rel="apple-touch-icon" href="logosinkpeso.png">
     <link rel="icon" href="logosinkpeso.png" type="image/png">
@@ -57,6 +59,7 @@
     <meta name="theme-color" content="#020810">
 </head>
 <body>
+    <a href="#tab-panel-dashboard" class="skip-to-content">Skip to content</a>
     <div id="root"></div>
 
     <script>
@@ -72,7 +75,7 @@
         const Icon = window.SINKPESO_Icon;
 
         // Vault icons, categories, currencies — all from constants.js
-        const { FUND_ICONS, resolveVaultIcon, CATEGORIES, CURRENCIES, EXCHANGE_RATES, WALLET_COLORS, CASH_WALLET_ID, CASH_WALLET } = window.SINKPESO_CONSTANTS;
+        const { FUND_ICONS, resolveVaultIcon, CATEGORIES, CURRENCIES, EXCHANGE_RATES, CURRENCY_LABELS, WALLET_COLORS, CASH_WALLET_ID, CASH_WALLET } = window.SINKPESO_CONSTANTS;
 
         // ── RESOLVE GLOBALS ───────────────────────────────────────────────────
         // Pull utils, UI primitives and external components from their own files.
@@ -102,6 +105,9 @@
         window.FUND_ICONS = FUND_ICONS;
         window.resolveVaultIcon = resolveVaultIcon;
         window.CATEGORIES = CATEGORIES;
+        window.CURRENCIES = CURRENCIES;
+        window.EXCHANGE_RATES = EXCHANGE_RATES;
+        window.CURRENCY_LABELS = CURRENCY_LABELS;
         window.DotMenu = DotMenu;
         window.WalletPicker = WalletPicker;
         window.EmptyState = EmptyState;
@@ -181,6 +187,27 @@
                     window.DailyReminder.scheduleNext(dailyExpenses, budgets);
                 }
             }, [dailyExpenses, budgets]);
+
+            // ── LOW BALANCE ALERT ──
+            useEffect(() => {
+                if (window.DailyReminder && displayWallets.length > 0) {
+                    window.DailyReminder.checkLowBalance(displayWallets);
+                }
+            }, [displayWallets]);
+
+            // ── BILL DUE SOON ALERT ──
+            useEffect(() => {
+                if (window.DailyReminder) {
+                    window.DailyReminder.checkBillDueSoon(bills);
+                }
+            }, [bills]);
+
+            // ── BUDGET WARNING ALERT ──
+            useEffect(() => {
+                if (window.DailyReminder && budgets.length > 0) {
+                    window.DailyReminder.checkBudgetWarning(budgets, totals.catSum);
+                }
+            }, [dailyExpenses, budgets, totals.catSum]);
 
             // Load archives from IndexedDB on mount, with localStorage migration
             useEffect(() => {
@@ -293,6 +320,7 @@
             const sheetSwipeRef = useRef({ startY: 0, currentY: 0, swiping: false });
             const [showQuickAdd, setShowQuickAdd]   = useState(false);
             const [showUtilMenu, setShowUtilMenu]   = useState(false);
+            const [showSearch, setShowSearch]       = useState(false);
             const [toast, setToast] = useState(null);
             const toastTimer = useRef(null);
             const haptic = useCallback((pattern) => { try { if (navigator.vibrate) navigator.vibrate(pattern || 10); } catch(e) {} }, []);
@@ -325,10 +353,17 @@
             // ── KEYBOARD SHORTCUTS ──
             useEffect(() => {
                 const handleKeyDown = (ev) => {
+                    // Ctrl+K / Cmd+K → open global search
+                    if ((ev.ctrlKey || ev.metaKey) && ev.key === 'k') {
+                        ev.preventDefault();
+                        setShowSearch(prev => !prev);
+                        return;
+                    }
                     if (isUnlocked && !ev.target.closest('input, textarea, select')) {
                         if (ev.key === 'Escape') {
                             setShowCloseModal(false); setShowQuickAdd(false); setShowMoreSheet(false);
                             setConfirmState(null);
+                            setShowSearch(false);
                         }
                     }
                 };
@@ -467,6 +502,22 @@
                                         e(Icon, { name: "archive", size: 14, color: "var(--text-muted)" }),
                                         "Archive Month"
                                     ),
+                                    e('button', {
+                                        className: "dot-menu-item",
+                                        onClick: () => {
+                                            setShowUtilMenu(false);
+                                            if (window.exportTransactionsCSV) {
+                                                const ok = window.exportTransactionsCSV({
+                                                    dailyExpenses, incomes, txns, bills, funds, wallets: displayWallets
+                                                });
+                                                showToast(ok ? "CSV exported!" : "No data to export.");
+                                            }
+                                        },
+                                        style: { display: "flex", alignItems: "center", gap: 10, color: "var(--text-main)" }
+                                    },
+                                        e(Icon, { name: "list", size: 14, color: "var(--text-muted)" }),
+                                        "Export as CSV"
+                                    ),
                                     settings.pin && e('button', {
                                         className: "dot-menu-item",
                                         onClick: () => { setShowUtilMenu(false); setIsUnlocked(false); },
@@ -506,6 +557,14 @@
                                 e('path', { d: "M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2" }),
                                 e('rect', { x: 6, y: 14, width: 12, height: 8 })
                             )),
+
+                            // Search button
+                            e('button', {
+                                onClick: () => setShowSearch(true),
+                                title: "Search (Ctrl+K)",
+                                "aria-label": "Search transactions",
+                                style: { ...S.iconBtn, color: "var(--text-muted)" }
+                            }, e(Icon, { name: "zoomin", size: 16 })),
 
                             e('button', { 
                                 onClick: () => setTab("settings"), title: "Settings",
@@ -766,6 +825,15 @@ e('footer', {
                         showToast("Expense logged!");
                     }, 
                     onClose: () => setShowQuickAdd(false) 
+                }),
+
+                // ── GLOBAL SEARCH MODAL ─────────────────────────────────────
+                showSearch && e(window.GlobalSearchView, {
+                    show: showSearch,
+                    onClose: () => setShowSearch(false),
+                    dailyExpenses, incomes, txns, bills, funds,
+                    wallets: displayWallets, fc,
+                    onNavigate: setTab
                 }),
 
                 showCloseModal && e('div', { className: "modal-overlay", onClick: () => setShowCloseModal(false) },

@@ -279,6 +279,54 @@
                 )
             ),
 
+            // ── ROW 2.5: Budget vs. Actual ────────────────────────────────
+            budgets.length > 0 && e('div', { className: 'bn-cell bn-budget-actual' },
+                e('div', { style: { display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 } },
+                    e(BentoLabel, { style: { marginBottom: 0 } }, 'Budget vs. Actual'),
+                    window.HelpTooltip && e(window.HelpTooltip, { text: 'How your spending compares to budget limits this month.' })
+                ),
+                e('div', { className: 'bn-budget-grid' },
+                    budgets.map(b => {
+                        const spent = totals.catSum[b.category] || 0;
+                        const limit = b.limitCents;
+                        const pct = safeDiv(spent, limit);
+                        const over = pct >= 1;
+                        const warn = pct >= 0.8;
+                        const barColor = over ? '#FF1744' : warn ? '#FFD600' : '#00E676';
+                        const statusLabel = over ? 'Over budget' : warn ? 'Almost there' : 'On track';
+                        const catIcons = { Food: 'utensils', Gas: 'car', Bills: 'receipt', Business: 'briefcase', Personal: 'shoppingbag', Savings: 'landmark' };
+                        return e('div', { key: b.id, className: 'bn-budget-item' },
+                            e('div', { style: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 } },
+                                e('div', { style: { display: 'flex', alignItems: 'center', gap: 8 } },
+                                    e('div', { style: { width: 28, height: 28, borderRadius: 7, background: barColor + '18', border: '1px solid ' + barColor + '30', display: 'flex', alignItems: 'center', justifyContent: 'center' } },
+                                        e(Icon, { name: catIcons[b.category] || 'target', size: 14, color: barColor })
+                                    ),
+                                    e('span', { style: { fontSize: 13, fontWeight: 700, color: 'var(--text-light)' } }, b.category)
+                                ),
+                                e('div', { style: { display: 'flex', alignItems: 'center', gap: 6 } },
+                                    e('span', { style: { fontSize: 11, fontWeight: 700, color: barColor, background: barColor + '15', padding: '2px 7px', borderRadius: 6 } }, Math.round(pct * 100) + '%'),
+                                    e('span', { style: { fontSize: 10, color: 'var(--text-muted)', fontWeight: 600 } }, statusLabel)
+                                )
+                            ),
+                            e('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 6 } },
+                                e('span', { style: { fontSize: 14, fontWeight: 800, color: over ? 'var(--bn-red)' : 'var(--text-main)', letterSpacing: '-0.01em' } }, fc(spent)),
+                                e('span', { style: { fontSize: 11, color: 'var(--text-muted)' } }, '/ ' + fc(limit))
+                            ),
+                            e('div', { style: { height: 5, background: 'rgba(255,255,255,0.06)', borderRadius: 3, overflow: 'hidden' } },
+                                e('div', { style: {
+                                    height: '100%',
+                                    width: Math.min(100, pct * 100) + '%',
+                                    background: barColor,
+                                    borderRadius: 3,
+                                    boxShadow: '0 0 8px ' + barColor + '60',
+                                    transition: 'width 0.5s ease'
+                                } })
+                            )
+                        );
+                    })
+                )
+            ),
+
             // ── ROW 3: recent expenses + upcoming bills ────────────────────
             e('div', { className: 'bn-row3' },
 

@@ -15,40 +15,98 @@
     const { Inp, Btn } = window.components;
 
     // ── VIRTUAL LIST — renders only visible items for performance ────────
-    function VirtualList({ items, itemHeight = 60, overscan = 5, renderItem, emptyContent }) {
+    // Optimized: rAF-throttled scroll, configurable overscan, cleanup on unmount
+    function VirtualList({ items, itemHeight = 60, overscan = 8, renderItem, emptyContent, getItemHeight }) {
         const containerRef = useRef(null);
         const [scrollTop, setScrollTop] = useState(0);
         const [containerHeight, setContainerHeight] = useState(600);
+        const rafRef = useRef(null);
+        const mountedRef = useRef(true);
 
         useEffect(() => {
+            mountedRef.current = true;
             const el = containerRef.current;
             if (!el) return;
             const observer = new ResizeObserver(entries => {
-                setContainerHeight(entries[0].contentRect.height);
+                if (mountedRef.current) setContainerHeight(entries[0].contentRect.height);
             });
             observer.observe(el);
-            return () => observer.disconnect();
+            return () => { mountedRef.current = false; observer.disconnect(); };
         }, []);
 
-        const totalHeight = items.length * itemHeight;
-        const startIndex = Math.max(0, Math.floor(scrollTop / itemHeight) - overscan);
-        const endIndex = Math.min(items.length, Math.ceil((scrollTop + containerHeight) / itemHeight) + overscan);
-        const visibleItems = items.slice(startIndex, endIndex);
+        // Throttled scroll handler using requestAnimationFrame
+        const handleScroll = useCallback((ev) => {
+            if (rafRef.current) return;
+            rafRef.current = requestAnimationFrame(() => {
+                rafRef.current = null;
+                if (mountedRef.current) setScrollTop(ev.target.scrollTop);
+            });
+        }, []);
+
+        // Cleanup pending rAF on unmount
+        useEffect(() => {
+            return () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); };
+        }, []);
+
+        // Dynamic item height support: precompute cumulative offsets
+        const offsets = useMemo(() => {
+            if (!getItemHeight) return null;
+            const arr = new Array(items.length + 1);
+            arr[0] = 0;
+            for (let i = 0; i < items.length; i++) {
+                arr[i + 1] = arr[i] + getItemHeight(items[i], i);
+            }
+            return arr;
+        }, [items, getItemHeight]);
+
+        const totalHeight = offsets ? offsets[items.length] : items.length * itemHeight;
+
+        let startIndex, endIndex, visibleItems;
+        if (offsets) {
+            // Binary search for start index
+            let lo = 0, hi = items.length;
+            while (lo < hi) {
+                const mid = (lo + hi) >>> 1;
+                if (offsets[mid + 1] <= scrollTop) lo = mid + 1;
+                else hi = mid;
+            }
+            startIndex = Math.max(0, lo - overscan);
+            // Find end index
+            let lo2 = startIndex, hi2 = items.length;
+            while (lo2 < hi2) {
+                const mid = (lo2 + hi2) >>> 1;
+                if (offsets[mid] <= scrollTop + containerHeight) lo2 = mid + 1;
+                else hi2 = mid;
+            }
+            endIndex = Math.min(items.length, lo2 + overscan);
+            visibleItems = items.slice(startIndex, endIndex);
+        } else {
+            startIndex = Math.max(0, Math.floor(scrollTop / itemHeight) - overscan);
+            endIndex = Math.min(items.length, Math.ceil((scrollTop + containerHeight) / itemHeight) + overscan);
+            visibleItems = items.slice(startIndex, endIndex);
+        }
 
         if (items.length === 0 && emptyContent) return emptyContent;
 
         return e('div', {
             ref: containerRef,
-            onScroll: ev => setScrollTop(ev.target.scrollTop),
+            role: "list",
+            onScroll: handleScroll,
             style: { overflow: "auto", position: "relative" }
         },
             e('div', { style: { height: totalHeight, position: "relative" } },
-                visibleItems.map((item, i) =>
-                    e('div', {
-                        key: item.id || startIndex + i,
-                        style: { position: "absolute", top: (startIndex + i) * itemHeight, left: 0, right: 0 }
-                    }, renderItem(item, startIndex + i))
-                )
+                visibleItems.map((item, i) => {
+                    const idx = startIndex + i;
+                    const top = offsets ? offsets[idx] : idx * itemHeight;
+                    const h = offsets ? offsets[idx + 1] - offsets[idx] : itemHeight;
+                    return e('div', {
+                        key: item.id || idx,
+                        role: "listitem",
+                        "aria-setsize": items.length,
+                        "aria-posinset": idx + 1,
+                        style: { position: "absolute", top: top, left: 0, right: 0, height: h }
+                    }, renderItem(item, idx));
+                })
             )
         );
     }

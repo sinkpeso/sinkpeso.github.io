@@ -13,10 +13,13 @@
     const { Field, Inp, Btn } = window.components;
 
     function WalletsView({ wallets, rawWallets, setWallets, incomes, dailyExpenses, txns, setTxns, fc, requestConfirm, showToast }) {
+        const CURRENCIES = window.CURRENCIES || { "PHP": {} };
+        const CURRENCY_LABELS = window.CURRENCY_LABELS || { "PHP": "₱ PHP — Philippine Peso" };
+
         const [modal, setModal] = React.useState(false);
-        const [form, setForm] = React.useState({ name: "", balanceCents: "", color: WALLET_COLORS[0] });
+        const [form, setForm] = React.useState({ name: "", balanceCents: "", color: WALLET_COLORS[0], currency: "PHP" });
         const [editWallet, setEditWallet] = React.useState(null);
-        const [editForm, setEditForm] = React.useState({ name: "", color: WALLET_COLORS[0] });
+        const [editForm, setEditForm] = React.useState({ name: "", color: WALLET_COLORS[0], currency: "PHP" });
         const [openMenu, setOpenMenu] = React.useState(null);
         const [showUpgrade, setShowUpgrade] = React.useState(false);
         const [transferModal, setTransferModal] = React.useState(false);
@@ -39,15 +42,15 @@
                 setShowUpgrade(true);
                 return;
             }
-            setWallets(prev => [...prev, { id: uid(), name: form.name.trim(), openingBalanceCents: tc(form.balanceCents || "0"), color: form.color }]);
-            setForm({ name: "", balanceCents: "", color: WALLET_COLORS[0] });
+            setWallets(prev => [...prev, { id: uid(), name: form.name.trim(), openingBalanceCents: tc(form.balanceCents || "0"), color: form.color, currency: form.currency || "PHP" }]);
+            setForm({ name: "", balanceCents: "", color: WALLET_COLORS[0], currency: "PHP" });
             setModal(false);
         };
 
-        const openEdit = (w) => { setEditWallet(w); setEditForm({ name: w.name, color: w.color || WALLET_COLORS[0] }); };
+        const openEdit = (w) => { setEditWallet(w); setEditForm({ name: w.name, color: w.color || WALLET_COLORS[0], currency: w.currency || "PHP" }); };
         const saveEdit = () => {
             if (!editForm.name) return;
-            setWallets(prev => prev.map(w => w.id === editWallet.id ? { ...w, name: editForm.name.trim(), color: editForm.color } : w));
+            setWallets(prev => prev.map(w => w.id === editWallet.id ? { ...w, name: editForm.name.trim(), color: editForm.color, currency: editForm.currency || "PHP" } : w));
             setEditWallet(null);
         };
 
@@ -129,9 +132,10 @@
                         return e('div', { key:w.id, className:"stream-row" },
                             e('div', { style:{ display:"flex", alignItems:"center", gap:12 } },
                                 e(window.walleticons.WalletIcon, { name: w.name, color: w.color||"#00E676", size: 32, radius: 9 }),
-                                e('div', null,
-                                    e('div', { style:{ fontWeight:600, color:"var(--text-main)" } }, w.name),
-                                    e('div', { style:{ display:"flex", gap:10, marginTop:3, fontSize:11, fontWeight:600 } },
+                        e('div', null,
+                            e('div', { style:{ fontWeight:600, color:"var(--text-main)" } }, w.name),
+                            w.currency && w.currency !== 'PHP' && e('div', { style:{ fontSize:10, color:"var(--text-muted)", marginTop:1, fontWeight:600 } }, w.currency),
+                            e('div', { style:{ display:"flex", gap:10, marginTop:3, fontSize:11, fontWeight:600 } },
                                         e('span', { style:{ color:"#00E676" } }, `+${fc(flow.inc)}`),
                                         e('span', { style:{ color:"#EF4444" } }, `-${fc(flow.out)}`),
                                         e('span', { style:{ color:"var(--text-muted)" } }, "this month")
@@ -212,6 +216,17 @@
                     ),
                     e(Field, { label:"Wallet Name" }, e(Inp, { autoFocus:true, placeholder:"e.g. GCash, BPI, Cash", value:form.name, onChange:ev=>setForm({...form,name:ev.target.value}) })),
                     e(Field, { label:"Opening Balance" }, e(Inp, { type:"number", placeholder:"0.00", value:form.balanceCents, onChange:ev=>setForm({...form,balanceCents:ev.target.value}) })),
+                    e(Field, { label:"Currency" },
+                        e('select', {
+                            value: form.currency || "PHP",
+                            onChange: ev => setForm({...form, currency: ev.target.value}),
+                            style: { width:"100%", padding:"10px 12px", borderRadius:10, border:"1px solid var(--border)", background:"var(--bg-input)", color:"var(--text-main)", fontSize:14, fontWeight:600 }
+                        },
+                            Object.keys(CURRENCIES).map(code =>
+                                e('option', { key:code, value:code }, CURRENCY_LABELS[code] || code)
+                            )
+                        )
+                    ),
                     e(Field, { label:"Color" }, e(ColorPicker, { value:form.color, onChange:c=>setForm({...form,color:c}) })),
                     e('div', { style:{...S.modalFooter, marginTop:20} },
                         e(Btn, { v:"ghost", style:{flex:1}, onClick:()=>setModal(false) }, "Cancel"),
@@ -227,6 +242,17 @@
                         e('button', { onClick:()=>setEditWallet(null), style:S.closeBtn }, e(Icon, {name:"x",size:16}))
                     ),
                     e(Field, { label:"Wallet Name" }, e(Inp, { autoFocus:true, value:editForm.name, onChange:ev=>setEditForm({...editForm,name:ev.target.value}) })),
+                    e(Field, { label:"Currency" },
+                        e('select', {
+                            value: editForm.currency || "PHP",
+                            onChange: ev => setEditForm({...editForm, currency: ev.target.value}),
+                            style: { width:"100%", padding:"10px 12px", borderRadius:10, border:"1px solid var(--border)", background:"var(--bg-input)", color:"var(--text-main)", fontSize:14, fontWeight:600 }
+                        },
+                            Object.keys(CURRENCIES).map(code =>
+                                e('option', { key:code, value:code }, CURRENCY_LABELS[code] || code)
+                            )
+                        )
+                    ),
                     e(Field, { label:"Color" }, e(ColorPicker, { value:editForm.color, onChange:c=>setEditForm({...editForm,color:c}) })),
                     e('div', { style:{...S.modalFooter, marginTop:20} },
                         e(Btn, { v:"ghost", style:{flex:1}, onClick:()=>setEditWallet(null) }, "Cancel"),

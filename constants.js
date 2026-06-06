@@ -65,11 +65,43 @@
         "USD": { style: "currency", currency: "USD" },
         "EUR": { style: "currency", currency: "EUR" },
         "GBP": { style: "currency", currency: "GBP" },
-        "JPY": { style: "currency", currency: "JPY", minimumFractionDigits: 0 }
+        "JPY": { style: "currency", currency: "JPY", minimumFractionDigits: 0 },
+        "KRW": { style: "currency", currency: "KRW", minimumFractionDigits: 0 },
+        "CNY": { style: "currency", currency: "CNY" },
+        "AUD": { style: "currency", currency: "AUD" },
+        "SGD": { style: "currency", currency: "SGD" },
+        "HKD": { style: "currency", currency: "HKD" },
+        "TWD": { style: "currency", currency: "TWD" },
+        "MYR": { style: "currency", currency: "MYR" },
+        "THB": { style: "currency", currency: "THB" },
+        "AED": { style: "currency", currency: "AED" },
+        "CAD": { style: "currency", currency: "CAD" }
     };
 
     var EXCHANGE_RATES = {
-        "PHP": 1, "USD": 0.018, "EUR": 0.016, "GBP": 0.014, "JPY": 2.65
+        "PHP": 1, "USD": 0.018, "EUR": 0.016, "GBP": 0.014, "JPY": 2.65,
+        "KRW": 24.5, "CNY": 0.13, "AUD": 0.027, "SGD": 0.024,
+        "HKD": 0.14, "TWD": 0.56, "MYR": 0.084, "THB": 0.62,
+        "AED": 0.066, "CAD": 0.024
+    };
+
+    // Currency display labels for picker
+    var CURRENCY_LABELS = {
+        "PHP": "₱ PHP — Philippine Peso",
+        "USD": "$ USD — US Dollar",
+        "EUR": "€ EUR — Euro",
+        "GBP": "£ GBP — British Pound",
+        "JPY": "¥ JPY — Japanese Yen",
+        "KRW": "₩ KRW — Korean Won",
+        "CNY": "¥ CNY — Chinese Yuan",
+        "AUD": "$ AUD — Australian Dollar",
+        "SGD": "$ SGD — Singapore Dollar",
+        "HKD": "$ HKD — Hong Kong Dollar",
+        "TWD": "$ TWD — Taiwan Dollar",
+        "MYR": "RM MYR — Malaysian Ringgit",
+        "THB": "฿ THB — Thai Baht",
+        "AED": "د.إ AED — UAE Dirham",
+        "CAD": "$ CAD — Canadian Dollar"
     };
 
     // ── WALLET CONSTANTS ─────────────────────────────────────────────────
@@ -106,6 +138,7 @@
         CATEGORIES: CATEGORIES,
         CURRENCIES: CURRENCIES,
         EXCHANGE_RATES: EXCHANGE_RATES,
+        CURRENCY_LABELS: CURRENCY_LABELS,
         WALLET_COLORS: WALLET_COLORS,
         CASH_WALLET_ID: CASH_WALLET_ID,
         CASH_WALLET: CASH_WALLET,

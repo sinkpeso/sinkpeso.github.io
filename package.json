@@ -7,9 +7,18 @@
     "test": "node tests/utils.test.js && node tests/finance.test.js && node tests/selectors.test.js && node tests/license.test.js && node tests/persistence.test.js && node tests/photodb.test.js && node tests/actions.test.js",
     "test:watch": "node --watch tests/run-all.js",
     "test:e2e": "npx playwright test",
-    "test:all": "npm test && npm run test:e2e"
+    "test:all": "npm test && npm run test:e2e",
+    "test:coverage": "c8 --include=utils.js --include=finance.js --include=selectors.js --include=actions.js --include=persistence.js --include=photodb.js --include=license.js --reporter=text --reporter=html --reporter=lcov npm test",
+    "coverage": "npm run test:coverage"
+  },
+  "c8": {
+    "lines": 50,
+    "functions": 50,
+    "branches": 40,
+    "exclude": ["tests/**", "node_modules/**", "*.min.js"]
   },
   "devDependencies": {
-    "@playwright/test": "^1.60.0"
+    "@playwright/test": "^1.60.0",
+    "c8": "^11.0.0"
   }
 }

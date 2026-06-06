@@ -246,6 +246,24 @@
         };
     }
 
+    /**
+     * Convert an amount from one currency to another using exchange rates.
+     * Rates are relative to PHP as base (1 PHP = rate units of target currency).
+     * @param {number} amountCents - Amount in integer cents
+     * @param {string} fromCurrency - Source currency code (e.g. "PHP")
+     * @param {string} toCurrency - Target currency code (e.g. "USD")
+     * @returns {number} Converted amount in integer cents of target currency
+     */
+    function convertCurrency(amountCents, fromCurrency, toCurrency) {
+        if (fromCurrency === toCurrency) return amountCents;
+        var rates = (window.EXCHANGE_RATES || window.SINKPESO_CONSTANTS && window.SINKPESO_CONSTANTS.EXCHANGE_RATES) || { PHP: 1 };
+        var fromRate = rates[fromCurrency] || 1;
+        var toRate = rates[toCurrency] || 1;
+        // Convert to PHP base, then to target
+        var phpCents = amountCents / fromRate;
+        return Math.round(phpCents * toRate);
+    }
+
     window.finance = {
         deriveWallets,
         deriveWalletBalance,
@@ -253,6 +271,7 @@
         migrateWallets,
         validateExpenseWalletBalance,
         processFinancialTransaction,
-        checkIncomeDeleteSafe
+        checkIncomeDeleteSafe,
+        convertCurrency
     };
 })();

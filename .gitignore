@@ -1,5 +1,6 @@
 node_modules/
 test-results/
+coverage/
 package-lock.json
 
 # Dev tools
