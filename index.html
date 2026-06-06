@@ -166,7 +166,7 @@
                 <article class="trust-card reveal reveal-d2">
                     <div class="tc-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg></div>
                     <h3>Multi Wallet</h3>
-                    <p>Cash, GCash, banks</p>
+                    <p>Cash, GCash, banks + transfers</p>
                 </article>
                 <article class="trust-card reveal reveal-d2">
                     <div class="tc-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg></div>
@@ -286,7 +286,7 @@
         <div class="container">
             <div class="section-header reveal">
                 <div class="eyebrow">Features</div>
-                <h2 class="section-title">Ten tools. One app. All yours.</h2>
+                <h2 class="section-title">Eleven tools. One app. All yours.</h2>
                 <p class="section-sub center">A complete budgeting system designed for everyday life.</p>
             </div>
             <div class="features-grid">
@@ -339,6 +339,11 @@
                     <div class="feat-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg></div>
                     <h3>Pera Report</h3>
                     <p>Your monthly money story. See your spending personality, top categories, biggest expense, and savings rate — all beautifully presented.</p>
+                </article>
+                <article class="feat-card featured reveal">
+                    <div class="feat-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3L4 7l4 4 M4 7h16 M16 21l4-4-4-4 M20 17H4"/></svg></div>
+                    <h3>Wallet Transfer</h3>
+                    <p>Move money between Cash, GCash, Maya, and bank accounts with optional fees. Edit transfers, filter by type, and track every movement in the transaction log.</p>
                 </article>
             </div>
         </div>
@@ -393,6 +398,7 @@
                 <button class="showcase-tab" data-panel="diary" role="tab" aria-selected="false" aria-controls="panel-diary" id="tab-diary" tabindex="-1">Photo Diary</button>
                 <button class="showcase-tab" data-panel="utang" role="tab" aria-selected="false" aria-controls="panel-utang" id="tab-utang" tabindex="-1">Utang</button>
                 <button class="showcase-tab" data-panel="cashflow" role="tab" aria-selected="false" aria-controls="panel-cashflow" id="tab-cashflow" tabindex="-1">Forecast</button>
+                <button class="showcase-tab" data-panel="transfer" role="tab" aria-selected="false" aria-controls="panel-transfer" id="tab-transfer" tabindex="-1">Transfer</button>
             </div>
             <div class="showcase-display reveal">
                 <div class="showcase-frame">
@@ -634,6 +640,50 @@
                                 </div>
                             </div>
                         </div>
+                        <!-- Transfer Panel -->
+                        <div class="showcase-panel" id="panel-transfer" role="tabpanel" aria-labelledby="tab-transfer" aria-hidden="true">
+                            <div style="width:100%">
+                                <div class="ss-grid cols-3" style="margin-bottom:16px">
+                                    <article class="ss-card">
+                                        <div class="bento-label">Cash</div>
+                                        <div class="bento-value" style="color:var(--blue);font-size:20px">&#8369;5,000</div>
+                                        <div class="bento-sub">source wallet</div>
+                                    </article>
+                                    <article class="ss-card">
+                                        <div class="bento-label">GCash</div>
+                                        <div class="bento-value green" style="font-size:20px">&#8369;8,000</div>
+                                        <div class="bento-sub">dest wallet</div>
+                                    </article>
+                                    <article class="ss-card">
+                                        <div class="bento-label">Fees Paid</div>
+                                        <div class="bento-value" style="color:var(--amber);font-size:20px">&#8369;15</div>
+                                        <div class="bento-sub">this month</div>
+                                    </article>
+                                </div>
+                                <div style="display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap">
+                                    <span style="background:rgba(37,99,235,0.15);border:1px solid #2563EB;color:#2563EB;padding:5px 12px;border-radius:8px;font-size:12px;font-weight:600">All</span>
+                                    <span style="background:var(--hover-bg);border:1px solid var(--border);color:var(--text-muted);padding:5px 12px;border-radius:8px;font-size:12px;font-weight:600">Expenses</span>
+                                    <span style="background:var(--hover-bg);border:1px solid var(--border);color:var(--text-muted);padding:5px 12px;border-radius:8px;font-size:12px;font-weight:600">Income</span>
+                                    <span style="background:var(--hover-bg);border:1px solid var(--border);color:var(--text-muted);padding:5px 12px;border-radius:8px;font-size:12px;font-weight:600">Bills</span>
+                                    <span style="background:var(--hover-bg);border:1px solid var(--border);color:var(--text-muted);padding:5px 12px;border-radius:8px;font-size:12px;font-weight:600">Vaults</span>
+                                    <span style="background:rgba(37,99,235,0.15);border:1px solid #2563EB;color:#2563EB;padding:5px 12px;border-radius:8px;font-size:12px;font-weight:600">Transfers</span>
+                                </div>
+                                <div class="ss-row">
+                                    <div class="ss-row-left">
+                                        <div class="ss-row-icon" style="background:rgba(37,99,235,0.1);color:#2563EB"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3L4 7l4 4 M4 7h16 M16 21l4-4-4-4 M20 17H4"/></svg></div>
+                                        <div><div class="ss-row-name">Cash → GCash</div><div class="ss-row-cat">Wallet Transfer · Today</div></div>
+                                    </div>
+                                    <div class="ss-row-amt" style="color:#2563EB">~&#8369;500</div>
+                                </div>
+                                <div class="ss-row">
+                                    <div class="ss-row-left">
+                                        <div class="ss-row-icon" style="background:rgba(37,99,235,0.1);color:#2563EB"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3L4 7l4 4 M4 7h16 M16 21l4-4-4-4 M20 17H4"/></svg></div>
+                                        <div><div class="ss-row-name">GCash → Maya</div><div class="ss-row-cat">Wallet Transfer · Yesterday</div></div>
+                                    </div>
+                                    <div class="ss-row-amt" style="color:#2563EB">~&#8369;1,000</div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     </div>
                 </div>
@@ -714,6 +764,7 @@
                         <tr><td>Fast Setup</td><td class="hl"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> 30 seconds</td><td style="opacity:0.4">Account required</td></tr>
                         <tr><td>Local Data Ownership</td><td class="hl"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> 100% local</td><td style="opacity:0.4">Server-dependent</td></tr>
                         <tr><td>Financial Memory</td><td class="hl"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Photo + context</td><td style="opacity:0.4">Numbers only</td></tr>
+                        <tr><td>Wallet Transfers</td><td class="hl"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Built-in + fees</td><td style="opacity:0.4">Not available</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -742,6 +793,7 @@
                         <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Expense & bills tracking</li>
                         <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Photo diary (10/month)</li>
                         <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Utang tracker</li>
+                        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Wallet transfers with fees</li>
                         <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Offline access</li>
                     </ul>
                     <a href="app.html" class="btn btn-secondary price-cta">Launch App</a>
