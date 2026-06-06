@@ -88,7 +88,7 @@
                         : e('div')
                 )
             ),
-            e('div', { className: "bento-filter-row" },
+            e('div', { className: "bento-filter-row", style: { marginBottom: 14 } },
                 e('div', { className: "txn-date-row" },
                     e('div', { className: "txn-date-field" },
                         e('div', { className: "txn-date-label" }, "From Date"),
