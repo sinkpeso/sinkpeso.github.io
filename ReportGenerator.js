@@ -210,59 +210,45 @@
         doc.text(value, x + w / 2, y + 21, { align: "center" });
     }
 
-    // ── Bar chart (manual drawing) ─────────────────────────────────────────
-    function drawBreakdownChart(doc, labels, values, colors, sym, y) {
+    // ── Horizontal bar chart ───────────────────────────────────────────────
+    function drawHorizontalBarChart(doc, labels, values, colors, sym, y) {
         var pw = doc.internal.pageSize.getWidth();
-        var chartX = ML + 15;
-        var chartW = pw - ML - MR - 30;
-        var chartH = 55;
-        var chartY = y;
-        var barCount = labels.length;
-        var barSpacing = chartW / barCount;
-        var barW = barSpacing * 0.55;
+        var labelW = 35;
+        var valueW = 28;
+        var barAreaX = ML + labelW + 4;
+        var barAreaW = pw - ML - MR - labelW - valueW - 12;
+        var barH = 14;
+        var rowH = 22;
         var maxVal = Math.max.apply(null, values) || 1;
-        var floorY = chartY + chartH;
-        var gridColor = [226, 232, 240];
 
-        // Y-axis grid lines
-        var steps = 4;
-        for (var s = 0; s <= steps; s++) {
-            var gy = floorY - (s / steps) * chartH;
-            doc.setDrawColor(gridColor[0], gridColor[1], gridColor[2]);
-            doc.setLineWidth(0.2);
-            doc.line(chartX, gy, chartX + chartW, gy);
-            // Y label
-            var yVal = Math.round((maxVal / steps) * s);
-            doc.setFontSize(6);
-            doc.setTextColor(GRAY[0], GRAY[1], GRAY[2]);
-            doc.setFont("helvetica", "normal");
-            doc.text(sym + yVal.toLocaleString(), chartX - 4, gy + 1.5, { align: "right" });
-        }
-
-        // Bars
         values.forEach(function (val, i) {
-            var bx = chartX + i * barSpacing + (barSpacing - barW) / 2;
-            var barH = (val / maxVal) * chartH;
-            var by = floorY - barH;
+            var cy = y + i * rowH;
+            var color = colors[i];
+            var pct = maxVal > 0 ? (val / maxVal) : 0;
 
-            // Bar
-            doc.setFillColor(colors[i][0], colors[i][1], colors[i][2]);
-            doc.roundedRect(bx, by, barW, barH, 1.5, 1.5, "F");
+            // Category label (left)
+            doc.setFontSize(8);
+            doc.setTextColor(BODY_TEXT[0], BODY_TEXT[1], BODY_TEXT[2]);
+            doc.setFont("helvetica", "bold");
+            doc.text(labels[i], ML, cy + 5);
 
-            // Value label above bar
+            // Bar track
+            doc.setFillColor(LIGHT_GRAY[0], LIGHT_GRAY[1], LIGHT_GRAY[2]);
+            doc.roundedRect(barAreaX, cy, barAreaW, barH, 2, 2, "F");
+
+            // Bar fill
+            var fillW = Math.max(6, barAreaW * pct);
+            doc.setFillColor(color[0], color[1], color[2]);
+            doc.roundedRect(barAreaX, cy, fillW, barH, 2, 2, "F");
+
+            // Value label (right of bar)
             doc.setFontSize(8);
             doc.setTextColor(SLATE[0], SLATE[1], SLATE[2]);
             doc.setFont("helvetica", "bold");
-            doc.text(sym + fmtMoney(val * 100), bx + barW / 2, by - 3, { align: "center" });
-
-            // Category label below
-            doc.setFontSize(7);
-            doc.setTextColor(BODY_TEXT[0], BODY_TEXT[1], BODY_TEXT[2]);
-            doc.setFont("helvetica", "normal");
-            doc.text(labels[i], bx + barW / 2, floorY + 6, { align: "center" });
+            doc.text(sym + fmtMoney(val * 100), barAreaX + barAreaW + 5, cy + 5.5);
         });
 
-        return floorY + 16;
+        return y + values.length * rowH;
     }
 
     // ── Standard table config ───────────────────────────────────────────────
@@ -285,7 +271,7 @@
             }),
             styles: {
                 fontSize: 8.5,
-                cellPadding: { top: 4, bottom: 4, left: 6, right: 6 },
+                cellPadding: { top: 10, bottom: 10, left: 12, right: 12 },
                 textColor: BODY_TEXT,
                 lineColor: BORDER_GRAY,
                 lineWidth: 0.3,
@@ -297,11 +283,20 @@
                 textColor: WHITE,
                 fontStyle: "bold",
                 fontSize: 8,
-                cellPadding: { top: 5, bottom: 5, left: 6, right: 6 },
+                cellPadding: { top: 10, bottom: 10, left: 12, right: 12 },
             },
             alternateRowStyles: { fillColor: LIGHT_BG2 },
             tableLineColor: BORDER_GRAY,
-            tableLineWidth: 0.3,
+            tableLineWidth: 0.5,
+            didDrawCell: function (data) {
+                // Clean horizontal separation lines (LINEBELOW)
+                if (data.section === "body") {
+                    var doc = data.doc;
+                    doc.setDrawColor(BORDER_GRAY[0], BORDER_GRAY[1], BORDER_GRAY[2]);
+                    doc.setLineWidth(0.5);
+                    doc.line(data.cell.x, data.cell.y + data.cell.height, data.cell.x + data.cell.width, data.cell.y + data.cell.height);
+                }
+            },
         };
 
         if (opts.columnStyles) config.columnStyles = opts.columnStyles;
@@ -426,7 +421,7 @@
         });
         y += Math.ceil(sumCards.length / 2) * (sumCardH + 4) + 6;
 
-        // ── Spending Breakdown Bar Chart ────────────────────────────────────
+        // ── Spending Breakdown Horizontal Bar Chart ─────────────────────────
         if (needsSpace(doc, y, 80)) { doc.addPage(); drawLightPageHeader(doc, 2); y = MT + 6; }
         y = drawSectionAnchor(doc, "Spending Breakdown", y);
 
@@ -436,12 +431,18 @@
             (totals.paidBills || 0) / 100,
             (totals.unpaidBills || 0) / 100
         ];
-        var chartColors = [RED, PURPLE, LIGHT_PURPLE];
-        y = drawBreakdownChart(doc, chartLabels, chartValues, chartColors, sym, y);
+        var chartColors = [RED, PURPLE, [100, 116, 139]]; // Red, Purple, Slate Gray
+        y = drawHorizontalBarChart(doc, chartLabels, chartValues, chartColors, sym, y);
         y += 6;
 
+        // ════════════════════════════════════════════════════════════════════
+        // PAGE 3: HIGHLIGHTS + WALLETS
+        // ════════════════════════════════════════════════════════════════════
+        doc.addPage();
+        drawLightPageHeader(doc, 3);
+        y = MT + 6;
+
         // ── Highlights Table ────────────────────────────────────────────────
-        if (needsSpace(doc, y, 60)) { doc.addPage(); drawLightPageHeader(doc, 2); y = MT + 6; }
         y = drawSectionAnchor(doc, "Highlights", y);
 
         var highlightRows = [];
@@ -459,7 +460,7 @@
         y = hlFinalY + 10;
 
         // ── Wallets Table ───────────────────────────────────────────────────
-        if (needsSpace(doc, y, 60)) { doc.addPage(); drawLightPageHeader(doc, 2); y = MT + 6; }
+        if (needsSpace(doc, y, 60)) { doc.addPage(); drawLightPageHeader(doc, 3); y = MT + 6; }
         y = drawSectionAnchor(doc, "Wallets & Multi-Currency Breakdown", y);
 
         var walletRows = [];
