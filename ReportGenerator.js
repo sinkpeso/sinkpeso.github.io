@@ -134,14 +134,14 @@
             doc.setFontSize(12);
             doc.setTextColor(c.color[0], c.color[1], c.color[2]);
             doc.setFont("helvetica", "bold");
-            doc.text(c.value, x + cardW / 2, cardY + 25, { align: "center" });
+            doc.text(c.value, x + cardW / 2, cardY + 25, { align: "center", maxWidth: cardW - 6 });
         });
 
         // Quick stats line
         doc.setFontSize(9);
         doc.setTextColor(GRAY[0], GRAY[1], GRAY[2]);
         doc.setFont("helvetica", "normal");
-        doc.text(data.quickStats, pw / 2, cardY - 18, { align: "center" });
+        doc.text(data.quickStats, pw / 2, cardY - 18, { align: "center", maxWidth: pw - ML - MR - 10 });
 
         // Cover footer
         doc.setFontSize(8);
@@ -202,12 +202,12 @@
         doc.setFontSize(6.5);
         doc.setTextColor(GRAY[0], GRAY[1], GRAY[2]);
         doc.setFont("helvetica", "bold");
-        doc.text(label, x + w / 2, y + 10, { align: "center" });
+        doc.text(label, x + w / 2, y + 10, { align: "center", maxWidth: w - 8 });
         // Value
         doc.setFontSize(11);
         doc.setTextColor(color[0], color[1], color[2]);
         doc.setFont("helvetica", "bold");
-        doc.text(value, x + w / 2, y + 21, { align: "center" });
+        doc.text(value, x + w / 2, y + 21, { align: "center", maxWidth: w - 8 });
     }
 
     // ── Horizontal bar chart ───────────────────────────────────────────────
@@ -258,12 +258,19 @@
         // Wrap all cells in arrays for autoTable
         var body = allRows.slice(1);
 
+        // Auto-distribute column widths if not provided
+        var contentWidth = doc.internal.pageSize.getWidth() - ML - MR;
+        var cw = colWidths;
+        if (!cw) {
+            var perCol = contentWidth / headers.length;
+            cw = headers.map(function () { return perCol; });
+        }
+
         var config = {
             startY: startY,
             margin: { left: ML, right: MR, top: MT, bottom: MB },
-            columns: headers.map(function (h, i) {
-                return { header: h, dataKey: "col" + i };
-            }),
+            tableWidth: contentWidth,
+            columnStyles: {},
             body: body.map(function (row) {
                 var obj = {};
                 row.forEach(function (cell, i) { obj["col" + i] = cell; });
@@ -277,6 +284,8 @@
                 lineWidth: 0.3,
                 font: "helvetica",
                 overflow: "linebreak",
+                cellWidth: "wrap",
+                minCellWidth: 20,
             },
             headStyles: {
                 fillColor: SLATE,

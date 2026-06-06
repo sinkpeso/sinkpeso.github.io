@@ -29,30 +29,29 @@ from reportlab.graphics import renderPDF
 # DATA SOURCE
 data_source = {
     "base_currency": "PHP",
-    "base_symbol": "P",
+    "base_symbol": "\u20b1",
     "report_date": "June 2026",
-    "generated_at": "June 6, 2026 at 08:40 AM",
+    "generated_at": "June 6, 2026 at 09:10 AM",
     "personality": "The Spender",
     "metrics": {
-        "total_income": 5400.00,
-        "total_spent": 4200.00,
-        "savings_rate": "22%",
-        "net_available": 1200.00,
-        "daily_expenses": 1500.00,
-        "paid_bills": 1800.00,
-        "unpaid_bills": 900.00,
-        "in_vaults": 500.00
+        "total_income": 65000.00,
+        "total_spent": 58200.00,
+        "savings_rate": "10.4%",
+        "net_available": 6800.00,
+        "daily_expenses": 24500.00,
+        "paid_bills": 22000.00,
+        "unpaid_bills": 11700.00,
+        "in_vaults": 5000.00
     },
     "highlights": [
-        ["Peak Spending Day", "Sundays", "P450.00"],
-        ["Total Transactions", "24", "--"],
-        ["Peak Day Total", "Sunday", "P450.00"],
-        ["Total in Vaults", "Savings", "P500.00"]
+        ["Peak Spending Day", "Saturdays", "\u20b18,400.00"],
+        ["Total Transactions", "47", "--"],
+        ["Peak Day Total", "Saturday", "\u20b18,400.00"],
+        ["Total in Vaults", "Savings", "\u20b15,000.00"]
     ],
     "wallets": [
-        {"name": "Cash", "type": "Physical", "currency": "PHP", "symbol": "P", "balance": 300.00, "fx_rate_to_base": 1.0},
-        {"name": "Travel Stash", "type": "Cash", "currency": "USD", "symbol": "$", "balance": 50.00, "fx_rate_to_base": 58.50},
-        {"name": "Crypto Wallet", "type": "Digital", "currency": "USDT", "symbol": "T", "balance": 20.00, "fx_rate_to_base": 58.60}
+        {"name": "Cash", "type": "Physical", "currency": "PHP", "symbol": "\u20b1", "balance": 1800.00, "fx_rate_to_base": 1.0},
+        {"name": "Digital Bank", "type": "Savings", "currency": "PHP", "symbol": "\u20b1", "balance": 5000.00, "fx_rate_to_base": 1.0}
     ]
 }
 
@@ -281,8 +280,8 @@ chart.categoryAxis.labels.fontName = "Helvetica"
 chart.categoryAxis.labels.fontSize = 8
 chart.categoryAxis.labels.fillColor = HexColor("#334155")
 chart.valueAxis.valueMin = 0
-chart.valueAxis.valueMax = 2000
-chart.valueAxis.valueStep = 500
+chart.valueAxis.valueMax = 30000
+chart.valueAxis.valueStep = 10000
 chart.valueAxis.labels.fontName = "Helvetica"
 chart.valueAxis.labels.fontSize = 8
 chart.valueAxis.labels.fillColor = GRAY
