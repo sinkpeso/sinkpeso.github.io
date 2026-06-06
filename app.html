@@ -188,27 +188,6 @@
                 }
             }, [dailyExpenses, budgets]);
 
-            // ── LOW BALANCE ALERT ──
-            useEffect(() => {
-                if (window.DailyReminder && displayWallets.length > 0) {
-                    window.DailyReminder.checkLowBalance(displayWallets);
-                }
-            }, [displayWallets]);
-
-            // ── BILL DUE SOON ALERT ──
-            useEffect(() => {
-                if (window.DailyReminder) {
-                    window.DailyReminder.checkBillDueSoon(bills);
-                }
-            }, [bills]);
-
-            // ── BUDGET WARNING ALERT ──
-            useEffect(() => {
-                if (window.DailyReminder && budgets.length > 0) {
-                    window.DailyReminder.checkBudgetWarning(budgets, totals.catSum);
-                }
-            }, [dailyExpenses, budgets, totals.catSum]);
-
             // Load archives from IndexedDB on mount, with localStorage migration
             useEffect(() => {
                 window.archivedb.open().then(() => {
@@ -312,6 +291,27 @@
                 () => window.selectors.computeTotals({ incomes, bills, funds, txns, dailyExpenses }),
                 [incomes, bills, funds, txns, dailyExpenses]
             );
+
+            // ── LOW BALANCE ALERT ──
+            useEffect(() => {
+                if (window.DailyReminder && displayWallets.length > 0) {
+                    window.DailyReminder.checkLowBalance(displayWallets);
+                }
+            }, [displayWallets]);
+
+            // ── BILL DUE SOON ALERT ──
+            useEffect(() => {
+                if (window.DailyReminder) {
+                    window.DailyReminder.checkBillDueSoon(bills);
+                }
+            }, [bills]);
+
+            // ── BUDGET WARNING ALERT ──
+            useEffect(() => {
+                if (window.DailyReminder && budgets.length > 0) {
+                    window.DailyReminder.checkBudgetWarning(budgets, totals.catSum);
+                }
+            }, [dailyExpenses, budgets, totals.catSum]);
 
             // ── CLOSE MONTH (hook must be before any conditional return) ────
             const [showCloseModal, setShowCloseModal] = useState(false);
