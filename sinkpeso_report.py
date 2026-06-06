@@ -289,14 +289,13 @@ t = Table(table_data, colWidths=[CONTENT_W * 0.35, CONTENT_W * 0.35, CONTENT_W *
 t.setStyle(TableStyle([
     ("BACKGROUND", (0, 0), (-1, 0), SLATE),
     ("TEXTCOLOR", (0, 0), (-1, 0), white),
-    ("TOPPADDING", (0, 0), (-1, -1), 12),
-    ("BOTTOMPADDING", (0, 0), (-1, -1), 12),
-    ("LEFTPADDING", (0, 0), (-1, -1), 15),
-    ("RIGHTPADDING", (0, 0), (-1, -1), 20),
+    ("TOPPADDING", (0, 0), (-1, -1), 10),
+    ("BOTTOMPADDING", (0, 0), (-1, -1), 10),
+    ("LEFTPADDING", (0, 0), (-1, -1), 10),
+    ("RIGHTPADDING", (0, 0), (-1, -1), 10),
     ("ROWBACKGROUNDS", (0, 1), (-1, -1), [LIGHT_BG, LIGHT_BG2]),
     ("LINEBELOW", (0, 0), (-1, -1), 0.5, BORDER_GRAY),
     ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
-    ("ALIGN", (2, 0), (2, -1), "RIGHT"),
 ]))
 story.append(t)
 
@@ -329,8 +328,14 @@ wallet_data = [
      Paragraph("PHP 6,800.00", sWalletTotalRight)],
 ]
 
-# Explicit point widths totaling 504 points (fits A4 with 0.75in margins)
-wt = Table(wallet_data, colWidths=[110, 80, 100, 100, 114], repeatRows=1)
+# Use CONTENT_W-relative ratios to guarantee no overflow
+wt = Table(wallet_data, colWidths=[
+    CONTENT_W * 0.217,   # Wallet
+    CONTENT_W * 0.158,   # Type
+    CONTENT_W * 0.199,   # Original Balance
+    CONTENT_W * 0.199,   # FX Rate
+    CONTENT_W * 0.227,   # Total (Base)
+], repeatRows=1)
 wt.setStyle(TableStyle([
     ("BACKGROUND", (0, 0), (-1, 0), SLATE),
     ("TEXTCOLOR", (0, 0), (-1, 0), white),
