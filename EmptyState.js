@@ -26,11 +26,16 @@
 (function () {
     const e = React.createElement;
 
-    function EmptyState({ icon, title, sub }) {
+    function EmptyState({ icon, title, sub, illustration }) {
         return e('div', { className: "empty-state" },
-            e('div', { className: "empty-state-icon" },
-                e(Icon, { name: icon, size: 30, color: "var(--text-muted)" })
-            ),
+            illustration
+                ? e('div', { className: "empty-state-illustration", dangerouslySetInnerHTML: { __html: illustration } })
+                : e('div', { className: "empty-state-icon-wrap" },
+                    e('div', { className: "empty-state-icon-bg" }),
+                    e('div', { className: "empty-state-icon" },
+                        e(Icon, { name: icon, size: 32, color: "var(--text-muted)" })
+                    )
+                  ),
             e('div', { className: "empty-state-title" }, title),
             e('div', { className: "empty-state-sub" },  sub)
         );

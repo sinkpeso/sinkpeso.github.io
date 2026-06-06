@@ -35,8 +35,16 @@
         </div>
     </nav>
 
+    <!-- ═══ SCROLL PROGRESS ═══ -->
+    <div class="scroll-progress" aria-hidden="true"></div>
+
     <!-- ═══ SECTION 1 — HERO ═══ -->
     <section class="hero" aria-label="Hero">
+        <div class="hero-orbs" aria-hidden="true">
+            <div class="hero-orb hero-orb--green"></div>
+            <div class="hero-orb hero-orb--blue"></div>
+            <div class="hero-orb hero-orb--purple"></div>
+        </div>
         <div class="container">
             <div class="hero-content">
                 <div class="eyebrow">Private. Offline. Yours.</div>
@@ -934,6 +942,11 @@
         </div>
     </section>
 
+    <!-- ═══ BACK TO TOP ═══ -->
+    <button class="back-to-top" aria-label="Back to top" onclick="window.scrollTo({top:0,behavior:'smooth'})">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 15l-6-6-6 6"/></svg>
+    </button>
+
     <!-- ═══ SECTION 12 — FOOTER ═══ -->
     <footer role="contentinfo">
         <div class="container">
@@ -971,6 +984,71 @@
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('./service-worker.js');
         }
+
+        /* ── Scroll Progress Bar ── */
+        const scrollProgress = document.querySelector('.scroll-progress');
+        const nav = document.querySelector('.nav');
+        const backToTop = document.querySelector('.back-to-top');
+
+        function onScroll() {
+            const scrollTop = window.scrollY;
+            const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+            const progress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+            if (scrollProgress) scrollProgress.style.width = progress + '%';
+            if (nav) nav.classList.toggle('scrolled', scrollTop > 40);
+            if (backToTop) backToTop.classList.toggle('visible', scrollTop > 500);
+        }
+        window.addEventListener('scroll', onScroll, { passive: true });
+        onScroll();
+
+        /* ── Reveal on Scroll ── */
+        const reveals = document.querySelectorAll('.reveal');
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+        reveals.forEach(el => observer.observe(el));
+
+        /* ── Showcase Tabs with Crossfade ── */
+        const tabs = document.querySelectorAll('.showcase-tab');
+        const panels = document.querySelectorAll('.showcase-panel');
+        const showcaseTitle = document.getElementById('showcase-title');
+        const titleMap = {
+            dashboard: 'SINKPESO — Dashboard',
+            expenses: 'SINKPESO — Expenses',
+            bills: 'SINKPESO — Bills',
+            savings: 'SINKPESO — Savings',
+            diary: 'SINKPESO — Photo Diary',
+            utang: 'SINKPESO — Utang Tracker',
+            cashflow: 'SINKPESO — Cashflow Forecast',
+            transfer: 'SINKPESO — Wallet Transfer'
+        };
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const target = tab.dataset.panel;
+                tabs.forEach(t => { t.classList.remove('active'); t.setAttribute('aria-selected', 'false'); });
+                tab.classList.add('active');
+                tab.setAttribute('aria-selected', 'true');
+                panels.forEach(p => {
+                    if (p.id === 'panel-' + target) {
+                        p.style.display = 'block';
+                        requestAnimationFrame(() => {
+                            p.classList.add('active');
+                            p.removeAttribute('aria-hidden');
+                        });
+                    } else {
+                        p.classList.remove('active');
+                        p.setAttribute('aria-hidden', 'true');
+                        setTimeout(() => { if (!p.classList.contains('active')) p.style.display = 'none'; }, 350);
+                    }
+                });
+                if (showcaseTitle && titleMap[target]) showcaseTitle.textContent = titleMap[target];
+            });
+        });
     </script>
 </body>
 </html>

@@ -76,6 +76,11 @@ body.modal-open {
     --accent: #00E676;
     --accent-dim: rgba(0,230,118,0.08);
     --accent-border: rgba(0,230,118,0.2);
+    /* shadows & depth */
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.2);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.3), 0 2px 4px rgba(0,0,0,0.2);
+    --shadow-lg: 0 8px 32px rgba(0,0,0,0.4), 0 4px 8px rgba(0,0,0,0.2);
+    --shadow-accent: 0 4px 20px rgba(0,230,118,0.12);
     /* spacing scale (8px grid) */
     --sp-1: 4px; --sp-2: 8px; --sp-3: 12px; --sp-4: 16px;
     --sp-5: 20px; --sp-6: 24px; --sp-7: 28px; --sp-8: 32px;
@@ -255,8 +260,8 @@ input[type="datetime-local"] {
    ──────────────────────────────────────────────────────────────── */
 
 /* ── MODAL ── */
-.modal-overlay { position: fixed; inset: 0; background: var(--modal-bg); backdrop-filter: blur(10px); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: var(--sp-4); }
-.modal-container { background: var(--bg-panel); border: 1px solid var(--border); border-radius: var(--r-xl); padding: var(--sp-6); width: 100%; max-width: 480px; box-shadow: 0 16px 48px rgba(0,0,0,0.4); }
+.modal-overlay { position: fixed; inset: 0; background: var(--modal-bg); backdrop-filter: blur(16px) saturate(1.2); -webkit-backdrop-filter: blur(16px) saturate(1.2); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: var(--sp-4); }
+.modal-container { background: var(--bg-panel); border: 1px solid var(--border); border-radius: var(--r-xl); padding: var(--sp-6); width: 100%; max-width: 480px; box-shadow: var(--shadow-lg), 0 0 0 1px rgba(255,255,255,0.03); }
 @media (max-width: 600px) {
     .modal-container { padding: var(--sp-5) var(--sp-4); border-radius: var(--r-lg); }
 }
@@ -403,10 +408,15 @@ input[type="datetime-local"] {
 .safe-chip { display: inline-flex; align-items: center; gap: var(--sp-2); background: var(--accent-dim); border: 1px solid var(--accent-border); color: var(--accent); padding: 5px 12px; border-radius: var(--sp-2); font-size: var(--t-base); font-weight: 600; margin-top: var(--sp-4); }
 
 /* ── EMPTY STATE ── */
-.empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: var(--sp-6) var(--sp-4); text-align: center; color: var(--text-muted); gap: var(--sp-3); }
-.empty-state-icon { opacity: 0.5; margin-bottom: var(--sp-2); }
+.empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: var(--sp-8) var(--sp-4); text-align: center; color: var(--text-muted); gap: var(--sp-3); animation: emptyFadeIn 0.4s ease both; }
+@keyframes emptyFadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+.empty-state-icon-wrap { position: relative; display: flex; align-items: center; justify-content: center; width: 64px; height: 64px; margin-bottom: var(--sp-2); }
+.empty-state-icon-bg { position: absolute; inset: 0; border-radius: 50%; background: var(--accent-dim); border: 1px solid var(--accent-border); }
+.empty-state-icon { position: relative; display: flex; align-items: center; justify-content: center; opacity: 0.7; }
 .empty-state-title { font-size: var(--t-md); font-weight: 700; color: var(--text-main); }
 .empty-state-sub { font-size: var(--t-sm); max-width: 240px; line-height: 1.6; color: var(--text-muted); }
+.empty-state-illustration { margin-bottom: var(--sp-3); opacity: 0.6; }
+.empty-state-illustration svg { width: 80px; height: 80px; }
 
 /* ══════════════════════════════════════════════════════════════════
    MOBILE UI FIXES (≤ 600px)
