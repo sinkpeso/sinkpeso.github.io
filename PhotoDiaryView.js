@@ -249,7 +249,7 @@
                                 e('div', { style:{ fontSize:11, color:"var(--text-muted)" } }, "Camera or gallery — auto compressed")
                               ),
                         preview && e('div', { className: "pd-picker-change" }, "Tap to change"),
-                        e('input', { id:"pd-file-input", type:"file", accept:"image/*", capture:"environment", style:{ display:"none" }, onChange: handlePickImage })
+e('input', { id:"pd-file-input", type:"file", accept:"image/*", style:{ display:"none" }, onChange: handlePickImage })
                     ),
 
                     e('input', { className:"quick-add-amount", type:"number", inputMode:"decimal", placeholder:"0.00", value: form.amountRaw, autoFocus:true, onChange: ev => setForm(f => ({...f, amountRaw: ev.target.value})) }),
