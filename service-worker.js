@@ -1,4 +1,4 @@
-const CACHE_NAME = 'sinkpeso-v14';
+const CACHE_NAME = 'sinkpeso-v15';
 const ASSETS = [
   './index.html',
   './app.html',

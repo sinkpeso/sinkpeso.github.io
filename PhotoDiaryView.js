@@ -240,17 +240,26 @@
                         e('button', { onClick: resetForm, style: S.closeBtn }, e(Icon, { name:"x", size:16 }))
                     ),
 
-                    e('label', { className: "pd-picker", htmlFor: "pd-file-input", style: compressing ? { opacity:0.6 } : undefined },
-                        preview
-                            ? e('img', { src: preview, className: "pd-preview", alt:"preview" })
-                            : e('div', { style:{ display:"flex", flexDirection:"column", alignItems:"center", gap:8, color:"var(--text-muted)" } },
-                                e(Icon, { name: compressing ? "target" : "camera", size:32 }),
-                                e('div', { style:{ fontSize:13, fontWeight:600, color:"var(--text-light)" } }, compressing ? "Compressing…" : "Tap to add photo"),
-                                e('div', { style:{ fontSize:11, color:"var(--text-muted)" } }, "Camera or gallery — auto compressed")
-                              ),
-                        preview && e('div', { className: "pd-picker-change" }, "Tap to change"),
-e('input', { id:"pd-file-input", type:"file", accept:"image/*", style:{ display:"none" }, onChange: handlePickImage })
-                    ),
+                    preview
+                        ? e('div', { className: "pd-picker", style: compressing ? { opacity:0.6 } : undefined },
+                            e('img', { src: preview, className: "pd-preview", alt:"preview" }),
+                            e('div', { style:{ position:"absolute", bottom:10, left:"50%", transform:"translateX(-50%)", display:"flex", gap:6 } },
+                                e('button', { type:"button", onClick: ev => { ev.stopPropagation(); document.getElementById("pd-cam-input").click(); }, style:{ background:"rgba(0,0,0,0.65)", color:"rgba(255,255,255,0.85)", fontSize:11, fontWeight:700, padding:"4px 12px", borderRadius:20, border:"none", cursor:"pointer" } }, "📷 Camera"),
+                                e('button', { type:"button", onClick: ev => { ev.stopPropagation(); document.getElementById("pd-gallery-input").click(); }, style:{ background:"rgba(0,0,0,0.65)", color:"rgba(255,255,255,0.85)", fontSize:11, fontWeight:700, padding:"4px 12px", borderRadius:20, border:"none", cursor:"pointer" } }, "🖼️ Gallery")
+                            )
+                          )
+                        : e('div', { style:{ display:"flex", gap:10 } },
+                            e('button', { type:"button", onClick: () => document.getElementById("pd-cam-input").click(), style:{ flex:1, display:"flex", flexDirection:"column", alignItems:"center", gap:6, padding:"20px 12px", background:"var(--bg-input)", border:"1.5px dashed var(--border-input)", borderRadius:14, cursor:"pointer", color:"var(--text-muted)", transition:"border-color 0.2s" }, onMouseEnter: ev => ev.currentTarget.style.borderColor = "var(--accent)", onMouseLeave: ev => ev.currentTarget.style.borderColor = "var(--border-input)" },
+                                e(Icon, { name: compressing ? "target" : "camera", size:28, color:"var(--accent)" }),
+                                e('div', { style:{ fontSize:12, fontWeight:600, color:"var(--text-light)" } }, compressing ? "Compressing…" : "Take Photo")
+                            ),
+                            e('button', { type:"button", onClick: () => document.getElementById("pd-gallery-input").click(), style:{ flex:1, display:"flex", flexDirection:"column", alignItems:"center", gap:6, padding:"20px 12px", background:"var(--bg-input)", border:"1.5px dashed var(--border-input)", borderRadius:14, cursor:"pointer", color:"var(--text-muted)", transition:"border-color 0.2s" }, onMouseEnter: ev => ev.currentTarget.style.borderColor = "var(--accent)", onMouseLeave: ev => ev.currentTarget.style.borderColor = "var(--border-input)" },
+                                e(Icon, { name: "image", size:28, color:"var(--accent)" }),
+                                e('div', { style:{ fontSize:12, fontWeight:600, color:"var(--text-light)" } }, "Gallery")
+                            )
+                          ),
+                    e('input', { id:"pd-cam-input", type:"file", accept:"image/*", capture:"environment", style:{ display:"none" }, onChange: handlePickImage }),
+                    e('input', { id:"pd-gallery-input", type:"file", accept:"image/*", style:{ display:"none" }, onChange: handlePickImage }),
 
                     e('input', { className:"quick-add-amount", type:"number", inputMode:"decimal", placeholder:"0.00", value: form.amountRaw, autoFocus:true, onChange: ev => setForm(f => ({...f, amountRaw: ev.target.value})) }),
 
