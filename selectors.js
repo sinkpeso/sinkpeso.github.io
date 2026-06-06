@@ -235,13 +235,26 @@
             });
         });
 
+        (txns || []).filter(t => t.type === "wallet_transfer").forEach(t => {
+            const fromName = resolve(t.fromWalletId, t.fromWalletNameSnapshot) || "Unknown";
+            const toName = resolve(t.toWalletId, t.toWalletNameSnapshot) || "Unknown";
+            items.push({
+                id: `xfer-${t.id}`, icon: "arrow-right", iconColor: "#2563EB",
+                title: `${fromName} → ${toName}`, subtitle: "Transfer",
+                amountCents: t.amountCents, amountColor: "#2563EB", amountPrefix: "~",
+                date: t.date,
+                walletName: fromName,
+                navTarget: "wallets",
+            });
+        });
+
         (archives || []).slice(0, 3).forEach(arc => {
             items.push({
                 id: `arc-${arc.id}`, icon: "archive", iconColor: "#A855F7",
                 title: arc.month + " Archived", subtitle: "Monthly Snapshot",
                 amountCents: null, amountColor: null, amountPrefix: null,
                 date: arc.closedAt ? arc.closedAt.slice(0, 10) : "",
-                walletName: null, navTarget: "history",
+                walletName: null, navTarget: "wallets",
             });
         });
 
@@ -306,6 +319,18 @@
                 walletName:   resolve(t.walletId, t.walletNameSnapshot),
                 amountColor:  isDeposit ? "#2563EB" : "#F59E0B",
                 amountPrefix: isDeposit ? "→" : "←",
+            });
+        });
+
+        (txns || []).filter(t => t.type === "wallet_transfer").forEach(t => {
+            const fromName = resolve(t.fromWalletId, t.fromWalletNameSnapshot) || "Unknown";
+            const toName = resolve(t.toWalletId, t.toWalletNameSnapshot) || "Unknown";
+            items.push({
+                id: `xfer-${t.id}`, rawId: t.id, source: "transfer", icon: "arrow-right",
+                title: `${fromName} → ${toName}`, subtitle: "Wallet Transfer",
+                amountCents: t.amountCents, date: t.date, walletId: t.fromWalletId,
+                walletName: fromName,
+                amountColor: "#2563EB", amountPrefix: "~",
             });
         });
 

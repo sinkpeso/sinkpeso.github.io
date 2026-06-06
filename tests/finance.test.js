@@ -90,4 +90,66 @@ assert.deepStrictEqual(fin.checkIncomeDeleteSafe(null, 1000, []), { safe: true, 
 assert.deepStrictEqual(fin.checkIncomeDeleteSafe('w1', 3000, [{ id: 'w1', balanceCents: 5000 }]), { safe: true, walletName: undefined, projectedBalance: 2000 }, 'safe delete');
 assert.deepStrictEqual(fin.checkIncomeDeleteSafe('w1', 6000, [{ id: 'w1', balanceCents: 5000 }]), { safe: false, walletName: undefined, projectedBalance: -1000 }, 'unsafe delete');
 
+// ── wallet_transfer: getWalletDelta ──
+const transferSources = {
+    incomes: [],
+    dailyExpenses: [],
+    txns: [
+        { type: 'wallet_transfer', fromWalletId: 'w1', toWalletId: 'w2', amountCents: 5000 }
+    ]
+};
+assert.strictEqual(fin.getWalletDelta('w1', transferSources), -5000, 'transfer: source wallet debited');
+assert.strictEqual(fin.getWalletDelta('w2', transferSources), 5000, 'transfer: destination wallet credited');
+assert.strictEqual(fin.getWalletDelta('w3', transferSources), 0, 'transfer: unrelated wallet unaffected');
+
+// Transfer + other txns combined
+const combinedSources = {
+    incomes: [{ walletId: 'w1', amountCents: 10000 }],
+    dailyExpenses: [{ walletId: 'w1', amountCents: 2000 }],
+    txns: [
+        { type: 'bill_payment', walletId: 'w1', amountCents: 1000 },
+        { type: 'wallet_transfer', fromWalletId: 'w1', toWalletId: 'w2', amountCents: 3000 }
+    ]
+};
+assert.strictEqual(fin.getWalletDelta('w1', combinedSources), 4000, 'combined: 10000-2000-1000-3000=4000');
+assert.strictEqual(fin.getWalletDelta('w2', combinedSources), 3000, 'combined: w2 receives 3000 transfer');
+
+// Derive balance with transfers
+const wTransfer = { id: 'w1', openingBalanceCents: 5000 };
+assert.strictEqual(fin.deriveWalletBalance(wTransfer, transferSources), 0, 'derive with transfer: 5000-5000=0');
+
+// ── wallet_transfer: processFinancialTransaction ──
+assert.strictEqual(
+    fin.processFinancialTransaction({ type: 'wallet_transfer', fromWalletId: 'w1', toWalletId: 'w2', amountCents: 1000, wallets: [{ id: 'w1', balanceCents: 5000 }, { id: 'w2', balanceCents: 0 }] }).ok,
+    true, 'valid transfer'
+);
+assert.strictEqual(
+    fin.processFinancialTransaction({ type: 'wallet_transfer', fromWalletId: 'w1', toWalletId: 'w2', amountCents: 0, wallets: [{ id: 'w1', balanceCents: 5000 }] }).ok,
+    false, 'zero amount transfer fails'
+);
+assert.strictEqual(
+    fin.processFinancialTransaction({ type: 'wallet_transfer', fromWalletId: 'w1', toWalletId: 'w1', amountCents: 1000, wallets: [{ id: 'w1', balanceCents: 5000 }] }).ok,
+    false, 'same source and dest fails'
+);
+assert.strictEqual(
+    fin.processFinancialTransaction({ type: 'wallet_transfer', fromWalletId: 'w1', toWalletId: null, amountCents: 1000, wallets: [{ id: 'w1', balanceCents: 5000 }] }).ok,
+    false, 'missing destination fails'
+);
+assert.strictEqual(
+    fin.processFinancialTransaction({ type: 'wallet_transfer', fromWalletId: null, toWalletId: 'w2', amountCents: 1000, wallets: [{ id: 'w1', balanceCents: 5000 }] }).ok,
+    false, 'missing source fails'
+);
+assert.strictEqual(
+    fin.processFinancialTransaction({ type: 'wallet_transfer', fromWalletId: 'w1', toWalletId: 'w2', amountCents: 6000, wallets: [{ id: 'w1', balanceCents: 5000 }, { id: 'w2', balanceCents: 0 }] }).ok,
+    false, 'insufficient funds fails'
+);
+assert.strictEqual(
+    fin.processFinancialTransaction({ type: 'wallet_transfer', fromWalletId: 'missing', toWalletId: 'w2', amountCents: 1000, wallets: [{ id: 'w2', balanceCents: 0 }] }).ok,
+    false, 'source wallet not found fails'
+);
+assert.strictEqual(
+    fin.processFinancialTransaction({ type: 'wallet_transfer', fromWalletId: 'w1', toWalletId: 'missing', amountCents: 1000, wallets: [{ id: 'w1', balanceCents: 5000 }] }).ok,
+    false, 'dest wallet not found fails'
+);
+
 console.log('✓ finance.js: all tests passed');

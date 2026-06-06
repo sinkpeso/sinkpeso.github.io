@@ -130,6 +130,28 @@
         setIncomes(prev => prev.filter(i => i.id !== id));
     }
 
-    window.actions = { addExpense, editExpense, deleteExpense, addIncome, editIncome, deleteIncome };
+    // ── TRANSFER ACTIONS ───────────────────────────────────────────────────
+
+    /**
+     * Create a wallet-to-wallet transfer transaction.
+     * Validates source wallet balance, then appends a wallet_transfer txn record.
+     * @param {{ rec: Object, wallets: Array, setTxns: Function }} opts
+     * @returns {{ ok: boolean, error?: string }} Validation result
+     */
+    function transferBetweenWallets({ rec, wallets, setTxns }) {
+        const result = fin().processFinancialTransaction({
+            type: "wallet_transfer",
+            fromWalletId: rec.fromWalletId,
+            toWalletId: rec.toWalletId,
+            amountCents: rec.amountCents,
+            wallets,
+        });
+        if (!result.ok) return result;
+
+        setTxns(prev => [rec, ...prev]);
+        return { ok: true };
+    }
+
+    window.actions = { addExpense, editExpense, deleteExpense, addIncome, editIncome, deleteIncome, transferBetweenWallets };
 
 })();

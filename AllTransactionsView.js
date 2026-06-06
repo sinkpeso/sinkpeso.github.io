@@ -89,6 +89,7 @@
                     ),
                     renderItem: (item) => {
                         const canEdit = item.source === "vault";
+                        const canDeleteTransfer = item.source === "transfer";
                         return e('div', { className: "txn-row" },
                             e('div', { className: "txn-left" },
                                 e('div', { className: "txn-icon", style: { background: item.amountColor + "15", border: "1px solid " + item.amountColor + "35" } }, e(Icon, { name: item.icon, size: 15, color: item.amountColor })),
@@ -105,7 +106,9 @@
                                 ),
                                 canEdit
                                     ? e(DotMenu, { itemId: item.rawId, openMenu, setOpenMenu, onEdit: () => { const t = (txns||[]).find(x => x.id === item.rawId); if (t) openEditTxn(t); }, onDelete: () => deleteTxn(item.rawId) })
-                                    : e('div', { style: { width: 34 } })
+                                    : canDeleteTransfer
+                                        ? e('button', { onClick: () => deleteTxn(item.rawId), style: { background:"transparent", border:"none", cursor:"pointer", padding:6, color:"var(--text-muted)", borderRadius:6 }, title:"Delete transfer" }, e(Icon, { name:"trash", size:14 }))
+                                        : e('div', { style: { width: 34 } })
                             )
                         );
                     }

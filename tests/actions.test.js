@@ -126,4 +126,80 @@ assert.strictEqual(setInc3.get().length, 1, 'editIncome keeps array same length'
 assert.strictEqual(setInc3.get()[0].name, 'New Salary', 'editIncome updates name');
 assert.strictEqual(setInc3.get()[0].amountCents, 40000, 'editIncome updates amount');
 
+// ── transferBetweenWallets ──────────────────────────────────────────────
+const fromWallet = { id: 'wf1', name: 'Cash', openingBalanceCents: 10000, balanceCents: 10000 };
+const toWallet = { id: 'wf2', name: 'GCash', openingBalanceCents: 0, balanceCents: 0 };
+const transferWallets = [fromWallet, toWallet];
+const setTxns1 = createSetter([]);
+
+const transferRec = {
+    id: 'xfer-1',
+    type: 'wallet_transfer',
+    fromWalletId: 'wf1',
+    toWalletId: 'wf2',
+    amountCents: 3000,
+    date: '2024-02-01',
+    note: 'Cash to GCash',
+    fromWalletNameSnapshot: 'Cash',
+    toWalletNameSnapshot: 'GCash'
+};
+
+const transferResult = actions.transferBetweenWallets({
+    rec: transferRec,
+    wallets: transferWallets,
+    setTxns: setTxns1
+});
+
+assert.strictEqual(transferResult.ok, true, 'transferBetweenWallets succeeds');
+assert.strictEqual(setTxns1.get().length, 1, 'transferBetweenWallets appends txn');
+assert.strictEqual(setTxns1.get()[0].type, 'wallet_transfer', 'transfer txn has correct type');
+assert.strictEqual(setTxns1.get()[0].fromWalletId, 'wf1', 'transfer txn has fromWalletId');
+assert.strictEqual(setTxns1.get()[0].toWalletId, 'wf2', 'transfer txn has toWalletId');
+
+// Transfer with insufficient funds should fail
+const poorWallets = [
+    { id: 'wf3', name: 'Wallet A', openingBalanceCents: 500, balanceCents: 500 },
+    { id: 'wf4', name: 'Wallet B', openingBalanceCents: 0, balanceCents: 0 }
+];
+const setTxns2 = createSetter([]);
+
+const failedTransfer = actions.transferBetweenWallets({
+    rec: {
+        id: 'xfer-2',
+        type: 'wallet_transfer',
+        fromWalletId: 'wf3',
+        toWalletId: 'wf4',
+        amountCents: 1000,
+        date: '2024-02-01',
+        fromWalletNameSnapshot: 'Wallet A',
+        toWalletNameSnapshot: 'Wallet B'
+    },
+    wallets: poorWallets,
+    setTxns: setTxns2
+});
+
+assert.strictEqual(failedTransfer.ok, false, 'transferBetweenWallets fails with insufficient funds');
+assert.strictEqual(setTxns2.get().length, 0, 'failed transfer does not add txn');
+assert.ok(failedTransfer.error.includes('Insufficient'), 'error message mentions insufficient');
+
+// Same wallet transfer should fail
+const setTxns3 = createSetter([]);
+const sameWalletTransfer = actions.transferBetweenWallets({
+    rec: {
+        id: 'xfer-3',
+        type: 'wallet_transfer',
+        fromWalletId: 'wf1',
+        toWalletId: 'wf1',
+        amountCents: 1000,
+        date: '2024-02-01',
+        fromWalletNameSnapshot: 'Cash',
+        toWalletNameSnapshot: 'Cash'
+    },
+    wallets: transferWallets,
+    setTxns: setTxns3
+});
+
+assert.strictEqual(sameWalletTransfer.ok, false, 'same wallet transfer fails');
+assert.strictEqual(setTxns3.get().length, 0, 'same wallet transfer does not add txn');
+
 console.log('✓ actions.js: all tests passed');

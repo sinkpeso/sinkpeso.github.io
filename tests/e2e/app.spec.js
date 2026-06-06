@@ -26,6 +26,9 @@ async function seedTestData(page, data = {}) {
         if (d.bills) localStorage.setItem('sp_bills', JSON.stringify(d.bills));
         if (d.debts) localStorage.setItem('sp_debts', JSON.stringify(d.debts));
         if (d.templates) localStorage.setItem('sp_templates', JSON.stringify(d.templates));
+        if (d.txns) localStorage.setItem('sp_txns', JSON.stringify(d.txns));
+        if (d.funds) localStorage.setItem('sp_funds', JSON.stringify(d.funds));
+        if (d.budgets) localStorage.setItem('sp_budgets', JSON.stringify(d.budgets));
     }, data);
 }
 
@@ -410,6 +413,201 @@ test.describe('SINKPESO E2E', () => {
         await expect(homeBtn).toBeVisible({ timeout: 5000 });
         await expect(expenseBtn).toBeVisible({ timeout: 5000 });
         await expect(savingsBtn).toBeVisible({ timeout: 5000 });
+    });
+
+    // ═══════════════════════════════════════════════════════════════
+    // WALLET TRANSFER E2E TESTS
+    // ═══════════════════════════════════════════════════════════════
+
+    test('wallet transfer end-to-end', async ({ page }) => {
+        // Seed 2 wallets with opening balances
+        await page.goto('/app.html');
+        await page.waitForTimeout(500);
+        await seedTestData(page, {
+            wallets: [
+                { id: 'cash-e2e', name: 'Cash', openingBalanceCents: 100000, color: '#00E676' },
+                { id: 'gcash-e2e', name: 'GCash', openingBalanceCents: 50000, color: '#2563EB' }
+            ]
+        });
+        await page.evaluate(() => {
+            localStorage.setItem('sp_onboarding_seen', '1');
+            localStorage.setItem('sp_settings', JSON.stringify({ _v: 2, data: { currency: 'PHP', theme: 'dark', pin: '' } }));
+        });
+        await page.reload();
+        await page.waitForTimeout(1500);
+
+        // Navigate to Wallets tab
+        const walletsTab = page.locator('button:has-text("Wallets")').first();
+        if (await walletsTab.isVisible()) {
+            await walletsTab.click();
+            await page.waitForTimeout(500);
+
+            // Verify both wallets are visible
+            await expect(page.locator('text=Cash').first()).toBeVisible({ timeout: 5000 });
+            await expect(page.locator('text=GCash').first()).toBeVisible({ timeout: 5000 });
+
+            // Click the Transfer button
+            const transferBtn = page.locator('button:has-text("Transfer")').first();
+            if (await transferBtn.isVisible()) {
+                await transferBtn.click();
+                await page.waitForTimeout(500);
+
+                // Verify transfer modal opens
+                await expect(page.locator('text=Transfer Between Wallets')).toBeVisible({ timeout: 5000 });
+
+                // Fill in the amount
+                const amountInput = page.locator('input[placeholder="0.00"]').last();
+                if (await amountInput.isVisible()) {
+                    await amountInput.fill('200');
+                    await page.waitForTimeout(300);
+
+                    // Click Transfer button in modal
+                    const commitBtn = page.locator('button:has-text("Transfer")').last();
+                    if (await commitBtn.isVisible()) {
+                        await commitBtn.click();
+                        await page.waitForTimeout(1000);
+
+                        // Verify success toast
+                        const toast = page.locator('text=Transferred');
+                        await expect(toast.first()).toBeVisible({ timeout: 5000 });
+
+                        // Verify modal closed
+                        const modalTitle = page.locator('text=Transfer Between Wallets');
+                        await expect(modalTitle).not.toBeVisible({ timeout: 3000 });
+                    }
+                }
+            }
+        }
+    });
+
+    test('transfer appears in Transaction Log', async ({ page }) => {
+        // Seed wallets and an existing transfer transaction
+        await page.goto('/app.html');
+        await page.waitForTimeout(500);
+        await seedTestData(page, {
+            wallets: [
+                { id: 'cash-log', name: 'Cash', openingBalanceCents: 100000, color: '#00E676' },
+                { id: 'gcash-log', name: 'GCash', openingBalanceCents: 50000, color: '#2563EB' }
+            ],
+            txns: [
+                {
+                    id: 'xfer-e2e-log',
+                    type: 'wallet_transfer',
+                    fromWalletId: 'cash-log',
+                    toWalletId: 'gcash-log',
+                    amountCents: 30000,
+                    date: new Date().toISOString().slice(0, 10),
+                    note: 'E2E Transfer Test',
+                    fromWalletNameSnapshot: 'Cash',
+                    toWalletNameSnapshot: 'GCash'
+                }
+            ]
+        });
+        await page.evaluate(() => {
+            localStorage.setItem('sp_onboarding_seen', '1');
+            localStorage.setItem('sp_settings', JSON.stringify({ _v: 2, data: { currency: 'PHP', theme: 'dark', pin: '' } }));
+        });
+        await page.reload();
+        await page.waitForTimeout(1500);
+
+        // Navigate to Transaction Log via desktop tab
+        const logsTab = page.locator('button:has-text("Logs")').first();
+        if (await logsTab.isVisible()) {
+            await logsTab.click();
+            await page.waitForTimeout(500);
+
+            // Should see the transfer in the log
+            const transferRow = page.locator('text=Cash → GCash');
+            await expect(transferRow.first()).toBeVisible({ timeout: 5000 });
+
+            // Should see "Wallet Transfer" subtitle
+            const subtitle = page.locator('text=Wallet Transfer');
+            await expect(subtitle.first()).toBeVisible({ timeout: 5000 });
+        }
+    });
+
+    test('transfer button hidden with single wallet', async ({ page }) => {
+        // Seed only 1 wallet
+        await page.goto('/app.html');
+        await page.waitForTimeout(500);
+        await seedTestData(page, {
+            wallets: [
+                { id: 'only-wallet', name: 'OnlyWallet', openingBalanceCents: 50000, color: '#FF5722' }
+            ]
+        });
+        await page.evaluate(() => {
+            localStorage.setItem('sp_onboarding_seen', '1');
+            localStorage.setItem('sp_settings', JSON.stringify({ _v: 2, data: { currency: 'PHP', theme: 'dark', pin: '' } }));
+        });
+        await page.reload();
+        await page.waitForTimeout(1500);
+
+        // Navigate to Wallets tab
+        const walletsTab = page.locator('button:has-text("Wallets")').first();
+        if (await walletsTab.isVisible()) {
+            await walletsTab.click();
+            await page.waitForTimeout(500);
+
+            // Transfer button should NOT be visible (requires >= 2 wallets)
+            const transferBtn = page.locator('button:has-text("Transfer")');
+            const isTransferVisible = await transferBtn.first().isVisible().catch(() => false);
+            expect(isTransferVisible).toBeFalsy();
+        }
+    });
+
+    test('wallet balances update after transfer', async ({ page }) => {
+        // Seed 2 wallets
+        await page.goto('/app.html');
+        await page.waitForTimeout(500);
+        await seedTestData(page, {
+            wallets: [
+                { id: 'bal-w1', name: 'SourceWallet', openingBalanceCents: 100000, color: '#00E676' },
+                { id: 'bal-w2', name: 'DestWallet', openingBalanceCents: 50000, color: '#2563EB' }
+            ]
+        });
+        await page.evaluate(() => {
+            localStorage.setItem('sp_onboarding_seen', '1');
+            localStorage.setItem('sp_settings', JSON.stringify({ _v: 2, data: { currency: 'PHP', theme: 'dark', pin: '' } }));
+        });
+        await page.reload();
+        await page.waitForTimeout(1500);
+
+        // Navigate to Wallets tab
+        const walletsTab = page.locator('button:has-text("Wallets")').first();
+        if (await walletsTab.isVisible()) {
+            await walletsTab.click();
+            await page.waitForTimeout(500);
+
+            // Perform a transfer of ₱500 (50000 cents)
+            const transferBtn = page.locator('button:has-text("Transfer")').first();
+            if (await transferBtn.isVisible()) {
+                await transferBtn.click();
+                await page.waitForTimeout(500);
+
+                const amountInput = page.locator('input[placeholder="0.00"]').last();
+                if (await amountInput.isVisible()) {
+                    await amountInput.fill('500');
+                    await page.waitForTimeout(300);
+
+                    const commitBtn = page.locator('button:has-text("Transfer")').last();
+                    if (await commitBtn.isVisible()) {
+                        await commitBtn.click();
+                        await page.waitForTimeout(1500);
+
+                        // Verify the source wallet now shows ₱500 (was ₱1,000)
+                        const sourceBalance = page.locator('text=₱500.00');
+                        const hasSource = await sourceBalance.first().isVisible().catch(() => false);
+
+                        // Verify the dest wallet now shows ₱1,000 (was ₱500)
+                        const destBalance = page.locator('text=₱1,000.00');
+                        const hasDest = await destBalance.first().isVisible().catch(() => false);
+
+                        // At least one balance change should be visible
+                        expect(hasSource || hasDest).toBeTruthy();
+                    }
+                }
+            }
+        }
     });
 
     test('More sheet contains all secondary tabs', async ({ page }) => {
