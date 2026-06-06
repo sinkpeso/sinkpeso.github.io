@@ -98,10 +98,10 @@
             type, ...p,
             style: {
                 ...vs[v],
-                borderRadius: 10, padding: "12px 20px", fontSize: 16,
+                borderRadius: 10, padding: "10px 16px", fontSize: 14,
                 fontWeight: 600, cursor: "pointer",
                 border: vs[v].border || "none",
-                transition: "all 0.15s ease", minHeight: 44,
+                transition: "all 0.15s ease", minHeight: 40,
                 lineHeight: 1.2, letterSpacing: "0.01em",
                 ...style
             }
