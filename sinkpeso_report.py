@@ -304,41 +304,44 @@ story.append(t)
 story.append(Spacer(1, 24))
 story.append(KeepTogether([SectionAnchor("Wallets & Multi-Currency Breakdown"), Spacer(1, 8)]))
 
+# Dedicated right-aligned paragraph style for currency values
+sWalletRight = ParagraphStyle("WalletRight", fontName="Helvetica",
+                              fontSize=9, leading=12, alignment=TA_RIGHT,
+                              textColor=HexColor("#334155"))
+sWalletRightBold = ParagraphStyle("WalletRightBold", fontName="Helvetica-Bold",
+                                  fontSize=9, leading=12, alignment=TA_RIGHT,
+                                  textColor=SLATE)
+sWalletTotalRight = ParagraphStyle("WalletTotalRight", fontName="Helvetica-Bold",
+                                   fontSize=9, leading=12, alignment=TA_RIGHT,
+                                   textColor=GREEN)
+
 wallet_data = [
     [Paragraph("Wallet", hdr_style), Paragraph("Type", hdr_style), Paragraph("Original Balance", hdr_style),
      Paragraph("FX Rate", hdr_style), Paragraph("Total (Base)", hdr_style)],
     [Paragraph("Cash", sCellNormal), Paragraph("Physical", sCellNormal),
-     Paragraph("PHP 1,800.00", sCellRight), Paragraph("1 PHP = 1.00 PHP", sCellNormal),
-     Paragraph("PHP 1,800.00", sCellBold)],
+     Paragraph("PHP 1,800.00", sWalletRight), Paragraph("1 PHP = 1.00 PHP", sCellNormal),
+     Paragraph("PHP 1,800.00", sWalletRightBold)],
     [Paragraph("Digital Bank", sCellNormal), Paragraph("Savings", sCellNormal),
-     Paragraph("PHP 5,000.00", sCellRight), Paragraph("1 PHP = 1.00 PHP", sCellNormal),
-     Paragraph("PHP 5,000.00", sCellBold)],
+     Paragraph("PHP 5,000.00", sWalletRight), Paragraph("1 PHP = 1.00 PHP", sCellNormal),
+     Paragraph("PHP 5,000.00", sWalletRightBold)],
     [Paragraph("TOTAL (Combined)", sCellBold), Paragraph("", sCellNormal),
      Paragraph("", sCellNormal), Paragraph("", sCellNormal),
-     Paragraph("PHP 6,800.00", ParagraphStyle("TotalR", fontName="Helvetica-Bold",
-               fontSize=9, textColor=GREEN, alignment=TA_RIGHT, leading=12))],
+     Paragraph("PHP 6,800.00", sWalletTotalRight)],
 ]
 
-wcol_w = [
-    CONTENT_W * 0.17,   # Wallet
-    CONTENT_W * 0.10,   # Type
-    CONTENT_W * 0.22,   # Original Balance
-    CONTENT_W * 0.27,   # FX Rate
-    CONTENT_W * 0.24,   # Total (Base)
-]
-wt = Table(wallet_data, colWidths=wcol_w, repeatRows=1)
+# Explicit point widths totaling 504 points (fits A4 with 0.75in margins)
+wt = Table(wallet_data, colWidths=[110, 80, 100, 100, 114], repeatRows=1)
 wt.setStyle(TableStyle([
     ("BACKGROUND", (0, 0), (-1, 0), SLATE),
     ("TEXTCOLOR", (0, 0), (-1, 0), white),
-    ("TOPPADDING", (0, 0), (-1, -1), 12),
-    ("BOTTOMPADDING", (0, 0), (-1, -1), 12),
-    ("LEFTPADDING", (0, 0), (-1, -1), 15),
-    ("RIGHTPADDING", (0, 0), (-1, -1), 20),
+    ("TOPPADDING", (0, 0), (-1, -1), 10),
+    ("BOTTOMPADDING", (0, 0), (-1, -1), 10),
+    ("LEFTPADDING", (0, 0), (-1, -1), 12),
+    ("RIGHTPADDING", (0, 0), (-1, -1), 12),
     ("ROWBACKGROUNDS", (0, 1), (-1, -2), [LIGHT_BG, LIGHT_BG2]),
     ("LINEBELOW", (0, 0), (-1, -1), 0.5, BORDER_GRAY),
     ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
     ("BACKGROUND", (0, -1), (-1, -1), LIGHT_GRAY),
-    ("ALIGN", (2, 0), (-1, -1), "RIGHT"),
 ]))
 story.append(wt)
 story.append(Spacer(1, 12))
