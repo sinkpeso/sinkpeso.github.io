@@ -10,14 +10,17 @@
     const { tc } = window.utils;
     const { Field, Inp, Sel, Btn, SLabel } = window.components;
 
-    function AllTransactionsView({ txns, setTxns, funds, incomes, dailyExpenses, bills, wallets, fc, requestConfirm }) {
+    function AllTransactionsView({ txns, setTxns, funds, incomes, dailyExpenses, bills, wallets, fc, requestConfirm, showToast }) {
         const [search, setSearch] = React.useState("");
         const [walletFilter, setWalletFilter] = React.useState("all");
+        const [sourceFilter, setSourceFilter] = React.useState("all");
         const [dateFrom, setDateFrom] = React.useState("");
         const [dateTo, setDateTo] = React.useState("");
         const [openMenu, setOpenMenu] = React.useState(null);
         const [editTxn, setEditTxn] = React.useState(null);
         const [editTxnForm, setEditTxnForm] = React.useState({ type: "deposit", amount: "", date: "" });
+        const [editTransfer, setEditTransfer] = React.useState(null);
+        const [editTransferForm, setEditTransferForm] = React.useState({ amount: "", fee: "", date: "", note: "" });
 
         const allItems = React.useMemo(() =>
             window.selectors.getAllTransactionItems({ dailyExpenses, incomes, txns, bills, funds, wallets }),
@@ -25,6 +28,7 @@
 
         const filtered = React.useMemo(() => {
             let list = allItems;
+            if (sourceFilter !== "all") list = list.filter(item => item.source === sourceFilter);
             if (walletFilter !== "all") list = list.filter(item => item.walletId === walletFilter);
             if (dateFrom) list = list.filter(item => item.date >= dateFrom);
             if (dateTo) list = list.filter(item => item.date <= dateTo);
@@ -37,12 +41,23 @@
                 );
             }
             return list;
-        }, [allItems, walletFilter, search, dateFrom, dateTo]);
+        }, [allItems, walletFilter, sourceFilter, search, dateFrom, dateTo]);
 
         const getVaultName = (fundId) => { const f = (funds||[]).find(x => x.id === fundId); return f ? f.name : "Unknown Vault"; };
         const openEditTxn = (t) => { setEditTxn(t); setEditTxnForm({ type: t.type, amount: String((t.amountCents / 100).toFixed(2)), date: t.date }); };
         const saveEditTxn = () => { if (!editTxnForm.amount || !editTxnForm.date) return; setTxns(prev => prev.map(t => t.id === editTxn.id ? { ...t, type: editTxnForm.type, amountCents: tc(editTxnForm.amount), date: editTxnForm.date } : t)); setEditTxn(null); };
         const deleteTxn = (id) => { requestConfirm("Delete this transaction?", () => setTxns(prev => prev.filter(t => t.id !== id))); };
+        const openEditTransferFn = (t) => { setEditTransfer(t); setEditTransferForm({ amount: String((t.amountCents / 100).toFixed(2)), fee: t.feeCents ? String((t.feeCents / 100).toFixed(2)) : "", date: t.date, note: t.note || "" }); };
+        const saveEditTransfer = () => {
+            if (!editTransferForm.amount || !editTransferForm.date) return;
+            const newAmt = tc(editTransferForm.amount);
+            const newFee = tc(editTransferForm.fee || "0");
+            if (newAmt <= 0) return;
+            const srcWallet = wallets.find(w => w.id === editTransfer.fromWalletId);
+            if (srcWallet && (srcWallet.balanceCents || 0) < newAmt + newFee) { if (showToast) showToast("Insufficient funds for this edit."); return; }
+            setTxns(prev => prev.map(t => t.id === editTransfer.id ? { ...t, amountCents: newAmt, feeCents: newFee, date: editTransferForm.date, note: editTransferForm.note || null } : t));
+            setEditTransfer(null);
+        };
 
         return e('div', null,
             e('div', { style: { display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 4 } },
@@ -50,6 +65,13 @@
                     e('h2', { style: { fontSize: 22, fontWeight: 800, marginBottom: 4 } }, 'Transaction Log'),
                     e('div', { style: { fontSize: 14, color: "var(--text-muted)", marginBottom: 20 } }, 'Full history — expenses, income, bills, and vault actions.')
                 ),
+            ),
+
+            // Source filter pills
+            e('div', { style: { display:"flex", gap:6, marginBottom:12, flexWrap:"wrap" } },
+                [["all","All"],["expense","Expenses"],["income","Income"],["bill","Bills"],["vault","Vaults"],["transfer","Transfers"]].map(([val,label]) =>
+                    e('button', { key:val, onClick:()=>setSourceFilter(val), style:{ background: sourceFilter===val ? "rgba(37,99,235,0.15)" : "var(--hover-bg)", border:"1px solid " + (sourceFilter===val ? "#2563EB" : "var(--border)"), color: sourceFilter===val ? "#2563EB" : "var(--text-muted)", padding:"5px 12px", borderRadius:8, fontSize:12, fontWeight:600, cursor:"pointer", fontFamily:"inherit" } }, label)
+                )
             ),
 
             e('div', { className: "bento-filter", style: { marginBottom: 14 } },
@@ -89,7 +111,7 @@
                     ),
                     renderItem: (item) => {
                         const canEdit = item.source === "vault";
-                        const canDeleteTransfer = item.source === "transfer";
+                        const canManageTransfer = item.source === "transfer";
                         return e('div', { className: "txn-row" },
                             e('div', { className: "txn-left" },
                                 e('div', { className: "txn-icon", style: { background: item.amountColor + "15", border: "1px solid " + item.amountColor + "35" } }, e(Icon, { name: item.icon, size: 15, color: item.amountColor })),
@@ -106,8 +128,8 @@
                                 ),
                                 canEdit
                                     ? e(DotMenu, { itemId: item.rawId, openMenu, setOpenMenu, onEdit: () => { const t = (txns||[]).find(x => x.id === item.rawId); if (t) openEditTxn(t); }, onDelete: () => deleteTxn(item.rawId) })
-                                    : canDeleteTransfer
-                                        ? e('button', { onClick: () => deleteTxn(item.rawId), style: { background:"transparent", border:"none", cursor:"pointer", padding:6, color:"var(--text-muted)", borderRadius:6 }, title:"Delete transfer" }, e(Icon, { name:"trash", size:14 }))
+                                    : canManageTransfer
+                                        ? e(DotMenu, { itemId: item.rawId, openMenu, setOpenMenu, onEdit: () => { const t = (txns||[]).find(x => x.id === item.rawId); if (t) openEditTransferFn(t); }, onDelete: () => deleteTxn(item.rawId) })
                                         : e('div', { style: { width: 34 } })
                             )
                         );
@@ -122,7 +144,27 @@
                 e(Field, { label: "Amount" }, e(Inp, { type: "number", value: editTxnForm.amount, onChange: ev => setEditTxnForm({ ...editTxnForm, amount: ev.target.value }) })),
                 e(Field, { label: "Date" }, e(Inp, { type: "date", value: editTxnForm.date, onChange: ev => setEditTxnForm({ ...editTxnForm, date: ev.target.value }) })),
                 e('div', { style: S.formFooter }, e(Btn, { v: "ghost", style: { flex: 1 }, onClick: () => setEditTxn(null) }, "Cancel"), e(Btn, { v: "primary", style: { flex: 1 }, onClick: saveEditTxn }, "Save Changes"))
-            ))
+            )),
+
+            editTransfer && e('div', { className: "modal-overlay", onClick:()=>setEditTransfer(null) },
+                e('div', { className: "modal-container", style:{maxWidth:400}, onClick:ev=>ev.stopPropagation() },
+                    e('div', { style:S.modalHeader },
+                        e('div', { style:S.modalTitle }, "Edit Transfer"),
+                        e('button', { onClick:()=>setEditTransfer(null), style:S.closeBtn }, e(Icon, {name:"x",size:16}))
+                    ),
+                    e('p', { style:{ fontSize:13, color:"var(--text-muted)", marginBottom:16 } },
+                        `From: ${editTransfer.fromWalletNameSnapshot || "Unknown"} → To: ${editTransfer.toWalletNameSnapshot || "Unknown"}`
+                    ),
+                    e(Field, { label:"Amount" }, e(Inp, { type:"number", value:editTransferForm.amount, onChange:ev=>setEditTransferForm({...editTransferForm, amount:ev.target.value}) })),
+                    e(Field, { label:"Fee" }, e(Inp, { type:"number", placeholder:"0.00", value:editTransferForm.fee, onChange:ev=>setEditTransferForm({...editTransferForm, fee:ev.target.value}) })),
+                    e(Field, { label:"Date" }, e(Inp, { type:"date", value:editTransferForm.date, onChange:ev=>setEditTransferForm({...editTransferForm, date:ev.target.value}) })),
+                    e(Field, { label:"Note" }, e(Inp, { placeholder:"Optional note", value:editTransferForm.note, onChange:ev=>setEditTransferForm({...editTransferForm, note:ev.target.value}) })),
+                    e('div', { style:{...S.modalFooter, marginTop:16} },
+                        e(Btn, { v:"ghost", style:{flex:1}, onClick:()=>setEditTransfer(null) }, "Cancel"),
+                        e(Btn, { v:"primary", style:{flex:1}, onClick:saveEditTransfer }, "Save Changes")
+                    )
+                )
+            )
         );
     }
 

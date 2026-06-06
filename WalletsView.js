@@ -20,14 +20,14 @@
         const [openMenu, setOpenMenu] = React.useState(null);
         const [showUpgrade, setShowUpgrade] = React.useState(false);
         const [transferModal, setTransferModal] = React.useState(false);
-        const [transferForm, setTransferForm] = React.useState({ fromWalletId: "", toWalletId: "", amount: "", note: "" });
+        const [transferForm, setTransferForm] = React.useState({ fromWalletId: "", toWalletId: "", amount: "", fee: "", note: "" });
 
         const walletFlow = (wId) => {
             const inc  = (incomes || []).filter(i => i.walletId === wId).reduce((s, i) => s + i.amountCents, 0);
             const exp  = (dailyExpenses || []).filter(d => d.walletId === wId).reduce((s, d) => s + d.amountCents, 0);
             const bill = (txns || []).filter(t => t.walletId === wId && t.type === "bill_payment").reduce((s, t) => s + t.amountCents, 0);
             const transferIn  = (txns || []).filter(t => t.type === "wallet_transfer" && t.toWalletId === wId).reduce((s, t) => s + t.amountCents, 0);
-            const transferOut = (txns || []).filter(t => t.type === "wallet_transfer" && t.fromWalletId === wId).reduce((s, t) => s + t.amountCents, 0);
+            const transferOut = (txns || []).filter(t => t.type === "wallet_transfer" && t.fromWalletId === wId).reduce((s, t) => s + t.amountCents + (t.feeCents || 0), 0);
             return { inc: inc + transferIn, out: exp + bill + transferOut };
         };
 
@@ -70,13 +70,15 @@
             const fromW = wallets.find(w => w.id === fromId);
             const toW = wallets.find(w => w.id === toId);
             if (!fromW || !toW) { showToast("Wallet not found."); return; }
-            if ((fromW.balanceCents || 0) < amtCents) { showToast("Insufficient funds in source wallet."); return; }
+            const feeCents = tc(transferForm.fee || "0");
+            if ((fromW.balanceCents || 0) < amtCents + feeCents) { showToast("Insufficient funds in source wallet (including fee)."); return; }
             const rec = {
                 id: uid(),
                 type: "wallet_transfer",
                 fromWalletId: fromId,
                 toWalletId: toId,
                 amountCents: amtCents,
+                feeCents: feeCents,
                 date: todayStr(),
                 note: transferForm.note ? transferForm.note.trim() : null,
                 fromWalletNameSnapshot: fromW.name,
@@ -85,8 +87,8 @@
             const result = window.actions.transferBetweenWallets({ rec, wallets, setTxns });
             if (!result.ok) { showToast(result.error); return; }
             setTransferModal(false);
-            setTransferForm({ fromWalletId: "", toWalletId: "", amount: "", note: "" });
-            showToast(`Transferred ${fc(amtCents)} from ${fromW.name} to ${toW.name}`);
+            setTransferForm({ fromWalletId: "", toWalletId: "", amount: "", fee: "", note: "" });
+            showToast(`Transferred ${fc(amtCents)} from ${fromW.name} to ${toW.name}` + (feeCents > 0 ? ` (${fc(feeCents)} fee)` : ""));
         };
 
         const ColorPicker = ({ value, onChange }) => e('div', { style: { display:"flex", gap:8, flexWrap:"wrap", marginTop:4 } },
@@ -105,7 +107,7 @@
                     const btns = [];
                     if (wallets.length >= 2) {
                         btns.push(e(Btn, { key:"transfer", v:"ghost", style:{ fontSize:12, padding:"8px 14px" }, onClick: () => {
-                            setTransferForm({ fromWalletId: wallets[0].id, toWalletId: wallets[1] ? wallets[1].id : "", amount: "", note: "" });
+                            setTransferForm({ fromWalletId: wallets[0].id, toWalletId: wallets[1] ? wallets[1].id : "", amount: "", fee: "", note: "" });
                             setTransferModal(true);
                         } }, "↔ Transfer"));
                     }
@@ -175,6 +177,7 @@
                         )
                     ),
                     e(Field, { label:"Amount" }, e(Inp, { type:"number", placeholder:"0.00", value:transferForm.amount, onChange:ev=>setTransferForm({...transferForm, amount:ev.target.value}) })),
+                    e(Field, { label:"Fee (optional)" }, e(Inp, { type:"number", placeholder:"0.00", value:transferForm.fee, onChange:ev=>setTransferForm({...transferForm, fee:ev.target.value}) })),
                     e(Field, { label:"Note (optional)" }, e(Inp, { placeholder:"e.g. Cash out for GCash", value:transferForm.note, onChange:ev=>setTransferForm({...transferForm, note:ev.target.value}) })),
                     (() => {
                         const fromId = transferForm.fromWalletId || (wallets[0] ? wallets[0].id : "");
@@ -184,7 +187,7 @@
                         if (fromW && toW) {
                             return e('div', { style:{ display:"flex", alignItems:"center", justifyContent:"center", gap:8, margin:"8px 0 4px", fontSize:13, color:"var(--text-muted)" } },
                                 e('span', { style:{ fontWeight:600, color:"var(--text-main)" } }, fromW.name),
-                                e(Icon, { name:"arrow-right", size:14, color:"var(--text-muted)" }),
+                                e(Icon, { name:"transfer", size:14, color:"var(--text-muted)" }),
                                 e('span', { style:{ fontWeight:600, color:"var(--text-main)" } }, toW.name),
                                 transferForm.amount ? e('span', { style:{ fontWeight:700, color:"#2563EB" } }, fc(tc(transferForm.amount))) : null
                             );
@@ -194,7 +197,7 @@
                     e('div', { style:{...S.modalFooter, marginTop:20} },
                         e(Btn, { v:"ghost", style:{flex:1}, onClick:()=>{
                             setTransferModal(false);
-                            setTransferForm({ fromWalletId: "", toWalletId: "", amount: "", note: "" });
+                            setTransferForm({ fromWalletId: "", toWalletId: "", amount: "", fee: "", note: "" });
                         }}, "Cancel"),
                         e(Btn, { v:"accent", style:{flex:1}, onClick:handleTransfer }, "Transfer")
                     )

@@ -156,6 +156,7 @@
         image:       "M21 19V5a2 2 0 00-2-2H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2z M8.5 10a1.5 1.5 0 100-3 1.5 1.5 0 000 3z M21 15l-5-5L5 21",
         zoomin:      "M21 21l-4.35-4.35 M17 11A6 6 0 105 11a6 6 0 0012 0z M11 8v6 M8 11h6",
         coffee:      "M17 8h1a4 4 0 110 8h-1 M3 8h14v9a4 4 0 01-4 4H7a4 4 0 01-4-4z M6 2v2 M10 2v2 M14 2v2",
+        transfer:    "M8 3L4 7l4 4 M4 7h16 M16 21l4-4-4-4 M20 17H4",
     };
 
     function Icon({ name, size, color, style }) {

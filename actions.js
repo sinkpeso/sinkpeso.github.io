@@ -144,6 +144,7 @@
             fromWalletId: rec.fromWalletId,
             toWalletId: rec.toWalletId,
             amountCents: rec.amountCents,
+            feeCents: rec.feeCents || 0,
             wallets,
         });
         if (!result.ok) return result;

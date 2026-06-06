@@ -554,7 +554,7 @@
                     tab === "budget" && e(BudgetBillsView, { incomes, setIncomes, bills, setBills, wallets: displayWallets, setWallets, txns, setTxns, fc, requestConfirm, showToast }),
                     tab === "daily" && e(DailyExpensesView, { dailyExpenses, setDailyExpenses, photoDiary, setPhotoDiary, wallets: displayWallets, setWallets, fc, requestConfirm, showToast, templates }),
                     tab === "goals" && e(SinkingFundsView, { funds, setFunds, enrichedFunds: totals.enrichedFunds, txns, setTxns, wallets: displayWallets, setWallets, fc, requestConfirm, showToast }),
-                    tab === "transactions" && e(AllTransactionsView, { txns, setTxns, funds, incomes, dailyExpenses, bills, wallets: displayWallets, fc, requestConfirm }),
+                    tab === "transactions" && e(AllTransactionsView, { txns, setTxns, funds, incomes, dailyExpenses, bills, wallets: displayWallets, fc, requestConfirm, showToast }),
                     tab === "history" && e(HistoryView, { archives, fc }),
                     tab === "photo-diary" && e(PhotoDiaryView, { photoDiary, setPhotoDiary, dailyExpenses, setDailyExpenses, wallets: displayWallets, setWallets, fc, showToast, requestConfirm }),
                     tab === "utang" && e(DebtView, { debts, setDebts, fc, requestConfirm, showToast }),

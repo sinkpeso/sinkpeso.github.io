@@ -239,8 +239,8 @@
             const fromName = resolve(t.fromWalletId, t.fromWalletNameSnapshot) || "Unknown";
             const toName = resolve(t.toWalletId, t.toWalletNameSnapshot) || "Unknown";
             items.push({
-                id: `xfer-${t.id}`, icon: "arrow-right", iconColor: "#2563EB",
-                title: `${fromName} → ${toName}`, subtitle: "Transfer",
+                id: `xfer-${t.id}`, icon: "transfer", iconColor: "#2563EB",
+                title: `${fromName} → ${toName}`, subtitle: "Transfer" + (t.feeCents ? " (+fee)" : ""),
                 amountCents: t.amountCents, amountColor: "#2563EB", amountPrefix: "~",
                 date: t.date,
                 walletName: fromName,
@@ -326,11 +326,12 @@
             const fromName = resolve(t.fromWalletId, t.fromWalletNameSnapshot) || "Unknown";
             const toName = resolve(t.toWalletId, t.toWalletNameSnapshot) || "Unknown";
             items.push({
-                id: `xfer-${t.id}`, rawId: t.id, source: "transfer", icon: "arrow-right",
-                title: `${fromName} → ${toName}`, subtitle: "Wallet Transfer",
+                id: `xfer-${t.id}`, rawId: t.id, source: "transfer", icon: "transfer",
+                title: `${fromName} → ${toName}`, subtitle: "Wallet Transfer" + (t.feeCents ? ` (fee: ₱${(t.feeCents/100).toFixed(2)})` : ""),
                 amountCents: t.amountCents, date: t.date, walletId: t.fromWalletId,
                 walletName: fromName,
                 amountColor: "#2563EB", amountPrefix: "~",
+                feeCents: t.feeCents || 0,
             });
         });
 

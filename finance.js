@@ -59,7 +59,7 @@
         txns.forEach(item => {
             // wallet_transfer uses fromWalletId/toWalletId instead of walletId
             if (item.type === "wallet_transfer") {
-                if (item.fromWalletId === walletId) total -= ensureIntCents(item.amountCents);
+                if (item.fromWalletId === walletId) total -= (ensureIntCents(item.amountCents) + ensureIntCents(item.feeCents));
                 if (item.toWalletId === walletId) total += ensureIntCents(item.amountCents);
                 return;
             }
@@ -191,6 +191,7 @@
 
             if (type === "wallet_transfer") {
                 const amt = validatePositiveCents(opts.amountCents, "transfer amount");
+                const fee = ensureIntCents(opts.feeCents);
 
                 if (!opts.fromWalletId || !opts.toWalletId) {
                     return { ok: false, error: "Both source and destination wallets are required." };
@@ -205,7 +206,7 @@
                 const toWallet = (opts.wallets || []).find(w => w.id === opts.toWalletId);
                 if (!toWallet) return { ok: false, error: "Destination wallet not found." };
 
-                if (ensureIntCents(fromWallet.balanceCents) < amt) {
+                if (ensureIntCents(fromWallet.balanceCents) < amt + fee) {
                     return { ok: false, error: "Insufficient funds in source wallet for this transfer." };
                 }
 
