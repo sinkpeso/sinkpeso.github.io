@@ -15,10 +15,15 @@
     "lines": 50,
     "functions": 50,
     "branches": 40,
-    "exclude": ["tests/**", "node_modules/**", "*.min.js"]
+    "exclude": [
+      "tests/**",
+      "node_modules/**",
+      "*.min.js"
+    ]
   },
   "devDependencies": {
     "@playwright/test": "^1.60.0",
-    "c8": "^11.0.0"
+    "c8": "^11.0.0",
+    "puppeteer": "^25.1.0"
   }
 }
