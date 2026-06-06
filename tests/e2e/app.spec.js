@@ -37,7 +37,7 @@ test.describe('SINKPESO E2E', () => {
     test('landing page loads', async ({ page }) => {
         await page.goto('/');
         // Landing page should show the SINKPESO heading
-        await expect(page.locator('text=SINKPESO')).toBeVisible({ timeout: 10000 });
+        await expect(page.locator('.nav-brand-text').first()).toBeVisible({ timeout: 10000 });
         // Should have a CTA linking to the app
         await expect(page.locator('a[href="app.html"]')).toBeVisible({ timeout: 5000 });
     });
@@ -291,7 +291,7 @@ test.describe('SINKPESO E2E', () => {
                             await amountInput.fill('500');
 
                             // Click "Add Debt"
-                            const saveBtn = page.locator('button:has-text("Add Debt")');
+                            const saveBtn = page.locator('button:has-text("Add Debt"):not(:has-text("+"))').first();
                             if (await saveBtn.isVisible()) {
                                 await saveBtn.click();
                                 await page.waitForTimeout(1000);
