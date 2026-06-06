@@ -492,7 +492,8 @@
         // Total row
         walletRows.push(["TOTAL (Combined)", "", "", "", sym + combinedBaseTotal.toLocaleString("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })]);
 
-        var walFinalY = makeTable(doc, y, ["Wallet", "Type", "Original Balance", "FX Rate", "Total (Base)"], walletRows, null, {
+        var walColW = [contentW * 0.17, contentW * 0.10, contentW * 0.22, contentW * 0.27, contentW * 0.24];
+        var walFinalY = makeTable(doc, y, ["Wallet", "Type", "Original Balance", "FX Rate", "Total (Base)"], walletRows, walColW, {
             columnStyles: { 2: { halign: "right" }, 3: { halign: "right" }, 4: { halign: "right", fontStyle: "bold" } },
             didParseCell: function (data) {
                 // Bold total row

@@ -23,7 +23,7 @@ from reportlab.platypus import (
     Flowable, KeepTogether
 )
 from reportlab.graphics.shapes import Drawing, Rect, String, Line
-from reportlab.graphics.charts.barcharts import VerticalBarChart, HorizontalBarChart
+from reportlab.graphics.charts.barcharts import HorizontalBarChart
 from reportlab.graphics import renderPDF
 
 # DATA SOURCE
@@ -269,7 +269,7 @@ story.append(Spacer(1, 12))
 story.append(KeepTogether([SectionAnchor("Spending Breakdown"), Spacer(1, 8)]))
 
 drawing = Drawing(CONTENT_W, 160)
-chart = VerticalBarChart()
+chart = HorizontalBarChart()
 chart.x = 80
 chart.y = 20
 chart.width = 350
@@ -279,21 +279,22 @@ chart.categoryAxis.categoryNames = ["Daily Expenses", "Paid Bills", "Unpaid Bill
 chart.categoryAxis.labels.fontName = "Helvetica"
 chart.categoryAxis.labels.fontSize = 8
 chart.categoryAxis.labels.fillColor = HexColor("#334155")
+chart.categoryAxis.categoryNames = ["Daily Expenses", "Paid Bills", "Unpaid Bills"]
 chart.valueAxis.valueMin = 0
 chart.valueAxis.valueMax = 30000
 chart.valueAxis.valueStep = 10000
 chart.valueAxis.labels.fontName = "Helvetica"
 chart.valueAxis.labels.fontSize = 8
 chart.valueAxis.labels.fillColor = GRAY
-chart.barWidth = 40
-chart.groupSpacing = 30
+chart.barWidth = 18
+chart.groupSpacing = 12
 
 chart.bars[0].fillColor = RED
 chart.bars[1].fillColor = PURPLE
 chart.bars[2].fillColor = SLATE_GRAY
 
 chart.barLabels.fontName = "Helvetica-Bold"
-chart.barLabels.fontSize = 9
+chart.barLabels.fontSize = 8
 chart.barLabels.fillColor = SLATE
 chart.barLabels.nudge = 8
 chart.barLabelArray = [
@@ -377,15 +378,22 @@ wallet_data.append([
     Paragraph("%s%s" % (data_source["base_symbol"], "{:,.2f}".format(combined_total)), wcellr),
 ])
 
-wcol_w = [CONTENT_W * 0.18, CONTENT_W * 0.12, CONTENT_W * 0.20, CONTENT_W * 0.25, CONTENT_W * 0.25]
+# Strict column widths summing to CONTENT_W exactly
+wcol_w = [
+    CONTENT_W * 0.17,   # Wallet
+    CONTENT_W * 0.10,   # Type
+    CONTENT_W * 0.22,   # Original Balance
+    CONTENT_W * 0.27,   # FX Rate
+    CONTENT_W * 0.24,   # Total (Base)
+]
 wt = Table(wallet_data, colWidths=wcol_w, repeatRows=1)
 wt.setStyle(TableStyle([
     ("BACKGROUND", (0, 0), (-1, 0), SLATE),
     ("TEXTCOLOR", (0, 0), (-1, 0), white),
     ("TOPPADDING", (0, 0), (-1, -1), 10),
     ("BOTTOMPADDING", (0, 0), (-1, -1), 10),
-    ("LEFTPADDING", (0, 0), (-1, -1), 12),
-    ("RIGHTPADDING", (0, 0), (-1, -1), 12),
+    ("LEFTPADDING", (0, 0), (-1, -1), 10),
+    ("RIGHTPADDING", (0, 0), (-1, -1), 15),
     ("ROWBACKGROUNDS", (0, 1), (-1, -2), [LIGHT_BG, LIGHT_BG2]),
     ("LINEBELOW", (0, 0), (-1, -1), 0.5, BORDER_GRAY),
     ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
