@@ -330,7 +330,7 @@
         var pw = doc.internal.pageSize.getWidth();
         var ph = doc.internal.pageSize.getHeight();
         var contentW = pw - ML - MR;
-        var sym = "P";
+        var sym = "PHP ";
 
         // Extract app data
         var fc = appData.fc;
@@ -478,7 +478,7 @@
         wallets.forEach(function (w) {
             var bal = (w.balanceCents || 0) / 100;
             var currency = w.currency || "PHP";
-            var nativeSymbol = w.currencySymbol || (currency === "PHP" ? "P" : currency === "USD" ? "$" : currency);
+            var nativeSymbol = w.currencySymbol || (currency === "PHP" ? "PHP " : currency === "USD" ? "USD " : currency);
             var fxRate = w.fxRateToBase || 1.0;
             var nativeStr = nativeSymbol + bal.toLocaleString("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
             var fxStr = "1 " + currency + " = " + fxRate.toLocaleString("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " PHP";

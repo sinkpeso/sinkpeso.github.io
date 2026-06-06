@@ -5,8 +5,6 @@ SINKPESO Financial Report Generator - ReportLab Edition
 Run: python sinkpeso_report.py
 Output: SINKPESO_Report_June2026.pdf
 
-This is the reference implementation. The live app uses ReportGenerator.js (jsPDF).
-
 Page 1: Dark cover + dashboard
 Page 2: Light theme - executive summary, horizontal bar chart
 Page 3: Light theme - highlights, wallets with multi-currency FX breakdown
@@ -14,46 +12,16 @@ Page 3: Light theme - highlights, wallets with multi-currency FX breakdown
 
 import os
 from reportlab.lib.pagesizes import A4
-from reportlab.lib.units import mm, inch
-from reportlab.lib.colors import HexColor, white, black
+from reportlab.lib.units import inch
+from reportlab.lib.colors import HexColor, white
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT
+from reportlab.lib.enums import TA_CENTER, TA_RIGHT
 from reportlab.platypus import (
     SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle,
     Flowable, KeepTogether
 )
-from reportlab.graphics.shapes import Drawing, Rect, String, Line
+from reportlab.graphics.shapes import Drawing
 from reportlab.graphics.charts.barcharts import HorizontalBarChart
-from reportlab.graphics import renderPDF
-
-# DATA SOURCE
-data_source = {
-    "base_currency": "PHP",
-    "base_symbol": "\u20b1",
-    "report_date": "June 2026",
-    "generated_at": "June 6, 2026 at 09:10 AM",
-    "personality": "The Spender",
-    "metrics": {
-        "total_income": 65000.00,
-        "total_spent": 58200.00,
-        "savings_rate": "10.4%",
-        "net_available": 6800.00,
-        "daily_expenses": 24500.00,
-        "paid_bills": 22000.00,
-        "unpaid_bills": 11700.00,
-        "in_vaults": 5000.00
-    },
-    "highlights": [
-        ["Peak Spending Day", "Saturdays", "\u20b18,400.00"],
-        ["Total Transactions", "47", "--"],
-        ["Peak Day Total", "Saturday", "\u20b18,400.00"],
-        ["Total in Vaults", "Savings", "\u20b15,000.00"]
-    ],
-    "wallets": [
-        {"name": "Cash", "type": "Physical", "currency": "PHP", "symbol": "\u20b1", "balance": 1800.00, "fx_rate_to_base": 1.0},
-        {"name": "Digital Bank", "type": "Savings", "currency": "PHP", "symbol": "\u20b1", "balance": 5000.00, "fx_rate_to_base": 1.0}
-    ]
-}
 
 # COLORS
 DARK_BG     = HexColor("#0F172A")
@@ -74,15 +42,20 @@ ML = 0.75 * inch
 MR = 0.75 * inch
 CONTENT_W = W - ML - MR
 
-# STYLES
 styles = getSampleStyleSheet()
 
-sNoteText = ParagraphStyle("NoteText", parent=styles["Normal"], fontName="Helvetica-Oblique",
+sCellRight = ParagraphStyle("CellRight", fontName="Helvetica-Bold",
+                            fontSize=9, textColor=SLATE, alignment=TA_RIGHT, leading=12)
+sCellBold = ParagraphStyle("CellBold", fontName="Helvetica-Bold",
+                           fontSize=9, textColor=SLATE, leading=12)
+sCellNormal = ParagraphStyle("CellNormal", fontName="Helvetica",
+                             fontSize=9, textColor=HexColor("#334155"), leading=12)
+sNoteText = ParagraphStyle("NoteText", fontName="Helvetica-Oblique",
                            fontSize=8, textColor=GRAY, leading=11)
+
 
 # CUSTOM FLOWABLES
 class DarkCoverPage(Flowable):
-    """Full-page dark cover drawn directly on canvas."""
     def __init__(self):
         Flowable.__init__(self)
         self.width = W
@@ -99,8 +72,8 @@ class DarkCoverPage(Flowable):
 
         c.setStrokeColor(GREEN)
         c.setLineWidth(2)
-        line_w = CONTENT_W * 0.8
-        c.line(W / 2 - line_w / 2, H - 135, W / 2 + line_w / 2, H - 135)
+        lw = CONTENT_W * 0.8
+        c.line(W / 2 - lw / 2, H - 135, W / 2 + lw / 2, H - 135)
 
         c.setFont("Helvetica", 14)
         c.setFillColor(white)
@@ -108,46 +81,45 @@ class DarkCoverPage(Flowable):
 
         c.setFont("Helvetica-Bold", 24)
         c.setFillColor(GREEN)
-        c.drawCentredString(W / 2, H - 200, data_source["report_date"])
+        c.drawCentredString(W / 2, H - 200, "June 2026")
 
         c.setFont("Helvetica", 10)
         c.setFillColor(GRAY)
-        c.drawCentredString(W / 2, H - 220, "Generated on %s" % data_source["generated_at"])
+        c.drawCentredString(W / 2, H - 220, "Generated on June 6, 2026 at 09:10 AM")
 
         c.setFont("Helvetica", 9)
         c.setFillColor(GRAY)
         c.drawCentredString(W / 2, H - 260, "SPENDING PERSONALITY")
         c.setFont("Helvetica-Bold", 20)
         c.setFillColor(GREEN)
-        c.drawCentredString(W / 2, H - 285, data_source["personality"])
+        c.drawCentredString(W / 2, H - 285, "The Spender")
 
-        sym = data_source["base_symbol"]
-        m = data_source["metrics"]
+        # 4 metric cards - HARDCODED
         cards = [
-            ("TOTAL INCOME", "%s%s" % (sym, "{:,.2f}".format(m["total_income"])), GREEN),
-            ("TOTAL SPENT", "%s%s" % (sym, "{:,.2f}".format(m["total_spent"])), RED),
-            ("SAVINGS RATE", m["savings_rate"], BLUE),
-            ("NET AVAILABLE", "%s%s" % (sym, "{:,.2f}".format(m["net_available"])), GREEN if m["net_available"] >= 0 else RED),
+            ("TOTAL INCOME",  "PHP 65,000.00", GREEN),
+            ("TOTAL SPENT",   "PHP 58,200.00", RED),
+            ("SAVINGS RATE",  "10.4%",         BLUE),
+            ("NET AVAILABLE", "PHP 6,800.00",  GREEN),
         ]
-        card_w = (CONTENT_W - 40) / 4
-        card_h = 55
-        card_y = H - 380
+        cw = (CONTENT_W - 40) / 4
+        ch = 55
+        cy = H - 380
         for i, (label, value, color) in enumerate(cards):
-            x = ML + i * (card_w + 13)
+            x = ML + i * (cw + 13)
             c.setFillColor(SLATE)
-            c.roundRect(x, card_y, card_w, card_h, 4, fill=1, stroke=0)
+            c.roundRect(x, cy, cw, ch, 4, fill=1, stroke=0)
             c.setFillColor(color)
-            c.rect(x, card_y + card_h - 3, card_w, 3, fill=1, stroke=0)
+            c.rect(x, cy + ch - 3, cw, 3, fill=1, stroke=0)
             c.setFont("Helvetica-Bold", 7)
             c.setFillColor(GRAY)
-            c.drawCentredString(x + card_w / 2, card_y + 35, label)
+            c.drawCentredString(x + cw / 2, cy + 35, label)
             c.setFont("Helvetica-Bold", 13)
             c.setFillColor(color)
-            c.drawCentredString(x + card_w / 2, card_y + 14, value)
+            c.drawCentredString(x + cw / 2, cy + 14, value)
 
         c.setFont("Helvetica", 9)
         c.setFillColor(GRAY)
-        c.drawCentredString(W / 2, card_y - 30, "24 transactions  -  4 categories  -  3 bills  -  1 vault  -  3 wallets")
+        c.drawCentredString(W / 2, cy - 30, "47 transactions  -  4 categories  -  3 bills  -  1 vault  -  2 wallets")
 
         c.setFont("Helvetica", 8)
         c.setFillColor(GRAY)
@@ -156,7 +128,6 @@ class DarkCoverPage(Flowable):
 
 
 class SectionAnchor(Flowable):
-    """Green vertical bar + section title for light pages."""
     def __init__(self, title):
         Flowable.__init__(self)
         self.title = title
@@ -176,7 +147,6 @@ class SectionAnchor(Flowable):
 
 
 class SummaryCard(Flowable):
-    """2-column grid card for executive summary."""
     def __init__(self, label, value, color):
         Flowable.__init__(self)
         self.label = label
@@ -199,7 +169,7 @@ class SummaryCard(Flowable):
         c.drawCentredString(self.width / 2, 8, self.value)
 
 
-# BUILD DOCUMENT
+# BUILD
 def on_first_page(canvas, doc):
     pass
 
@@ -216,6 +186,7 @@ def on_later_pages(canvas, doc):
     canvas.setFillColor(GRAY)
     canvas.drawCentredString(W / 2, 28, "Private  -  Offline  -  Yours  -  by Lodoy Goes Random  |  Page %d of 3" % doc.page)
 
+
 doc = SimpleDocTemplate(
     "SINKPESO_Report_June2026.pdf",
     pagesize=A4,
@@ -229,21 +200,19 @@ story = []
 story.append(DarkCoverPage())
 story.append(Spacer(1, H))
 
-# PAGE 2: EXECUTIVE SUMMARY + HORIZONTAL BAR CHART
-sym = data_source["base_symbol"]
-m = data_source["metrics"]
-
+# PAGE 2: EXECUTIVE SUMMARY
 story.append(KeepTogether([SectionAnchor("Executive Summary"), Spacer(1, 10)]))
 
+# HARDCODED 8 summary cards
 card_data = [
-    ("TOTAL INCOME", "%s%s" % (sym, "{:,.2f}".format(m["total_income"])), GREEN),
-    ("DAILY EXPENSES", "%s%s" % (sym, "{:,.2f}".format(m["daily_expenses"])), RED),
-    ("PAID BILLS", "%s%s" % (sym, "{:,.2f}".format(m["paid_bills"])), PURPLE),
-    ("UNPAID BILLS", "%s%s" % (sym, "{:,.2f}".format(m["unpaid_bills"])), RED if m["unpaid_bills"] > 0 else GRAY),
-    ("IN SAVINGS VAULTS", "%s%s" % (sym, "{:,.2f}".format(m["in_vaults"])), BLUE),
-    ("NET AVAILABLE", "%s%s" % (sym, "{:,.2f}".format(m["net_available"])), GREEN if m["net_available"] >= 0 else RED),
-    ("SAVINGS RATE", m["savings_rate"], BLUE),
-    ("TOTAL SPENT", "%s%s" % (sym, "{:,.2f}".format(m["total_spent"])), RED),
+    ("TOTAL INCOME",     "PHP 65,000.00", GREEN),
+    ("DAILY EXPENSES",   "PHP 24,500.00", RED),
+    ("PAID BILLS",       "PHP 22,000.00", PURPLE),
+    ("UNPAID BILLS",     "PHP 11,700.00", RED),
+    ("IN SAVINGS VAULTS","PHP 5,000.00",  BLUE),
+    ("NET AVAILABLE",    "PHP 6,800.00",  GREEN),
+    ("SAVINGS RATE",     "10.4%",         BLUE),
+    ("TOTAL SPENT",      "PHP 58,200.00", RED),
 ]
 
 for i in range(0, len(card_data), 2):
@@ -274,12 +243,11 @@ chart.x = 80
 chart.y = 20
 chart.width = 350
 chart.height = 100
-chart.data = [[m["daily_expenses"], m["paid_bills"], m["unpaid_bills"]]]
+chart.data = [[24500, 22000, 11700]]
 chart.categoryAxis.categoryNames = ["Daily Expenses", "Paid Bills", "Unpaid Bills"]
 chart.categoryAxis.labels.fontName = "Helvetica"
 chart.categoryAxis.labels.fontSize = 8
 chart.categoryAxis.labels.fillColor = HexColor("#334155")
-chart.categoryAxis.categoryNames = ["Daily Expenses", "Paid Bills", "Unpaid Bills"]
 chart.valueAxis.valueMin = 0
 chart.valueAxis.valueMax = 30000
 chart.valueAxis.valueStep = 10000
@@ -297,11 +265,7 @@ chart.barLabels.fontName = "Helvetica-Bold"
 chart.barLabels.fontSize = 8
 chart.barLabels.fillColor = SLATE
 chart.barLabels.nudge = 8
-chart.barLabelArray = [
-    "%s%s" % (sym, "{:,.0f}".format(m["daily_expenses"])),
-    "%s%s" % (sym, "{:,.0f}".format(m["paid_bills"])),
-    "%s%s" % (sym, "{:,.0f}".format(m["unpaid_bills"]))
-]
+chart.barLabelArray = ["PHP 24,500.00", "PHP 22,000.00", "PHP 11,700.00"]
 
 drawing.add(chart)
 story.append(drawing)
@@ -312,28 +276,23 @@ story.append(Spacer(1, 24))
 story.append(KeepTogether([SectionAnchor("Highlights"), Spacer(1, 8)]))
 
 hdr_style = ParagraphStyle("THdr", fontName="Helvetica-Bold", fontSize=8, textColor=white, leading=10)
-cell_style = ParagraphStyle("TCell", fontName="Helvetica", fontSize=9, textColor=HexColor("#334155"), leading=12)
-cell_bold = ParagraphStyle("TCellB", fontName="Helvetica-Bold", fontSize=9, textColor=SLATE, leading=12)
 
 table_data = [
-    [Paragraph("Metric", hdr_style), Paragraph("Detail", hdr_style), Paragraph("Amount", hdr_style)]
+    [Paragraph("Metric", hdr_style), Paragraph("Detail", hdr_style), Paragraph("Amount", hdr_style)],
+    [Paragraph("Peak Spending Day", sCellNormal), Paragraph("Saturdays", sCellNormal), Paragraph("PHP 8,400.00", sCellRight)],
+    [Paragraph("Total Transactions", sCellNormal), Paragraph("47", sCellNormal), Paragraph("--", sCellRight)],
+    [Paragraph("Peak Day Total", sCellNormal), Paragraph("Saturday", sCellNormal), Paragraph("PHP 8,400.00", sCellRight)],
+    [Paragraph("Total in Vaults", sCellNormal), Paragraph("Savings", sCellNormal), Paragraph("PHP 5,000.00", sCellRight)],
 ]
-for row in data_source["highlights"]:
-    table_data.append([
-        Paragraph(row[0], cell_style),
-        Paragraph(row[1], cell_style),
-        Paragraph(row[2], cell_bold)
-    ])
 
-col_w = [CONTENT_W * 0.35, CONTENT_W * 0.35, CONTENT_W * 0.30]
-t = Table(table_data, colWidths=col_w, repeatRows=1)
+t = Table(table_data, colWidths=[CONTENT_W * 0.35, CONTENT_W * 0.35, CONTENT_W * 0.30])
 t.setStyle(TableStyle([
     ("BACKGROUND", (0, 0), (-1, 0), SLATE),
     ("TEXTCOLOR", (0, 0), (-1, 0), white),
-    ("TOPPADDING", (0, 0), (-1, -1), 10),
-    ("BOTTOMPADDING", (0, 0), (-1, -1), 10),
-    ("LEFTPADDING", (0, 0), (-1, -1), 12),
-    ("RIGHTPADDING", (0, 0), (-1, -1), 12),
+    ("TOPPADDING", (0, 0), (-1, -1), 12),
+    ("BOTTOMPADDING", (0, 0), (-1, -1), 12),
+    ("LEFTPADDING", (0, 0), (-1, -1), 15),
+    ("RIGHTPADDING", (0, 0), (-1, -1), 20),
     ("ROWBACKGROUNDS", (0, 1), (-1, -1), [LIGHT_BG, LIGHT_BG2]),
     ("LINEBELOW", (0, 0), (-1, -1), 0.5, BORDER_GRAY),
     ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
@@ -345,40 +304,21 @@ story.append(t)
 story.append(Spacer(1, 24))
 story.append(KeepTogether([SectionAnchor("Wallets & Multi-Currency Breakdown"), Spacer(1, 8)]))
 
-whdr = ParagraphStyle("WHdr", fontName="Helvetica-Bold", fontSize=8, textColor=white, leading=10)
-wcell = ParagraphStyle("WCell", fontName="Helvetica", fontSize=9, textColor=HexColor("#334155"), leading=12)
-wcellb = ParagraphStyle("WCellB", fontName="Helvetica-Bold", fontSize=9, textColor=SLATE, leading=12)
-wcellr = ParagraphStyle("WCellR", fontName="Helvetica-Bold", fontSize=9, textColor=GREEN, leading=12, alignment=TA_RIGHT)
-
 wallet_data = [
-    [Paragraph("Wallet", whdr), Paragraph("Type", whdr), Paragraph("Original Balance", whdr),
-     Paragraph("FX Rate", whdr), Paragraph("Total (Base)", whdr)]
+    [Paragraph("Wallet", hdr_style), Paragraph("Type", hdr_style), Paragraph("Original Balance", hdr_style),
+     Paragraph("FX Rate", hdr_style), Paragraph("Total (Base)", hdr_style)],
+    [Paragraph("Cash", sCellNormal), Paragraph("Physical", sCellNormal),
+     Paragraph("PHP 1,800.00", sCellRight), Paragraph("1 PHP = 1.00 PHP", sCellNormal),
+     Paragraph("PHP 1,800.00", sCellBold)],
+    [Paragraph("Digital Bank", sCellNormal), Paragraph("Savings", sCellNormal),
+     Paragraph("PHP 5,000.00", sCellRight), Paragraph("1 PHP = 1.00 PHP", sCellNormal),
+     Paragraph("PHP 5,000.00", sCellBold)],
+    [Paragraph("TOTAL (Combined)", sCellBold), Paragraph("", sCellNormal),
+     Paragraph("", sCellNormal), Paragraph("", sCellNormal),
+     Paragraph("PHP 6,800.00", ParagraphStyle("TotalR", fontName="Helvetica-Bold",
+               fontSize=9, textColor=GREEN, alignment=TA_RIGHT, leading=12))],
 ]
 
-combined_total = 0
-for w in data_source["wallets"]:
-    native = "%s%s" % (w["symbol"], "{:,.2f}".format(w["balance"]))
-    fx_str = "1 %s = %s %s" % (w["currency"], "{:,.2f}".format(w["fx_rate_to_base"]), data_source["base_currency"])
-    base_val = w["balance"] * w["fx_rate_to_base"]
-    combined_total += base_val
-    base_str = "%s%s" % (data_source["base_symbol"], "{:,.2f}".format(base_val))
-    wallet_data.append([
-        Paragraph(w["name"], wcell),
-        Paragraph(w["type"], wcell),
-        Paragraph(native, wcell),
-        Paragraph(fx_str, wcell),
-        Paragraph(base_str, wcellb),
-    ])
-
-wallet_data.append([
-    Paragraph("TOTAL (Combined)", wcellb),
-    Paragraph("", wcell),
-    Paragraph("", wcell),
-    Paragraph("", wcell),
-    Paragraph("%s%s" % (data_source["base_symbol"], "{:,.2f}".format(combined_total)), wcellr),
-])
-
-# Strict column widths summing to CONTENT_W exactly
 wcol_w = [
     CONTENT_W * 0.17,   # Wallet
     CONTENT_W * 0.10,   # Type
@@ -390,10 +330,10 @@ wt = Table(wallet_data, colWidths=wcol_w, repeatRows=1)
 wt.setStyle(TableStyle([
     ("BACKGROUND", (0, 0), (-1, 0), SLATE),
     ("TEXTCOLOR", (0, 0), (-1, 0), white),
-    ("TOPPADDING", (0, 0), (-1, -1), 10),
-    ("BOTTOMPADDING", (0, 0), (-1, -1), 10),
-    ("LEFTPADDING", (0, 0), (-1, -1), 10),
-    ("RIGHTPADDING", (0, 0), (-1, -1), 15),
+    ("TOPPADDING", (0, 0), (-1, -1), 12),
+    ("BOTTOMPADDING", (0, 0), (-1, -1), 12),
+    ("LEFTPADDING", (0, 0), (-1, -1), 15),
+    ("RIGHTPADDING", (0, 0), (-1, -1), 20),
     ("ROWBACKGROUNDS", (0, 1), (-1, -2), [LIGHT_BG, LIGHT_BG2]),
     ("LINEBELOW", (0, 0), (-1, -1), 0.5, BORDER_GRAY),
     ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
@@ -403,24 +343,20 @@ wt.setStyle(TableStyle([
 story.append(wt)
 story.append(Spacer(1, 12))
 
-# FX Reference Callout Box
-fx_notes = []
-for w in data_source["wallets"]:
-    if w["currency"] != data_source["base_currency"]:
-        fx_notes.append("1 %s = %s %s" % (w["currency"], "{:,.2f}".format(w["fx_rate_to_base"]), data_source["base_currency"]))
-
-if fx_notes:
-    note_text = "Note: Exchange rates are relative to base currency (%s). %s." % (data_source["base_currency"], ", ".join(fx_notes))
-    callout_data = [[Paragraph(note_text, sNoteText)]]
-    callout = Table(callout_data, colWidths=[CONTENT_W - 16])
-    callout.setStyle(TableStyle([
-        ("BACKGROUND", (0, 0), (-1, -1), LIGHT_GRAY),
-        ("LEFTPADDING", (0, 0), (-1, -1), 10),
-        ("RIGHTPADDING", (0, 0), (-1, -1), 10),
-        ("TOPPADDING", (0, 0), (-1, -1), 8),
-        ("BOTTOMPADDING", (0, 0), (-1, -1), 8),
-    ]))
-    story.append(callout)
+# FX Callout
+callout_data = [[Paragraph(
+    "Note: Exchange rates are relative to base currency (PHP). All wallets are in PHP.",
+    sNoteText
+)]]
+callout = Table(callout_data, colWidths=[CONTENT_W - 16])
+callout.setStyle(TableStyle([
+    ("BACKGROUND", (0, 0), (-1, -1), LIGHT_GRAY),
+    ("LEFTPADDING", (0, 0), (-1, -1), 15),
+    ("RIGHTPADDING", (0, 0), (-1, -1), 20),
+    ("TOPPADDING", (0, 0), (-1, -1), 12),
+    ("BOTTOMPADDING", (0, 0), (-1, -1), 12),
+]))
+story.append(callout)
 
 # BUILD
 doc.build(story, onFirstPage=on_first_page, onLaterPages=on_later_pages)
