@@ -1,11 +1,8 @@
-const CACHE_NAME = 'sinkpeso-v15';
+const CACHE_NAME = 'sinkpeso-v16';
 const ASSETS = [
-  './index.html',
   './app.html',
   './offline.html',
   './styles.css',
-  './landing.css',
-  './app.js',
   './utils.js',
   './components.js',
   './InsightStrip.js',
@@ -43,8 +40,6 @@ const ASSETS = [
   './jspdf.umd.min.js',
   './jspdf.plugin.autotable.min.js',
   './ReportGenerator.js',
-  './CSVExporter.js',
-  './GlobalSearchView.js',
   './react.production.min.js',
   './react-dom.production.min.js',
   './fonts/fonts.css',
@@ -55,7 +50,6 @@ const ASSETS = [
   './fonts/dm-sans-800.woff2',
   './fonts/dm-mono-400.woff2',
   './fonts/dm-mono-500.woff2',
-  './offline.html',
   './service-worker.js',
   './manifest.json',
   './logosinkpeso.png',
@@ -64,10 +58,12 @@ const ASSETS = [
   './terms.html'
 ];
 
-// Install: cache all app shell assets
+// Install: cache app shell assets (fault-tolerant — SW installs even if some assets fail)
 self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS))
+    caches.open(CACHE_NAME).then(cache =>
+      Promise.allSettled(ASSETS.map(url => cache.add(url)))
+    )
   );
   self.skipWaiting();
 });
