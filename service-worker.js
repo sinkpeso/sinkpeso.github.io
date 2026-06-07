@@ -1,4 +1,4 @@
-const CACHE_NAME = 'sinkpeso-v17';
+const CACHE_NAME = 'sinkpeso-v18';
 const ASSETS = [
   './app.html',
   './offline.html',
@@ -43,6 +43,7 @@ const ASSETS = [
   './CSVExporter.js',
   './CSVImporter.js',
   './GlobalSearchView.js',
+  './RecurringView.js',
   './react.production.min.js',
   './react-dom.production.min.js',
   './fonts/fonts.css',

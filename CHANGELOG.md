@@ -5,6 +5,7 @@ All notable changes to SINKPESO are documented here.
 ## [2.5.0] — 2026-06-08
 
 ### Added
+- **Recurring Transactions UI** — Full management screen for recurring items. Add/edit/delete recurring expenses and income with category, wallet, frequency, and next due date. Toggle items active/inactive. Filter by type (expense, income, active, paused). Summary cards show active count and projected monthly auto-expenses/auto-income. Accessible via desktop "Recurring" tab and mobile "More → Recurring" sheet.
 - **CSV Transaction Import** — Import expenses, income, and transfers from `.csv` files via Settings → Data Backup. Round-trips with the existing CSV export. RFC 4180 compliant parser handles quoted fields, BOM, and escaped quotes.
 - **Recurring Transactions Engine** — Backend support for auto-logging recurring expenses and income. Supports daily, weekly, biweekly, and monthly frequencies. Items are processed automatically on app open and advance their next due date.
 - **robots.txt** — Search engine crawl directives for proper indexing

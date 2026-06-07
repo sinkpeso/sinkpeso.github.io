@@ -59,6 +59,7 @@
     <script src="CSVExporter.js"></script>
     <script src="CSVImporter.js"></script>
     <script src="GlobalSearchView.js"></script>
+    <script src="RecurringView.js"></script>
 
         <link rel="apple-touch-icon" href="logosinkpeso.png">
     <link rel="icon" href="logosinkpeso.png" type="image/png">
@@ -624,8 +625,9 @@
                             { id: "limits",       label: "Limits" },
                             { id: "transactions", label: "Logs" },
                             { id: "history",      label: "History" },
-                            { id: "cashflow",     label: "Cashflow" },
+                        { id: "cashflow",     label: "Cashflow" },
                             { id: "pera-report",  label: "Pera Report" },
+                            { id: "recurring",    label: "Recurring" },
                         ].map(t => e('button', {
                             key: t.id, className: "nav-btn", onClick: () => setTab(t.id),
                             style: { background: "transparent", color: tab === t.id ? "var(--text-light)" : "var(--text-muted)", border: "none", borderBottom: tab === t.id ? "2px solid rgba(148,163,184,0.6)" : "2px solid transparent", padding: "12px 12px", cursor: "pointer", fontSize: 12, fontWeight: tab === t.id ? 600 : 400, whiteSpace: "nowrap", flexShrink: 0, transition: "all 0.18s", opacity: tab === t.id ? 1 : 0.7 }
@@ -647,6 +649,7 @@
                     tab === "cashflow" && e(CashflowView, { totals, bills, incomes, dailyExpenses, wallets: displayWallets, fc }),
                     tab === "pera-report" && e(PeraReportView, { totals, dailyExpenses, incomes, bills, funds, wallets: displayWallets, fc }),
                     tab === "settings" && e(SettingsView, { settings, setSettings, setIncomes, setBills, setDailyExpenses, setFunds, setTxns, setArchives, setBudgets, showToast, totals, bills, budgets, fc, templates, setTemplates }),
+                    tab === "recurring" && e(RecurringView, { recurring, setRecurring: setRecurring, wallets: displayWallets, fc, requestConfirm, showToast }),
 
 e('footer', { 
                     style: { 
@@ -801,7 +804,7 @@ e('footer', {
                         { id: "more",        icon: "more",    label: "More" }
                     ].map(t => e('button', {
                         key: t.id,
-                        className: "bnav-btn" + (tab === t.id || (t.id === "more" && ["wallets","limits","transactions","history","settings","budget","utang","cashflow","pera-report"].includes(tab)) ? " active" : ""),
+                        className: "bnav-btn" + (tab === t.id || (t.id === "more" && ["wallets","limits","transactions","history","settings","budget","utang","cashflow","pera-report","recurring"].includes(tab)) ? " active" : ""),
                         onClick: () => t.id === "more" ? setShowMoreSheet(true) : setTab(t.id)
                     },
                         e(Icon, { name: t.icon, size: 22 }),
@@ -822,6 +825,7 @@ e('footer', {
                             { id: "utang",        icon: "creditcard",   label: "Utang Tracker",      sub: "Track money owed & owing" },
                             { id: "cashflow",     icon: "trendingup",   label: "Cashflow Forecast",  sub: "30-day balance projection" },
                             { id: "pera-report", icon: "chart",         label: "Pera Report",          sub: "Your monthly money story" },
+                            { id: "recurring",    icon: "calendar",     label: "Recurring",            sub: "Auto-log repeating transactions" },
                             { id: "settings",     icon: "settings",     label: "Settings",           sub: "Preferences, PIN, backup" },
                         ].map(t => {
                             const isActive = tab === t.id;
@@ -949,6 +953,9 @@ e('footer', {
 
         // AllTransactionsView loaded from AllTransactionsView.js
         const AllTransactionsView = window.AllTransactionsView || React.memo(function AllTransactionsView_FALLBACK() { return e('div', null, 'AllTransactionsView.js not loaded'); });
+
+        // RecurringView loaded from RecurringView.js
+        const RecurringView = window.RecurringView || React.memo(function RecurringView_FALLBACK() { return e('div', null, 'RecurringView.js not loaded'); });
 
         // HistoryView loaded from HistoryView.js
         const HistoryView = window.HistoryView || React.memo(function HistoryView_FALLBACK() { return e('div', null, 'HistoryView.js not loaded'); });
