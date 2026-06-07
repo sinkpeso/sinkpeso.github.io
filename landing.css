@@ -1165,6 +1165,34 @@ footer {
 }
 .screenshot-frame--mobile img { width: 100%; display: block; border-radius: 4px; }
 
+/* ── PERFORMANCE OPTIMIZATIONS ── */
+.hero-orb { will-change: transform, opacity; }
+.mockup-float { will-change: transform; }
+.scroll-progress { will-change: width; }
+/* Below-the-fold sections: allow browser to skip rendering until near viewport */
+.privacy, .comparison, .pricing, .testimonials, .about-strip, .final-cta {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 800px;
+}
+
+/* Contain layout for heavy grid sections */
+.features-grid, .trust-cards, .pricing-grid, .problem-grid {
+    contain: layout style;
+}
+
+/* Respect reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+    .hero-orb { display: none; }
+    .mockup-float { animation: none; }
+    .reveal { opacity: 1; transform: none; }
+}
+
 /* ── MOBILE ── */
 @media (max-width: 1024px) {
     .trust-cards { grid-template-columns: repeat(3, 1fr); }

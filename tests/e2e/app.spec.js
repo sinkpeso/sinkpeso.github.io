@@ -29,6 +29,7 @@ async function seedTestData(page, data = {}) {
         if (d.txns) localStorage.setItem('sp_txns', JSON.stringify(d.txns));
         if (d.funds) localStorage.setItem('sp_funds', JSON.stringify(d.funds));
         if (d.budgets) localStorage.setItem('sp_budgets', JSON.stringify(d.budgets));
+        if (d.recurring) localStorage.setItem('sp_recurring', JSON.stringify(d.recurring));
     }, data);
 }
 
@@ -63,11 +64,10 @@ test.describe('SINKPESO E2E', () => {
 
         // Click the FAB (floating action button)
         const fab = page.locator('.fab');
-        if (await fab.isVisible()) {
-            await fab.click();
-            // Should see the Quick Add modal
-            await expect(page.locator('text=Quick Add Expense')).toBeVisible({ timeout: 5000 });
-        }
+        await expect(fab).toBeVisible({ timeout: 5000 });
+        await fab.click();
+        // Should see the Quick Add modal
+        await expect(page.locator('text=Quick Add Expense')).toBeVisible({ timeout: 5000 });
     });
 
     test('navigates between tabs', async ({ page }) => {
@@ -75,10 +75,9 @@ test.describe('SINKPESO E2E', () => {
 
         // Click on Daily Expenses tab (desktop) or bottom nav
         const dailyTab = page.locator('text=Daily Expenses').first();
-        if (await dailyTab.isVisible()) {
-            await dailyTab.click();
-            await expect(page.locator('text=Daily Outflow Tracking')).toBeVisible({ timeout: 5000 });
-        }
+        await expect(dailyTab).toBeVisible({ timeout: 5000 });
+        await dailyTab.click();
+        await expect(page.locator('text=Daily Outflow Tracking')).toBeVisible({ timeout: 5000 });
     });
 
     test('settings page loads with all sections', async ({ page }) => {
@@ -86,13 +85,12 @@ test.describe('SINKPESO E2E', () => {
 
         // Navigate to settings
         const settingsBtn = page.locator('[title="Settings"]');
-        if (await settingsBtn.isVisible()) {
-            await settingsBtn.click();
-            await page.waitForTimeout(500);
-            // Should see key settings sections
-            await expect(page.locator('text=Appearance')).toBeVisible({ timeout: 5000 });
-            await expect(page.locator('text=Data Backup')).toBeVisible({ timeout: 5000 });
-        }
+        await expect(settingsBtn).toBeVisible({ timeout: 5000 });
+        await settingsBtn.click();
+        await page.waitForTimeout(500);
+        // Should see key settings sections
+        await expect(page.locator('text=Appearance')).toBeVisible({ timeout: 5000 });
+        await expect(page.locator('text=Data Backup')).toBeVisible({ timeout: 5000 });
     });
 
     test('PIN screen blocks access when PIN is set', async ({ page }) => {
@@ -117,20 +115,20 @@ test.describe('SINKPESO E2E', () => {
 
         // Open the utility kebab menu
         const utilMenu = page.locator('.util-menu-btn');
-        if (await utilMenu.isVisible()) {
-            await utilMenu.click();
-            // Click "Archive Month"
-            const archiveBtn = page.locator('text=Archive Month');
-            if (await archiveBtn.isVisible()) {
-                await archiveBtn.click();
-                // Should see the Close This Month modal
-                await expect(page.locator('text=Close This Month')).toBeVisible({ timeout: 5000 });
-                // Close it
-                const cancelBtn = page.locator('button:has-text("Cancel")');
-                await cancelBtn.first().click();
-                await page.waitForTimeout(300);
-            }
-        }
+        await expect(utilMenu).toBeVisible({ timeout: 5000 });
+        await utilMenu.click();
+        // Click "Archive Month"
+        const archiveBtn = page.locator('text=Archive Month');
+        await expect(archiveBtn).toBeVisible({ timeout: 5000 });
+        await archiveBtn.click();
+        // Should see the Close This Month modal
+        await expect(page.locator('text=Close This Month')).toBeVisible({ timeout: 5000 });
+        // Close it
+        const cancelBtn = page.locator('button:has-text("Cancel")');
+        await cancelBtn.first().click();
+        await page.waitForTimeout(300);
+        // Modal should be gone
+        await expect(page.locator('text=Close This Month')).not.toBeVisible({ timeout: 3000 });
     });
 
     test('Bills & Income tab shows income form', async ({ page }) => {
@@ -138,12 +136,11 @@ test.describe('SINKPESO E2E', () => {
 
         // Navigate to Bills & Income
         const budgetTab = page.locator('text=Bills & Income').first();
-        if (await budgetTab.isVisible()) {
-            await budgetTab.click();
-            await page.waitForTimeout(500);
-            // Should see income form
-            await expect(page.locator('text=Add Money In')).toBeVisible({ timeout: 5000 });
-        }
+        await expect(budgetTab).toBeVisible({ timeout: 5000 });
+        await budgetTab.click();
+        await page.waitForTimeout(500);
+        // Should see income form
+        await expect(page.locator('text=Add Money In')).toBeVisible({ timeout: 5000 });
     });
 
     test('Savings Vaults tab loads empty state', async ({ page }) => {
@@ -151,15 +148,12 @@ test.describe('SINKPESO E2E', () => {
 
         // Navigate to Savings Vaults
         const goalsTab = page.locator('text=Savings Vaults').first();
-        if (await goalsTab.isVisible()) {
-            await goalsTab.click();
-            await page.waitForTimeout(500);
-            // Should see either vault cards or empty state
-            const hasVaults = await page.locator('text=No Savings Vaults yet').isVisible().catch(() => false);
-            const hasCreate = await page.locator('text=Create New Vault').isVisible().catch(() => false);
-            const hasTitle = await page.locator('h2:has-text("Savings Vaults")').isVisible().catch(() => false);
-            expect(hasVaults || hasCreate || hasTitle).toBeTruthy();
-        }
+        await expect(goalsTab).toBeVisible({ timeout: 5000 });
+        await goalsTab.click();
+        await page.waitForTimeout(500);
+        // Should see either vault cards, create button, or the section title
+        const section = page.locator('h2:has-text("Savings Vaults")').or(page.locator('text=No Savings Vaults yet')).or(page.locator('text=Create New Vault'));
+        await expect(section.first()).toBeVisible({ timeout: 5000 });
     });
 
     test('Daily Expenses tab shows expense form', async ({ page }) => {
@@ -167,12 +161,11 @@ test.describe('SINKPESO E2E', () => {
 
         // Navigate to Daily Expenses
         const dailyTab = page.locator('text=Daily Expenses').first();
-        if (await dailyTab.isVisible()) {
-            await dailyTab.click();
-            await page.waitForTimeout(500);
-            // Should see the expense form
-            await expect(page.locator('text=Log New Daily Spend Item')).toBeVisible({ timeout: 5000 });
-        }
+        await expect(dailyTab).toBeVisible({ timeout: 5000 });
+        await dailyTab.click();
+        await page.waitForTimeout(500);
+        // Should see the expense form
+        await expect(page.locator('text=Log New Daily Spend Item')).toBeVisible({ timeout: 5000 });
     });
 
     test('app has correct title and meta tags', async ({ page }) => {
@@ -628,6 +621,308 @@ test.describe('SINKPESO E2E', () => {
         const hasCashflow = await page.locator('text=Cashflow').first().isVisible().catch(() => false);
 
         expect(hasBills && hasWallets && hasUtang && hasCashflow).toBeTruthy();
+    });
+
+    // ═══════════════════════════════════════════════════════════════
+    // CSV IMPORT E2E TESTS (v2.5.0)
+    // ═══════════════════════════════════════════════════════════════
+
+    test('CSV import button visible in Settings', async ({ page }) => {
+        await skipOnboarding(page);
+
+        // Navigate to Settings
+        const settingsBtn = page.locator('[title="Settings"]');
+        await expect(settingsBtn).toBeVisible({ timeout: 5000 });
+        await settingsBtn.click();
+        await page.waitForTimeout(500);
+
+        // Should see Data Backup section
+        await expect(page.locator('text=Data Backup')).toBeVisible({ timeout: 5000 });
+
+        // Should see CSV import button
+        const importBtn = page.locator('text=Import Transactions (.csv)');
+        await expect(importBtn).toBeVisible({ timeout: 5000 });
+    });
+
+    test('CSV export button visible in Settings', async ({ page }) => {
+        await skipOnboarding(page);
+
+        // Navigate to Settings
+        const settingsBtn = page.locator('[title="Settings"]');
+        await expect(settingsBtn).toBeVisible({ timeout: 5000 });
+        await settingsBtn.click();
+        await page.waitForTimeout(500);
+
+        // Should see CSV export button
+        const exportBtn = page.locator('text=Export Transactions (.csv)');
+        await expect(exportBtn).toBeVisible({ timeout: 5000 });
+    });
+
+    test('CSV import button also in utility menu', async ({ page }) => {
+        await skipOnboarding(page);
+
+        // Open utility kebab menu
+        const utilMenu = page.locator('.util-menu-btn');
+        await expect(utilMenu).toBeVisible({ timeout: 5000 });
+        await utilMenu.click();
+        await page.waitForTimeout(300);
+
+        // Should see Export as CSV option
+        const exportCSV = page.locator('text=Export as CSV');
+        await expect(exportCSV).toBeVisible({ timeout: 5000 });
+    });
+
+    // ═══════════════════════════════════════════════════════════════
+    // RECURRING TRANSACTIONS E2E TESTS (v2.5.0)
+    // ═══════════════════════════════════════════════════════════════
+
+    test('recurring transactions section visible in Bills & Income', async ({ page }) => {
+        await skipOnboarding(page);
+
+        // Navigate to Bills & Income
+        const budgetTab = page.locator('text=Bills & Income').first();
+        await expect(budgetTab).toBeVisible({ timeout: 5000 });
+        await budgetTab.click();
+        await page.waitForTimeout(500);
+
+        // Should see the Recurring Transactions section
+        await expect(page.locator('text=Recurring Transactions')).toBeVisible({ timeout: 5000 });
+
+        // Should see Add button
+        const addBtn = page.locator('button:has-text("+ Add")').first();
+        await expect(addBtn).toBeVisible({ timeout: 5000 });
+    });
+
+    test('add recurring item form opens and closes', async ({ page }) => {
+        await skipOnboarding(page);
+
+        // Navigate to Bills & Income
+        const budgetTab = page.locator('text=Bills & Income').first();
+        await expect(budgetTab).toBeVisible({ timeout: 5000 });
+        await budgetTab.click();
+        await page.waitForTimeout(500);
+
+        // Click Add button
+        const addBtn = page.locator('button:has-text("+ Add")').first();
+        await expect(addBtn).toBeVisible({ timeout: 5000 });
+        await addBtn.click();
+        await page.waitForTimeout(300);
+
+        // Should see form fields
+        const nameInput = page.locator('input[placeholder*="Netflix"]').first();
+        await expect(nameInput).toBeVisible({ timeout: 5000 });
+
+        // Should see Add Recurring Item button
+        await expect(page.locator('button:has-text("Add Recurring Item")')).toBeVisible({ timeout: 5000 });
+
+        // Close the form
+        const cancelBtn = page.locator('button:has-text("Cancel")').last();
+        await cancelBtn.click();
+        await page.waitForTimeout(300);
+
+        // Form should be hidden
+        await expect(page.locator('input[placeholder*="Netflix"]').first()).not.toBeVisible({ timeout: 3000 });
+    });
+
+    test('seeding recurring items shows them in list', async ({ page }) => {
+        // Seed recurring items
+        await page.goto('/app.html');
+        await page.waitForTimeout(500);
+        await seedTestData(page, {
+            recurring: [
+                {
+                    id: 'rec-e2e-1',
+                    type: 'expense',
+                    name: 'Netflix E2E',
+                    amountCents: 14900,
+                    category: 'Entertainment',
+                    walletId: null,
+                    frequency: 'monthly',
+                    dayOfMonth: 15,
+                    nextDueDate: '2026-07-15',
+                    isActive: true,
+                    createdAt: '2026-06-08'
+                },
+                {
+                    id: 'rec-e2e-2',
+                    type: 'income',
+                    name: 'Freelance E2E',
+                    amountCents: 500000,
+                    category: 'Freelance',
+                    walletId: null,
+                    frequency: 'biweekly',
+                    dayOfMonth: 1,
+                    nextDueDate: '2026-06-22',
+                    isActive: false,
+                    createdAt: '2026-06-08'
+                }
+            ]
+        });
+        await page.evaluate(() => {
+            localStorage.setItem('sp_onboarding_seen', '1');
+            localStorage.setItem('sp_settings', JSON.stringify({ _v: 2, data: { currency: 'PHP', theme: 'dark', pin: '' } }));
+        });
+        await page.reload();
+        await page.waitForTimeout(1500);
+
+        // Navigate to Bills & Income
+        const budgetTab = page.locator('text=Bills & Income').first();
+        await expect(budgetTab).toBeVisible({ timeout: 5000 });
+        await budgetTab.click();
+        await page.waitForTimeout(500);
+
+        // Should see recurring items in the list
+        await expect(page.locator('text=Netflix E2E').first()).toBeVisible({ timeout: 5000 });
+        await expect(page.locator('text=Freelance E2E').first()).toBeVisible({ timeout: 5000 });
+
+        // Should see Monthly badge on Netflix
+        const monthlyBadge = page.locator('text=Monthly').first();
+        await expect(monthlyBadge).toBeVisible({ timeout: 5000 });
+
+        // Should see Biweekly badge on Freelance
+        const biweeklyBadge = page.locator('text=Biweekly').first();
+        await expect(biweeklyBadge).toBeVisible({ timeout: 5000 });
+
+        // Should see Paused badge on inactive item
+        const pausedBadge = page.locator('text=Paused').first();
+        await expect(pausedBadge).toBeVisible({ timeout: 5000 });
+
+        // Should see ON/OFF toggle buttons
+        const onBtn = page.locator('button:has-text("ON")').first();
+        const offBtn = page.locator('button:has-text("OFF")').first();
+        await expect(onBtn).toBeVisible({ timeout: 5000 });
+        await expect(offBtn).toBeVisible({ timeout: 5000 });
+    });
+
+    test('recurring item toggle ON/OFF works', async ({ page }) => {
+        // Seed a recurring item
+        await page.goto('/app.html');
+        await page.waitForTimeout(500);
+        await seedTestData(page, {
+            recurring: [
+                {
+                    id: 'rec-toggle-e2e',
+                    type: 'expense',
+                    name: 'Toggle Test',
+                    amountCents: 10000,
+                    category: 'Other',
+                    walletId: null,
+                    frequency: 'monthly',
+                    dayOfMonth: 1,
+                    nextDueDate: '2026-07-01',
+                    isActive: true,
+                    createdAt: '2026-06-08'
+                }
+            ]
+        });
+        await page.evaluate(() => {
+            localStorage.setItem('sp_onboarding_seen', '1');
+            localStorage.setItem('sp_settings', JSON.stringify({ _v: 2, data: { currency: 'PHP', theme: 'dark', pin: '' } }));
+        });
+        await page.reload();
+        await page.waitForTimeout(1500);
+
+        // Navigate to Bills & Income
+        const budgetTab = page.locator('text=Bills & Income').first();
+        await expect(budgetTab).toBeVisible({ timeout: 5000 });
+        await budgetTab.click();
+        await page.waitForTimeout(500);
+
+        // Item should show ON
+        const onBtn = page.locator('button:has-text("ON")').first();
+        await expect(onBtn).toBeVisible({ timeout: 5000 });
+
+        // Click to toggle OFF
+        await onBtn.click();
+        await page.waitForTimeout(500);
+
+        // Should now show OFF
+        const offBtn = page.locator('button:has-text("OFF")').first();
+        await expect(offBtn).toBeVisible({ timeout: 5000 });
+    });
+
+    test('empty state shows when no recurring items', async ({ page }) => {
+        await skipOnboarding(page);
+
+        // Navigate to Bills & Income
+        const budgetTab = page.locator('text=Bills & Income').first();
+        await expect(budgetTab).toBeVisible({ timeout: 5000 });
+        await budgetTab.click();
+        await page.waitForTimeout(500);
+
+        // Should see empty state for recurring
+        const emptyTitle = page.locator('text=No recurring items');
+        await expect(emptyTitle).toBeVisible({ timeout: 5000 });
+
+        const emptySub = page.locator('text=Auto-log Netflix, Spotify, rent, salary');
+        await expect(emptySub).toBeVisible({ timeout: 5000 });
+    });
+
+    test('recurring transactions in More sheet description', async ({ page }) => {
+        // Set mobile viewport
+        await page.setViewportSize({ width: 375, height: 812 });
+        await skipOnboarding(page);
+
+        // Open More sheet
+        const moreBtn = page.locator('.bnav-btn:has-text("More")');
+        await expect(moreBtn).toBeVisible({ timeout: 5000 });
+        await moreBtn.click();
+        await page.waitForTimeout(500);
+
+        // Bills & Income description should mention recurring
+        const description = page.locator('text=Track bills, income, recurring');
+        await expect(description).toBeVisible({ timeout: 5000 });
+    });
+
+    // ═══════════════════════════════════════════════════════════════
+    // SEO E2E TESTS (v2.5.0)
+    // ═══════════════════════════════════════════════════════════════
+
+    test('landing page has SEO meta tags', async ({ page }) => {
+        await page.goto('/');
+
+        // Check description meta tag
+        const description = page.locator('meta[name="description"]');
+        await expect(description).toHaveAttribute('content', /offline budgeting app/);
+
+        // Check OG tags
+        const ogTitle = page.locator('meta[property="og:title"]');
+        await expect(ogTitle).toHaveAttribute('content', /SINKPESO/);
+
+        const ogImage = page.locator('meta[property="og:image"]');
+        await expect(ogImage).toHaveAttribute('content', 'logosinkpeso.png');
+
+        // Check Twitter Card
+        const twitterCard = page.locator('meta[name="twitter:card"]');
+        await expect(twitterCard).toHaveAttribute('content', 'summary_large_image');
+    });
+
+    test('app.html has SEO meta tags', async ({ page }) => {
+        await page.goto('/app.html');
+
+        // Check description meta tag
+        const description = page.locator('meta[name="description"]');
+        await expect(description).toHaveAttribute('content', /offline budgeting app/);
+
+        // Check OG tags
+        const ogTitle = page.locator('meta[property="og:title"]');
+        await expect(ogTitle).toHaveAttribute('content', /SINKPESO/);
+
+        // Check title includes full name
+        await expect(page).toHaveTitle('SINKPESO — Private Budget Tracker');
+    });
+
+    test('landing page has JSON-LD structured data', async ({ page }) => {
+        await page.goto('/');
+
+        // Should have JSON-LD script
+        const jsonLd = page.locator('script[type="application/ld+json"]');
+        await expect(jsonLd).toBeAttached({ timeout: 5000 });
+
+        // Verify content
+        const content = await jsonLd.textContent();
+        expect(content).toContain('WebApplication');
+        expect(content).toContain('SINKPESO');
     });
 
 });
