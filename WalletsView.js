@@ -130,18 +130,28 @@
                     wallets.map(w => {
                         const flow = walletFlow(w.id);
                         return e('div', { key:w.id, className:"stream-row" },
-                            e('div', { style:{ display:"flex", alignItems:"center", gap:12 } },
+                            // ── LEFT: icon + name/amounts ─────────────────────────────────
+                            // FIX: flex:1 + minWidth:0 so this side actually shrinks when
+                            //      the right side (balance + menu) needs space. Without it
+                            //      the "this month" label overflows off-screen on mobile.
+                            e('div', { style:{ display:"flex", alignItems:"center", gap:12, flex:1, minWidth:0 } },
                                 e(window.walleticons.WalletIcon, { name: w.name, color: w.color||"#00E676", size: 32, radius: 9 }),
-                        e('div', null,
-                            e('div', { style:{ fontWeight:600, color:"var(--text-main)" } }, w.name),
-                            w.currency && w.currency !== 'PHP' && e('div', { style:{ fontSize:10, color:"var(--text-muted)", marginTop:1, fontWeight:600 } }, w.currency),
-                            e('div', { style:{ display:"flex", gap:10, marginTop:3, fontSize:11, fontWeight:600 } },
-                                        e('span', { style:{ color:"#00E676" } }, `+${fc(flow.inc)}`),
-                                        e('span', { style:{ color:"#EF4444" } }, `-${fc(flow.out)}`),
-                                        e('span', { style:{ color:"var(--text-muted)" } }, "this month")
-                                    )
+                                // FIX: minWidth:0 + flex:1 on the text block so it can
+                                //      shrink and its children respect the container width.
+                                e('div', { style:{ minWidth:0, flex:1 } },
+                                    e('div', { style:{ fontWeight:600, color:"var(--text-main)", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" } }, w.name),
+                                    w.currency && w.currency !== 'PHP' && e('div', { style:{ fontSize:10, color:"var(--text-muted)", marginTop:1, fontWeight:600 } }, w.currency),
+                                    // FIX: amounts row — whiteSpace:nowrap on each span so
+                                    //      they never split mid-number; "this month" moved
+                                    //      to its own line so it is always fully visible.
+                                    e('div', { style:{ display:"flex", gap:8, marginTop:3, fontSize:11, fontWeight:600, alignItems:"center" } },
+                                        e('span', { style:{ color:"#00E676", whiteSpace:"nowrap" } }, `+${fc(flow.inc)}`),
+                                        e('span', { style:{ color:"#EF4444", whiteSpace:"nowrap" } }, `-${fc(flow.out)}`)
+                                    ),
+                                    e('div', { style:{ fontSize:10, color:"var(--text-muted)", marginTop:1 } }, "this month")
                                 )
                             ),
+                            // ── RIGHT: balance + action ───────────────────────────────────
                             e('div', { style:S.row10 },
                                 e('div', { style:{ textAlign:"right" } },
                                     e('div', { style:{ fontWeight:700, fontVariantNumeric:"tabular-nums", color: (w.balanceCents||0) < 0 ? "#EF4444" : "var(--text-main)" } }, fc(w.balanceCents||0)),
