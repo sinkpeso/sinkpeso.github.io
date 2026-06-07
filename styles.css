@@ -516,7 +516,7 @@ input[type="datetime-local"] {
 
 /* ── TOAST ── */
 @media (max-width: 600px) {
-    .toast { bottom: 140px; font-size: 12px; padding: 8px 16px; max-width: 90vw; white-space: normal; text-align: center; }
+    .toast { bottom: calc(152px + env(safe-area-inset-bottom, 0px)); font-size: 12px; padding: 8px 16px; max-width: calc(100vw - 32px); white-space: normal; text-align: center; }
 }
 
 /* ── BOTTOM SHEET ── */
@@ -634,8 +634,12 @@ a:active { opacity: 0.7; transition: opacity 80ms; }
 .pd-card:active { transform: scale(0.97); }
 
 /* ── Toast: GPU-accelerated entrance ── */
+@keyframes toastSlideUp {
+    from { transform: translateX(-50%) translateY(12px); opacity: 0; }
+    to   { transform: translateX(-50%) translateY(0); opacity: 1; }
+}
 .toast {
-    animation: nativeSlideUp 0.22s cubic-bezier(0.2, 0, 0, 1) both;
+    animation: toastSlideUp 0.22s cubic-bezier(0.2, 0, 0, 1) both;
     will-change: transform, opacity;
 }
 
