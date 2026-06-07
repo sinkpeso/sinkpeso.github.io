@@ -238,7 +238,7 @@
         deactivate: deactivate,
         validateKey: validateKey,
         getStoredLicense: getStoredLicense,
-        generateKey: generateKey
+        // generateKey intentionally NOT exported — admin-only
     };
 
     // ── TAMPER DETECTION ───────────────────────────────────────────────────

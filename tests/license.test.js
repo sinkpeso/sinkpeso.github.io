@@ -19,15 +19,15 @@ require('../license.js');
 
 const lic = window.license;
 
-// ── generateKey produces valid keys ──
-const key1 = lic.generateKey("user-001");
+// ── Pre-generated valid keys (generateKey no longer exported) ──
+const key1 = "SINKPESO-VXWY-4Y35-46AV";
 assert.ok(key1.startsWith("SINKPESO-"), 'key starts with SINKPESO-');
 assert.ok(/^SINKPESO-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(key1), 'key matches format');
-assert.strictEqual(lic.validateKey(key1), true, 'generated key passes validation');
+assert.strictEqual(lic.validateKey(key1), true, 'pre-generated key passes validation');
 
-const key2 = lic.generateKey("user-002");
-assert.notStrictEqual(key1, key2, 'different seeds produce different keys');
-assert.strictEqual(lic.validateKey(key2), true, 'second generated key passes');
+const key2 = "SINKPESO-VXWY-4X35-46AU";
+assert.notStrictEqual(key1, key2, 'different keys are distinct');
+assert.strictEqual(lic.validateKey(key2), true, 'second pre-generated key passes');
 
 // ── validateKey rejects bad keys ──
 assert.strictEqual(lic.validateKey(null), false, 'null rejected');

@@ -2,8 +2,8 @@
   "name": "SINKPESO — Private Budget Tracker",
   "short_name": "SINKPESO",
   "description": "Offline personal finance tracker for the Philippines. Track expenses, manage wallets, set budgets, and save for goals — all private, all offline.",
-  "start_url": "/app.html",
-  "scope": "/",
+  "start_url": "./app.html",
+  "scope": "./",
   "display": "standalone",
   "background_color": "#020810",
   "theme_color": "#020810",
@@ -12,13 +12,19 @@
   "lang": "en",
   "icons": [
     {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
       "src": "logosinkpeso.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "logosinkpeso.png",
+      "src": "icon-maskable.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
@@ -29,7 +35,7 @@
       "name": "Quick Add Expense",
       "short_name": "Add Expense",
       "description": "Log a new expense quickly",
-      "url": "/app.html?action=quick-add",
+      "url": "./app.html?action=quick-add",
       "icons": [
         {
           "src": "logosinkpeso.png",
@@ -41,7 +47,7 @@
       "name": "Photo Diary",
       "short_name": "Diary",
       "description": "View your photo spending diary",
-      "url": "/app.html?tab=photo-diary",
+      "url": "./app.html?tab=photo-diary",
       "icons": [
         {
           "src": "logosinkpeso.png",

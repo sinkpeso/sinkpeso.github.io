@@ -10,7 +10,13 @@
     <meta property="og:description" content="Track expenses, manage wallets, build savings goals — offline and private. Free forever. Premium ₱250.">
     <meta property="og:image" content="logosinkpeso.png">
     <meta property="og:type" content="website">
+    <link rel="apple-touch-icon" href="logosinkpeso.png">
     <link rel="icon" href="logosinkpeso.png" type="image/png">
+    <meta property="og:url" content="https://sinkpeso.github.io">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="SINKPESO — Private Finance Tracker">
+    <meta name="twitter:description" content="Track expenses, manage wallets, build savings goals — offline and private. Free forever. Premium ₱250.">
+    <meta name="twitter:image" content="logosinkpeso.png">
     <link rel="stylesheet" href="fonts/fonts.css">
     <link rel="stylesheet" href="landing.css">
 </head>
@@ -748,7 +754,6 @@
         </div>
     </footer>
 
-    <script src="app.js"></script>
     <script>
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('./service-worker.js');
@@ -782,42 +787,7 @@
         }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
         reveals.forEach(el => observer.observe(el));
 
-        /* ── Showcase Tabs with Crossfade ── */
-        const tabs = document.querySelectorAll('.showcase-tab');
-        const panels = document.querySelectorAll('.showcase-panel');
-        const showcaseTitle = document.getElementById('showcase-title');
-        const titleMap = {
-            dashboard: 'SINKPESO — Dashboard',
-            expenses: 'SINKPESO — Expenses',
-            bills: 'SINKPESO — Bills',
-            savings: 'SINKPESO — Savings',
-            diary: 'SINKPESO — Photo Diary',
-            utang: 'SINKPESO — Utang Tracker',
-            cashflow: 'SINKPESO — Cashflow Forecast',
-            transfer: 'SINKPESO — Wallet Transfer'
-        };
-        tabs.forEach(tab => {
-            tab.addEventListener('click', () => {
-                const target = tab.dataset.panel;
-                tabs.forEach(t => { t.classList.remove('active'); t.setAttribute('aria-selected', 'false'); });
-                tab.classList.add('active');
-                tab.setAttribute('aria-selected', 'true');
-                panels.forEach(p => {
-                    if (p.id === 'panel-' + target) {
-                        p.style.display = 'block';
-                        requestAnimationFrame(() => {
-                            p.classList.add('active');
-                            p.removeAttribute('aria-hidden');
-                        });
-                    } else {
-                        p.classList.remove('active');
-                        p.setAttribute('aria-hidden', 'true');
-                        setTimeout(() => { if (!p.classList.contains('active')) p.style.display = 'none'; }, 350);
-                    }
-                });
-                if (showcaseTitle && titleMap[target]) showcaseTitle.textContent = titleMap[target];
-            });
-        });
+        /* ── Showcase tab code removed — was dead code referencing non-existent elements ── */
     </script>
 </body>
 </html>
