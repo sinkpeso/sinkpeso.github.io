@@ -152,4 +152,55 @@ assert.strictEqual(
     false, 'dest wallet not found fails'
 );
 
+// ── RECURRING TRANSACTIONS ──
+
+// getDueRecurringItems
+const recurringItems = [
+    { id: 'r1', isActive: true, nextDueDate: '2026-06-08', name: 'Netflix', amountCents: 14900, type: 'expense' },
+    { id: 'r2', isActive: true, nextDueDate: '2026-06-15', name: 'Spotify', amountCents: 14900, type: 'expense' },
+    { id: 'r3', isActive: false, nextDueDate: '2026-06-01', name: 'Old', amountCents: 100, type: 'expense' },
+    { id: 'r4', isActive: true, nextDueDate: '2026-06-07', name: 'Overdue', amountCents: 5000, type: 'expense' },
+];
+
+const due = fin.getDueRecurringItems(recurringItems, '2026-06-08');
+assert.strictEqual(due.length, 2, 'getDueRecurringItems: 2 items due (r1 + r4)');
+assert.strictEqual(due[0].id, 'r1');
+assert.strictEqual(due[1].id, 'r4');
+
+const dueNone = fin.getDueRecurringItems(recurringItems, '2026-06-01');
+assert.strictEqual(dueNone.length, 0, 'getDueRecurringItems: none due in the past');
+
+const dueNull = fin.getDueRecurringItems(null, '2026-06-08');
+assert.deepStrictEqual(dueNull, [], 'getDueRecurringItems: null input');
+
+console.log('✓ getDueRecurringItems');
+
+// calculateNextDueDate
+assert.strictEqual(fin.calculateNextDueDate({ nextDueDate: '2026-06-08', frequency: 'daily' }), '2026-06-09');
+assert.strictEqual(fin.calculateNextDueDate({ nextDueDate: '2026-06-08', frequency: 'weekly' }), '2026-06-15');
+assert.strictEqual(fin.calculateNextDueDate({ nextDueDate: '2026-06-08', frequency: 'biweekly' }), '2026-06-22');
+assert.strictEqual(fin.calculateNextDueDate({ nextDueDate: '2026-06-08', frequency: 'monthly', dayOfMonth: 8 }), '2026-07-08');
+assert.strictEqual(fin.calculateNextDueDate({ nextDueDate: '2026-01-31', frequency: 'monthly', dayOfMonth: 31 }), '2026-02-28');
+
+console.log('✓ calculateNextDueDate');
+
+// processRecurringItem
+const item = { id: 'r1', type: 'expense', name: 'Netflix', amountCents: 14900, category: 'Entertainment', walletId: 'w1', frequency: 'monthly', dayOfMonth: 8, nextDueDate: '2026-06-08', isActive: true };
+const processed = fin.processRecurringItem(item, '2026-06-08');
+assert.ok(processed.record.id, 'processRecurringItem: record has id');
+assert.strictEqual(processed.record.name, 'Netflix');
+assert.strictEqual(processed.record.amountCents, 14900);
+assert.strictEqual(processed.record.date, '2026-06-08');
+assert.strictEqual(processed.record.walletId, 'w1');
+assert.strictEqual(processed.record.source, 'recurring');
+assert.strictEqual(processed.updatedItem.nextDueDate, '2026-07-08');
+assert.strictEqual(processed.updatedItem.lastProcessedDate, '2026-06-08');
+
+// Income recurring
+const incItem = { id: 'r2', type: 'income', name: 'Salary', amountCents: 3200000, category: 'Salary', walletId: 'w1', frequency: 'monthly', dayOfMonth: 15, nextDueDate: '2026-06-15', isActive: true };
+const processedInc = fin.processRecurringItem(incItem, '2026-06-15');
+assert.strictEqual(processedInc.record.type, 'income');
+
+console.log('✓ processRecurringItem');
+
 console.log('✓ finance.js: all tests passed');

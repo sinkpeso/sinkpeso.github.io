@@ -2,6 +2,30 @@
 
 All notable changes to SINKPESO are documented here.
 
+## [2.5.0] — 2026-06-08
+
+### Added
+- **CSV Transaction Import** — Import expenses, income, and transfers from `.csv` files via Settings → Data Backup. Round-trips with the existing CSV export. RFC 4180 compliant parser handles quoted fields, BOM, and escaped quotes.
+- **Recurring Transactions Engine** — Backend support for auto-logging recurring expenses and income. Supports daily, weekly, biweekly, and monthly frequencies. Items are processed automatically on app open and advance their next due date.
+- **robots.txt** — Search engine crawl directives for proper indexing
+- **sitemap.xml** — XML sitemap for Google Search Console discovery (landing page, app, premium, privacy, terms)
+- **JSON-LD Structured Data** — `WebApplication` schema on the landing page for rich search result snippets
+- **Full SEO Meta Tags on app.html** — `<meta name="description">`, Open Graph tags (`og:title`, `og:description`, `og:image`, `og:url`, `og:type`), and Twitter Card tags (`twitter:card`, `twitter:title`, `twitter:description`, `twitter:image`)
+- **CSV Import Unit Tests** — 8 test cases covering RFC 4180 parsing, amount parsing, type mapping, wallet matching, edge cases
+- **Recurring Transaction Unit Tests** — Tests for `getDueRecurringItems`, `calculateNextDueDate`, and `processRecurringItem` in finance.js
+
+### Fixed
+- **Service Worker Cache** — Added missing `icon-192.png`, `CSVExporter.js`, `CSVImporter.js`, and `GlobalSearchView.js` to offline cache. Bumped cache to `sinkpeso-v17`.
+- **Monthly Recurring Date Overflow** — Jan 31 + monthly now correctly yields Feb 28 instead of Mar 3 (set day to 1 before incrementing month)
+
+### Changed
+- **package.json version** bumped from `2.2.0` to `2.4.0` (synced with CHANGELOG)
+- **Recurring state wired into app** — `sp_recurring` persistence key, auto-process on mount, `setRecurring` state in App component
+- **Recurring CRUD actions** — `addRecurringItem`, `editRecurringItem`, `deleteRecurringItem`, `toggleRecurringItem`, `processDueRecurringItems` added to actions.js
+- **Recurring data model** — `getDueRecurringItems`, `calculateNextDueDate`, `processRecurringItem` added to finance.js
+- **CSVImporter.js exposed globally** — Available as `window.parseCSV` and `window.importTransactionsCSV`
+- **Test script updated** — `npm test` now includes `csvimporter.test.js`
+
 ## [2.4.0] — 2026-06-06
 
 ### Added

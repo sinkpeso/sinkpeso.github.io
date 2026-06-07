@@ -264,6 +264,102 @@
         return Math.round(phpCents * toRate);
     }
 
+    // ── RECURRING TRANSACTIONS ─────────────────────────────────────────────
+    // Schema for a recurring item:
+    // {
+    //   id: string,
+    //   type: 'expense' | 'income',
+    //   name: string,
+    //   amountCents: number,
+    //   category: string,
+    //   walletId: string | null,
+    //   frequency: 'daily' | 'weekly' | 'biweekly' | 'monthly',
+    //   dayOfMonth: number (1-31, for monthly),
+    //   dayOfWeek: number (0-6, for weekly/biweekly),
+    //   nextDueDate: string (YYYY-MM-DD),
+    //   isActive: boolean,
+    //   createdAt: string
+    // }
+
+    /**
+     * Get all recurring items whose nextDueDate is today or earlier.
+     * @param {Array} recurringItems - Array of recurring item records
+     * @param {string} today - Today's date string (YYYY-MM-DD)
+     * @returns {Array} Items due for auto-logging
+     */
+    function getDueRecurringItems(recurringItems, today) {
+        if (!recurringItems || !Array.isArray(recurringItems)) return [];
+        return recurringItems.filter(function (item) {
+            return item.isActive && item.nextDueDate && item.nextDueDate <= today;
+        });
+    }
+
+    /**
+     * Calculate the next due date for a recurring item based on its frequency.
+     * @param {Object} item - Recurring item record
+     * @returns {string} Next due date (YYYY-MM-DD)
+     */
+    function calculateNextDueDate(item) {
+        var current = new Date(item.nextDueDate + 'T12:00:00');
+        var next = new Date(current);
+
+        switch (item.frequency) {
+            case 'daily':
+                next.setDate(next.getDate() + 1);
+                break;
+            case 'weekly':
+                next.setDate(next.getDate() + 7);
+                break;
+            case 'biweekly':
+                next.setDate(next.getDate() + 14);
+                break;
+            case 'monthly':
+                // Set day to 1 first to prevent month-overflow (Jan 31 → Mar 3)
+                next.setDate(1);
+                next.setMonth(next.getMonth() + 1);
+                // Handle day-of-month overflow (e.g., Jan 31 → Feb 28)
+                var maxDay = new Date(next.getFullYear(), next.getMonth() + 1, 0).getDate();
+                next.setDate(Math.min(item.dayOfMonth || current.getDate(), maxDay));
+                break;
+            default:
+                next.setMonth(next.getMonth() + 1);
+        }
+
+        return next.toISOString().slice(0, 10);
+    }
+
+    /**
+     * Process a due recurring item: create a record and advance the next due date.
+     * @param {Object} item - The recurring item to process
+     * @param {string} today - Today's date string
+     * @returns {{ record: Object, updatedItem: Object }} The generated record and updated recurring item
+     */
+    function processRecurringItem(item, today) {
+        var uid = window.utils ? window.utils.uid : function () { return Math.random().toString(36).slice(2, 10); };
+
+        var record = {
+            id: uid(),
+            name: item.name,
+            amountCents: item.amountCents,
+            category: item.category || 'Other',
+            date: today,
+            walletId: item.walletId || null,
+            source: 'recurring'
+        };
+
+        if (item.type === 'income') {
+            record.type = 'income';
+        }
+
+        var updatedItem = {
+            ...item,
+            nextDueDate: calculateNextDueDate(item),
+            lastProcessedDate: today
+        };
+
+        return { record: record, updatedItem: updatedItem };
+    }
+
     window.finance = {
         deriveWallets,
         deriveWalletBalance,
@@ -272,6 +368,9 @@
         validateExpenseWalletBalance,
         processFinancialTransaction,
         checkIncomeDeleteSafe,
-        convertCurrency
+        convertCurrency,
+        getDueRecurringItems,
+        calculateNextDueDate,
+        processRecurringItem
     };
 })();

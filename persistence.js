@@ -77,6 +77,7 @@
         photoDiary : "sp_photo_diary",
         templates  : "sp_templates",
         debts      : "sp_debts",
+        recurring  : "sp_recurring",
     };
 
     // ── DEFAULT VALUES ────────────────────────────────────────────────────────
@@ -101,6 +102,7 @@
             { id: "tpl-default-6", label: "Load",      amountCents: 5000,  category: "Personal",   icon: "smartphone" },
         ],
         debts      : [],
+        recurring  : [],
     };
 
     // ── INTERNAL: safe JSON read ──────────────────────────────────────────────

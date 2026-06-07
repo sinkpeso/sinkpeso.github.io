@@ -153,6 +153,112 @@
         return { ok: true };
     }
 
-    window.actions = { addExpense, editExpense, deleteExpense, addIncome, editIncome, deleteIncome, transferBetweenWallets };
+    // ── RECURRING ACTIONS ──────────────────────────────────────────────────
+
+    /**
+     * Add a new recurring item.
+     * @param {{ rec: Object, recurringItems: Array, setRecurringItems: Function }} opts
+     */
+    function addRecurringItem({ rec, recurringItems, setRecurringItems }) {
+        setRecurringItems(prev => [rec, ...prev]);
+    }
+
+    /**
+     * Edit an existing recurring item.
+     * @param {{ id: string, updates: Object, recurringItems: Array, setRecurringItems: Function }} opts
+     */
+    function editRecurringItem({ id, updates, recurringItems, setRecurringItems }) {
+        setRecurringItems(recurringItems.map(item =>
+            item.id === id ? { ...item, ...updates } : item
+        ));
+    }
+
+    /**
+     * Delete a recurring item.
+     * @param {{ id: string, recurringItems: Array, setRecurringItems: Function }} opts
+     */
+    function deleteRecurringItem({ id, recurringItems, setRecurringItems }) {
+        setRecurringItems(prev => prev.filter(item => item.id !== id));
+    }
+
+    /**
+     * Toggle a recurring item active/inactive.
+     * @param {{ id: string, recurringItems: Array, setRecurringItems: Function }} opts
+     */
+    function toggleRecurringItem({ id, recurringItems, setRecurringItems }) {
+        setRecurringItems(recurringItems.map(item =>
+            item.id === id ? { ...item, isActive: !item.isActive } : item
+        ));
+    }
+
+    /**
+     * Auto-process all due recurring items.
+     * Creates expense/income records and advances next due dates.
+     * @param {{ recurringItems: Array, setRecurringItems: Function, setDailyExpenses: Function, setIncomes: Function, wallets: Array, setWallets: Function, showToast: Function }} opts
+     */
+    function processDueRecurringItems({ recurringItems, setRecurringItems, setDailyExpenses, setIncomes, wallets, setWallets, showToast }) {
+        var today = window.utils.todayStr();
+        var dueItems = fin().getDueRecurringItems(recurringItems, today);
+        if (dueItems.length === 0) return;
+
+        var updatedItems = [];
+        var newExpenses = [];
+        var newIncomes = [];
+        var count = 0;
+
+        dueItems.forEach(function (item) {
+            var result = fin().processRecurringItem(item, today);
+            updatedItems.push(result.updatedItem);
+
+            if (item.type === 'income') {
+                newIncomes.push(result.record);
+                fin().processFinancialTransaction({
+                    type: "income",
+                    walletId: item.walletId,
+                    amountCents: item.amountCents,
+                    wallets,
+                    setWallets,
+                });
+            } else {
+                newExpenses.push(result.record);
+                fin().processFinancialTransaction({
+                    type: "expense",
+                    walletId: item.walletId,
+                    amountCents: item.amountCents,
+                    wallets,
+                    setWallets,
+                });
+            }
+            count++;
+        });
+
+        // Update recurring items with new next due dates
+        setRecurringItems(function (prev) {
+            return prev.map(function (item) {
+                var updated = updatedItems.find(function (u) { return u.id === item.id; });
+                return updated || item;
+            });
+        });
+
+        // Append new records
+        if (newExpenses.length > 0) {
+            setDailyExpenses(prev => [...newExpenses, ...prev]);
+        }
+        if (newIncomes.length > 0) {
+            setIncomes(prev => [...newIncomes, ...prev]);
+        }
+
+        if (showToast && count > 0) {
+            showToast("Auto-logged " + count + " recurring transaction" + (count > 1 ? "s" : "") + "!");
+        }
+    }
+
+    window.actions = {
+        addExpense, editExpense, deleteExpense,
+        addIncome, editIncome, deleteIncome,
+        transferBetweenWallets,
+        addRecurringItem, editRecurringItem, deleteRecurringItem,
+        toggleRecurringItem, processDueRecurringItems
+    };
 
 })();

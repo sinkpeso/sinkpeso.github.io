@@ -3,7 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>SINKPESO</title>
+    <title>SINKPESO — Private Budget Tracker</title>
+    <meta name="description" content="Free offline budgeting app for Filipinos. Track expenses, manage wallets, build savings vaults, and reach your financial goals — all private, all offline.">
+    <meta property="og:title" content="SINKPESO — Private Budget Tracker">
+    <meta property="og:description" content="Free offline budgeting app for Filipinos. Track expenses, manage wallets, build savings vaults — all private, all offline.">
+    <meta property="og:image" content="logosinkpeso.png">
+    <meta property="og:url" content="https://sinkpeso.github.io/app.html">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="SINKPESO — Private Budget Tracker">
+    <meta name="twitter:description" content="Free offline budgeting app for Filipinos. Track expenses, manage wallets, build savings vaults — all private, all offline.">
+    <meta name="twitter:image" content="logosinkpeso.png">
     
     <script src="react.production.min.js"></script>
     <script src="react-dom.production.min.js"></script>
@@ -47,6 +57,7 @@
     <script src="jspdf.plugin.autotable.min.js"></script>
     <script src="ReportGenerator.js"></script>
     <script src="CSVExporter.js"></script>
+    <script src="CSVImporter.js"></script>
     <script src="GlobalSearchView.js"></script>
 
         <link rel="apple-touch-icon" href="logosinkpeso.png">
@@ -176,6 +187,7 @@
             const [photoDiaryLoaded, setPhotoDiaryLoaded] = useState(false);
             const [templates, setTemplates] = useState(saved.templates);
             const [debts, setDebts] = useState(saved.debts);
+            const [recurring, setRecurring] = useState(saved.recurring);
 
             // ── DAILY REMINDER NOTIFICATION ──
             useEffect(() => {
@@ -269,6 +281,22 @@
             useEffect(() => { window.persistence.saveKey("wallets", wallets); }, [wallets]);
             useEffect(() => { window.persistence.saveKey("templates", templates); }, [templates]);
             useEffect(() => { window.persistence.saveKey("debts", debts); }, [debts]);
+            useEffect(() => { window.persistence.saveKey("recurring", recurring); }, [recurring]);
+
+            // ── AUTO-PROCESS RECURRING ITEMS ON APP OPEN ──
+            useEffect(() => {
+                if (recurring && recurring.length > 0 && window.actions && window.finance) {
+                    window.actions.processDueRecurringItems({
+                        recurringItems: recurring,
+                        setRecurringItems: setRecurring,
+                        setDailyExpenses: setDailyExpenses,
+                        setIncomes: setIncomes,
+                        wallets: displayWallets,
+                        setWallets: setWallets,
+                        showToast: showToast
+                    });
+                }
+            }, []); // Only on mount
 
             // Currency Formatter bound to state
             const fc = useMemo(() => {
@@ -609,7 +637,7 @@
                     tab === "dashboard" && e(DashboardOverview, { totals, bills, dailyExpenses, budgets, wallets: displayWallets, fc, fc2, incomes, txns, funds, archives, photoDiary, debts, onNavigate: setTab }),
                     tab === "limits" && e(BudgetLimitsView, { budgets, setBudgets, fc, requestConfirm, showToast }),
                     tab === "wallets" && e(WalletsView, { wallets: displayWallets, rawWallets: wallets, setWallets, incomes, dailyExpenses, txns, setTxns, fc, requestConfirm, showToast }),
-                    tab === "budget" && e(BudgetBillsView, { incomes, setIncomes, bills, setBills, wallets: displayWallets, setWallets, txns, setTxns, fc, requestConfirm, showToast }),
+                    tab === "budget" && e(BudgetBillsView, { incomes, setIncomes, bills, setBills, wallets: displayWallets, setWallets, txns, setTxns, fc, requestConfirm, showToast, recurring, setRecurring }),
                     tab === "daily" && e(DailyExpensesView, { dailyExpenses, setDailyExpenses, photoDiary, setPhotoDiary, wallets: displayWallets, setWallets, fc, requestConfirm, showToast, templates }),
                     tab === "goals" && e(SinkingFundsView, { funds, setFunds, enrichedFunds: totals.enrichedFunds, txns, setTxns, wallets: displayWallets, setWallets, fc, requestConfirm, showToast }),
                     tab === "transactions" && e(AllTransactionsView, { txns, setTxns, funds, incomes, dailyExpenses, bills, wallets: displayWallets, fc, requestConfirm, showToast }),

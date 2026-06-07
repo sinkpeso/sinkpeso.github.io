@@ -297,6 +297,52 @@ setUpgradeMsg("This is a Premium feature. Unlock encrypted backups with a one-ti
             showToast(" CSV exported!");
         };
 
+        const csvImportRef = React.useRef(null);
+        const handleImportCSV = (ev) => {
+            const file = ev.target.files[0];
+            if (!file) return;
+            ev.target.value = '';
+            const reader = new FileReader();
+            reader.onload = (re) => {
+                try {
+                    const text = re.target.result;
+                    if (!window.importTransactionsCSV) {
+                        showToast("CSV importer not loaded.");
+                        return;
+                    }
+                    const processor = window.importTransactionsCSV({ wallets: [] });
+                    const result = processor(text);
+                    if (result.errors.length > 0 && result.stats.imported === 0) {
+                        showToast("Import failed: " + result.errors[0]);
+                        return;
+                    }
+                    if (result.stats.imported === 0) {
+                        showToast("No valid transactions found in CSV.");
+                        return;
+                    }
+                    // Append imported records to existing state
+                    const saved = window.persistence.loadState();
+                    if (result.records.expenses.length > 0) {
+                        setDailyExpenses(prev => [...result.records.expenses, ...prev]);
+                    }
+                    if (result.records.incomes.length > 0) {
+                        setIncomes(prev => [...result.records.incomes, ...prev]);
+                    }
+                    if (result.records.transfers.length > 0) {
+                        setTxns(prev => [...result.records.transfers, ...prev]);
+                    }
+                    const parts = [];
+                    if (result.records.expenses.length) parts.push(result.records.expenses.length + " expenses");
+                    if (result.records.incomes.length) parts.push(result.records.incomes.length + " incomes");
+                    if (result.records.transfers.length) parts.push(result.records.transfers.length + " transfers");
+                    showToast("Imported " + parts.join(", ") + " from CSV!");
+                } catch (err) {
+                    showToast("Invalid CSV file: " + (err.message || "Parse error"));
+                }
+            };
+            reader.readAsText(file);
+        };
+
         const SettingGroup = window.SettingGroup;
         const CURRENCIES = window.SINKPESO_CONSTANTS.CURRENCIES;
 
@@ -397,6 +443,10 @@ setUpgradeMsg("This is a Premium feature. Unlock encrypted backups with a one-ti
                         e(Btn, { v: "ghost", style: { width:"100%", marginBottom:10 }, onClick: handleExportCSV },
                             "⬇ Export Transactions (.csv)"
                         ),
+                        e(Btn, { v: "ghost", style: { width:"100%", marginBottom:10 }, onClick: () => csvImportRef.current && csvImportRef.current.click() },
+                            "⬆ Import Transactions (.csv)"
+                        ),
+                        e('input', { ref: csvImportRef, type:"file", accept:".csv", onChange: handleImportCSV, style: { display: "none" } }),
                         e('div', { style: { borderTop:"1px solid var(--border)", paddingTop:16, marginTop:6 } },
                             e(SLabel, { style: { marginBottom:10 } }, "Restore from backup"),
                             e('input', { type:"file", accept:".json", onChange: handleImport,

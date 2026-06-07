@@ -1,4 +1,4 @@
-const CACHE_NAME = 'sinkpeso-v16';
+const CACHE_NAME = 'sinkpeso-v17';
 const ASSETS = [
   './app.html',
   './offline.html',
@@ -40,6 +40,9 @@ const ASSETS = [
   './jspdf.umd.min.js',
   './jspdf.plugin.autotable.min.js',
   './ReportGenerator.js',
+  './CSVExporter.js',
+  './CSVImporter.js',
+  './GlobalSearchView.js',
   './react.production.min.js',
   './react-dom.production.min.js',
   './fonts/fonts.css',
@@ -53,6 +56,7 @@ const ASSETS = [
   './service-worker.js',
   './manifest.json',
   './logosinkpeso.png',
+  './icon-192.png',
   './privacy.html',
   './premium.html',
   './terms.html'
