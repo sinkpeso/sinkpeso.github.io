@@ -60,6 +60,7 @@
     <script src="CSVImporter.js"></script>
     <script src="GlobalSearchView.js"></script>
     <script src="RecurringView.js"></script>
+    <script src="BudgetActualView.js"></script>
 
         <link rel="apple-touch-icon" href="logosinkpeso.png">
     <link rel="icon" href="logosinkpeso.png" type="image/png">
@@ -627,6 +628,7 @@
                             { id: "history",      label: "History" },
                         { id: "cashflow",     label: "Cashflow" },
                             { id: "pera-report",  label: "Pera Report" },
+                            { id: "budget-actual",label: "Budget" },
                             { id: "recurring",    label: "Recurring" },
                         ].map(t => e('button', {
                             key: t.id, className: "nav-btn", onClick: () => setTab(t.id),
@@ -804,7 +806,7 @@ e('footer', {
                         { id: "more",        icon: "more",    label: "More" }
                     ].map(t => e('button', {
                         key: t.id,
-                        className: "bnav-btn" + (tab === t.id || (t.id === "more" && ["wallets","limits","transactions","history","settings","budget","utang","cashflow","pera-report","recurring"].includes(tab)) ? " active" : ""),
+                        className: "bnav-btn" + (tab === t.id || (t.id === "more" && ["wallets","limits","transactions","history","settings","budget","utang","cashflow","pera-report","recurring","budget-actual"].includes(tab)) ? " active" : ""),
                         onClick: () => t.id === "more" ? setShowMoreSheet(true) : setTab(t.id)
                     },
                         e(Icon, { name: t.icon, size: 22 }),
@@ -825,6 +827,7 @@ e('footer', {
                             { id: "utang",        icon: "creditcard",   label: "Utang Tracker",      sub: "Track money owed & owing" },
                             { id: "cashflow",     icon: "trendingup",   label: "Cashflow Forecast",  sub: "30-day balance projection" },
                             { id: "pera-report", icon: "chart",         label: "Pera Report",          sub: "Your monthly money story" },
+                            { id: "budget-actual",icon: "target",       label: "Budget vs Actual",     sub: "Track spending against limits" },
                             { id: "recurring",    icon: "calendar",     label: "Recurring",            sub: "Auto-log repeating transactions" },
                             { id: "settings",     icon: "settings",     label: "Settings",           sub: "Preferences, PIN, backup" },
                         ].map(t => {
@@ -956,6 +959,9 @@ e('footer', {
 
         // RecurringView loaded from RecurringView.js
         const RecurringView = window.RecurringView || React.memo(function RecurringView_FALLBACK() { return e('div', null, 'RecurringView.js not loaded'); });
+
+        // BudgetActualView loaded from BudgetActualView.js
+        const BudgetActualView = window.BudgetActualView || React.memo(function BudgetActualView_FALLBACK() { return e('div', null, 'BudgetActualView.js not loaded'); });
 
         // HistoryView loaded from HistoryView.js
         const HistoryView = window.HistoryView || React.memo(function HistoryView_FALLBACK() { return e('div', null, 'HistoryView.js not loaded'); });
