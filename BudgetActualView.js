@@ -117,8 +117,9 @@
 
     // ── MAIN VIEW ────────────────────────────────────────────────────────
     function BudgetActualView({ budgets, fc, totals }) {
+        budgets = budgets || [];
         var budgetStatus = useMemo(function () {
-            return window.selectors.getCategoryBudgetStatus(totals.catSum, budgets, CATEGORIES);
+            return window.selectors.getCategoryBudgetStatus(totals ? totals.catSum : {}, budgets, CATEGORIES);
         }, [totals.catSum, budgets]);
 
         // Summary calculations
