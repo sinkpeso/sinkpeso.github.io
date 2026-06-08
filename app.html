@@ -652,6 +652,7 @@
                     tab === "pera-report" && e(PeraReportView, { totals, dailyExpenses, incomes, bills, funds, wallets: displayWallets, fc }),
                     tab === "settings" && e(SettingsView, { settings, setSettings, setIncomes, setBills, setDailyExpenses, setFunds, setTxns, setArchives, setBudgets, showToast, totals, bills, budgets, fc, templates, setTemplates }),
                     tab === "recurring" && e(RecurringView, { recurring, setRecurring: setRecurring, wallets: displayWallets, fc, requestConfirm, showToast }),
+                    tab === "budget-actual" && e(BudgetActualView, { budgets, fc, totals }),
 
 e('footer', { 
                     style: { 
