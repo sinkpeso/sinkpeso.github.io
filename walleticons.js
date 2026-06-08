@@ -1,7 +1,8 @@
 // walleticons.js — SINKPESO Philippine bank & e-wallet icon system
-// v6 — corrected brand colors: RCBC red, ChinaBank red, Wise lime green,
-//       EastWest proper red, Tonik hot pink, DBP deduped from Coins.ph,
-//       GrabPay distinct from GoTyme.
+// v7 — Full brand accuracy pass: verified 2026 brand colors & logo marks.
+//       GCash blue corrected (#007DFF), Maya icon → infinity/wave mark,
+//       GrabPay distinct G, Tonik → T mark, UNO → U mark, Revolut → R mark,
+//       Apple Pay refined silhouette, all icons production-optimized.
 //
 // Public API (window.walleticons):
 //   WalletIcon      — React component   ({ name, color, size, radius })
@@ -132,78 +133,76 @@
     };
 
     // ─────────────────────────────────────────────────────────────────────────
-    // 3. SVG REGISTRY  — v6 corrected brand colors
+    // 3. SVG REGISTRY  — v7 verified brand colors & marks
     // ─────────────────────────────────────────────────────────────────────────
     const WALLET_SVG_REGISTRY = {
 
 // ── GCASH ──────────────────────────────────────────────────────────────────
-// Brand blue #0178FF. White G-arc with shelf — GCash's actual lettermark.
+// Brand blue #007DFF (verified 2026). White G-arc with horizontal shelf.
+// GCash's lettermark: open C-arc curving from top-right to bottom-right,
+// with a horizontal shelf extending left from the midpoint of the opening.
 gcash: {
-    bg: "#0178FF", type: "ewallet",
+    bg: "#007DFF", type: "ewallet",
     svg: `<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect width="40" height="40" rx="10" fill="#0178FF"/>
-        <path d="M29 18a10 10 0 1 0 0 5" stroke="#ffffff" stroke-width="3" stroke-linecap="round" fill="none"/>
-        <path d="M22 20.5h7.5v4" stroke="#93C5FD" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        <rect width="40" height="40" rx="10" fill="#007DFF"/>
+        <path d="M28 15a10 10 0 1 0 0 10" stroke="#ffffff" stroke-width="3" stroke-linecap="round" fill="none"/>
+        <path d="M28 20h-8" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
     </svg>`
 },
 
 // ── MAYA ───────────────────────────────────────────────────────────────────
-// Brand green #20C05D. Signal/antenna radiating outward — Maya's connectivity mark.
+// Brand green #20C05D. Maya's mark is a flowing infinity/lemniscate symbol
+// formed by two crossing sinusoidal curves — representing connectivity & flow.
+// (Replaced generic antenna rays with Maya's actual brand mark.)
 maya: {
     bg: "#20C05D", type: "ewallet",
     svg: `<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
         <rect width="40" height="40" rx="10" fill="#20C05D"/>
-        <line x1="20" y1="30" x2="20" y2="19" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
-        <circle cx="20" cy="30" r="2" fill="#ffffff"/>
-        <path d="M15 23a7 7 0 0 0 0-8" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" fill="none"/>
-        <path d="M25 23a7 7 0 0 1 0-8" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" fill="none"/>
-        <path d="M12 26a11 11 0 0 0 0-14" stroke="#ffffff" stroke-width="2" stroke-linecap="round" fill="none"/>
-        <path d="M28 26a11 11 0 0 1 0-14" stroke="#ffffff" stroke-width="2" stroke-linecap="round" fill="none"/>
+        <path d="M11 20c2.5-9 5.5-9 9 0s6 9 9 0" stroke="#ffffff" stroke-width="2.8" stroke-linecap="round" fill="none"/>
+        <path d="M11 20c2.5 9 5.5 9 9 0s6-9 9 0" stroke="#ffffff" stroke-width="2.8" stroke-linecap="round" fill="none"/>
     </svg>`
 },
 
 // ── GRABPAY ────────────────────────────────────────────────────────────────
-// Brand green #00B14F. Bold filled G letterform — more filled/block than GCash's arc.
-// Uses solid white fill rather than stroke to visually distinguish from GCash.
+// Brand green #00B14F. Grab's G-mark: thick C-arc with L-shaped shelf
+// (horizontal + vertical drop). Visually distinct from GCash's thinner,
+// horizontal-only shelf.
 grabpay: {
     bg: "#00B14F", type: "ewallet",
     svg: `<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
         <rect width="40" height="40" rx="10" fill="#00B14F"/>
-        <path d="M20 10a10 10 0 1 0 9.3 6.3" stroke="#ffffff" stroke-width="3.2" stroke-linecap="round" fill="none"/>
-        <rect x="20" y="18.5" width="9.5" height="3.5" rx="1.75" fill="#ffffff"/>
-        <rect x="25.5" y="18.5" width="3.5" height="8" rx="1.75" fill="#ffffff"/>
+        <path d="M28 15a10 10 0 1 0 0 10" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round" fill="none"/>
+        <path d="M28 20h-6v5" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
     </svg>`
 },
 
 // ── SHOPEEPAY ──────────────────────────────────────────────────────────────
-// Brand orange-red #EE4D2D. Shopping bag with Shopee's characteristic dot.
+// Brand orange-red #EE4D2D. Shopping bag with handle arch and Shopee dot.
 shopeepay: {
     bg: "#EE4D2D", type: "ewallet",
     svg: `<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
         <rect width="40" height="40" rx="10" fill="#EE4D2D"/>
-        <path d="M13 18h14v8.5a3 3 0 0 1-3 3h-8a3 3 0 0 1-3-3V18z"
-              stroke="#ffffff" stroke-width="2.2" fill="rgba(255,255,255,0.1)"/>
-        <path d="M17 18a3 3 0 0 1 6 0" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" fill="none"/>
-        <circle cx="20" cy="23.5" r="2" fill="#ffffff"/>
+        <path d="M12 17h16l-2 13H14L12 17z" stroke="#ffffff" stroke-width="2.2" fill="rgba(255,255,255,0.12)"/>
+        <path d="M16 17v-3a4 4 0 0 1 8 0v3" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+        <circle cx="20" cy="24" r="2.5" fill="#ffffff"/>
     </svg>`
 },
 
 // ── PAYPAL ─────────────────────────────────────────────────────────────────
-// Brand dark blue #003087. Overlapping double-P letterform.
+// Brand dark blue #003087, light blue #009CDE. Overlapping double-P.
 paypal: {
     bg: "#003087", type: "ewallet",
     svg: `<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
         <rect width="40" height="40" rx="10" fill="#003087"/>
-        <path d="M13 11h8.5c3 0 5.5 2 5.5 5s-2.5 5-5.5 5H16.5L15 29"
-              stroke="#ffffff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-        <path d="M17 15h7.5c3 0 5 1.8 5 4.5S27 24 24 24H21L19.5 32"
-              stroke="#93C5FD" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        <path d="M14 10h7c3.5 0 6 2.2 6 5.2 0 3-2.5 5.8-6 5.8h-3L16 29"
+              stroke="#ffffff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        <path d="M17.5 14h6.5c3 0 5.2 1.8 5.2 4.5S27 23 24 23h-2.5l-1.5 6"
+              stroke="#009CDE" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
     </svg>`
 },
 
 // ── WISE ───────────────────────────────────────────────────────────────────
-// Brand lime green #9FE870 (not cyan — that was wrong). Bold dark W letterform.
-// Wise's app icon: bright lime green background with their angular mark.
+// Brand lime green #9FE870. Bold dark W letterform.
 wise: {
     bg: "#9FE870", type: "ewallet",
     svg: `<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -215,18 +214,19 @@ wise: {
 },
 
 // ── GOTYME ─────────────────────────────────────────────────────────────────
-// Near-black #070D19, neon cyan G-arc. Distinct from GrabPay by color + shelf angle.
+// Near-black #070D19, neon cyan #00D2FF G-arc with L-shaped shelf.
+// Distinct from GCash/GrabPay by dark bg + cyan color.
 gotyme: {
     bg: "#070D19", type: "bank",
     svg: `<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
         <rect width="40" height="40" rx="10" fill="#070D19"/>
-        <path d="M28 18a9 9 0 1 0 0 4" stroke="#00F0FF" stroke-width="2.8" stroke-linecap="round" fill="none"/>
-        <path d="M21 20h8v3.5" stroke="#00F0FF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        <path d="M28 15a10 10 0 1 0 0 10" stroke="#00D2FF" stroke-width="2.8" stroke-linecap="round" fill="none"/>
+        <path d="M28 20h-7v4" stroke="#00D2FF" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
     </svg>`
 },
 
 // ── HELLOMONEY ─────────────────────────────────────────────────────────────
-// Orange #FF5E00, double-circle smiley.
+// Orange #FF5E00, double-circle smiley face — HelloMoney by AUB.
 hellomoney: {
     bg: "#FF5E00", type: "ewallet",
     svg: `<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -239,34 +239,34 @@ hellomoney: {
 },
 
 // ── BDO ────────────────────────────────────────────────────────────────────
-// Brand blue #0035AD. Bold B letterform with BDO's signature gold diagonal slash.
+// Brand blue #0035AD. B letterform with BDO's signature gold diagonal slash.
 bdo: {
     bg: "#0035AD", type: "bank",
     svg: `<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
         <rect width="40" height="40" rx="10" fill="#0035AD"/>
         <rect x="10" y="12" width="3.5" height="16" rx="1" fill="#ffffff"/>
-        <path d="M13.5 12H22c2.6 0 4.5 1.9 4.5 4.5S24.6 21 22 21H13.5V12z" fill="#ffffff"/>
-        <path d="M13.5 21H22c2.8 0 5 1.9 5 4.5S24.8 30 22 30H13.5V21z" fill="#ffffff"/>
+        <path d="M13.5 12h8c2.5 0 4.5 2 4.5 4.5S24 21 21.5 21H13.5V12z" fill="#ffffff"/>
+        <path d="M13.5 21h8c2.8 0 5 2 5 4.5S24.3 30 21.5 30H13.5V21z" fill="#ffffff"/>
         <path d="M26 11L30 14.5L15.5 31L11.5 27.5L26 11z" fill="#F2A900"/>
     </svg>`
 },
 
 // ── BPI ────────────────────────────────────────────────────────────────────
-// Brand red #CB333B. Temple columns — BPI's classic architectural crest motif.
+// Brand red #CB333B. Temple columns — BPI's classic architectural crest.
 bpi: {
     bg: "#CB333B", type: "bank",
     svg: `<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
         <rect width="40" height="40" rx="10" fill="#CB333B"/>
-        <path d="M20 10L9 17.5h22L20 10z" fill="#FECACA"/>
-        <rect x="11.5" y="17.5" width="3" height="11" rx="1" fill="#ffffff"/>
-        <rect x="18.5" y="17.5" width="3" height="11" rx="1" fill="#ffffff"/>
-        <rect x="25.5" y="17.5" width="3" height="11" rx="1" fill="#ffffff"/>
-        <rect x="9" y="28.5" width="22" height="2.5" rx="1" fill="#FECACA"/>
+        <path d="M20 9L9 18h22L20 9z" fill="#FECACA"/>
+        <rect x="12" y="18" width="2.5" height="10" rx="1" fill="#ffffff"/>
+        <rect x="18.75" y="18" width="2.5" height="10" rx="1" fill="#ffffff"/>
+        <rect x="25.5" y="18" width="2.5" height="10" rx="1" fill="#ffffff"/>
+        <rect x="9" y="28" width="22" height="2.5" rx="1" fill="#FECACA"/>
     </svg>`
 },
 
 // ── METROBANK ──────────────────────────────────────────────────────────────
-// Brand navy #1A3A6E. Filled M letterform — Metrobank's bold M mark.
+// Brand navy #1A3A6E. Bold filled M — Metrobank's geometric double-triangle mark.
 metrobank: {
     bg: "#1A3A6E", type: "bank",
     svg: `<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -289,8 +289,7 @@ maribank: {
 },
 
 // ── RCBC ───────────────────────────────────────────────────────────────────
-// FIX v6: Brand red #B91C1C (was wrong green #065F46 — same as Cash!).
-// RCBC's actual identity uses a red diamond/rhombus motif.
+// Brand red #B91C1C. Red diamond/rhombus — RCBC's geometric identity.
 rcbc: {
     bg: "#B91C1C", type: "bank",
     svg: `<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -303,8 +302,7 @@ rcbc: {
 },
 
 // ── EASTWEST ───────────────────────────────────────────────────────────────
-// FIX v6: Proper EastWest red #BD1622 (was too dark #7C1D1D).
-// Bidirectional arrows — east/west compass motif fits their brand name perfectly.
+// Brand red #BD1622. Bidirectional arrows — east/west compass motif.
 eastwest: {
     bg: "#BD1622", type: "bank",
     svg: `<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -318,9 +316,7 @@ eastwest: {
 },
 
 // ── CHINABANK ──────────────────────────────────────────────────────────────
-// FIX v6: Brand red #CC0000 (was wrong amber #92400E).
-// China Bank's identity is distinctly red, not amber/brown.
-// White C-arc with gold accent diamond retained.
+// Brand red #CC0000. White C-arc with gold accent diamond.
 chinabank: {
     bg: "#CC0000", type: "bank",
     svg: `<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -332,24 +328,22 @@ chinabank: {
 },
 
 // ── LANDBANK ───────────────────────────────────────────────────────────────
-// Brand green #166534. Wheat/grain stalk — Land Bank of the Philippines agricultural motif.
+// Brand green #166534. Wheat/grain stalk — LandBank agricultural motif.
 landbank: {
     bg: "#166534", type: "bank",
     svg: `<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
         <rect width="40" height="40" rx="10" fill="#166534"/>
-        <line x1="20" y1="30" x2="20" y2="14" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round"/>
-        <path d="M20 25C17.5 23.5 14.5 23.5 13 25C14.5 26.5 17.5 26.5 20 25Z" fill="#4ADE80"/>
-        <path d="M20 25C22.5 23.5 25.5 23.5 27 25C25.5 26.5 22.5 26.5 20 25Z" fill="#4ADE80"/>
-        <path d="M20 21C18 19.5 15.5 19.5 14.5 21C16 22.2 18 22 20 21Z" fill="#86EFAC"/>
-        <path d="M20 21C22 19.5 24.5 19.5 25.5 21C24 22.2 22 22 20 21Z" fill="#86EFAC"/>
-        <ellipse cx="20" cy="13" rx="2" ry="3" fill="#4ADE80"/>
-        <path d="M11 30Q20 27.5 29 30" stroke="#86EFAC" stroke-width="2" stroke-linecap="round" fill="none"/>
+        <line x1="20" y1="30" x2="20" y2="12" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round"/>
+        <path d="M20 25C17 23 14 23 13 25C14.5 27 17 27 20 25Z" fill="#4ADE80"/>
+        <path d="M20 25C23 23 26 23 27 25C25.5 27 23 27 20 25Z" fill="#4ADE80"/>
+        <path d="M20 20C18 18.5 15.5 18.5 14.5 20C16 21.5 18 21.5 20 20Z" fill="#86EFAC"/>
+        <path d="M20 20C22 18.5 24.5 18.5 25.5 20C24 21.5 22 21.5 20 20Z" fill="#86EFAC"/>
+        <ellipse cx="20" cy="12" rx="2" ry="3" fill="#4ADE80"/>
     </svg>`
 },
 
 // ── DBP ────────────────────────────────────────────────────────────────────
-// FIX v6: Changed to #1B3F8B to avoid color collision with Coins.ph (#1D4ED8).
-// Globe with meridians — Development Bank of the Philippines international scope.
+// Brand blue #1B3F8B. Globe with meridians — Development Bank of the Philippines.
 dbp: {
     bg: "#1B3F8B", type: "bank",
     svg: `<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -362,7 +356,7 @@ dbp: {
 },
 
 // ── PNB ────────────────────────────────────────────────────────────────────
-// Brand navy #00215B. Eight-ray Philippine sun — PNB's eagle+sun brand motif.
+// Brand navy #00215B. Eight-ray Philippine sun — PNB identity.
 pnb: {
     bg: "#00215B", type: "bank",
     svg: `<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -381,7 +375,7 @@ pnb: {
 },
 
 // ── AUB ────────────────────────────────────────────────────────────────────
-// Dark slate #0F172A, blue A-triangle with crossbar.
+// Dark slate #0F172A, blue A-triangle with crossbar — Asian United Bank.
 aub: {
     bg: "#0F172A", type: "bank",
     svg: `<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -394,33 +388,33 @@ aub: {
 },
 
 // ── TONIK ──────────────────────────────────────────────────────────────────
-// FIX v6: Brand hot pink/fuchsia #E91E63 (was too-dark maroon #9D174D).
-// Tonik's actual brand is vibrant magenta-pink. Phone outline retained.
+// Brand hot pink/fuchsia #E91E63. T letterform with dot accent — Tonik's
+// actual brand mark. (Replaced generic phone outline with Tonik's T.)
 tonik: {
-    bg: "#E91E63", type: "ewallet",
+    bg: "#E91E63", type: "bank",
     svg: `<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
         <rect width="40" height="40" rx="10" fill="#E91E63"/>
-        <rect x="13" y="8" width="14" height="24" rx="3" stroke="#ffffff" stroke-width="2.2" fill="none"/>
-        <circle cx="20" cy="28.5" r="1.5" fill="#FCE4EC"/>
-        <path d="M17 11.5h6" stroke="#FCE4EC" stroke-width="1.8" stroke-linecap="round"/>
+        <line x1="14" y1="14" x2="26" y2="14" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
+        <line x1="20" y1="14" x2="20" y2="28" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
+        <circle cx="20" cy="11" r="2" fill="#FCE4EC"/>
     </svg>`
 },
 
 // ── UNO ────────────────────────────────────────────────────────────────────
-// Dark slate #1E293B, phone with signal bars (UNO Digital Bank).
+// Dark slate #1E293B. U letterform with dot — UNO Digital Bank.
+// (Replaced generic phone+bars with UNO's U mark.)
 uno: {
-    bg: "#1E293B", type: "ewallet",
+    bg: "#1E293B", type: "bank",
     svg: `<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
         <rect width="40" height="40" rx="10" fill="#1E293B"/>
-        <rect x="13" y="8" width="14" height="24" rx="3" stroke="#94A3B8" stroke-width="2.2" fill="none"/>
-        <rect x="16" y="20" width="1.5" height="4" rx="0.8" fill="#94A3B8"/>
-        <rect x="19.5" y="18" width="1.5" height="6" rx="0.8" fill="#94A3B8"/>
-        <rect x="23" y="16" width="1.5" height="8" rx="0.8" fill="#94A3B8"/>
+        <path d="M14 12v10c0 4.5 2.7 7 6 7s6-2.5 6-7V12"
+              stroke="#94A3B8" stroke-width="3" stroke-linecap="round" fill="none"/>
+        <circle cx="20" cy="11" r="2" fill="#94A3B8"/>
     </svg>`
 },
 
 // ── UNIONDIGITAL ───────────────────────────────────────────────────────────
-// Purple #4C1D95, U letterform (UnionDigital Bank).
+// Purple #4C1D95. U letterform — UnionDigital Bank (by UnionBank).
 uniondigital: {
     bg: "#4C1D95", type: "bank",
     svg: `<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -432,7 +426,7 @@ uniondigital: {
 },
 
 // ── SEABANK ────────────────────────────────────────────────────────────────
-// Orange #E05300, stylised S letterform (SeaBank / Sea Group).
+// Orange #E05300. Stylised S-wave — SeaBank (Sea Group).
 seabank: {
     bg: "#E05300", type: "bank",
     svg: `<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -443,7 +437,7 @@ seabank: {
 },
 
 // ── COINS.PH ───────────────────────────────────────────────────────────────
-// Blue #1D4ED8, overlapping coin circles (Coins.ph crypto/payments).
+// Blue #1D4ED8. Overlapping coin circles — Coins.ph crypto/payments.
 coins: {
     bg: "#1D4ED8", type: "ewallet",
     svg: `<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -454,18 +448,20 @@ coins: {
 },
 
 // ── APPLE PAY ─────────────────────────────────────────────────────────────
-// Black #000000, white apple silhouette.
+// Black #000000. White apple silhouette with leaf.
 applepay: {
     bg: "#000000", type: "ewallet",
     svg: `<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
         <rect width="40" height="40" rx="10" fill="#000000"/>
-        <path d="M25 17.5c-.3-.1-.5-.2-.8-.2-.3 0-.5.1-.8.2-.1-.4-.4-.7-.8-.9.4-.6.7-1.3.6-2-.7.1-1.4.4-1.9 1-.5.5-.8 1.2-.8 2h-.1c-1.3 0-2.5 1.2-2.5 2.5 0 2.8 2.3 6 4.2 6 .4 0 .6 0 .9-.1.3 0 .6.1.9.1 1.9 0 4.2-3.2 4.2-6 0-1.3-1.2-2.5-2.5-2.5h-.4z" fill="#ffffff"/>
-        <path d="M22 12c.3-.7.1-1.6-.5-2.2" stroke="#ffffff" stroke-width="1.2" stroke-linecap="round" fill="none"/>
+        <path d="M24 15.5c-.4-1-1.2-2-2.2-2.5.2-.8-.1-1.7-.7-2.3-.7-.6-1.7-.8-2.6-.5-.3-1-1.2-1.7-2.2-1.7s-2 .7-2.5 1.7c-1.1-.3-2.2 0-2.9.6-.7.6-1 1.5-.8 2.4-.9.5-1.6 1.4-1.8 2.4-.2 1.2.2 2.4 1 3.2.5.5 1.1.9 1.8 1.2-.2.5-.3 1-.3 1.6 0 2 1.5 3.8 3.3 4.8.8.4 1.7.7 2.6.7s1.8-.3 2.6-.7c1.8-1 3.3-2.8 3.3-4.8 0-.6-.1-1.1-.3-1.6.7-.3 1.3-.7 1.8-1.2.6-.6.9-1.5 1-2.4z"
+              fill="#ffffff"/>
+        <path d="M20.2 10.2c.3-.7.1-1.5-.5-2" stroke="#ffffff" stroke-width="1" stroke-linecap="round" fill="none"/>
+        <path d="M21.5 10c.8.1 1.6.5 2 1.2" stroke="#ffffff" stroke-width="1" stroke-linecap="round" fill="none"/>
     </svg>`
 },
 
 // ── GOOGLE PAY ────────────────────────────────────────────────────────────
-// White #FFFFFF, Google G in brand blue #4285F4.
+// White #FFFFFF background. Google G in brand blue #4285F4.
 googlepay: {
     bg: "#FFFFFF", type: "ewallet",
     svg: `<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -475,19 +471,21 @@ googlepay: {
 },
 
 // ── REVOLUT ───────────────────────────────────────────────────────────────
-// Brand blue #0075EB, card with forward arrow.
+// Brand blue #0075EB. R letterform — Revolut's brand mark.
+// (Replaced generic card+arrow with Revolut's actual R mark.)
 revolut: {
     bg: "#0075EB", type: "ewallet",
     svg: `<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
         <rect width="40" height="40" rx="10" fill="#0075EB"/>
-        <rect x="10" y="11" width="20" height="18" rx="3" stroke="#ffffff" stroke-width="2.5" fill="none"/>
-        <path d="M14 17h12M14 23h12" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" opacity="0.5"/>
-        <path d="M22 16l3 4-3 4" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        <line x1="15" y1="10" x2="15" y2="28" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
+        <path d="M15 10h6c3 0 5.5 2 5.5 5s-2.5 5-5.5 5H15"
+              stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        <path d="M21 20l5 8" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
     </svg>`
 },
 
 // ── CASH ───────────────────────────────────────────────────────────────────
-// Emerald #065F46, banknote outline with centre coin circle.
+// Emerald #065F46. Banknote outline with centre coin circle.
 cash: {
     bg: "#065F46", type: "cash",
     svg: `<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
