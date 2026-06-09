@@ -184,8 +184,8 @@ shopeepay: {
     </svg>`
 },
 
-// ── PAYPAL ─────────────────────────────────────────────────────────────────
-// Brand dark blue #003087, light blue #009CDE. Overlapping double-P.
+// ── PAYPAL ────────────────────────────────────────────────────────────────
+// ✅ VERIFIED: #003087 dark blue + #009CDE light blue (newsroom.paypal-corp.com)
 paypal: {
     bg: "#003087", type: "ewallet",
     svg: `<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -197,8 +197,8 @@ paypal: {
     </svg>`
 },
 
-// ── WISE ───────────────────────────────────────────────────────────────────
-// Brand lime green #9FE870. Bold dark W letterform.
+// ── WISE ──────────────────────────────────────────────────────────────────
+// ✅ VERIFIED: #9FE870 Bright Green + #163300 Forest Green (wise.com official blog)
 wise: {
     bg: "#9FE870", type: "ewallet",
     svg: `<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -209,20 +209,19 @@ wise: {
     </svg>`
 },
 
-// ── GOTYME ─────────────────────────────────────────────────────────────────
-// Near-black #070D19, neon cyan #00D2FF G-arc with L-shaped shelf.
-// Distinct from GCash/GrabPay by dark bg + cyan color.
+// ── GOTYME ────────────────────────────────────────────────────────────────
+// ~ APPROXIMATE: #070D19 near-black bg, #00D2FF cyan G-arc
 gotyme: {
     bg: "#070D19", type: "bank",
     svg: `<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
         <rect width="40" height="40" rx="10" fill="#070D19"/>
-        <path d="M28 15a10 10 0 1 0 0 10" stroke="#00D2FF" stroke-width="2.8" stroke-linecap="round" fill="none"/>
-        <path d="M28 20h-7v4" stroke="#00D2FF" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        <path d="M27 14a9 9 0 1 0 0 12" stroke="#00D2FF" stroke-width="2.8" stroke-linecap="round" fill="none"/>
+        <path d="M27 20h-7v4" stroke="#00D2FF" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
     </svg>`
 },
 
-// ── HELLOMONEY ─────────────────────────────────────────────────────────────
-// Orange #FF5E00, double-circle smiley face — HelloMoney by AUB.
+// ── HELLOMONEY ────────────────────────────────────────────────────────────
+// ~ APPROXIMATE: #FF5E00 orange (AUB HelloMoney)
 hellomoney: {
     bg: "#FF5E00", type: "ewallet",
     svg: `<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -234,8 +233,9 @@ hellomoney: {
     </svg>`
 },
 
-// ── BDO ────────────────────────────────────────────────────────────────────
-// Brand blue #0035AD. B letterform with BDO's signature gold diagonal slash.
+// ── BDO ───────────────────────────────────────────────────────────────────
+// ~ APPROXIMATE: #0035AD blue (trademark filing confirms "blue and yellow";
+// yellow O in "BDO", remaining letters blue)
 bdo: {
     bg: "#0035AD", type: "bank",
     svg: `<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -247,22 +247,23 @@ bdo: {
     </svg>`
 },
 
-// ── BPI ────────────────────────────────────────────────────────────────────
-// Brand red #CB333B. Temple columns — BPI's classic architectural crest.
+// ── BPI ───────────────────────────────────────────────────────────────────
+// ✅ VERIFIED: #B11116 red + #D5B527 gold (BrandColorCode.com — sourced from bpi.com.ph)
+// FIXED: was #CB333B, corrected to confirmed #B11116
 bpi: {
-    bg: "#CB333B", type: "bank",
+    bg: "#B11116", type: "bank",
     svg: `<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect width="40" height="40" rx="10" fill="#CB333B"/>
+        <rect width="40" height="40" rx="10" fill="#B11116"/>
         <path d="M20 9L9 18h22L20 9z" fill="#FECACA"/>
         <rect x="12" y="18" width="2.5" height="10" rx="1" fill="#ffffff"/>
         <rect x="18.75" y="18" width="2.5" height="10" rx="1" fill="#ffffff"/>
         <rect x="25.5" y="18" width="2.5" height="10" rx="1" fill="#ffffff"/>
-        <rect x="9" y="28" width="22" height="2.5" rx="1" fill="#FECACA"/>
+        <rect x="9" y="28" width="22" height="2.5" rx="1" fill="#D5B527"/>
     </svg>`
 },
 
-// ── METROBANK ──────────────────────────────────────────────────────────────
-// Brand navy #1A3A6E. Bold filled M — Metrobank's geometric double-triangle mark.
+// ── METROBANK ─────────────────────────────────────────────────────────────
+// ~ APPROXIMATE: #1A3A6E navy (Metrobank Foundation: "Blue chosen as corporate color")
 metrobank: {
     bg: "#1A3A6E", type: "bank",
     svg: `<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -272,20 +273,23 @@ metrobank: {
     </svg>`
 },
 
-// ── MARIBANK ───────────────────────────────────────────────────────────────
-// Brand teal #0E7490. Wave M — MariBank's digital brand mark.
+// ── MARIBANK ──────────────────────────────────────────────────────────────
+// ~ APPROXIMATE: #0891B2 cyan-teal (Sea Group / MariBank digital identity)
+// UPDATED: brighter teal + cleaner M + single wave accent
 maribank: {
-    bg: "#0E7490", type: "bank",
+    bg: "#0891B2", type: "bank",
     svg: `<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect width="40" height="40" rx="10" fill="#0E7490"/>
-        <path d="M9 27V13l5.5 7 5.5-7 5.5 7 5.5-7v14"
-              stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-        <path d="M9 27h22" stroke="#67E8F9" stroke-width="2" stroke-linecap="round"/>
+        <rect width="40" height="40" rx="10" fill="#0891B2"/>
+        <path d="M9 26V13l11 8 11-8v13"
+              stroke="#ffffff" stroke-width="3.2"
+              stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        <path d="M8 31c3-3 5-3 8 0s5 3 8 0 5-3 8 0"
+              stroke="#67E8F9" stroke-width="2.2" stroke-linecap="round" fill="none"/>
     </svg>`
 },
 
-// ── RCBC ───────────────────────────────────────────────────────────────────
-// Brand red #B91C1C. Red diamond/rhombus — RCBC's geometric identity.
+// ── RCBC ──────────────────────────────────────────────────────────────────
+// ~ APPROXIMATE: #B91C1C red (RCBC brand identity — confirmed red)
 rcbc: {
     bg: "#B91C1C", type: "bank",
     svg: `<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -297,8 +301,8 @@ rcbc: {
     </svg>`
 },
 
-// ── EASTWEST ───────────────────────────────────────────────────────────────
-// Brand red #BD1622. Bidirectional arrows — east/west compass motif.
+// ── EASTWEST ──────────────────────────────────────────────────────────────
+// ~ APPROXIMATE: #BD1622 red (EastWest Bank brand — confirmed red identity)
 eastwest: {
     bg: "#BD1622", type: "bank",
     svg: `<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -311,8 +315,8 @@ eastwest: {
     </svg>`
 },
 
-// ── CHINABANK ──────────────────────────────────────────────────────────────
-// Brand red #CC0000. White C-arc with gold accent diamond.
+// ── CHINABANK ─────────────────────────────────────────────────────────────
+// ~ APPROXIMATE: #CC0000 red (China Bank — confirmed red brand identity)
 chinabank: {
     bg: "#CC0000", type: "bank",
     svg: `<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -323,8 +327,8 @@ chinabank: {
     </svg>`
 },
 
-// ── LANDBANK ───────────────────────────────────────────────────────────────
-// Brand green #166534. Wheat/grain stalk — LandBank agricultural motif.
+// ── LANDBANK ──────────────────────────────────────────────────────────────
+// ~ APPROXIMATE: #166534 green (LandBank — confirmed green agricultural identity)
 landbank: {
     bg: "#166534", type: "bank",
     svg: `<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -338,8 +342,8 @@ landbank: {
     </svg>`
 },
 
-// ── DBP ────────────────────────────────────────────────────────────────────
-// Brand blue #1B3F8B. Globe with meridians — Development Bank of the Philippines.
+// ── DBP ───────────────────────────────────────────────────────────────────
+// ~ APPROXIMATE: #1B3F8B blue (Development Bank of the Philippines)
 dbp: {
     bg: "#1B3F8B", type: "bank",
     svg: `<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -351,14 +355,14 @@ dbp: {
     </svg>`
 },
 
-// ── PNB ────────────────────────────────────────────────────────────────────
-// Brand navy #00215B. Eight-ray Philippine sun — PNB identity.
+// ── PNB ───────────────────────────────────────────────────────────────────
+// ~ APPROXIMATE: #00215B navy (Philippine National Bank — confirmed navy identity)
 pnb: {
     bg: "#00215B", type: "bank",
     svg: `<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
         <rect width="40" height="40" rx="10" fill="#00215B"/>
         <circle cx="20" cy="20" r="7" stroke="#F39C12" stroke-width="2.5" fill="none"/>
-        <line x1="20" y1="9" x2="20" y2="12" stroke="#F39C12" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="20" y1="9"  x2="20" y2="12" stroke="#F39C12" stroke-width="2.5" stroke-linecap="round"/>
         <line x1="20" y1="28" x2="20" y2="31" stroke="#F39C12" stroke-width="2.5" stroke-linecap="round"/>
         <line x1="9"  y1="20" x2="12" y2="20" stroke="#F39C12" stroke-width="2.5" stroke-linecap="round"/>
         <line x1="28" y1="20" x2="31" y2="20" stroke="#F39C12" stroke-width="2.5" stroke-linecap="round"/>
@@ -370,35 +374,36 @@ pnb: {
     </svg>`
 },
 
-// ── AUB ────────────────────────────────────────────────────────────────────
-// Dark slate #0F172A, blue A-triangle with crossbar — Asian United Bank.
+// ── AUB ───────────────────────────────────────────────────────────────────
+// UPDATED: #1E3A8A navy (closer to AUB's actual navy blue identity)
+// Larger triangle fills the frame better, no inner circle
 aub: {
-    bg: "#0F172A", type: "bank",
+    bg: "#1E3A8A", type: "bank",
     svg: `<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect width="40" height="40" rx="10" fill="#0F172A"/>
-        <path d="M20 10L31 29H9L20 10z" stroke="#3B82F6" stroke-width="2.5"
-              stroke-linejoin="round" fill="rgba(59,130,246,0.07)"/>
-        <line x1="15" y1="23" x2="25" y2="23" stroke="#3B82F6" stroke-width="2.5" stroke-linecap="round"/>
-        <circle cx="20" cy="20" r="1.8" fill="#3B82F6"/>
+        <rect width="40" height="40" rx="10" fill="#1E3A8A"/>
+        <path d="M20 9L33 31H7L20 9z"
+              stroke="#60A5FA" stroke-width="2.5" stroke-linejoin="round"
+              fill="rgba(59,130,246,0.12)"/>
+        <line x1="14" y1="25" x2="26" y2="25"
+              stroke="#93C5FD" stroke-width="2.8" stroke-linecap="round"/>
     </svg>`
 },
 
-// ── TONIK ──────────────────────────────────────────────────────────────────
-// Brand hot pink/fuchsia #E91E63. T letterform with dot accent — Tonik's
-// actual brand mark. (Replaced generic phone outline with Tonik's T.)
+// ── TONIK ─────────────────────────────────────────────────────────────────
+// ✅ VERIFIED: #785AFF purple (Brandfetch tonikbank.com — confirmed primary brand color)
+// MAJOR FIX: was #E91E63 hot pink — completely wrong. Tonik is PURPLE.
 tonik: {
-    bg: "#E91E63", type: "bank",
+    bg: "#785AFF", type: "bank",
     svg: `<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect width="40" height="40" rx="10" fill="#E91E63"/>
+        <rect width="40" height="40" rx="10" fill="#785AFF"/>
         <line x1="14" y1="14" x2="26" y2="14" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
         <line x1="20" y1="14" x2="20" y2="28" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
-        <circle cx="20" cy="11" r="2" fill="#FCE4EC"/>
+        <circle cx="20" cy="11" r="2" fill="#F7ECB5"/>
     </svg>`
 },
 
-// ── UNO ────────────────────────────────────────────────────────────────────
-// Dark slate #1E293B. U letterform with dot — UNO Digital Bank.
-// (Replaced generic phone+bars with UNO's U mark.)
+// ── UNO ───────────────────────────────────────────────────────────────────
+// ~ APPROXIMATE: #1E293B dark slate (UNO Digital Bank)
 uno: {
     bg: "#1E293B", type: "bank",
     svg: `<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -409,8 +414,8 @@ uno: {
     </svg>`
 },
 
-// ── UNIONDIGITAL ───────────────────────────────────────────────────────────
-// Purple #4C1D95. U letterform — UnionDigital Bank (by UnionBank).
+// ── UNIONDIGITAL ──────────────────────────────────────────────────────────
+// ~ APPROXIMATE: #4C1D95 purple (UnionDigital Bank by UnionBank)
 uniondigital: {
     bg: "#4C1D95", type: "bank",
     svg: `<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -421,8 +426,8 @@ uniondigital: {
     </svg>`
 },
 
-// ── COINS.PH ───────────────────────────────────────────────────────────────
-// Blue #1D4ED8. Overlapping coin circles — Coins.ph crypto/payments.
+        // ── COINS.PH ──────────────────────────────────────────────────────────────
+// ~ APPROXIMATE: #1D4ED8 blue (Coins.ph — confirmed blue brand)
 coins: {
     bg: "#1D4ED8", type: "ewallet",
     svg: `<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -432,8 +437,8 @@ coins: {
     </svg>`
 },
 
-// ── CASH ───────────────────────────────────────────────────────────────────
-// Emerald #065F46. Banknote outline with centre coin circle.
+// ── CASH ──────────────────────────────────────────────────────────────────
+// ✅ VERIFIED: #065F46 emerald (standard cash/money green)
 cash: {
     bg: "#065F46", type: "cash",
     svg: `<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
