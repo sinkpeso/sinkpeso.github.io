@@ -117,16 +117,8 @@
         "unodigitalbank":                   "uno",
         "uniondigital":                     "uniondigital",
         "uniondigitalbank":                 "uniondigital",
-        "seabank":                          "seabank",
-        "seabankph":                        "seabank",
         "coins":                            "coins",
         "coinsph":                          "coins",
-        "applepay":                         "applepay",
-        "apple":                            "applepay",
-        "googlepay":                        "googlepay",
-        "google":                           "googlepay",
-        "gpay":                             "googlepay",
-        "revolut":                          "revolut",
         "cash":                             "cash",
         "pettycash":                        "cash",
         "petty":                            "cash",
@@ -429,17 +421,6 @@ uniondigital: {
     </svg>`
 },
 
-// ── SEABANK ────────────────────────────────────────────────────────────────
-// Orange #E05300. Stylised S-wave — SeaBank (Sea Group).
-seabank: {
-    bg: "#E05300", type: "bank",
-    svg: `<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect width="40" height="40" rx="10" fill="#E05300"/>
-        <path d="M27 15c0-2.5-2-4.5-6-4.5C16 10.5 13 14 13 17c0 4.5 14 3.5 14 9.5C27 29 24.5 30 20 30S12 27 12 25"
-              stroke="#ffffff" stroke-width="3" stroke-linecap="round" fill="none"/>
-    </svg>`
-},
-
 // ── COINS.PH ───────────────────────────────────────────────────────────────
 // Blue #1D4ED8. Overlapping coin circles — Coins.ph crypto/payments.
 coins: {
@@ -448,43 +429,6 @@ coins: {
         <rect width="40" height="40" rx="10" fill="#1D4ED8"/>
         <circle cx="16.5" cy="21" r="7" stroke="#ffffff" stroke-width="2.2" fill="none"/>
         <circle cx="23.5" cy="21" r="7" stroke="#BFDBFE" stroke-width="2.2" fill="none"/>
-    </svg>`
-},
-
-// ── APPLE PAY ─────────────────────────────────────────────────────────────
-// Black #000000. White apple silhouette with leaf.
-applepay: {
-    bg: "#000000", type: "ewallet",
-    svg: `<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect width="40" height="40" rx="10" fill="#000000"/>
-        <path d="M24 15.5c-.4-1-1.2-2-2.2-2.5.2-.8-.1-1.7-.7-2.3-.7-.6-1.7-.8-2.6-.5-.3-1-1.2-1.7-2.2-1.7s-2 .7-2.5 1.7c-1.1-.3-2.2 0-2.9.6-.7.6-1 1.5-.8 2.4-.9.5-1.6 1.4-1.8 2.4-.2 1.2.2 2.4 1 3.2.5.5 1.1.9 1.8 1.2-.2.5-.3 1-.3 1.6 0 2 1.5 3.8 3.3 4.8.8.4 1.7.7 2.6.7s1.8-.3 2.6-.7c1.8-1 3.3-2.8 3.3-4.8 0-.6-.1-1.1-.3-1.6.7-.3 1.3-.7 1.8-1.2.6-.6.9-1.5 1-2.4z"
-              fill="#ffffff"/>
-        <path d="M20.2 10.2c.3-.7.1-1.5-.5-2" stroke="#ffffff" stroke-width="1" stroke-linecap="round" fill="none"/>
-        <path d="M21.5 10c.8.1 1.6.5 2 1.2" stroke="#ffffff" stroke-width="1" stroke-linecap="round" fill="none"/>
-    </svg>`
-},
-
-// ── GOOGLE PAY ────────────────────────────────────────────────────────────
-// White #FFFFFF background. Google G in brand blue #4285F4.
-googlepay: {
-    bg: "#FFFFFF", type: "ewallet",
-    svg: `<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect width="40" height="40" rx="10" fill="#FFFFFF" stroke="#E5E7EB" stroke-width="1.5"/>
-        <path d="M27 20c0 4-3 7-7 7s-7-3-7-7 3-7 7-7c2.2 0 4 .9 5.2 2.2l-2 1.5C22.5 15.5 21.3 15 20 15c-2.8 0-5 2.2-5 5s2.2 5 5 5 5-2.2 5-5v-1h-5v-2.5h7.5c0 .5.1 1 .1 1.5z" fill="#4285F4"/>
-    </svg>`
-},
-
-// ── REVOLUT ───────────────────────────────────────────────────────────────
-// Brand blue #0075EB. R letterform — Revolut's brand mark.
-// (Replaced generic card+arrow with Revolut's actual R mark.)
-revolut: {
-    bg: "#0075EB", type: "ewallet",
-    svg: `<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect width="40" height="40" rx="10" fill="#0075EB"/>
-        <line x1="15" y1="10" x2="15" y2="28" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
-        <path d="M15 10h6c3 0 5.5 2 5.5 5s-2.5 5-5.5 5H15"
-              stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-        <path d="M21 20l5 8" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
     </svg>`
 },
 
