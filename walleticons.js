@@ -145,8 +145,10 @@ gcash: {
     bg: "#007DFF", type: "ewallet",
     svg: `<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
         <rect width="40" height="40" rx="10" fill="#007DFF"/>
-        <path d="M28 15a10 10 0 1 0 0 10" stroke="#ffffff" stroke-width="3" stroke-linecap="round" fill="none"/>
-        <path d="M28 20h-8" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
+        <path d="M27 14a9 9 0 1 0 0 12" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round" fill="none"/>
+        <path d="M27 20h-6" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round"/>
+        <path d="M29.5 17a4.5 4.5 0 0 1 0 6" stroke="#93C5FD" stroke-width="2" stroke-linecap="round" fill="none"/>
+        <path d="M32 15a7.5 7.5 0 0 1 0 10" stroke="#93C5FD" stroke-width="1.5" stroke-linecap="round" fill="none"/>
     </svg>`
 },
 
@@ -155,11 +157,13 @@ gcash: {
 // formed by two crossing sinusoidal curves — representing connectivity & flow.
 // (Replaced generic antenna rays with Maya's actual brand mark.)
 maya: {
-    bg: "#20C05D", type: "ewallet",
+    bg: "#1CB95E", type: "ewallet",
     svg: `<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect width="40" height="40" rx="10" fill="#20C05D"/>
-        <path d="M11 20c2.5-9 5.5-9 9 0s6 9 9 0" stroke="#ffffff" stroke-width="2.8" stroke-linecap="round" fill="none"/>
-        <path d="M11 20c2.5 9 5.5 9 9 0s6-9 9 0" stroke="#ffffff" stroke-width="2.8" stroke-linecap="round" fill="none"/>
+        <rect width="40" height="40" rx="10" fill="#1CB95E"/>
+        <path d="M9 28v-9a5 5 0 0 1 10 0v9"
+              stroke="#ffffff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        <path d="M19 28v-9a5 5 0 0 1 10 0v9"
+              stroke="#ffffff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
     </svg>`
 },
 
@@ -171,8 +175,8 @@ grabpay: {
     bg: "#00B14F", type: "ewallet",
     svg: `<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
         <rect width="40" height="40" rx="10" fill="#00B14F"/>
-        <path d="M28 15a10 10 0 1 0 0 10" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round" fill="none"/>
-        <path d="M28 20h-6v5" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        <path d="M27 14a9 9 0 1 0 0 12" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round" fill="none"/>
+        <path d="M27 20h-6v6" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
     </svg>`
 },
 
