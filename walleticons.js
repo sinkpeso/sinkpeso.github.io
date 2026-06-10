@@ -274,20 +274,22 @@ metrobank: {
 },
 
 // ── MARIBANK ──────────────────────────────────────────────────────────────
-// ~ APPROXIMATE: #0891B2 cyan-teal (Sea Group / MariBank digital identity)
-// UPDATED: brighter teal + cleaner M + single wave accent
+// MAJOR REDESIGN from image: white bg, orange circle+M, blue double wave
+// Orange: ~#F0622A  Blue waves: ~#2196F3 / #1976D2
 maribank: {
-    bg: "#0891B2", type: "bank",
+    bg: "#FFFFFF", type: "bank",
     svg: `<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect width="40" height="40" rx="10" fill="#0891B2"/>
-        <path d="M9 26V13l11 8 11-8v13"
-              stroke="#ffffff" stroke-width="3.2"
+        <rect width="40" height="40" rx="10" fill="#FFFFFF" stroke="#E5E7EB" stroke-width="1"/>
+        <circle cx="20" cy="16" r="9.5" fill="#F0622A"/>
+        <path d="M14 21.5V14.5l6 4.5 6-4.5v7"
+              stroke="#ffffff" stroke-width="2.8"
               stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-        <path d="M8 31c3-3 5-3 8 0s5 3 8 0 5-3 8 0"
-              stroke="#67E8F9" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+        <path d="M9 28c3-2.5 5-2.5 8 0s5 2.5 8 0 5-2.5 7 0"
+              stroke="#2196F3" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+        <path d="M10 32c3-2.5 5-2.5 8 0s5 2.5 8 0 4.5-2.5 6 0"
+              stroke="#1976D2" stroke-width="2" stroke-linecap="round" fill="none"/>
     </svg>`
 },
-
 // ── RCBC ──────────────────────────────────────────────────────────────────
 // ~ APPROXIMATE: #B91C1C red (RCBC brand identity — confirmed red)
 rcbc: {
@@ -328,20 +330,31 @@ chinabank: {
 },
 
 // ── LANDBANK ──────────────────────────────────────────────────────────────
-// ~ APPROXIMATE: #166534 green (LandBank — confirmed green agricultural identity)
+// MAJOR REDESIGN from image: green bg, yellow gear ring + wheat plant inside
+// Green: ~#3CAE4A  Yellow: ~#F9B800
 landbank: {
-    bg: "#166534", type: "bank",
+    bg: "#3CAE4A", type: "bank",
     svg: `<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect width="40" height="40" rx="10" fill="#166534"/>
-        <line x1="20" y1="30" x2="20" y2="12" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round"/>
-        <path d="M20 25C17 23 14 23 13 25C14.5 27 17 27 20 25Z" fill="#4ADE80"/>
-        <path d="M20 25C23 23 26 23 27 25C25.5 27 23 27 20 25Z" fill="#4ADE80"/>
-        <path d="M20 20C18 18.5 15.5 18.5 14.5 20C16 21.5 18 21.5 20 20Z" fill="#86EFAC"/>
-        <path d="M20 20C22 18.5 24.5 18.5 25.5 20C24 21.5 22 21.5 20 20Z" fill="#86EFAC"/>
-        <ellipse cx="20" cy="12" rx="2" ry="3" fill="#4ADE80"/>
+        <rect width="40" height="40" rx="10" fill="#3CAE4A"/>
+        <!-- Gear ring: dashed circle simulating sprocket teeth -->
+        <circle cx="20" cy="20" r="14" stroke="#F9B800" stroke-width="4.5"
+                stroke-dasharray="3.8 2.2" stroke-linecap="square" fill="none"/>
+        <!-- Center stem -->
+        <line x1="20" y1="28" x2="20" y2="15"
+              stroke="#F9B800" stroke-width="2.2" stroke-linecap="round"/>
+        <!-- Center grain (top) -->
+        <ellipse cx="20" cy="12.5" rx="2.5" ry="3.5" fill="#F9B800"/>
+        <!-- Left grain -->
+        <ellipse cx="15" cy="16.5" rx="2" ry="3.2" fill="#F9B800"
+                 transform="rotate(-35 15 16.5)"/>
+        <!-- Right grain -->
+        <ellipse cx="25" cy="16.5" rx="2" ry="3.2" fill="#F9B800"
+                 transform="rotate(35 25 16.5)"/>
+        <!-- Ground / root arc -->
+        <path d="M14.5 27.5 Q20 31 25.5 27.5"
+              stroke="#F9B800" stroke-width="2.2" stroke-linecap="round" fill="none"/>
     </svg>`
 },
-
 // ── DBP ───────────────────────────────────────────────────────────────────
 // ~ APPROXIMATE: #1B3F8B blue (Development Bank of the Philippines)
 dbp: {
